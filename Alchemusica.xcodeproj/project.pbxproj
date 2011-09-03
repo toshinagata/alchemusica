@@ -1121,6 +1121,7 @@
 					"-Wmost",
 					"-Wno-four-char-constants",
 					"-Wno-unknown-pragmas",
+					"-Wno-uninitialized",
 				);
 			};
 			name = Deployment;

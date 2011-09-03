@@ -36,7 +36,7 @@ static NSFont *sRulerLabelFont;
 - (int)rulerViewType
 {
 	if (clientView != nil)
-		return [clientView clientViewType];
+		return [(GraphicClientView *)clientView clientViewType];
 	else return kGraphicGenericViewType;
 }
 
