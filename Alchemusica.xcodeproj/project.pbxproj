@@ -1,0 +1,1209 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		E400BBC811D627650032B969 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165FFE840EACC02AAC07 /* InfoPlist.strings */; };
+		E400BBCC11D627650032B969 /* FFButton.icns in Resources */ = {isa = PBXBuildFile; fileRef = F5F22F08022FBBC501A80002 /* FFButton.icns */; };
+		E400BBCD11D627650032B969 /* PauseButton.icns in Resources */ = {isa = PBXBuildFile; fileRef = F5F22F09022FBBC501A80002 /* PauseButton.icns */; };
+		E400BBCE11D627650032B969 /* PlayButton.icns in Resources */ = {isa = PBXBuildFile; fileRef = F5F22F0A022FBBC501A80002 /* PlayButton.icns */; };
+		E400BBCF11D627650032B969 /* RewindButton.icns in Resources */ = {isa = PBXBuildFile; fileRef = F5F22F0B022FBBC501A80002 /* RewindButton.icns */; };
+		E400BBD011D627650032B969 /* StopButton.icns in Resources */ = {isa = PBXBuildFile; fileRef = F5F22F0C022FBBC501A80002 /* StopButton.icns */; };
+		E400BBD111D627650032B969 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5FFC0B30237AAD301A80002 /* Localizable.strings */; };
+		E400BBD211D627650032B969 /* G-clef.icns in Resources */ = {isa = PBXBuildFile; fileRef = F520EC10023D1DC601A80002 /* G-clef.icns */; };
+		E400BBD411D627650032B969 /* plus.png in Resources */ = {isa = PBXBuildFile; fileRef = E48885ED04523E4B00A80006 /* plus.png */; };
+		E400BBD511D627650032B969 /* minus.png in Resources */ = {isa = PBXBuildFile; fileRef = E45323310452743D00A80006 /* minus.png */; };
+		E400BBD611D627650032B969 /* horizontal_move.png in Resources */ = {isa = PBXBuildFile; fileRef = E40D6F3F0636BF0100A80105 /* horizontal_move.png */; };
+		E400BBD711D627650032B969 /* vertical_move.png in Resources */ = {isa = PBXBuildFile; fileRef = E40D6F450636C6B700A80105 /* vertical_move.png */; };
+		E400BBD811D627650032B969 /* stretch.png in Resources */ = {isa = PBXBuildFile; fileRef = E4DB1648063B485600A80105 /* stretch.png */; };
+		E400BBDA11D627650032B969 /* RecButton.png in Resources */ = {isa = PBXBuildFile; fileRef = E4ECB32B06E231BB00A80105 /* RecButton.png */; };
+		E400BBDB11D627650032B969 /* horizontal_split.png in Resources */ = {isa = PBXBuildFile; fileRef = E4D803D80737CD3500EB5804 /* horizontal_split.png */; };
+		E400BBDC11D627650032B969 /* move_around.png in Resources */ = {isa = PBXBuildFile; fileRef = E4D803DC0737D6F400EB5804 /* move_around.png */; };
+		E400BBDD11D627650032B969 /* document_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = E4F95D80073D909700F1D121 /* document_icon.icns */; };
+		E400BBDE11D627650032B969 /* expand.png in Resources */ = {isa = PBXBuildFile; fileRef = E4E44B92074CFB9D0034031C /* expand.png */; };
+		E400BBDF11D627650032B969 /* shrink.png in Resources */ = {isa = PBXBuildFile; fileRef = E4E44B93074CFB9D0034031C /* shrink.png */; };
+		E400BBE011D627650032B969 /* loupe.png in Resources */ = {isa = PBXBuildFile; fileRef = E44A56B8074F99DB002034A7 /* loupe.png */; };
+		E400BBE111D627650032B969 /* selection.png in Resources */ = {isa = PBXBuildFile; fileRef = E4266C730966379B00C04A48 /* selection.png */; };
+		E400BBE211D627650032B969 /* pencil.png in Resources */ = {isa = PBXBuildFile; fileRef = E4266C81096647F100C04A48 /* pencil.png */; };
+		E400BBE311D627650032B969 /* sigmoid.png in Resources */ = {isa = PBXBuildFile; fileRef = E4332325096841C800D5DAD8 /* sigmoid.png */; };
+		E400BBE411D627650032B969 /* random.png in Resources */ = {isa = PBXBuildFile; fileRef = E4332326096841C800D5DAD8 /* random.png */; };
+		E400BBE511D627650032B969 /* linear.png in Resources */ = {isa = PBXBuildFile; fileRef = E49DF713096935AA00A91C40 /* linear.png */; };
+		E400BBE611D627650032B969 /* triangle.png in Resources */ = {isa = PBXBuildFile; fileRef = E49DF721096935FA00A91C40 /* triangle.png */; };
+		E400BBE711D627650032B969 /* pencil_cursor.png in Resources */ = {isa = PBXBuildFile; fileRef = E49DF79709694BDC00A91C40 /* pencil_cursor.png */; };
+		E400BBE811D627650032B969 /* arc.png in Resources */ = {isa = PBXBuildFile; fileRef = E49DF811096A3E2400A91C40 /* arc.png */; };
+		E400BBE911D627650032B969 /* parabola.png in Resources */ = {isa = PBXBuildFile; fileRef = E49DF812096A3E2400A91C40 /* parabola.png */; };
+		E400BBEA11D627650032B969 /* pencil_small.png in Resources */ = {isa = PBXBuildFile; fileRef = E49DF944096A9B8500A91C40 /* pencil_small.png */; };
+		E400BBEB11D627650032B969 /* StartEditingRange.png in Resources */ = {isa = PBXBuildFile; fileRef = E4280AFF0A44164600DCD341 /* StartEditingRange.png */; };
+		E400BBEC11D627650032B969 /* EndEditingRange.png in Resources */ = {isa = PBXBuildFile; fileRef = E4280BEB0A44465800DCD341 /* EndEditingRange.png */; };
+		E400BBED11D627650032B969 /* ibeam.png in Resources */ = {isa = PBXBuildFile; fileRef = E4402B790BF592170076972C /* ibeam.png */; };
+		E400BBEE11D627650032B969 /* speaker.png in Resources */ = {isa = PBXBuildFile; fileRef = E4CD4D710C106B9800AF6017 /* speaker.png */; };
+		E400BBEF11D627650032B969 /* eye_open.png in Resources */ = {isa = PBXBuildFile; fileRef = E4BAFFAD0C1C3ED800A5EAED /* eye_open.png */; };
+		E400BBF011D627650032B969 /* eye_close.png in Resources */ = {isa = PBXBuildFile; fileRef = E4BAFFC20C1C44D800A5EAED /* eye_close.png */; };
+		E400BBF211D627650032B969 /* note4.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081650C4B547E009D0A87 /* note4.png */; };
+		E400BBF311D627650032B969 /* note16.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081720C4B57AA009D0A87 /* note16.png */; };
+		E400BBF411D627650032B969 /* note8.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081740C4B57B2009D0A87 /* note8.png */; };
+		E400BBF511D627650032B969 /* note32.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081760C4B58F5009D0A87 /* note32.png */; };
+		E400BBF611D627650032B969 /* note1.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081780C4B5E62009D0A87 /* note1.png */; };
+		E400BBF711D627650032B969 /* note2.png in Resources */ = {isa = PBXBuildFile; fileRef = E400817A0C4B5E69009D0A87 /* note2.png */; };
+		E400BBF811D627650032B969 /* note1_3.png in Resources */ = {isa = PBXBuildFile; fileRef = E400817C0C4B6795009D0A87 /* note1_3.png */; };
+		E400BBF911D627650032B969 /* note1d.png in Resources */ = {isa = PBXBuildFile; fileRef = E400817D0C4B6795009D0A87 /* note1d.png */; };
+		E400BBFA11D627650032B969 /* note2_3.png in Resources */ = {isa = PBXBuildFile; fileRef = E400817E0C4B6795009D0A87 /* note2_3.png */; };
+		E400BBFB11D627650032B969 /* note2d.png in Resources */ = {isa = PBXBuildFile; fileRef = E400817F0C4B6795009D0A87 /* note2d.png */; };
+		E400BBFC11D627650032B969 /* note4_3.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081800C4B6795009D0A87 /* note4_3.png */; };
+		E400BBFD11D627650032B969 /* note4d.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081810C4B6795009D0A87 /* note4d.png */; };
+		E400BBFE11D627650032B969 /* note8_3.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081820C4B6795009D0A87 /* note8_3.png */; };
+		E400BBFF11D627650032B969 /* note8d.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081830C4B6795009D0A87 /* note8d.png */; };
+		E400BC0011D627650032B969 /* note16_3.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081840C4B6795009D0A87 /* note16_3.png */; };
+		E400BC0111D627650032B969 /* note16d.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081850C4B6795009D0A87 /* note16d.png */; };
+		E400BC0211D627650032B969 /* note32_3.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081860C4B6795009D0A87 /* note32_3.png */; };
+		E400BC0311D627650032B969 /* note32d.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081870C4B6795009D0A87 /* note32d.png */; };
+		E400BC0411D627650032B969 /* NQ.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081B50C4B73D5009D0A87 /* NQ.png */; };
+		E400BC0B11D627650032B969 /* Ruby_Scripts in Resources */ = {isa = PBXBuildFile; fileRef = E44BC0081044332E00978A1A /* Ruby_Scripts */; };
+		E400BC0C11D627650032B969 /* horizontal_move_plus.png in Resources */ = {isa = PBXBuildFile; fileRef = E4F45EF5104A75B8008C7814 /* horizontal_move_plus.png */; };
+		E400BC0D11D627650032B969 /* vertical_move_plus.png in Resources */ = {isa = PBXBuildFile; fileRef = E4F45EF6104A75B8008C7814 /* vertical_move_plus.png */; };
+		E400BC0E11D627650032B969 /* AudioSettingsPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4B4C25911C3ED4C00FE7593 /* AudioSettingsPanel.xib */; };
+		E400BC0F11D627730032B969 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 2A37F4B0FDCFA73011CA2CEA /* main.m */; };
+		E400BC1011D627730032B969 /* MDEvent.c in Sources */ = {isa = PBXBuildFile; fileRef = E4CF0D510746E734000ADE20 /* MDEvent.c */; };
+		E400BC1111D627730032B969 /* MDTrack.c in Sources */ = {isa = PBXBuildFile; fileRef = E4CF0D5C0746E734000ADE20 /* MDTrack.c */; };
+		E400BC1211D627730032B969 /* MDSequence.c in Sources */ = {isa = PBXBuildFile; fileRef = E4CF0D590746E734000ADE20 /* MDSequence.c */; };
+		E400BC1311D627730032B969 /* MDSequenceSMF.c in Sources */ = {isa = PBXBuildFile; fileRef = E4CF0D5B0746E734000ADE20 /* MDSequenceSMF.c */; };
+		E400BC1411D627730032B969 /* MDCalibrator.c in Sources */ = {isa = PBXBuildFile; fileRef = E4CF0D4E0746E734000ADE20 /* MDCalibrator.c */; };
+		E400BC1511D627730032B969 /* MDPointSet.c in Sources */ = {isa = PBXBuildFile; fileRef = E4CF0D570746E734000ADE20 /* MDPointSet.c */; };
+		E400BC1611D627730032B969 /* MDUtility.c in Sources */ = {isa = PBXBuildFile; fileRef = E4CF0D5E0746E734000ADE20 /* MDUtility.c */; };
+		E400BC1711D627730032B969 /* MDPlayer_MacOSX.c in Sources */ = {isa = PBXBuildFile; fileRef = E4CF0D540746E734000ADE20 /* MDPlayer_MacOSX.c */; };
+		E400BC1811D627730032B969 /* MDAudio_MacOSX.c in Sources */ = {isa = PBXBuildFile; fileRef = E405989D0D311A9700161E25 /* MDAudio_MacOSX.c */; };
+		E400BC1911D627730032B969 /* MDRubyCore.m in Sources */ = {isa = PBXBuildFile; fileRef = E43E5F210D92AD49002FDD1E /* MDRubyCore.m */; };
+		E400BC1A11D627730032B969 /* MDObjects.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D2EB090244AFAF01A80002 /* MDObjects.m */; };
+		E400BC1B11D627730032B969 /* LoadingPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D2EB070244AFAF01A80002 /* LoadingPanelController.m */; };
+		E400BC1C11D627730032B969 /* MyAppController.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D2EB0B0244AFAF01A80002 /* MyAppController.m */; };
+		E400BC1D11D627730032B969 /* MyDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D2EB0D0244AFAF01A80002 /* MyDocument.m */; };
+		E400BC1E11D627730032B969 /* ListWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D2EB0F0244AFAF01A80002 /* ListWindowController.m */; };
+		E400BC1F11D627730032B969 /* MyMIDISequence.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D2EB110244AFAF01A80002 /* MyMIDISequence.m */; };
+		E400BC2011D627730032B969 /* MyTableHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D2EB130244AFAF01A80002 /* MyTableHeaderView.m */; };
+		E400BC2111D627730032B969 /* MyTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D2EB150244AFAF01A80002 /* MyTableView.m */; };
+		E400BC2211D627730032B969 /* RemapDevicePanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D2EB1B0244AFAF01A80002 /* RemapDevicePanelController.m */; };
+		E400BC2311D627730032B969 /* GraphicWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = F5048CB203D5C06101A80002 /* GraphicWindowController.m */; };
+		E400BC2411D627730032B969 /* PianoRollView.m in Sources */ = {isa = PBXBuildFile; fileRef = F5048CB603D5C07201A80002 /* PianoRollView.m */; };
+		E400BC2511D627730032B969 /* PianoRollRulerView.m in Sources */ = {isa = PBXBuildFile; fileRef = F569756903DADD0A01A80002 /* PianoRollRulerView.m */; };
+		E400BC2611D627730032B969 /* GraphicClientView.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D6C49303E0489301A80002 /* GraphicClientView.m */; };
+		E400BC2711D627730032B969 /* GraphicRulerView.m in Sources */ = {isa = PBXBuildFile; fileRef = F52B39A903E17D2101A80002 /* GraphicRulerView.m */; };
+		E400BC2811D627730032B969 /* TimeChartView.m in Sources */ = {isa = PBXBuildFile; fileRef = F52B39AF03E18DEF01A80002 /* TimeChartView.m */; };
+		E400BC2911D627730032B969 /* StripChartView.m in Sources */ = {isa = PBXBuildFile; fileRef = F554D6E703E3FB8401A80002 /* StripChartView.m */; };
+		E400BC2A11D627730032B969 /* StripChartRulerView.m in Sources */ = {isa = PBXBuildFile; fileRef = F554D6EB03E3FC8901A80002 /* StripChartRulerView.m */; };
+		E400BC2B11D627730032B969 /* GraphicSplitterView.m in Sources */ = {isa = PBXBuildFile; fileRef = F50273C403F6969A01A80002 /* GraphicSplitterView.m */; };
+		E400BC2C11D627730032B969 /* GraphicFloatingView.m in Sources */ = {isa = PBXBuildFile; fileRef = E4743AE70456EAE900A80006 /* GraphicFloatingView.m */; };
+		E400BC2D11D627730032B969 /* ColorCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E4335F910472902100A80006 /* ColorCell.m */; };
+		E400BC2E11D627730032B969 /* NSStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = E4B5C7BB060C9406000BC127 /* NSStringAdditions.m */; };
+		E400BC2F11D627730032B969 /* NSEventAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = E4DB164B063B529800A80105 /* NSEventAdditions.m */; };
+		E400BC3111D627730032B969 /* TrackAttributeCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E4811680071C26C700A80105 /* TrackAttributeCell.m */; };
+		E400BC3211D627730032B969 /* NSWindowControllerAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = E426A2CE073E73B00039474B /* NSWindowControllerAdditions.m */; };
+		E400BC3311D627730032B969 /* NSCursorAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = E44A56BB074F9A6F002034A7 /* NSCursorAdditions.m */; };
+		E400BC3411D627730032B969 /* MyPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = E4266D0D0966681100C04A48 /* MyPopUpButton.m */; };
+		E400BC3511D627730032B969 /* MyPopUpButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E46394320A0E0C5400FD0629 /* MyPopUpButtonCell.m */; };
+		E400BC3611D627730032B969 /* MyComboBoxCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E46394F20A0E52D900FD0629 /* MyComboBoxCell.m */; };
+		E400BC3711D627730032B969 /* GraphicBackgroundView.m in Sources */ = {isa = PBXBuildFile; fileRef = E40EDA4C0BBFFD2600B3FE78 /* GraphicBackgroundView.m */; };
+		E400BC3811D627730032B969 /* TextureView.m in Sources */ = {isa = PBXBuildFile; fileRef = E4DB28E10C1458D500B6E980 /* TextureView.m */; };
+		E400BC3911D627730032B969 /* MyWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = E4BAFD810C18613600A5EAED /* MyWindow.m */; };
+		E400BC3A11D627730032B969 /* PlayingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E4BAFF300C1B005600A5EAED /* PlayingViewController.m */; };
+		E400BC3B11D627730032B969 /* RecordPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E44C7AC80C1D9E33004138AB /* RecordPanelController.m */; };
+		E400BC3C11D627730032B969 /* EventFilterPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E430D72C0D79700F00717A72 /* EventFilterPanelController.m */; };
+		E400BC3D11D627730032B969 /* EventKindTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E430D75A0D798DB100717A72 /* EventKindTextFieldCell.m */; };
+		E400BC3E11D627730032B969 /* MDRubySequence.m in Sources */ = {isa = PBXBuildFile; fileRef = E4B2E8E50D93F92600781995 /* MDRubySequence.m */; };
+		E400BC3F11D627730032B969 /* MDRubyTrack.m in Sources */ = {isa = PBXBuildFile; fileRef = E4B2EB330D9AA05600781995 /* MDRubyTrack.m */; };
+		E400BC4011D627730032B969 /* MDRubyPointer.m in Sources */ = {isa = PBXBuildFile; fileRef = E49B98070D9F79B100F61755 /* MDRubyPointer.m */; };
+		E400BC4111D627730032B969 /* RubyConsoleWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = E41CC3E00F599ACF006E6817 /* RubyConsoleWindowController.m */; };
+		E400BC4211D627730032B969 /* MDRubyEventSet.m in Sources */ = {isa = PBXBuildFile; fileRef = E4AA82341053F41D0052CF7F /* MDRubyEventSet.m */; };
+		E400BC4311D627730032B969 /* MDAudioUtility.c in Sources */ = {isa = PBXBuildFile; fileRef = E4B0B25F10A30F78007B7360 /* MDAudioUtility.c */; };
+		E400BC4411D627730032B969 /* ruby_dialog.c in Sources */ = {isa = PBXBuildFile; fileRef = E4DC0CE910A6623600377275 /* ruby_dialog.c */; };
+		E400BC4511D627730032B969 /* RubyDialogController.m in Sources */ = {isa = PBXBuildFile; fileRef = E42BF87E0DB1D1100095F74F /* RubyDialogController.m */; };
+		E400BC4611D627730032B969 /* AudioSettingsPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E4B4C26811C3EDAC00FE7593 /* AudioSettingsPanelController.m */; };
+		E400BE1811D627870032B969 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A7FEA54F5311CA2CBB /* Cocoa.framework */; };
+		E400BE1911D627870032B969 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00FBF1B800C9C4767F000001 /* AudioToolbox.framework */; };
+		E400BE1A11D627870032B969 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00FBF1BC00C9C7EA7F000001 /* Carbon.framework */; };
+		E400BE1B11D627870032B969 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0217E8F300D51D2B7F000001 /* CoreAudio.framework */; };
+		E400BE1C11D627870032B969 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00FB976F00D7AF2F7F000001 /* CoreServices.framework */; };
+		E400BE1D11D627870032B969 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5F9405D00EE2B4E01000001 /* CoreMIDI.framework */; };
+		E400BE1E11D627870032B969 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5FB767800F88D8601000001 /* AudioUnit.framework */; };
+		E400BE1F11D627870032B969 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5835E0702292DC201A80002 /* CoreFoundation.framework */; };
+		E400BE2011D627870032B969 /* CoreAudioKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4562EC211D10A8800EBD2AA /* CoreAudioKit.framework */; };
+		E400BE2411D627A60032B969 /* Ruby_Scripts in CopyFiles */ = {isa = PBXBuildFile; fileRef = E44BC0081044332E00978A1A /* Ruby_Scripts */; };
+		E40C7A1F140A85A200969DC3 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A1D140A85A200969DC3 /* MainMenu.xib */; };
+		E40C7A23140A85DB00969DC3 /* TrackWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A21140A85DB00969DC3 /* TrackWindow.xib */; };
+		E40C7A27140A860B00969DC3 /* ListWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A25140A860B00969DC3 /* ListWindow.xib */; };
+		E40C7A2B140A862D00969DC3 /* GraphicWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A29140A862D00969DC3 /* GraphicWindow.xib */; };
+		E40C7A2F140A865800969DC3 /* LoadingPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A2D140A865800969DC3 /* LoadingPanel.xib */; };
+		E40C7A33140A867A00969DC3 /* RemapDevicePanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A31140A867A00969DC3 /* RemapDevicePanel.xib */; };
+		E40C7A40140A879F00969DC3 /* AudioRecordPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A3E140A879F00969DC3 /* AudioRecordPanel.xib */; };
+		E40C7A44140A87B400969DC3 /* EventFilterPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A42140A87B400969DC3 /* EventFilterPanel.xib */; };
+		E40C7A48140A87CD00969DC3 /* EventKindTextFieldCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A46140A87CD00969DC3 /* EventKindTextFieldCell.xib */; };
+		E40C7A4C140A87E100969DC3 /* RubyDialog.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A4A140A87E100969DC3 /* RubyDialog.xib */; };
+		E40C7A50140A87FD00969DC3 /* RubyConsoleWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A4E140A87FD00969DC3 /* RubyConsoleWindow.xib */; };
+		E40C7AC7140A94F700969DC3 /* MetronomeSettingsPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7AC5140A94F700969DC3 /* MetronomeSettingsPanel.xib */; };
+		E40C7ACC140A95D700969DC3 /* MetronomeSettingsPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E40C7ACB140A95D700969DC3 /* MetronomeSettingsPanelController.m */; };
+		E48F300111D8EE7B00491B45 /* AUViewWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E48F2FFF11D8EE7B00491B45 /* AUViewWindow.xib */; };
+		E48F30F111DB8B8D00491B45 /* AUCarbonWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E48F30EF11DB8B8D00491B45 /* AUCarbonWindow.xib */; };
+		E4951EA411D63CD000D827EC /* AUViewWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = E4951EA311D63CD000D827EC /* AUViewWindowController.m */; };
+		E4C383F31411124C006F2661 /* AboutPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4C383F11411124C006F2661 /* AboutPanel.xib */; };
+		E4C383FC141117F9006F2661 /* AboutWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = E4C383FB141117F9006F2661 /* AboutWindowController.m */; };
+		E4C3844414111D23006F2661 /* lastBuild.txt in Resources */ = {isa = PBXBuildFile; fileRef = E4C3844314111D23006F2661 /* lastBuild.txt */; };
+		E4C384E514112400006F2661 /* Version in Resources */ = {isa = PBXBuildFile; fileRef = E4C384E414112400006F2661 /* Version */; };
+		E4D701EB13F540C5005EE5B3 /* RecordPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4D701E913F540C5005EE5B3 /* RecordPanel.xib */; };
+		E4FB54C313FA851A001C1290 /* horizontal_move_zoom.png in Resources */ = {isa = PBXBuildFile; fileRef = E4FB54C213FA851A001C1290 /* horizontal_move_zoom.png */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E400BE2511D627C40032B969 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				E400BE2411D627A60032B969 /* Ruby_Scripts in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		00FB976F00D7AF2F7F000001 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
+		00FBF1B800C9C4767F000001 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = /System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<absolute>"; };
+		00FBF1BC00C9C7EA7F000001 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
+		0217E8F300D51D2B7F000001 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = /System/Library/Frameworks/CoreAudio.framework; sourceTree = "<absolute>"; };
+		089C1660FE840EACC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		1058C7A7FEA54F5311CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		2A37F4B0FDCFA73011CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		2A37F4C4FDCFA73011CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
+		2A37F4C5FDCFA73011CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		E40081650C4B547E009D0A87 /* note4.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = note4.png; path = icons/note4.png; sourceTree = "<group>"; };
+		E40081720C4B57AA009D0A87 /* note16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = note16.png; path = icons/note16.png; sourceTree = "<group>"; };
+		E40081740C4B57B2009D0A87 /* note8.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = note8.png; path = icons/note8.png; sourceTree = "<group>"; };
+		E40081760C4B58F5009D0A87 /* note32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = note32.png; path = icons/note32.png; sourceTree = "<group>"; };
+		E40081780C4B5E62009D0A87 /* note1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = note1.png; path = icons/note1.png; sourceTree = "<group>"; };
+		E400817A0C4B5E69009D0A87 /* note2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = note2.png; path = icons/note2.png; sourceTree = "<group>"; };
+		E400817C0C4B6795009D0A87 /* note1_3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = note1_3.png; path = icons/note1_3.png; sourceTree = "<group>"; };
+		E400817D0C4B6795009D0A87 /* note1d.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = note1d.png; path = icons/note1d.png; sourceTree = "<group>"; };
+		E400817E0C4B6795009D0A87 /* note2_3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = note2_3.png; path = icons/note2_3.png; sourceTree = "<group>"; };
+		E400817F0C4B6795009D0A87 /* note2d.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = note2d.png; path = icons/note2d.png; sourceTree = "<group>"; };
+		E40081800C4B6795009D0A87 /* note4_3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = note4_3.png; path = icons/note4_3.png; sourceTree = "<group>"; };
+		E40081810C4B6795009D0A87 /* note4d.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = note4d.png; path = icons/note4d.png; sourceTree = "<group>"; };
+		E40081820C4B6795009D0A87 /* note8_3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = note8_3.png; path = icons/note8_3.png; sourceTree = "<group>"; };
+		E40081830C4B6795009D0A87 /* note8d.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = note8d.png; path = icons/note8d.png; sourceTree = "<group>"; };
+		E40081840C4B6795009D0A87 /* note16_3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = note16_3.png; path = icons/note16_3.png; sourceTree = "<group>"; };
+		E40081850C4B6795009D0A87 /* note16d.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = note16d.png; path = icons/note16d.png; sourceTree = "<group>"; };
+		E40081860C4B6795009D0A87 /* note32_3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = note32_3.png; path = icons/note32_3.png; sourceTree = "<group>"; };
+		E40081870C4B6795009D0A87 /* note32d.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = note32d.png; path = icons/note32d.png; sourceTree = "<group>"; };
+		E40081B50C4B73D5009D0A87 /* NQ.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = NQ.png; path = icons/NQ.png; sourceTree = "<group>"; };
+		E400BBBD11D627550032B969 /* Alchemusica.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Alchemusica.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E400BBBF11D627550032B969 /* Alchemusica-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Alchemusica-Info.plist"; sourceTree = "<group>"; };
+		E405989D0D311A9700161E25 /* MDAudio_MacOSX.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MDAudio_MacOSX.c; path = MD_package/MDAudio_MacOSX.c; sourceTree = "<group>"; };
+		E40598B80D311C9B00161E25 /* MDAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDAudio.h; path = MD_package/MDAudio.h; sourceTree = "<group>"; };
+		E40C7A1E140A85A200969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		E40C7A22140A85DB00969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/TrackWindow.xib; sourceTree = "<group>"; };
+		E40C7A26140A860B00969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/ListWindow.xib; sourceTree = "<group>"; };
+		E40C7A2A140A862D00969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/GraphicWindow.xib; sourceTree = "<group>"; };
+		E40C7A2E140A865800969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/LoadingPanel.xib; sourceTree = "<group>"; };
+		E40C7A32140A867A00969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/RemapDevicePanel.xib; sourceTree = "<group>"; };
+		E40C7A3F140A879F00969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/AudioRecordPanel.xib; sourceTree = "<group>"; };
+		E40C7A43140A87B400969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/EventFilterPanel.xib; sourceTree = "<group>"; };
+		E40C7A47140A87CD00969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/EventKindTextFieldCell.xib; sourceTree = "<group>"; };
+		E40C7A4B140A87E100969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/RubyDialog.xib; sourceTree = "<group>"; };
+		E40C7A4F140A87FD00969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/RubyConsoleWindow.xib; sourceTree = "<group>"; };
+		E40C7AC6140A94F700969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/MetronomeSettingsPanel.xib; sourceTree = "<group>"; };
+		E40C7ACA140A95D700969DC3 /* MetronomeSettingsPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MetronomeSettingsPanelController.h; path = Classes/MetronomeSettingsPanelController.h; sourceTree = "<group>"; };
+		E40C7ACB140A95D700969DC3 /* MetronomeSettingsPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MetronomeSettingsPanelController.m; path = Classes/MetronomeSettingsPanelController.m; sourceTree = "<group>"; };
+		E40D6F3F0636BF0100A80105 /* horizontal_move.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = horizontal_move.png; path = icons/horizontal_move.png; sourceTree = "<group>"; };
+		E40D6F450636C6B700A80105 /* vertical_move.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = vertical_move.png; path = icons/vertical_move.png; sourceTree = "<group>"; };
+		E40EDA4B0BBFFD2600B3FE78 /* GraphicBackgroundView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = GraphicBackgroundView.h; path = Classes/GraphicBackgroundView.h; sourceTree = "<group>"; };
+		E40EDA4C0BBFFD2600B3FE78 /* GraphicBackgroundView.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = GraphicBackgroundView.m; path = Classes/GraphicBackgroundView.m; sourceTree = "<group>"; };
+		E41CC3DF0F599ACF006E6817 /* RubyConsoleWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RubyConsoleWindowController.h; path = Classes/RubyConsoleWindowController.h; sourceTree = "<group>"; };
+		E41CC3E00F599ACF006E6817 /* RubyConsoleWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RubyConsoleWindowController.m; path = Classes/RubyConsoleWindowController.m; sourceTree = "<group>"; };
+		E4266C730966379B00C04A48 /* selection.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = selection.png; path = icons/selection.png; sourceTree = "<group>"; };
+		E4266C81096647F100C04A48 /* pencil.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = pencil.png; path = icons/pencil.png; sourceTree = "<group>"; };
+		E4266D0D0966681100C04A48 /* MyPopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyPopUpButton.m; path = Classes/MyPopUpButton.m; sourceTree = "<group>"; };
+		E4266D0E0966681100C04A48 /* MyPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MyPopUpButton.h; path = Classes/MyPopUpButton.h; sourceTree = "<group>"; };
+		E426A2CD073E73B00039474B /* NSWindowControllerAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSWindowControllerAdditions.h; path = Classes/NSWindowControllerAdditions.h; sourceTree = "<group>"; };
+		E426A2CE073E73B00039474B /* NSWindowControllerAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSWindowControllerAdditions.m; path = Classes/NSWindowControllerAdditions.m; sourceTree = "<group>"; };
+		E4280AFF0A44164600DCD341 /* StartEditingRange.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = StartEditingRange.png; path = icons/StartEditingRange.png; sourceTree = "<group>"; };
+		E4280BEB0A44465800DCD341 /* EndEditingRange.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = EndEditingRange.png; path = icons/EndEditingRange.png; sourceTree = "<group>"; };
+		E42BF87D0DB1D1100095F74F /* RubyDialogController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RubyDialogController.h; path = Ruby_bindings/RubyDialogController.h; sourceTree = "<group>"; };
+		E42BF87E0DB1D1100095F74F /* RubyDialogController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RubyDialogController.m; path = Ruby_bindings/RubyDialogController.m; sourceTree = "<group>"; };
+		E430D72B0D79700F00717A72 /* EventFilterPanelController.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = EventFilterPanelController.h; path = Classes/EventFilterPanelController.h; sourceTree = "<group>"; };
+		E430D72C0D79700F00717A72 /* EventFilterPanelController.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = EventFilterPanelController.m; path = Classes/EventFilterPanelController.m; sourceTree = "<group>"; };
+		E430D7590D798DB100717A72 /* EventKindTextFieldCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EventKindTextFieldCell.h; path = Classes/EventKindTextFieldCell.h; sourceTree = "<group>"; };
+		E430D75A0D798DB100717A72 /* EventKindTextFieldCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = EventKindTextFieldCell.m; path = Classes/EventKindTextFieldCell.m; sourceTree = "<group>"; };
+		E4332325096841C800D5DAD8 /* sigmoid.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = sigmoid.png; path = icons/sigmoid.png; sourceTree = "<group>"; };
+		E4332326096841C800D5DAD8 /* random.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = random.png; path = icons/random.png; sourceTree = "<group>"; };
+		E4335F900472902100A80006 /* ColorCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ColorCell.h; path = Classes/ColorCell.h; sourceTree = "<group>"; };
+		E4335F910472902100A80006 /* ColorCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ColorCell.m; path = Classes/ColorCell.m; sourceTree = "<group>"; };
+		E43D1E0F10418C0F00B0104C /* MDRubyExtern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDRubyExtern.h; path = Ruby_bindings/MDRubyExtern.h; sourceTree = "<group>"; };
+		E43E5F200D92AD49002FDD1E /* MDRuby.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MDRuby.h; path = Ruby_bindings/MDRuby.h; sourceTree = "<group>"; };
+		E43E5F210D92AD49002FDD1E /* MDRubyCore.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = MDRubyCore.m; path = Ruby_bindings/MDRubyCore.m; sourceTree = "<group>"; };
+		E43E5F220D92AD49002FDD1E /* MDRubyCore.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MDRubyCore.h; path = Ruby_bindings/MDRubyCore.h; sourceTree = "<group>"; };
+		E4402B790BF592170076972C /* ibeam.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ibeam.png; path = icons/ibeam.png; sourceTree = "<group>"; };
+		E44A56B8074F99DB002034A7 /* loupe.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = loupe.png; path = icons/loupe.png; sourceTree = "<group>"; };
+		E44A56BA074F9A6F002034A7 /* NSCursorAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSCursorAdditions.h; path = Classes/NSCursorAdditions.h; sourceTree = "<group>"; };
+		E44A56BB074F9A6F002034A7 /* NSCursorAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSCursorAdditions.m; path = Classes/NSCursorAdditions.m; sourceTree = "<group>"; wrapsLines = 1; };
+		E44BC0081044332E00978A1A /* Ruby_Scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Ruby_Scripts; sourceTree = "<group>"; };
+		E44C7AC70C1D9E33004138AB /* RecordPanelController.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = RecordPanelController.h; path = Classes/RecordPanelController.h; sourceTree = "<group>"; };
+		E44C7AC80C1D9E33004138AB /* RecordPanelController.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = RecordPanelController.m; path = Classes/RecordPanelController.m; sourceTree = "<group>"; };
+		E45323310452743D00A80006 /* minus.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = minus.png; path = icons/minus.png; sourceTree = "<group>"; };
+		E4562EC211D10A8800EBD2AA /* CoreAudioKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioKit.framework; path = /System/Library/Frameworks/CoreAudioKit.framework; sourceTree = "<absolute>"; };
+		E46394310A0E0C5400FD0629 /* MyPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MyPopUpButtonCell.h; path = Classes/MyPopUpButtonCell.h; sourceTree = "<group>"; };
+		E46394320A0E0C5400FD0629 /* MyPopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyPopUpButtonCell.m; path = Classes/MyPopUpButtonCell.m; sourceTree = "<group>"; };
+		E46394F10A0E52D900FD0629 /* MyComboBoxCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MyComboBoxCell.h; path = Classes/MyComboBoxCell.h; sourceTree = "<group>"; };
+		E46394F20A0E52D900FD0629 /* MyComboBoxCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyComboBoxCell.m; path = Classes/MyComboBoxCell.m; sourceTree = "<group>"; };
+		E4743AE60456EAE900A80006 /* GraphicFloatingView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GraphicFloatingView.h; path = Classes/GraphicFloatingView.h; sourceTree = "<group>"; };
+		E4743AE70456EAE900A80006 /* GraphicFloatingView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GraphicFloatingView.m; path = Classes/GraphicFloatingView.m; sourceTree = "<group>"; };
+		E476192C0454425A00A80006 /* MenuTags.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MenuTags.h; path = Classes/MenuTags.h; sourceTree = "<group>"; };
+		E481167F071C26C700A80105 /* TrackAttributeCell.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = TrackAttributeCell.h; path = Classes/TrackAttributeCell.h; sourceTree = "<group>"; };
+		E4811680071C26C700A80105 /* TrackAttributeCell.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = TrackAttributeCell.m; path = Classes/TrackAttributeCell.m; sourceTree = "<group>"; };
+		E48885ED04523E4B00A80006 /* plus.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = plus.png; path = icons/plus.png; sourceTree = "<group>"; };
+		E48F300011D8EE7B00491B45 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/AUViewWindow.xib; sourceTree = "<group>"; };
+		E48F30F011DB8B8D00491B45 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/AUCarbonWindow.xib; sourceTree = "<group>"; };
+		E4951EA211D63CD000D827EC /* AUViewWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AUViewWindowController.h; path = Classes/AUViewWindowController.h; sourceTree = "<group>"; };
+		E4951EA311D63CD000D827EC /* AUViewWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AUViewWindowController.m; path = Classes/AUViewWindowController.m; sourceTree = "<group>"; };
+		E49B98060D9F79B100F61755 /* MDRubyPointer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDRubyPointer.h; path = Ruby_bindings/MDRubyPointer.h; sourceTree = "<group>"; };
+		E49B98070D9F79B100F61755 /* MDRubyPointer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MDRubyPointer.m; path = Ruby_bindings/MDRubyPointer.m; sourceTree = "<group>"; wrapsLines = 1; };
+		E49DF713096935AA00A91C40 /* linear.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = linear.png; path = icons/linear.png; sourceTree = "<group>"; };
+		E49DF721096935FA00A91C40 /* triangle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = triangle.png; path = icons/triangle.png; sourceTree = "<group>"; };
+		E49DF79709694BDC00A91C40 /* pencil_cursor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = pencil_cursor.png; path = icons/pencil_cursor.png; sourceTree = "<group>"; };
+		E49DF811096A3E2400A91C40 /* arc.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = arc.png; path = icons/arc.png; sourceTree = "<group>"; };
+		E49DF812096A3E2400A91C40 /* parabola.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = parabola.png; path = icons/parabola.png; sourceTree = "<group>"; };
+		E49DF944096A9B8500A91C40 /* pencil_small.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = pencil_small.png; path = icons/pencil_small.png; sourceTree = "<group>"; };
+		E4AA82341053F41D0052CF7F /* MDRubyEventSet.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = MDRubyEventSet.m; path = Ruby_bindings/MDRubyEventSet.m; sourceTree = "<group>"; };
+		E4AA82441053F8050052CF7F /* MDRubyEventSet.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MDRubyEventSet.h; path = Ruby_bindings/MDRubyEventSet.h; sourceTree = "<group>"; };
+		E4B0B25E10A30F78007B7360 /* MDAudioUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDAudioUtility.h; path = MD_package/MDAudioUtility.h; sourceTree = "<group>"; };
+		E4B0B25F10A30F78007B7360 /* MDAudioUtility.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MDAudioUtility.c; path = MD_package/MDAudioUtility.c; sourceTree = "<group>"; };
+		E4B2E8E40D93F92600781995 /* MDRubySequence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDRubySequence.h; path = Ruby_bindings/MDRubySequence.h; sourceTree = "<group>"; };
+		E4B2E8E50D93F92600781995 /* MDRubySequence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MDRubySequence.m; path = Ruby_bindings/MDRubySequence.m; sourceTree = "<group>"; wrapsLines = 1; };
+		E4B2EB320D9AA05600781995 /* MDRubyTrack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDRubyTrack.h; path = Ruby_bindings/MDRubyTrack.h; sourceTree = "<group>"; };
+		E4B2EB330D9AA05600781995 /* MDRubyTrack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MDRubyTrack.m; path = Ruby_bindings/MDRubyTrack.m; sourceTree = "<group>"; wrapsLines = 1; };
+		E4B4C25A11C3ED4C00FE7593 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/AudioSettingsPanel.xib; sourceTree = "<group>"; };
+		E4B4C26711C3EDAC00FE7593 /* AudioSettingsPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioSettingsPanelController.h; path = Classes/AudioSettingsPanelController.h; sourceTree = "<group>"; };
+		E4B4C26811C3EDAC00FE7593 /* AudioSettingsPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AudioSettingsPanelController.m; path = Classes/AudioSettingsPanelController.m; sourceTree = "<group>"; };
+		E4B5C7BA060C9406000BC127 /* NSStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = NSStringAdditions.h; path = Classes/NSStringAdditions.h; sourceTree = "<group>"; };
+		E4B5C7BB060C9406000BC127 /* NSStringAdditions.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = NSStringAdditions.m; path = Classes/NSStringAdditions.m; sourceTree = "<group>"; };
+		E4BAFD800C18613600A5EAED /* MyWindow.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MyWindow.h; path = Classes/MyWindow.h; sourceTree = "<group>"; };
+		E4BAFD810C18613600A5EAED /* MyWindow.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = MyWindow.m; path = Classes/MyWindow.m; sourceTree = "<group>"; };
+		E4BAFF2F0C1B005600A5EAED /* PlayingViewController.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = PlayingViewController.h; path = Classes/PlayingViewController.h; sourceTree = "<group>"; };
+		E4BAFF300C1B005600A5EAED /* PlayingViewController.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = PlayingViewController.m; path = Classes/PlayingViewController.m; sourceTree = "<group>"; };
+		E4BAFFAD0C1C3ED800A5EAED /* eye_open.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = eye_open.png; path = icons/eye_open.png; sourceTree = "<group>"; };
+		E4BAFFC20C1C44D800A5EAED /* eye_close.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = eye_close.png; path = icons/eye_close.png; sourceTree = "<group>"; };
+		E4C383F21411124C006F2661 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/AboutPanel.xib; sourceTree = "<group>"; };
+		E4C383FA141117F9006F2661 /* AboutWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AboutWindowController.h; path = Classes/AboutWindowController.h; sourceTree = "<group>"; };
+		E4C383FB141117F9006F2661 /* AboutWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AboutWindowController.m; path = Classes/AboutWindowController.m; sourceTree = "<group>"; };
+		E4C3844314111D23006F2661 /* lastBuild.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = lastBuild.txt; sourceTree = "<group>"; };
+		E4C384E414112400006F2661 /* Version */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Version; sourceTree = "<group>"; };
+		E4CD4D710C106B9800AF6017 /* speaker.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = speaker.png; path = icons/speaker.png; sourceTree = "<group>"; };
+		E4CF0D4E0746E734000ADE20 /* MDCalibrator.c */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.c; name = MDCalibrator.c; path = MD_package/MDCalibrator.c; sourceTree = "<group>"; };
+		E4CF0D4F0746E734000ADE20 /* MDCalibrator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDCalibrator.h; path = MD_package/MDCalibrator.h; sourceTree = "<group>"; };
+		E4CF0D500746E734000ADE20 /* MDCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDCommon.h; path = MD_package/MDCommon.h; sourceTree = "<group>"; };
+		E4CF0D510746E734000ADE20 /* MDEvent.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDEvent.c; path = MD_package/MDEvent.c; sourceTree = "<group>"; };
+		E4CF0D520746E734000ADE20 /* MDEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDEvent.h; path = MD_package/MDEvent.h; sourceTree = "<group>"; };
+		E4CF0D530746E734000ADE20 /* MDHeaders.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MDHeaders.h; path = MD_package/MDHeaders.h; sourceTree = "<group>"; };
+		E4CF0D540746E734000ADE20 /* MDPlayer_MacOSX.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDPlayer_MacOSX.c; path = MD_package/MDPlayer_MacOSX.c; sourceTree = "<group>"; };
+		E4CF0D550746E734000ADE20 /* MDPlayer_MacOSX.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MDPlayer_MacOSX.h; path = MD_package/MDPlayer_MacOSX.h; sourceTree = "<group>"; };
+		E4CF0D560746E734000ADE20 /* MDPlayer.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MDPlayer.h; path = MD_package/MDPlayer.h; sourceTree = "<group>"; };
+		E4CF0D570746E734000ADE20 /* MDPointSet.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDPointSet.c; path = MD_package/MDPointSet.c; sourceTree = "<group>"; };
+		E4CF0D580746E734000ADE20 /* MDPointSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDPointSet.h; path = MD_package/MDPointSet.h; sourceTree = "<group>"; };
+		E4CF0D590746E734000ADE20 /* MDSequence.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDSequence.c; path = MD_package/MDSequence.c; sourceTree = "<group>"; };
+		E4CF0D5A0746E734000ADE20 /* MDSequence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDSequence.h; path = MD_package/MDSequence.h; sourceTree = "<group>"; };
+		E4CF0D5B0746E734000ADE20 /* MDSequenceSMF.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDSequenceSMF.c; path = MD_package/MDSequenceSMF.c; sourceTree = "<group>"; };
+		E4CF0D5C0746E734000ADE20 /* MDTrack.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MDTrack.c; path = MD_package/MDTrack.c; sourceTree = "<group>"; wrapsLines = 1; };
+		E4CF0D5D0746E734000ADE20 /* MDTrack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDTrack.h; path = MD_package/MDTrack.h; sourceTree = "<group>"; wrapsLines = 1; };
+		E4CF0D5E0746E734000ADE20 /* MDUtility.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDUtility.c; path = MD_package/MDUtility.c; sourceTree = "<group>"; };
+		E4CF0D5F0746E734000ADE20 /* MDUtility.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MDUtility.h; path = MD_package/MDUtility.h; sourceTree = "<group>"; };
+		E4D701EA13F540C5005EE5B3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/RecordPanel.xib; sourceTree = "<group>"; };
+		E4D803D80737CD3500EB5804 /* horizontal_split.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = horizontal_split.png; path = icons/horizontal_split.png; sourceTree = "<group>"; };
+		E4D803DC0737D6F400EB5804 /* move_around.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = move_around.png; path = icons/move_around.png; sourceTree = "<group>"; };
+		E4DB1648063B485600A80105 /* stretch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = stretch.png; path = icons/stretch.png; sourceTree = "<group>"; };
+		E4DB164A063B529800A80105 /* NSEventAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSEventAdditions.h; path = Classes/NSEventAdditions.h; sourceTree = "<group>"; };
+		E4DB164B063B529800A80105 /* NSEventAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSEventAdditions.m; path = Classes/NSEventAdditions.m; sourceTree = "<group>"; };
+		E4DB28E00C1458D500B6E980 /* TextureView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = TextureView.h; path = Classes/TextureView.h; sourceTree = "<group>"; };
+		E4DB28E10C1458D500B6E980 /* TextureView.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = TextureView.m; path = Classes/TextureView.m; sourceTree = "<group>"; };
+		E4DC0CE910A6623600377275 /* ruby_dialog.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ruby_dialog.c; path = Ruby_bindings/ruby_dialog.c; sourceTree = "<group>"; };
+		E4DC0CEA10A6623600377275 /* ruby_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ruby_dialog.h; path = Ruby_bindings/ruby_dialog.h; sourceTree = "<group>"; };
+		E4E44B92074CFB9D0034031C /* expand.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = expand.png; path = icons/expand.png; sourceTree = "<group>"; };
+		E4E44B93074CFB9D0034031C /* shrink.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = shrink.png; path = icons/shrink.png; sourceTree = "<group>"; };
+		E4ECB32B06E231BB00A80105 /* RecButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = RecButton.png; path = icons/RecButton.png; sourceTree = "<group>"; };
+		E4F45EF5104A75B8008C7814 /* horizontal_move_plus.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = horizontal_move_plus.png; path = icons/horizontal_move_plus.png; sourceTree = "<group>"; };
+		E4F45EF6104A75B8008C7814 /* vertical_move_plus.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = vertical_move_plus.png; path = icons/vertical_move_plus.png; sourceTree = "<group>"; };
+		E4F95D80073D909700F1D121 /* document_icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = document_icon.icns; path = icons/document_icon.icns; sourceTree = "<group>"; };
+		E4FB54C213FA851A001C1290 /* horizontal_move_zoom.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = horizontal_move_zoom.png; path = icons/horizontal_move_zoom.png; sourceTree = "<group>"; };
+		F50273C303F6969A01A80002 /* GraphicSplitterView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = GraphicSplitterView.h; path = Classes/GraphicSplitterView.h; sourceTree = "<group>"; };
+		F50273C403F6969A01A80002 /* GraphicSplitterView.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = GraphicSplitterView.m; path = Classes/GraphicSplitterView.m; sourceTree = "<group>"; };
+		F5048CB103D5C06101A80002 /* GraphicWindowController.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = GraphicWindowController.h; path = Classes/GraphicWindowController.h; sourceTree = "<group>"; wrapsLines = 1; };
+		F5048CB203D5C06101A80002 /* GraphicWindowController.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = GraphicWindowController.m; path = Classes/GraphicWindowController.m; sourceTree = "<group>"; wrapsLines = 1; };
+		F5048CB503D5C07201A80002 /* PianoRollView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = PianoRollView.h; path = Classes/PianoRollView.h; sourceTree = "<group>"; };
+		F5048CB603D5C07201A80002 /* PianoRollView.m */ = {isa = PBXFileReference; fileEncoding = 0; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; name = PianoRollView.m; path = Classes/PianoRollView.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 1; };
+		F520EC10023D1DC601A80002 /* G-clef.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "G-clef.icns"; path = "icons/G-clef.icns"; sourceTree = "<group>"; };
+		F52B39A803E17D2101A80002 /* GraphicRulerView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = GraphicRulerView.h; path = Classes/GraphicRulerView.h; sourceTree = "<group>"; };
+		F52B39A903E17D2101A80002 /* GraphicRulerView.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = GraphicRulerView.m; path = Classes/GraphicRulerView.m; sourceTree = "<group>"; };
+		F52B39AE03E18DEF01A80002 /* TimeChartView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = TimeChartView.h; path = Classes/TimeChartView.h; sourceTree = "<group>"; };
+		F52B39AF03E18DEF01A80002 /* TimeChartView.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = TimeChartView.m; path = Classes/TimeChartView.m; sourceTree = "<group>"; };
+		F554D6E603E3FB8401A80002 /* StripChartView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = StripChartView.h; path = Classes/StripChartView.h; sourceTree = "<group>"; };
+		F554D6E703E3FB8401A80002 /* StripChartView.m */ = {isa = PBXFileReference; fileEncoding = 0; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; name = StripChartView.m; path = Classes/StripChartView.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 1; wrapsLines = 1; };
+		F554D6EA03E3FC8901A80002 /* StripChartRulerView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = StripChartRulerView.h; path = Classes/StripChartRulerView.h; sourceTree = "<group>"; };
+		F554D6EB03E3FC8901A80002 /* StripChartRulerView.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = StripChartRulerView.m; path = Classes/StripChartRulerView.m; sourceTree = "<group>"; };
+		F569756803DADD0A01A80002 /* PianoRollRulerView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = PianoRollRulerView.h; path = Classes/PianoRollRulerView.h; sourceTree = "<group>"; };
+		F569756903DADD0A01A80002 /* PianoRollRulerView.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = PianoRollRulerView.m; path = Classes/PianoRollRulerView.m; sourceTree = "<group>"; };
+		F5835E0702292DC201A80002 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
+		F59FEFE3022BD45101A80002 /* CoreMIDIServer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDIServer.framework; path = /System/Library/Frameworks/CoreMIDIServer.framework; sourceTree = "<absolute>"; };
+		F5D2EB060244AFAF01A80002 /* LoadingPanelController.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = LoadingPanelController.h; path = Classes/LoadingPanelController.h; sourceTree = "<group>"; };
+		F5D2EB070244AFAF01A80002 /* LoadingPanelController.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = LoadingPanelController.m; path = Classes/LoadingPanelController.m; sourceTree = "<group>"; };
+		F5D2EB080244AFAF01A80002 /* MDObjects.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MDObjects.h; path = Classes/MDObjects.h; sourceTree = "<group>"; };
+		F5D2EB090244AFAF01A80002 /* MDObjects.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = MDObjects.m; path = Classes/MDObjects.m; sourceTree = "<group>"; };
+		F5D2EB0A0244AFAF01A80002 /* MyAppController.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MyAppController.h; path = Classes/MyAppController.h; sourceTree = "<group>"; };
+		F5D2EB0B0244AFAF01A80002 /* MyAppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = MyAppController.m; path = Classes/MyAppController.m; sourceTree = "<group>"; wrapsLines = 1; };
+		F5D2EB0C0244AFAF01A80002 /* MyDocument.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MyDocument.h; path = Classes/MyDocument.h; sourceTree = "<group>"; wrapsLines = 1; };
+		F5D2EB0D0244AFAF01A80002 /* MyDocument.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyDocument.m; path = Classes/MyDocument.m; sourceTree = "<group>"; wrapsLines = 1; };
+		F5D2EB0E0244AFAF01A80002 /* ListWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ListWindowController.h; path = Classes/ListWindowController.h; sourceTree = "<group>"; };
+		F5D2EB0F0244AFAF01A80002 /* ListWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ListWindowController.m; path = Classes/ListWindowController.m; sourceTree = "<group>"; wrapsLines = 1; };
+		F5D2EB100244AFAF01A80002 /* MyMIDISequence.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MyMIDISequence.h; path = Classes/MyMIDISequence.h; sourceTree = "<group>"; };
+		F5D2EB110244AFAF01A80002 /* MyMIDISequence.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = MyMIDISequence.m; path = Classes/MyMIDISequence.m; sourceTree = "<group>"; };
+		F5D2EB120244AFAF01A80002 /* MyTableHeaderView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MyTableHeaderView.h; path = Classes/MyTableHeaderView.h; sourceTree = "<group>"; };
+		F5D2EB130244AFAF01A80002 /* MyTableHeaderView.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = MyTableHeaderView.m; path = Classes/MyTableHeaderView.m; sourceTree = "<group>"; };
+		F5D2EB140244AFAF01A80002 /* MyTableView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MyTableView.h; path = Classes/MyTableView.h; sourceTree = "<group>"; };
+		F5D2EB150244AFAF01A80002 /* MyTableView.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = MyTableView.m; path = Classes/MyTableView.m; sourceTree = "<group>"; };
+		F5D2EB1A0244AFAF01A80002 /* RemapDevicePanelController.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = RemapDevicePanelController.h; path = Classes/RemapDevicePanelController.h; sourceTree = "<group>"; };
+		F5D2EB1B0244AFAF01A80002 /* RemapDevicePanelController.m */ = {isa = PBXFileReference; fileEncoding = 0; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; name = RemapDevicePanelController.m; path = Classes/RemapDevicePanelController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F5D6C49203E0489301A80002 /* GraphicClientView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = GraphicClientView.h; path = Classes/GraphicClientView.h; sourceTree = "<group>"; };
+		F5D6C49303E0489301A80002 /* GraphicClientView.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = GraphicClientView.m; path = Classes/GraphicClientView.m; sourceTree = "<group>"; wrapsLines = 1; };
+		F5F22F08022FBBC501A80002 /* FFButton.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = FFButton.icns; path = icons/FFButton.icns; sourceTree = "<group>"; };
+		F5F22F09022FBBC501A80002 /* PauseButton.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = PauseButton.icns; path = icons/PauseButton.icns; sourceTree = "<group>"; };
+		F5F22F0A022FBBC501A80002 /* PlayButton.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = PlayButton.icns; path = icons/PlayButton.icns; sourceTree = "<group>"; };
+		F5F22F0B022FBBC501A80002 /* RewindButton.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = RewindButton.icns; path = icons/RewindButton.icns; sourceTree = "<group>"; };
+		F5F22F0C022FBBC501A80002 /* StopButton.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = StopButton.icns; path = icons/StopButton.icns; sourceTree = "<group>"; };
+		F5F9405D00EE2B4E01000001 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = /System/Library/Frameworks/CoreMIDI.framework; sourceTree = "<absolute>"; };
+		F5FB767800F88D8601000001 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
+		F5FFC0B40237AAD301A80002 /* Localizable.strings */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = English.lproj/Localizable.strings; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E400BBBB11D627550032B969 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E400BE1811D627870032B969 /* Cocoa.framework in Frameworks */,
+				E400BE1911D627870032B969 /* AudioToolbox.framework in Frameworks */,
+				E400BE1A11D627870032B969 /* Carbon.framework in Frameworks */,
+				E400BE1B11D627870032B969 /* CoreAudio.framework in Frameworks */,
+				E400BE1C11D627870032B969 /* CoreServices.framework in Frameworks */,
+				E400BE1D11D627870032B969 /* CoreMIDI.framework in Frameworks */,
+				E400BE1E11D627870032B969 /* AudioUnit.framework in Frameworks */,
+				E400BE1F11D627870032B969 /* CoreFoundation.framework in Frameworks */,
+				E400BE2011D627870032B969 /* CoreAudioKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		00FAE72800CA70167F000001 /* MIDI Package Sources */ = {
+			isa = PBXGroup;
+			children = (
+				E4CF0D530746E734000ADE20 /* MDHeaders.h */,
+				E4CF0D500746E734000ADE20 /* MDCommon.h */,
+				E4CF0D520746E734000ADE20 /* MDEvent.h */,
+				E4CF0D510746E734000ADE20 /* MDEvent.c */,
+				E4CF0D5D0746E734000ADE20 /* MDTrack.h */,
+				E4CF0D5C0746E734000ADE20 /* MDTrack.c */,
+				E4CF0D5A0746E734000ADE20 /* MDSequence.h */,
+				E4CF0D590746E734000ADE20 /* MDSequence.c */,
+				E4CF0D5B0746E734000ADE20 /* MDSequenceSMF.c */,
+				E4CF0D4F0746E734000ADE20 /* MDCalibrator.h */,
+				E4CF0D4E0746E734000ADE20 /* MDCalibrator.c */,
+				E4CF0D580746E734000ADE20 /* MDPointSet.h */,
+				E4CF0D570746E734000ADE20 /* MDPointSet.c */,
+				E4CF0D5F0746E734000ADE20 /* MDUtility.h */,
+				E4CF0D5E0746E734000ADE20 /* MDUtility.c */,
+				E4CF0D560746E734000ADE20 /* MDPlayer.h */,
+				E4CF0D550746E734000ADE20 /* MDPlayer_MacOSX.h */,
+				E4CF0D540746E734000ADE20 /* MDPlayer_MacOSX.c */,
+				E40598B80D311C9B00161E25 /* MDAudio.h */,
+				E405989D0D311A9700161E25 /* MDAudio_MacOSX.c */,
+				E4B0B25E10A30F78007B7360 /* MDAudioUtility.h */,
+				E4B0B25F10A30F78007B7360 /* MDAudioUtility.c */,
+			);
+			name = "MIDI Package Sources";
+			sourceTree = "<group>";
+		};
+		1058C7A6FEA54F5311CA2CBB /* Linked Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1058C7A7FEA54F5311CA2CBB /* Cocoa.framework */,
+				00FBF1B800C9C4767F000001 /* AudioToolbox.framework */,
+				E4562EC211D10A8800EBD2AA /* CoreAudioKit.framework */,
+				F5FB767800F88D8601000001 /* AudioUnit.framework */,
+				00FBF1BC00C9C7EA7F000001 /* Carbon.framework */,
+			);
+			name = "Linked Frameworks";
+			sourceTree = "<group>";
+		};
+		1058C7A8FEA54F5311CA2CBB /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F5F9405D00EE2B4E01000001 /* CoreMIDI.framework */,
+				2A37F4C5FDCFA73011CA2CEA /* Foundation.framework */,
+				2A37F4C4FDCFA73011CA2CEA /* AppKit.framework */,
+				0217E8F300D51D2B7F000001 /* CoreAudio.framework */,
+				F59FEFE3022BD45101A80002 /* CoreMIDIServer.framework */,
+				00FB976F00D7AF2F7F000001 /* CoreServices.framework */,
+				F5835E0702292DC201A80002 /* CoreFoundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		19C28FB0FE9D524F11CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E400BBBD11D627550032B969 /* Alchemusica.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2A37F4AAFDCFA73011CA2CEA /* MIDI-cocoa-2 */ = {
+			isa = PBXGroup;
+			children = (
+				00FAE72800CA70167F000001 /* MIDI Package Sources */,
+				E43E5E360D915E53002FDD1E /* Ruby bindings */,
+				2A37F4ABFDCFA73011CA2CEA /* Classes */,
+				2A37F4AFFDCFA73011CA2CEA /* Other Sources */,
+				2A37F4B8FDCFA73011CA2CEA /* Resources */,
+				2A37F4C3FDCFA73011CA2CEA /* Frameworks */,
+				19C28FB0FE9D524F11CA2CBB /* Products */,
+				E44BC0081044332E00978A1A /* Ruby_Scripts */,
+				E400BBBF11D627550032B969 /* Alchemusica-Info.plist */,
+			);
+			name = "MIDI-cocoa-2";
+			sourceTree = "<group>";
+		};
+		2A37F4ABFDCFA73011CA2CEA /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				E476192C0454425A00A80006 /* MenuTags.h */,
+				F5D2EB080244AFAF01A80002 /* MDObjects.h */,
+				F5D2EB090244AFAF01A80002 /* MDObjects.m */,
+				F5D2EB100244AFAF01A80002 /* MyMIDISequence.h */,
+				F5D2EB110244AFAF01A80002 /* MyMIDISequence.m */,
+				F5D2EB0A0244AFAF01A80002 /* MyAppController.h */,
+				F5D2EB0B0244AFAF01A80002 /* MyAppController.m */,
+				F5D2EB0C0244AFAF01A80002 /* MyDocument.h */,
+				F5D2EB0D0244AFAF01A80002 /* MyDocument.m */,
+				E41CC3DF0F599ACF006E6817 /* RubyConsoleWindowController.h */,
+				E41CC3E00F599ACF006E6817 /* RubyConsoleWindowController.m */,
+				F5D2EB060244AFAF01A80002 /* LoadingPanelController.h */,
+				F5D2EB070244AFAF01A80002 /* LoadingPanelController.m */,
+				F5D2EB1A0244AFAF01A80002 /* RemapDevicePanelController.h */,
+				F5D2EB1B0244AFAF01A80002 /* RemapDevicePanelController.m */,
+				E4B4C26711C3EDAC00FE7593 /* AudioSettingsPanelController.h */,
+				E4B4C26811C3EDAC00FE7593 /* AudioSettingsPanelController.m */,
+				E4951EA211D63CD000D827EC /* AUViewWindowController.h */,
+				E4951EA311D63CD000D827EC /* AUViewWindowController.m */,
+				F5D2EB0E0244AFAF01A80002 /* ListWindowController.h */,
+				F5D2EB0F0244AFAF01A80002 /* ListWindowController.m */,
+				F5D2EB120244AFAF01A80002 /* MyTableHeaderView.h */,
+				F5D2EB130244AFAF01A80002 /* MyTableHeaderView.m */,
+				F5D2EB140244AFAF01A80002 /* MyTableView.h */,
+				F5D2EB150244AFAF01A80002 /* MyTableView.m */,
+				E4BAFD800C18613600A5EAED /* MyWindow.h */,
+				E4BAFD810C18613600A5EAED /* MyWindow.m */,
+				F5048CB103D5C06101A80002 /* GraphicWindowController.h */,
+				F5048CB203D5C06101A80002 /* GraphicWindowController.m */,
+				E4BAFF2F0C1B005600A5EAED /* PlayingViewController.h */,
+				E4BAFF300C1B005600A5EAED /* PlayingViewController.m */,
+				E44C7AC70C1D9E33004138AB /* RecordPanelController.h */,
+				E44C7AC80C1D9E33004138AB /* RecordPanelController.m */,
+				E40C7ACA140A95D700969DC3 /* MetronomeSettingsPanelController.h */,
+				E40C7ACB140A95D700969DC3 /* MetronomeSettingsPanelController.m */,
+				E4C383FA141117F9006F2661 /* AboutWindowController.h */,
+				E4C383FB141117F9006F2661 /* AboutWindowController.m */,
+				E40EDA4B0BBFFD2600B3FE78 /* GraphicBackgroundView.h */,
+				E40EDA4C0BBFFD2600B3FE78 /* GraphicBackgroundView.m */,
+				F5D6C49203E0489301A80002 /* GraphicClientView.h */,
+				F5D6C49303E0489301A80002 /* GraphicClientView.m */,
+				F52B39A803E17D2101A80002 /* GraphicRulerView.h */,
+				F52B39A903E17D2101A80002 /* GraphicRulerView.m */,
+				F5048CB503D5C07201A80002 /* PianoRollView.h */,
+				F5048CB603D5C07201A80002 /* PianoRollView.m */,
+				F569756803DADD0A01A80002 /* PianoRollRulerView.h */,
+				F569756903DADD0A01A80002 /* PianoRollRulerView.m */,
+				F52B39AE03E18DEF01A80002 /* TimeChartView.h */,
+				F52B39AF03E18DEF01A80002 /* TimeChartView.m */,
+				F554D6E603E3FB8401A80002 /* StripChartView.h */,
+				F554D6E703E3FB8401A80002 /* StripChartView.m */,
+				F554D6EA03E3FC8901A80002 /* StripChartRulerView.h */,
+				F554D6EB03E3FC8901A80002 /* StripChartRulerView.m */,
+				F50273C303F6969A01A80002 /* GraphicSplitterView.h */,
+				F50273C403F6969A01A80002 /* GraphicSplitterView.m */,
+				E4743AE60456EAE900A80006 /* GraphicFloatingView.h */,
+				E4743AE70456EAE900A80006 /* GraphicFloatingView.m */,
+				E4335F900472902100A80006 /* ColorCell.h */,
+				E4335F910472902100A80006 /* ColorCell.m */,
+				E481167F071C26C700A80105 /* TrackAttributeCell.h */,
+				E4811680071C26C700A80105 /* TrackAttributeCell.m */,
+				E4B5C7BA060C9406000BC127 /* NSStringAdditions.h */,
+				E4B5C7BB060C9406000BC127 /* NSStringAdditions.m */,
+				E4DB164A063B529800A80105 /* NSEventAdditions.h */,
+				E4DB164B063B529800A80105 /* NSEventAdditions.m */,
+				E426A2CD073E73B00039474B /* NSWindowControllerAdditions.h */,
+				E426A2CE073E73B00039474B /* NSWindowControllerAdditions.m */,
+				E44A56BA074F9A6F002034A7 /* NSCursorAdditions.h */,
+				E44A56BB074F9A6F002034A7 /* NSCursorAdditions.m */,
+				E4266D0E0966681100C04A48 /* MyPopUpButton.h */,
+				E4266D0D0966681100C04A48 /* MyPopUpButton.m */,
+				E46394310A0E0C5400FD0629 /* MyPopUpButtonCell.h */,
+				E46394320A0E0C5400FD0629 /* MyPopUpButtonCell.m */,
+				E46394F10A0E52D900FD0629 /* MyComboBoxCell.h */,
+				E46394F20A0E52D900FD0629 /* MyComboBoxCell.m */,
+				E4DB28E00C1458D500B6E980 /* TextureView.h */,
+				E4DB28E10C1458D500B6E980 /* TextureView.m */,
+				E430D72B0D79700F00717A72 /* EventFilterPanelController.h */,
+				E430D72C0D79700F00717A72 /* EventFilterPanelController.m */,
+				E430D7590D798DB100717A72 /* EventKindTextFieldCell.h */,
+				E430D75A0D798DB100717A72 /* EventKindTextFieldCell.m */,
+			);
+			name = Classes;
+			sourceTree = "<group>";
+		};
+		2A37F4AFFDCFA73011CA2CEA /* Other Sources */ = {
+			isa = PBXGroup;
+			children = (
+				2A37F4B0FDCFA73011CA2CEA /* main.m */,
+			);
+			name = "Other Sources";
+			sourceTree = "<group>";
+		};
+		2A37F4B8FDCFA73011CA2CEA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				E40C7A1D140A85A200969DC3 /* MainMenu.xib */,
+				E40C7A21140A85DB00969DC3 /* TrackWindow.xib */,
+				E40C7A25140A860B00969DC3 /* ListWindow.xib */,
+				E40C7A29140A862D00969DC3 /* GraphicWindow.xib */,
+				E40C7A2D140A865800969DC3 /* LoadingPanel.xib */,
+				E40C7A31140A867A00969DC3 /* RemapDevicePanel.xib */,
+				E40C7A3E140A879F00969DC3 /* AudioRecordPanel.xib */,
+				E40C7A42140A87B400969DC3 /* EventFilterPanel.xib */,
+				E40C7A46140A87CD00969DC3 /* EventKindTextFieldCell.xib */,
+				E40C7A4A140A87E100969DC3 /* RubyDialog.xib */,
+				E40C7A4E140A87FD00969DC3 /* RubyConsoleWindow.xib */,
+				E4D701E913F540C5005EE5B3 /* RecordPanel.xib */,
+				E4B4C25911C3ED4C00FE7593 /* AudioSettingsPanel.xib */,
+				E48F2FFF11D8EE7B00491B45 /* AUViewWindow.xib */,
+				E48F30EF11DB8B8D00491B45 /* AUCarbonWindow.xib */,
+				E40C7AC5140A94F700969DC3 /* MetronomeSettingsPanel.xib */,
+				E4C383F11411124C006F2661 /* AboutPanel.xib */,
+				089C165FFE840EACC02AAC07 /* InfoPlist.strings */,
+				F5FFC0B30237AAD301A80002 /* Localizable.strings */,
+				E40C7A53140A884400969DC3 /* icons */,
+				E4C3844314111D23006F2661 /* lastBuild.txt */,
+				E4C384E414112400006F2661 /* Version */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		2A37F4C3FDCFA73011CA2CEA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1058C7A6FEA54F5311CA2CBB /* Linked Frameworks */,
+				1058C7A8FEA54F5311CA2CBB /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E40C7A53140A884400969DC3 /* icons */ = {
+			isa = PBXGroup;
+			children = (
+				F5F22F08022FBBC501A80002 /* FFButton.icns */,
+				F5F22F09022FBBC501A80002 /* PauseButton.icns */,
+				F5F22F0A022FBBC501A80002 /* PlayButton.icns */,
+				F5F22F0B022FBBC501A80002 /* RewindButton.icns */,
+				F5F22F0C022FBBC501A80002 /* StopButton.icns */,
+				F520EC10023D1DC601A80002 /* G-clef.icns */,
+				E4F95D80073D909700F1D121 /* document_icon.icns */,
+				E48885ED04523E4B00A80006 /* plus.png */,
+				E45323310452743D00A80006 /* minus.png */,
+				E40D6F3F0636BF0100A80105 /* horizontal_move.png */,
+				E4F45EF5104A75B8008C7814 /* horizontal_move_plus.png */,
+				E4FB54C213FA851A001C1290 /* horizontal_move_zoom.png */,
+				E40D6F450636C6B700A80105 /* vertical_move.png */,
+				E4F45EF6104A75B8008C7814 /* vertical_move_plus.png */,
+				E4D803D80737CD3500EB5804 /* horizontal_split.png */,
+				E4266C730966379B00C04A48 /* selection.png */,
+				E4402B790BF592170076972C /* ibeam.png */,
+				E4266C81096647F100C04A48 /* pencil.png */,
+				E49DF79709694BDC00A91C40 /* pencil_cursor.png */,
+				E49DF944096A9B8500A91C40 /* pencil_small.png */,
+				E4BAFFAD0C1C3ED800A5EAED /* eye_open.png */,
+				E4BAFFC20C1C44D800A5EAED /* eye_close.png */,
+				E4CD4D710C106B9800AF6017 /* speaker.png */,
+				E4D803DC0737D6F400EB5804 /* move_around.png */,
+				E4DB1648063B485600A80105 /* stretch.png */,
+				E4ECB32B06E231BB00A80105 /* RecButton.png */,
+				E4E44B92074CFB9D0034031C /* expand.png */,
+				E4E44B93074CFB9D0034031C /* shrink.png */,
+				E44A56B8074F99DB002034A7 /* loupe.png */,
+				E49DF721096935FA00A91C40 /* triangle.png */,
+				E4280AFF0A44164600DCD341 /* StartEditingRange.png */,
+				E4280BEB0A44465800DCD341 /* EndEditingRange.png */,
+				E4332325096841C800D5DAD8 /* sigmoid.png */,
+				E49DF811096A3E2400A91C40 /* arc.png */,
+				E49DF812096A3E2400A91C40 /* parabola.png */,
+				E49DF713096935AA00A91C40 /* linear.png */,
+				E4332326096841C800D5DAD8 /* random.png */,
+				E40081B50C4B73D5009D0A87 /* NQ.png */,
+				E40081780C4B5E62009D0A87 /* note1.png */,
+				E400817C0C4B6795009D0A87 /* note1_3.png */,
+				E400817D0C4B6795009D0A87 /* note1d.png */,
+				E400817A0C4B5E69009D0A87 /* note2.png */,
+				E400817E0C4B6795009D0A87 /* note2_3.png */,
+				E400817F0C4B6795009D0A87 /* note2d.png */,
+				E40081650C4B547E009D0A87 /* note4.png */,
+				E40081800C4B6795009D0A87 /* note4_3.png */,
+				E40081810C4B6795009D0A87 /* note4d.png */,
+				E40081740C4B57B2009D0A87 /* note8.png */,
+				E40081820C4B6795009D0A87 /* note8_3.png */,
+				E40081830C4B6795009D0A87 /* note8d.png */,
+				E40081720C4B57AA009D0A87 /* note16.png */,
+				E40081840C4B6795009D0A87 /* note16_3.png */,
+				E40081850C4B6795009D0A87 /* note16d.png */,
+				E40081760C4B58F5009D0A87 /* note32.png */,
+				E40081860C4B6795009D0A87 /* note32_3.png */,
+				E40081870C4B6795009D0A87 /* note32d.png */,
+			);
+			name = icons;
+			sourceTree = "<group>";
+		};
+		E43E5E360D915E53002FDD1E /* Ruby bindings */ = {
+			isa = PBXGroup;
+			children = (
+				E43E5F200D92AD49002FDD1E /* MDRuby.h */,
+				E43D1E0F10418C0F00B0104C /* MDRubyExtern.h */,
+				E4AA82441053F8050052CF7F /* MDRubyEventSet.h */,
+				E4AA82341053F41D0052CF7F /* MDRubyEventSet.m */,
+				E43E5F220D92AD49002FDD1E /* MDRubyCore.h */,
+				E43E5F210D92AD49002FDD1E /* MDRubyCore.m */,
+				E4B2E8E40D93F92600781995 /* MDRubySequence.h */,
+				E4B2E8E50D93F92600781995 /* MDRubySequence.m */,
+				E4B2EB320D9AA05600781995 /* MDRubyTrack.h */,
+				E4B2EB330D9AA05600781995 /* MDRubyTrack.m */,
+				E49B98060D9F79B100F61755 /* MDRubyPointer.h */,
+				E49B98070D9F79B100F61755 /* MDRubyPointer.m */,
+				E42BF87D0DB1D1100095F74F /* RubyDialogController.h */,
+				E42BF87E0DB1D1100095F74F /* RubyDialogController.m */,
+				E4DC0CE910A6623600377275 /* ruby_dialog.c */,
+				E4DC0CEA10A6623600377275 /* ruby_dialog.h */,
+			);
+			name = "Ruby bindings";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E400BBBC11D627550032B969 /* Alchemusica */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E400BBC511D627560032B969 /* Build configuration list for PBXNativeTarget "Alchemusica" */;
+			buildPhases = (
+				E4C3848414111D93006F2661 /* ShellScript */,
+				E400BBB911D627550032B969 /* Resources */,
+				E400BBBA11D627550032B969 /* Sources */,
+				E400BBBB11D627550032B969 /* Frameworks */,
+				E400BE2511D627C40032B969 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Alchemusica;
+			productName = Alchemusica;
+			productReference = E400BBBD11D627550032B969 /* Alchemusica.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		2A37F4A9FDCFA73011CA2CEA /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = E428451A09AA2B7A00CB93B9 /* Build configuration list for PBXProject "Alchemusica" */;
+			compatibilityVersion = "Xcode 2.4";
+			hasScannedForEncodings = 1;
+			mainGroup = 2A37F4AAFDCFA73011CA2CEA /* MIDI-cocoa-2 */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E400BBBC11D627550032B969 /* Alchemusica */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E400BBB911D627550032B969 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E400BBC811D627650032B969 /* InfoPlist.strings in Resources */,
+				E400BBCC11D627650032B969 /* FFButton.icns in Resources */,
+				E400BBCD11D627650032B969 /* PauseButton.icns in Resources */,
+				E400BBCE11D627650032B969 /* PlayButton.icns in Resources */,
+				E400BBCF11D627650032B969 /* RewindButton.icns in Resources */,
+				E400BBD011D627650032B969 /* StopButton.icns in Resources */,
+				E400BBD111D627650032B969 /* Localizable.strings in Resources */,
+				E400BBD211D627650032B969 /* G-clef.icns in Resources */,
+				E400BBD411D627650032B969 /* plus.png in Resources */,
+				E400BBD511D627650032B969 /* minus.png in Resources */,
+				E400BBD611D627650032B969 /* horizontal_move.png in Resources */,
+				E400BBD711D627650032B969 /* vertical_move.png in Resources */,
+				E400BBD811D627650032B969 /* stretch.png in Resources */,
+				E400BBDA11D627650032B969 /* RecButton.png in Resources */,
+				E400BBDB11D627650032B969 /* horizontal_split.png in Resources */,
+				E400BBDC11D627650032B969 /* move_around.png in Resources */,
+				E400BBDD11D627650032B969 /* document_icon.icns in Resources */,
+				E400BBDE11D627650032B969 /* expand.png in Resources */,
+				E400BBDF11D627650032B969 /* shrink.png in Resources */,
+				E400BBE011D627650032B969 /* loupe.png in Resources */,
+				E400BBE111D627650032B969 /* selection.png in Resources */,
+				E400BBE211D627650032B969 /* pencil.png in Resources */,
+				E400BBE311D627650032B969 /* sigmoid.png in Resources */,
+				E400BBE411D627650032B969 /* random.png in Resources */,
+				E400BBE511D627650032B969 /* linear.png in Resources */,
+				E400BBE611D627650032B969 /* triangle.png in Resources */,
+				E400BBE711D627650032B969 /* pencil_cursor.png in Resources */,
+				E400BBE811D627650032B969 /* arc.png in Resources */,
+				E400BBE911D627650032B969 /* parabola.png in Resources */,
+				E400BBEA11D627650032B969 /* pencil_small.png in Resources */,
+				E400BBEB11D627650032B969 /* StartEditingRange.png in Resources */,
+				E400BBEC11D627650032B969 /* EndEditingRange.png in Resources */,
+				E400BBED11D627650032B969 /* ibeam.png in Resources */,
+				E400BBEE11D627650032B969 /* speaker.png in Resources */,
+				E400BBEF11D627650032B969 /* eye_open.png in Resources */,
+				E400BBF011D627650032B969 /* eye_close.png in Resources */,
+				E400BBF211D627650032B969 /* note4.png in Resources */,
+				E400BBF311D627650032B969 /* note16.png in Resources */,
+				E400BBF411D627650032B969 /* note8.png in Resources */,
+				E400BBF511D627650032B969 /* note32.png in Resources */,
+				E400BBF611D627650032B969 /* note1.png in Resources */,
+				E400BBF711D627650032B969 /* note2.png in Resources */,
+				E400BBF811D627650032B969 /* note1_3.png in Resources */,
+				E400BBF911D627650032B969 /* note1d.png in Resources */,
+				E400BBFA11D627650032B969 /* note2_3.png in Resources */,
+				E400BBFB11D627650032B969 /* note2d.png in Resources */,
+				E400BBFC11D627650032B969 /* note4_3.png in Resources */,
+				E400BBFD11D627650032B969 /* note4d.png in Resources */,
+				E400BBFE11D627650032B969 /* note8_3.png in Resources */,
+				E400BBFF11D627650032B969 /* note8d.png in Resources */,
+				E400BC0011D627650032B969 /* note16_3.png in Resources */,
+				E400BC0111D627650032B969 /* note16d.png in Resources */,
+				E400BC0211D627650032B969 /* note32_3.png in Resources */,
+				E400BC0311D627650032B969 /* note32d.png in Resources */,
+				E400BC0411D627650032B969 /* NQ.png in Resources */,
+				E400BC0B11D627650032B969 /* Ruby_Scripts in Resources */,
+				E400BC0C11D627650032B969 /* horizontal_move_plus.png in Resources */,
+				E400BC0D11D627650032B969 /* vertical_move_plus.png in Resources */,
+				E400BC0E11D627650032B969 /* AudioSettingsPanel.xib in Resources */,
+				E48F300111D8EE7B00491B45 /* AUViewWindow.xib in Resources */,
+				E48F30F111DB8B8D00491B45 /* AUCarbonWindow.xib in Resources */,
+				E4D701EB13F540C5005EE5B3 /* RecordPanel.xib in Resources */,
+				E4FB54C313FA851A001C1290 /* horizontal_move_zoom.png in Resources */,
+				E40C7A1F140A85A200969DC3 /* MainMenu.xib in Resources */,
+				E40C7A23140A85DB00969DC3 /* TrackWindow.xib in Resources */,
+				E40C7A27140A860B00969DC3 /* ListWindow.xib in Resources */,
+				E40C7A2B140A862D00969DC3 /* GraphicWindow.xib in Resources */,
+				E40C7A2F140A865800969DC3 /* LoadingPanel.xib in Resources */,
+				E40C7A33140A867A00969DC3 /* RemapDevicePanel.xib in Resources */,
+				E40C7A40140A879F00969DC3 /* AudioRecordPanel.xib in Resources */,
+				E40C7A44140A87B400969DC3 /* EventFilterPanel.xib in Resources */,
+				E40C7A48140A87CD00969DC3 /* EventKindTextFieldCell.xib in Resources */,
+				E40C7A4C140A87E100969DC3 /* RubyDialog.xib in Resources */,
+				E40C7A50140A87FD00969DC3 /* RubyConsoleWindow.xib in Resources */,
+				E40C7AC7140A94F700969DC3 /* MetronomeSettingsPanel.xib in Resources */,
+				E4C383F31411124C006F2661 /* AboutPanel.xib in Resources */,
+				E4C3844414111D23006F2661 /* lastBuild.txt in Resources */,
+				E4C384E514112400006F2661 /* Version in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		E4C3848414111D93006F2661 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd $PROJECT_DIR\necho \"last_build = \\\"`date '+%Y-%m-%d %H:%M:%S %Z'`\\\"\" > lastBuild.txt\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E400BBBA11D627550032B969 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E400BC0F11D627730032B969 /* main.m in Sources */,
+				E400BC1011D627730032B969 /* MDEvent.c in Sources */,
+				E400BC1111D627730032B969 /* MDTrack.c in Sources */,
+				E400BC1211D627730032B969 /* MDSequence.c in Sources */,
+				E400BC1311D627730032B969 /* MDSequenceSMF.c in Sources */,
+				E400BC1411D627730032B969 /* MDCalibrator.c in Sources */,
+				E400BC1511D627730032B969 /* MDPointSet.c in Sources */,
+				E400BC1611D627730032B969 /* MDUtility.c in Sources */,
+				E400BC1711D627730032B969 /* MDPlayer_MacOSX.c in Sources */,
+				E400BC1811D627730032B969 /* MDAudio_MacOSX.c in Sources */,
+				E400BC1911D627730032B969 /* MDRubyCore.m in Sources */,
+				E400BC1A11D627730032B969 /* MDObjects.m in Sources */,
+				E400BC1B11D627730032B969 /* LoadingPanelController.m in Sources */,
+				E400BC1C11D627730032B969 /* MyAppController.m in Sources */,
+				E400BC1D11D627730032B969 /* MyDocument.m in Sources */,
+				E400BC1E11D627730032B969 /* ListWindowController.m in Sources */,
+				E400BC1F11D627730032B969 /* MyMIDISequence.m in Sources */,
+				E400BC2011D627730032B969 /* MyTableHeaderView.m in Sources */,
+				E400BC2111D627730032B969 /* MyTableView.m in Sources */,
+				E400BC2211D627730032B969 /* RemapDevicePanelController.m in Sources */,
+				E400BC2311D627730032B969 /* GraphicWindowController.m in Sources */,
+				E400BC2411D627730032B969 /* PianoRollView.m in Sources */,
+				E400BC2511D627730032B969 /* PianoRollRulerView.m in Sources */,
+				E400BC2611D627730032B969 /* GraphicClientView.m in Sources */,
+				E400BC2711D627730032B969 /* GraphicRulerView.m in Sources */,
+				E400BC2811D627730032B969 /* TimeChartView.m in Sources */,
+				E400BC2911D627730032B969 /* StripChartView.m in Sources */,
+				E400BC2A11D627730032B969 /* StripChartRulerView.m in Sources */,
+				E400BC2B11D627730032B969 /* GraphicSplitterView.m in Sources */,
+				E400BC2C11D627730032B969 /* GraphicFloatingView.m in Sources */,
+				E400BC2D11D627730032B969 /* ColorCell.m in Sources */,
+				E400BC2E11D627730032B969 /* NSStringAdditions.m in Sources */,
+				E400BC2F11D627730032B969 /* NSEventAdditions.m in Sources */,
+				E400BC3111D627730032B969 /* TrackAttributeCell.m in Sources */,
+				E400BC3211D627730032B969 /* NSWindowControllerAdditions.m in Sources */,
+				E400BC3311D627730032B969 /* NSCursorAdditions.m in Sources */,
+				E400BC3411D627730032B969 /* MyPopUpButton.m in Sources */,
+				E400BC3511D627730032B969 /* MyPopUpButtonCell.m in Sources */,
+				E400BC3611D627730032B969 /* MyComboBoxCell.m in Sources */,
+				E400BC3711D627730032B969 /* GraphicBackgroundView.m in Sources */,
+				E400BC3811D627730032B969 /* TextureView.m in Sources */,
+				E400BC3911D627730032B969 /* MyWindow.m in Sources */,
+				E400BC3A11D627730032B969 /* PlayingViewController.m in Sources */,
+				E400BC3B11D627730032B969 /* RecordPanelController.m in Sources */,
+				E400BC3C11D627730032B969 /* EventFilterPanelController.m in Sources */,
+				E400BC3D11D627730032B969 /* EventKindTextFieldCell.m in Sources */,
+				E400BC3E11D627730032B969 /* MDRubySequence.m in Sources */,
+				E400BC3F11D627730032B969 /* MDRubyTrack.m in Sources */,
+				E400BC4011D627730032B969 /* MDRubyPointer.m in Sources */,
+				E400BC4111D627730032B969 /* RubyConsoleWindowController.m in Sources */,
+				E400BC4211D627730032B969 /* MDRubyEventSet.m in Sources */,
+				E400BC4311D627730032B969 /* MDAudioUtility.c in Sources */,
+				E400BC4411D627730032B969 /* ruby_dialog.c in Sources */,
+				E400BC4511D627730032B969 /* RubyDialogController.m in Sources */,
+				E400BC4611D627730032B969 /* AudioSettingsPanelController.m in Sources */,
+				E4951EA411D63CD000D827EC /* AUViewWindowController.m in Sources */,
+				E40C7ACC140A95D700969DC3 /* MetronomeSettingsPanelController.m in Sources */,
+				E4C383FC141117F9006F2661 /* AboutWindowController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		089C165FFE840EACC02AAC07 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				089C1660FE840EACC02AAC07 /* English */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		E40C7A1D140A85A200969DC3 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E40C7A1E140A85A200969DC3 /* English */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+		E40C7A21140A85DB00969DC3 /* TrackWindow.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E40C7A22140A85DB00969DC3 /* English */,
+			);
+			name = TrackWindow.xib;
+			sourceTree = "<group>";
+		};
+		E40C7A25140A860B00969DC3 /* ListWindow.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E40C7A26140A860B00969DC3 /* English */,
+			);
+			name = ListWindow.xib;
+			sourceTree = "<group>";
+		};
+		E40C7A29140A862D00969DC3 /* GraphicWindow.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E40C7A2A140A862D00969DC3 /* English */,
+			);
+			name = GraphicWindow.xib;
+			sourceTree = "<group>";
+		};
+		E40C7A2D140A865800969DC3 /* LoadingPanel.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E40C7A2E140A865800969DC3 /* English */,
+			);
+			name = LoadingPanel.xib;
+			sourceTree = "<group>";
+		};
+		E40C7A31140A867A00969DC3 /* RemapDevicePanel.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E40C7A32140A867A00969DC3 /* English */,
+			);
+			name = RemapDevicePanel.xib;
+			sourceTree = "<group>";
+		};
+		E40C7A3E140A879F00969DC3 /* AudioRecordPanel.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E40C7A3F140A879F00969DC3 /* English */,
+			);
+			name = AudioRecordPanel.xib;
+			sourceTree = "<group>";
+		};
+		E40C7A42140A87B400969DC3 /* EventFilterPanel.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E40C7A43140A87B400969DC3 /* English */,
+			);
+			name = EventFilterPanel.xib;
+			sourceTree = "<group>";
+		};
+		E40C7A46140A87CD00969DC3 /* EventKindTextFieldCell.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E40C7A47140A87CD00969DC3 /* English */,
+			);
+			name = EventKindTextFieldCell.xib;
+			sourceTree = "<group>";
+		};
+		E40C7A4A140A87E100969DC3 /* RubyDialog.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E40C7A4B140A87E100969DC3 /* English */,
+			);
+			name = RubyDialog.xib;
+			sourceTree = "<group>";
+		};
+		E40C7A4E140A87FD00969DC3 /* RubyConsoleWindow.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E40C7A4F140A87FD00969DC3 /* English */,
+			);
+			name = RubyConsoleWindow.xib;
+			sourceTree = "<group>";
+		};
+		E40C7AC5140A94F700969DC3 /* MetronomeSettingsPanel.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E40C7AC6140A94F700969DC3 /* English */,
+			);
+			name = MetronomeSettingsPanel.xib;
+			sourceTree = "<group>";
+		};
+		E48F2FFF11D8EE7B00491B45 /* AUViewWindow.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E48F300011D8EE7B00491B45 /* English */,
+			);
+			name = AUViewWindow.xib;
+			sourceTree = "<group>";
+		};
+		E48F30EF11DB8B8D00491B45 /* AUCarbonWindow.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E48F30F011DB8B8D00491B45 /* English */,
+			);
+			name = AUCarbonWindow.xib;
+			sourceTree = "<group>";
+		};
+		E4B4C25911C3ED4C00FE7593 /* AudioSettingsPanel.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E4B4C25A11C3ED4C00FE7593 /* English */,
+			);
+			name = AudioSettingsPanel.xib;
+			sourceTree = "<group>";
+		};
+		E4C383F11411124C006F2661 /* AboutPanel.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E4C383F21411124C006F2661 /* English */,
+			);
+			name = AboutPanel.xib;
+			sourceTree = "<group>";
+		};
+		E4D701E913F540C5005EE5B3 /* RecordPanel.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E4D701EA13F540C5005EE5B3 /* English */,
+			);
+			name = RecordPanel.xib;
+			sourceTree = "<group>";
+		};
+		F5FFC0B30237AAD301A80002 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F5FFC0B40237AAD301A80002 /* Localizable.strings */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		E400BBC011D627560032B969 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(NATIVE_ARCH)";
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = "$HOME/Development/ruby-1.8.7-static";
+				INFOPLIST_FILE = "Alchemusica-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = "$HOME/Development/ruby-1.8.7-static";
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				OTHER_LDFLAGS = "-lruby-static";
+				PREBINDING = NO;
+				PRODUCT_NAME = Alchemusica;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Development;
+		};
+		E400BBC211D627560032B969 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = "$HOME/Development/ruby-1.8.7-static";
+				INFOPLIST_FILE = "Alchemusica-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = "$HOME/Development/ruby-1.8.7-static";
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				OTHER_LDFLAGS = "-lruby-static";
+				PREBINDING = NO;
+				PRODUCT_NAME = Alchemusica;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Deployment;
+		};
+		E400BBC411D627560032B969 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = "$HOME/Development/ruby-1.8.7-static";
+				INFOPLIST_FILE = "Alchemusica-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = "$HOME/Development/ruby-1.8.7-static";
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				OTHER_LDFLAGS = "-lruby-static";
+				PREBINDING = NO;
+				PRODUCT_NAME = Alchemusica;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Default;
+		};
+		E428451B09AA2B7A00CB93B9 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = "DEBUG=1";
+				MACOSX_DEPLOYMENT_TARGET = "";
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+			};
+			name = Development;
+		};
+		E428451C09AA2B7A00CB93B9 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+			};
+			name = Deployment;
+		};
+		E428451D09AA2B7A00CB93B9 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 10.3;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+			};
+			name = Default;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E400BBC511D627560032B969 /* Build configuration list for PBXNativeTarget "Alchemusica" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E400BBC011D627560032B969 /* Development */,
+				E400BBC211D627560032B969 /* Deployment */,
+				E400BBC411D627560032B969 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		E428451A09AA2B7A00CB93B9 /* Build configuration list for PBXProject "Alchemusica" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E428451B09AA2B7A00CB93B9 /* Development */,
+				E428451C09AA2B7A00CB93B9 /* Deployment */,
+				E428451D09AA2B7A00CB93B9 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 2A37F4A9FDCFA73011CA2CEA /* Project object */;
+}

@@ -1,0 +1,33 @@
+--- ruby-1.8.7-p160/eval.c	2009-03-23 18:28:31.000000000 +0900
++++ ruby-1.8.7-p160-tn/eval.c	2009-09-22 18:53:47.000000000 +0900
+@@ -3145,6 +3145,9 @@
+ 		goto while_out;
+ 	    do {
+ 	      while_redo:
++		    EXEC_EVENT_HOOK(RUBY_EVENT_LINE, node, self,
++				    ruby_frame->last_func,
++				    ruby_frame->last_class); /* 20090829 TN */
+ 		rb_eval(self, node->nd_body);
+ 	      while_next:
+ 		;
+@@ -3180,6 +3183,9 @@
+ 		goto until_out;
+ 	    do {
+ 	      until_redo:
++		    EXEC_EVENT_HOOK(RUBY_EVENT_LINE, node, self,
++				    ruby_frame->last_func,
++				    ruby_frame->last_class); /* 20090829 TN */
+ 		rb_eval(self, node->nd_body);
+ 	      until_next:
+ 		;
+--- ruby-1.8.7-p160/gc.c	2009-03-27 19:25:23.000000000 +0900
++++ ruby-1.8.7-p160-tn/gc.c	2009-09-23 21:16:13.000000000 +0900
+@@ -1215,7 +1215,7 @@
+ 	if (malloc_limit < GC_MALLOC_LIMIT) malloc_limit = GC_MALLOC_LIMIT;
+     }
+     malloc_increase = 0;
+-    if (freed < free_min) {
++    if (freed < free_min || freelist == 0) {
+ 	add_heap();
+     }
+     during_gc = 0;

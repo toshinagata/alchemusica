@@ -1,0 +1,446 @@
+/*
+ Copyright 2010-2011 Toshi Nagata.  All rights reserved.
+ 
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation version 2 of the License.
+ 
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+*/
+
+#import "RecordPanelController.h"
+#import "MyDocument.h"
+#import "MDHeaders.h"
+#import "MyMIDISequence.h"
+#import "MyAppController.h"
+
+@implementation RecordPanelController
+
+- (id)initWithDocument: (MyDocument *)document audio: (BOOL)audioFlag
+{
+    self = [super initWithWindowNibName: (audioFlag ? @"AudioRecordPanel" : @"RecordPanel")];
+	myDocument = [document retain];
+	isAudio = audioFlag;
+    return self;
+}
+
+- (void)dealloc
+{
+	if (calib != NULL)
+		MDCalibratorRelease(calib);
+    [myDocument release];
+	[info release];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+	[super dealloc];
+}
+
+- (void)updateDisplay
+{
+	MyMIDISequence *seq = [myDocument myMIDISequence];
+	NSString *s;
+	long bar, beat, tick;
+	int ival;
+	MDTickType theTick;
+
+	s = [info valueForKey: (isAudio ? MyRecordingInfoSourceAudioDeviceKey : MyRecordingInfoSourceDeviceKey)];
+	if (s == nil) {
+		[sourceDevicePopUp selectItemAtIndex: 0];
+	} else {
+		[sourceDevicePopUp selectItemWithTitle: s];
+	}
+	
+	if (!isAudio) {
+		[destinationDevicePopUp selectItemWithTitle: [info valueForKey: MyRecordingInfoDestinationDeviceKey]];
+	}
+//	[destinationDevicePopUp selectItemWithTitle: [info valueForKey: (isAudio ? MyRecordingInfoDestinationAudioDeviceKey : MyRecordingInfoDestinationDeviceKey)]];
+/*	if (isAudio) {
+		[playThruCheckbox setState: [[info valueForKey: MyRecordingInfoAudioPlayThroughKey] boolValue]];
+	} */
+		
+	if (!isAudio) {
+		ival = [[info valueForKey: MyRecordingInfoTargetTrackKey] intValue];
+		if (ival > 0 && ival < [seq trackCount]) {
+			[destinationTrackPopUp selectItemAtIndex: ival - 1];
+		//	[destinationDevicePopUp setEnabled: NO];
+		//	[midiChannelPopUp setEnabled: NO];
+		} else {
+			[destinationTrackPopUp selectItemAtIndex: [destinationTrackPopUp numberOfItems] - 1];
+		//	[destinationDevicePopUp setEnabled: YES];
+		//	[midiChannelPopUp setEnabled: YES];
+		}
+		ival = [[info valueForKey: MyRecordingInfoDestinationChannelKey] intValue];
+		[midiChannelPopUp selectItemAtIndex: ival];
+		ival = [[info valueForKey: MyRecordingInfoBarBeatFlagKey] intValue];
+		[barBeatPopUp selectItemAtIndex: (ival ? 0 : 1)];
+		ival = [[info valueForKey: MyRecordingInfoRecordingModeKey] intValue];
+		[modePopUp selectItemAtIndex: ival];
+		if (ival == 0) {
+			[barBeatPopUp setEnabled: YES];
+			[barBeatText setEnabled: YES];
+		} else {
+			[barBeatPopUp setEnabled: NO];
+			[barBeatText setEnabled: NO];
+		}
+	}
+	
+	theTick = [[info valueForKey: MyRecordingInfoStartTickKey] doubleValue];
+	if (theTick >= 0 && theTick < kMDMaxTick) {
+		MDCalibratorTickToMeasure(calib, theTick, &bar, &beat, &tick);
+		s = [NSString stringWithFormat: @"%d:%d:%d", bar, beat, tick];
+	} else {
+		s = @"----:--:----";
+	}
+	[startTickText setStringValue: s];
+
+	theTick = [[info valueForKey: MyRecordingInfoStopTickKey] doubleValue];
+	if (theTick > 0 && theTick < kMDMaxTick) {
+		MDCalibratorTickToMeasure(calib, theTick, &bar, &beat, &tick);
+		s = [NSString stringWithFormat: @"%d:%d:%d", bar, beat, tick];
+	} else {
+		s = @"----:--:----";
+	}
+	[stopTickText setStringValue: s];
+	
+	ival = [[info valueForKey: MyRecordingInfoStopFlagKey] intValue];
+	[stopTickCheckbox setState: ival];
+	if (ival) {
+		[stopTickText setEnabled: YES];
+	} else {
+		[stopTickText setEnabled: NO];
+	}
+
+	ival = [[info valueForKey: MyRecordingInfoCountOffNumberKey] intValue];
+	[barBeatText setIntValue: ival];
+	
+	ival = [[info valueForKey: MyRecordingInfoReplaceFlagKey] intValue];
+	[overdubRadioMatrix selectCellWithTag: ival];
+	
+	if (isAudio) {
+		NSString *locationText, *nameText;
+		[audioSampleRatePopUp selectItemWithTitle: [NSString stringWithFormat: @"%.0f", [[info valueForKey: MyRecordingInfoAudioBitRateKey] floatValue]]];
+		ival = [[info valueForKey: MyRecordingInfoAudioChannelFormatKey] intValue];		
+		[audioChannelsPopUp selectItemAtIndex: ival];
+		ival = [[info valueForKey: MyRecordingInfoAudioRecordingFormatKey] intValue];
+		[audioFormatPopUp selectItemAtIndex: ival];
+		locationText = [info valueForKey: MyRecordingInfoFolderNameKey];
+		if (locationText == nil) {
+			locationText = [[myDocument fileName] stringByDeletingLastPathComponent];
+			if (locationText == nil)
+				locationText = @"~/Music";
+		}
+		nameText = [info valueForKey: MyRecordingInfoFileNameKey];
+		if (nameText == nil)
+			nameText = @"";
+		[audioFileLocationText setStringValue: locationText];
+		[audioFileNameText setStringValue: nameText];
+		if ([locationText length] > 0 && [nameText length] > 0)
+			[startRecordingButton setEnabled: YES];
+		else
+			[startRecordingButton setEnabled: NO];
+	}
+}
+
+/*
+- (void)timerCallback: (NSTimer *)timer
+{
+	if (isAudio) {
+		float volume, ampLeft, ampRight, peakLeft, peakRight;
+		if (MDAudioGetInputVolumeAndAmplitudes(&volume, &ampLeft, &ampRight, &peakLeft, &peakRight) == kMDNoError) {
+			[audioVolumeSlider setFloatValue: volume * 100.0];
+			[audioLeftLevel setFloatValue: ampLeft * 100.0];
+			[audioRightLevel setFloatValue: ampRight * 100.0];
+			NSLog(@"ampLeft = %f, ampRight = %f", ampLeft, ampRight);
+		}
+	}
+}
+
+- (void)stopTimer
+{
+	if (timer != nil) {
+		[timer invalidate];
+		[timer release];
+		timer = nil;
+	}
+}
+*/
+
+- (void)reloadMIDIDeviceInfo
+{
+	int i, n;
+	NSMenu *menu;
+	char name[64];
+	MyMIDISequence *seq = [myDocument myMIDISequence];
+
+	//  Update the device information before starting the dialog
+	MDPlayerReloadDeviceInformation();
+	
+	//  Initialize device popups (set device names and tags)
+	[sourceDevicePopUp removeAllItems];
+	menu = [sourceDevicePopUp menu];
+	[[menu addItemWithTitle: @"Any MIDI device" action: nil keyEquivalent: @""] setTag: 0];
+	n = MDPlayerGetNumberOfSources();
+	for (i = 1; i <= n; i++) {
+		MDPlayerGetSourceName(i - 1, name, sizeof name);
+		[[menu addItemWithTitle: [NSString stringWithUTF8String: name] action: nil keyEquivalent: @""] setTag: i];
+	}
+	
+	[destinationDevicePopUp removeAllItems];
+	menu = [destinationDevicePopUp menu];
+	n = MDPlayerGetNumberOfDestinations();
+	for (i = 0; i <= n; i++) {
+		if (i == 0)
+			strcpy(name, "(none)");
+		else
+			MDPlayerGetDestinationName(i - 1, name, sizeof name);
+		[[menu addItemWithTitle: [NSString stringWithUTF8String: name] action: nil keyEquivalent: @""] setTag: i];
+	}
+	
+	//  Add destinations for existing tracks (which may not be online now)
+	n = [seq trackCount];
+	for (i = 1; i < n; i++) {
+		NSString *s = [seq deviceName: i];
+		if (s == nil || [s isEqualToString: @""])
+			continue;
+		if (s != nil && [destinationDevicePopUp indexOfItemWithTitle: s] < 0)
+			[[menu addItemWithTitle: s action: nil keyEquivalent: @""] setTag: 10000 + i];
+	}
+	
+	//  Initialize track popup
+	[destinationTrackPopUp removeAllItems];
+	menu = [destinationTrackPopUp menu];
+	n = [[myDocument myMIDISequence] trackCount];
+	for (i = 1; i < n; i++) {
+		[[menu addItemWithTitle: [NSString stringWithFormat: @"%d: %@", i, [[myDocument myMIDISequence] trackName: i]] action: nil keyEquivalent: @""] setTag: i];
+	}
+	[menu addItem: [NSMenuItem separatorItem]];
+	[[menu addItemWithTitle: @"Create new track" action: nil keyEquivalent: @""] setTag: -1];
+}
+
+- (void)reloadInfoFromDocument
+{
+	MyMIDISequence *seq = [myDocument myMIDISequence];
+
+	//  In case window is not yet visible
+	[self window];
+	
+	//  Current recordingInfo
+	info = [[NSMutableDictionary dictionaryWithDictionary: [seq recordingInfo]] retain];
+	
+	if (!isAudio) {
+		[self reloadMIDIDeviceInfo];
+	}
+
+	//  Initialize the calibrator
+	{
+		MDSequence *mds = [seq mySequence];
+		MDTrack *track = MDSequenceGetTrack(mds, 0);
+		if (calib != NULL)
+			MDCalibratorRelease(calib);
+		//  Tempo is not necessary (only ticks are handled here)
+		calib = MDCalibratorNew(mds, track, kMDEventTimeSignature, -1);
+	}
+	
+	//  Initialize the start tick
+	{
+		MDPlayer *player = [seq myPlayer];
+		if (player != NULL) {
+			MDTickType tick = MDPlayerGetTick(player);
+			[info setValue: [NSNumber numberWithDouble: tick] forKey: MyRecordingInfoStartTickKey];
+		}
+	}
+	
+	[info setValue: [NSNumber numberWithBool: isAudio] forKey: MyRecordingInfoIsAudioKey];
+
+	[self updateDisplay];
+}
+
+- (void)saveInfoToDocument
+{
+//	NSUserDefaults *def = [NSUserDefaults standardUserDefaults];
+	MyMIDISequence *seq = [myDocument myMIDISequence];
+	[seq setRecordingInfo: info];
+/*	[def setValue:[[metronomeDevicePopUp selectedItem] title] forKey:MyRecordingInfoMetronomeDeviceKey];
+	[def setValue:[NSNumber numberWithInt:[metronomeChannelPopUp indexOfSelectedItem]]  forKey:MyRecordingInfoMetronomeChannelKey]; */
+}
+
+- (void)midiSetupDidChange:(NSNotification *)aNotification
+{
+	[self reloadMIDIDeviceInfo];
+	[self updateDisplay];
+}
+
+- (void)windowDidLoad
+{
+	[[NSNotificationCenter defaultCenter]
+	 addObserver:self
+	 selector:@selector(midiSetupDidChange:)
+	 name:MyAppControllerMIDISetupDidChangeNotification
+	 object:[NSApp delegate]];	
+}
+
+//- (void)beginSheetForWindow: (NSWindow *)parentWindow invokeStopModalWhenDone: (BOOL)flag
+//{
+//	NSWindow *window = [self window];
+//	[self reloadInfo];
+//	[self updateDisplay];
+//	stopModalFlag = flag;
+//	[[NSApplication sharedApplication] beginSheet: window
+//		modalForWindow: parentWindow
+//		modalDelegate: self
+//		didEndSelector: @selector(sheetDidEnd:returnCode:contextInfo:)
+//		contextInfo: nil];
+//}
+
+- (IBAction)cancelButtonPressed: (id)sender
+{
+	[[NSApplication sharedApplication] endSheet: [self window] returnCode: 0];
+}
+
+- (IBAction)myPopUpAction: (id)sender
+{
+	id item;
+	int tag, ch;
+	NSString *str;
+	MyMIDISequence *seq = [myDocument myMIDISequence];
+
+	item = [sender selectedItem];
+	if (item == nil)
+		return;
+	tag = [item tag];
+	if (sender == sourceDevicePopUp) {
+		str = [item title];
+		if (isAudio) {
+		//	[info setValue: str forKey: MyRecordingInfoSourceAudioDeviceKey];
+		//	MDAudioSelectInOutDeviceAtIndices([item tag], -1);
+		} else {
+			[info setValue: (tag == 0 ? nil : str) forKey: MyRecordingInfoSourceDeviceKey];
+		}
+	} else if (sender == destinationDevicePopUp) {
+		str = [item title];
+		if (isAudio) {
+		//	[info setValue: str forKey: MyRecordingInfoDestinationAudioDeviceKey];
+		//	MDAudioSelectInOutDeviceAtIndices(-1, [item tag]);
+		} else {
+			[info setValue: str forKey: MyRecordingInfoDestinationDeviceKey];
+		}
+	} else if (sender == midiChannelPopUp) {
+		[info setValue: [NSNumber numberWithInt: tag - 1] forKey: MyRecordingInfoDestinationChannelKey];
+	} else if (sender == destinationTrackPopUp) {
+		
+		[info setValue: [NSNumber numberWithInt: (tag > 0 ? tag : -1)] forKey: MyRecordingInfoTargetTrackKey];
+		//  Also modify destination device and channel if necessary
+		if (tag > 0) {
+			str = [seq deviceName: tag];
+			if (str != nil && ![str isEqualToString: @""]) {
+				[info setValue: str forKey: MyRecordingInfoDestinationDeviceKey];
+			}
+			ch = [seq trackChannel: tag];
+			if (ch >= 0 && ch < 16)
+				[info setValue: [NSNumber numberWithInt: ch] forKey: MyRecordingInfoDestinationChannelKey];
+		}
+	} else if (sender == modePopUp) {
+		[info setValue: [NSNumber numberWithInt: tag] forKey: MyRecordingInfoRecordingModeKey];
+	} else if (sender == barBeatPopUp) {
+		[info setValue: [NSNumber numberWithBool: (tag == 0)] forKey: MyRecordingInfoBarBeatFlagKey];
+	} else if (sender == audioFormatPopUp) {
+		[info setValue: [NSNumber numberWithInt: tag] forKey: MyRecordingInfoAudioRecordingFormatKey];
+	} else if (sender == audioSampleRatePopUp) {
+		float fval = [[sender titleOfSelectedItem] floatValue];
+		[info setValue: [NSNumber numberWithFloat: fval] forKey: MyRecordingInfoAudioBitRateKey];
+	} else if (sender == audioChannelsPopUp) {
+		[info setValue: [NSNumber numberWithInt: tag] forKey: MyRecordingInfoAudioChannelFormatKey];
+	}
+	[self updateDisplay];
+}
+
+- (IBAction)startButtonPressed: (id)sender
+{
+	[[NSApplication sharedApplication] endSheet: [self window] returnCode: 1];
+}
+
+- (IBAction)barBeatTextChanged:(id)sender
+{
+	int val = [sender intValue];
+	[info setValue: [NSNumber numberWithInt: val] forKey: MyRecordingInfoCountOffNumberKey];
+	[self updateDisplay];
+}
+
+- (IBAction)overdubRadioChecked:(id)sender
+{
+	int tag = [[sender selectedCell] tag];
+	[info setValue: [NSNumber numberWithBool: tag] forKey: MyRecordingInfoReplaceFlagKey];
+	[self updateDisplay];
+}
+
+- (IBAction)stopCheckboxClicked:(id)sender
+{
+	int val = ([sender state] != NSOffState);
+	[info setValue: [NSNumber numberWithBool: val] forKey: MyRecordingInfoStopFlagKey];
+	[self updateDisplay];
+}
+
+/*
+- (IBAction)playThruCheckboxClicked: (id)sender
+{
+	int val = ([sender state] != NSOffState);
+	[info setValue: [NSNumber numberWithBool: val] forKey: MyRecordingInfoAudioPlayThroughKey];
+	MDAudioEnablePlayThru(val);
+	[self updateDisplay];
+}
+*/
+
+- (IBAction)tickTextChanged:(id)sender
+{
+	long bar, beat, tick;
+	MDTickType mdTick;
+	const char *s;
+	s = [[sender stringValue] UTF8String];
+	if (MDEventParseTickString(s, &bar, &beat, &tick) == 3) {
+		mdTick = MDCalibratorMeasureToTick(calib, bar, beat, tick);
+		[info setValue: [NSNumber numberWithDouble: mdTick] forKey: (sender == startTickText ? MyRecordingInfoStartTickKey : MyRecordingInfoStopTickKey)];
+	}
+	[self updateDisplay];
+}
+
+- (IBAction)chooseDestinationFile:(id)sender
+{
+	NSSavePanel *panel = [NSSavePanel savePanel];
+	NSString *filename, *foldername;
+	filename = [info valueForKey: MyRecordingInfoFileNameKey];
+	foldername = [info valueForKey: MyRecordingInfoFolderNameKey];
+	if ([panel runModalForDirectory: [foldername stringByExpandingTildeInPath] file: filename] == NSFileHandlingPanelOKButton) {
+		foldername = [[panel directory] stringByAbbreviatingWithTildeInPath];
+		filename = [[panel filename] lastPathComponent];
+		[info setValue: foldername forKey: MyRecordingInfoFolderNameKey];
+		[info setValue: filename forKey: MyRecordingInfoFileNameKey];
+	}
+	[self updateDisplay];
+}
+
+- (IBAction)destinationTextChanged:(id)sender
+{
+	NSString *name;
+	name = [sender stringValue];
+	if (sender == audioFileLocationText) {
+		// TODO: check the existence of the directory
+		name = [name stringByAbbreviatingWithTildeInPath];
+		[info setValue: name forKey: MyRecordingInfoFolderNameKey];
+	} else {
+		[info setValue: name forKey: MyRecordingInfoFileNameKey];
+	}
+	[self updateDisplay];
+}
+
+/*
+- (IBAction)volumeSliderMoved:(id)sender
+{
+	if (isAudio) {
+		MDAudioSetInputVolume([sender floatValue] * 0.01);
+	}
+}
+*/
+
+@end

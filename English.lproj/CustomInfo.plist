@@ -1,0 +1,17 @@
+{
+    NSInfoPlistVersion = "5.0";
+    NSAppVersion = "1.0";
+    NSHumanReadableShortName = "SimpleTextEdit";
+    NSHumanReadableCompleteName = "Simple Text Edit Sample"; 
+    NSHumanReadableCopyright = "Copyright (c) 2000, Apple Computer, Inc.";
+    NSTypes = (
+     {
+        NSName = "rtf";
+        NSHumanReadableName = "RTF Document";
+        NSUnixExtensions = ("h", "m");
+        NSDOSExtensions = ("h", "m");
+        NSRole = Editor;
+        NSDocumentClass = MyDocument;
+      }
+    );
+}

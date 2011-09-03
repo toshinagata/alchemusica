@@ -1,0 +1,22 @@
+  Alchemusica をビルドするには、ruby-1.8.7 にパッチを当てて、ruby-static.a を universal binary としてビルドしておく必要があります。その手順を説明します。
+
+1. ruby-1.8.7-p160.tar.gz をダウンロードして、$(HOME)/Development に置く。
+（別の場所に置きたい場合は、後述のように Alchemusica の設定を変更する）
+2. 解凍する。 $ tar xvzf ruby-1.8.7-p160.tar.gz
+3. できたディレクトリの名前を "ruby-1.8.7-static" に変更する。
+4. そのディレクトリに移る。 $ cd ruby-1.8.7-static
+5. パッチを当てる。$ patch --backup -p1 < $(ALCHEMUSICA)/ruby-1.8.7-p160-tn.patch
+（$(ALCHEMUSICA) は Alchemusica のプロジェクトが存在するディレクトリ）
+　これで eval.c, gc.c が変更され、オリジナルは eval.c.orig, gc.c.orig として残るはずです。
+6. 次のコマンドラインで configure する。
+$ CFLAGS='-isysroot /Developer/SDKs/MacOSX10.4u.sdk -mmacosx-version-min=10.4 -arch i386 -arch ppc -O2' ./configure --disable-shared --disable-thread
+7. config.h の中身を見て、以下の行が含まれていれば削除。このままだと alloca が二重定義として警告されます。10.4 でビルドすると出るが、10.5 では出ないみたい。
+#define alloca alloca
+8. make
+
+　これで ruby-1.8.7-static/ruby-static.a が作成されます。（make install する必要はありません。）
+
+　ruby-1.8.7-static を $(HOME)/Development 以外の場所に置きたい場合は、Xcode で Alchemusica ターゲットを選んで「情報」を開き、「ビルド」タブの「ヘッダ検索パス」「ライブラリ検索パス」のところにある $(HOME)/Development/ruby-1.8.7-static を変更してください。
+
+2009.9.2.
+Toshi "Alchemist" Nagata （永田　央）

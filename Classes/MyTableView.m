@@ -1,0 +1,369 @@
+//
+//  MyTableView.m
+//
+//  Created by Toshi Nagata.
+/*
+    Copyright (c) 2000-2011 Toshi Nagata. All rights reserved.
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation version 2 of the License.
+ 
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ */
+
+#import "MyTableView.h"
+#import "ListWindowController.h"
+
+@implementation MyTableView
+
+- (id)initWithFrame:(NSRect)frameRect
+{
+	self = [super initWithFrame:frameRect];
+	if (self) {
+		underlineRow = -1;
+	}
+	return self;
+}
+
+- (void)awakeFromNib
+{
+	underlineRow = -1;
+}
+
+- (void)textDidBeginEditing: (NSNotification *)aNotification
+{
+	//  Make a copy of the original string
+	[originalString release];
+	originalString = [[NSString allocWithZone: [self zone]] initWithString: [[aNotification object] string]];
+	escapeFlag = NO;
+}
+
+- (BOOL)textShouldEndEditing: (NSText *)textObject
+{
+	if (escapeFlag)
+		//  Restore the original string
+		[textObject setString: originalString];
+	return [super textShouldEndEditing: textObject];
+}
+
+/*  Keyboard navigation during editing.
+ *  Return: insert a new event in the next line, and continue editing.
+ *  Enter: exit editing.
+ *  Escape: discard the change in the current cell and exit editing.
+ *  Tab/Backtab, arrows, home, end, pageup, pagedown: move the editing cell.
+ */
+- (BOOL)textView:(NSTextView *)aTextView doCommandBySelector:(SEL)aSelector
+{
+	int column, row, newRow, oldRow, dColumn, dRow, numRows, pageRows, n;
+	NSRect visibleRect;
+    BOOL endEditing = NO;
+    BOOL insertNewline = NO;
+    BOOL pageScroll = NO;
+	NSEvent *theEvent = [[self window] currentEvent];
+//	unichar charCode;
+//	charCode = [[theEvent charactersIgnoringModifiers] characterAtIndex: 0];
+	column = [self editedColumn];
+	row = [self editedRow];
+	dColumn = dRow = 0;
+	numRows = [self numberOfRows];
+	visibleRect = [self visibleRect];
+	pageRows = ([self rowsInRect: visibleRect]).length - 1;
+    if (aSelector == @selector(insertNewline:)) {
+        if ([[theEvent charactersIgnoringModifiers] characterAtIndex: 0] == NSEnterCharacter) {
+            endEditing = YES;
+        } else if ([theEvent modifierFlags] & NSShiftKeyMask) {
+			dRow = -1;
+		} else {
+			dRow = 1;
+        }
+    } else if (aSelector == @selector(insertTab:)) {
+        dColumn = 1;
+    } else if (aSelector == @selector(insertBacktab:)) {
+        dColumn = -1;
+/*    } else if (aSelector == @selector(moveLeft:)) {
+        dColumn = -1;
+    } else if (aSelector == @selector(moveRight:)) {
+        dColumn = 1;
+    } else if (aSelector == @selector(moveUp:)) {
+        dRow = -1;
+    } else if (aSelector == @selector(moveDown:)) {
+        dRow = 1; */
+    } else if (aSelector == @selector(scrollToBeginningOfDocument:)) {
+        dRow = -(numRows - 1);
+    } else if (aSelector == @selector(scrollToEndOfDocument:)) {
+        dRow = (numRows - 1);
+    } else if (aSelector == @selector(scrollPageUp:)) {
+        dRow = -pageRows;
+        pageScroll = YES;
+    } else if (aSelector == @selector(scrollPageDown:)) {
+        dRow = pageRows;
+        pageScroll = YES;
+    } else if (aSelector == @selector(cancel:)) {
+		[aTextView setString: originalString];
+        endEditing = YES;
+    } else {
+    //    NSLog(@"selector = %@", NSStringFromSelector(aSelector));
+        return NO;
+    }
+
+	/*  End edit of the current cell  */
+	if (![[self window] makeFirstResponder: self]) {
+		/*  Cannot end edit (the value is not valid)  */
+		NSBeep();
+		return YES;
+	}
+	
+	if (endEditing)
+		return YES;
+
+	/*  Continue edit  */
+	newRow = [self selectedRow];	/*  May have changed during confirmation  */
+	oldRow = row;
+
+	/*  Adjust the column position  */
+	column += dColumn;
+	if (column > (n = [self numberOfColumns] - 1)) {
+		column = 0;
+		dRow = 1;
+	}
+	if (column < 0) {
+		column = n;
+		dRow = -1;
+	}
+
+	/*  Adjust the row position  */
+	if (dRow != 0) {
+		row += dRow;
+		if (oldRow < newRow && (oldRow < row && row <= newRow))
+			row--;
+		else if (oldRow > newRow && (oldRow > row && row >= newRow))
+			row++;
+	} else {
+		row = newRow;
+	}
+	if (row < 0)
+		row = 0;
+	else if (row >= (n = [[self dataSource] numberOfRowsInTableView: self]))
+		row = n - 1;
+
+	if (pageScroll) {
+		NSClipView *clipView = (NSClipView *)[self superview];
+		NSPoint newOrigin = [clipView bounds].origin;
+		float amount = [self rectOfRow: row].origin.y - [self rectOfRow: [self selectedRow]].origin.y;
+	//	NSLog(@"clipView = %@, origin = (%g, %g) amount = %g", clipView, newOrigin.x, newOrigin.y, amount);
+		newOrigin.y += amount;
+		[clipView scrollToPoint: [clipView constrainScrollPoint: newOrigin]];
+	}
+	
+	if (insertNewline) {
+		/*  Insert an empty event with the same tick (TODO: or advance the tick by some specified value?)  */
+		long position = [[self dataSource] eventPositionForTableRow: row];
+		[[self dataSource] startEditAtColumn: column creatingEventWithTick: kMDNegativeTick atPosition: position + 1];
+	} else {
+		[[self dataSource] startEditAtColumn: column row: row];
+	}
+
+//	if (insertNewline) {
+//		/*  Insert empty event and continue  */
+//		if (row > numRows - 1)
+//			row = numRows - 1;
+//		[[self dataSource] startEditAtRow: row insertMode: YES];
+//	} else {
+//		if (row > numRows - 2)
+//			row = numRows - 2;
+//		[self selectRow: row byExtendingSelection: NO];
+//		[self editColumn: column row: row withEvent: nil select: YES];
+//	}
+	return YES;
+}
+
+/*  Keyboard navigation during _not_ editing.
+ *  Command+Return: insert a new event after the current event and start editing.
+ *  Command+Enter: start editing at the current cell.
+ *  Delete, Backspace: delete selected events.
+*/
+- (void)keyDown:(NSEvent *)theEvent
+{
+	int row;
+	BOOL insertFlag;
+	unichar charCode = [[theEvent charactersIgnoringModifiers] characterAtIndex: 0];
+	int modifierFlags = [theEvent modifierFlags];
+	if ((modifierFlags & NSCommandKeyMask) != 0 && (charCode == NSCarriageReturnCharacter || charCode == NSEnterCharacter)) {
+		/*  Enter edit mode  */
+		if ([self numberOfSelectedRows] == 1) {
+			long position;
+			row = [self selectedRow];
+			if (charCode == NSCarriageReturnCharacter) {
+				insertFlag = YES;
+				if (row < [self numberOfRows] - 1)
+					row++;
+			} else {
+				insertFlag = NO;
+			}
+			position = [[self dataSource] eventPositionForTableRow: row];
+			[[self dataSource] startEditAtColumn: -1 creatingEventWithTick: kMDNegativeTick atPosition: position + 1];
+			return;
+		}
+		NSBeep();
+	} else if (charCode == NSBackspaceCharacter || charCode == NSDeleteCharacter) {
+		if ([self numberOfSelectedRows] > 0)
+			[[self dataSource] deleteSelectedEvents: self];
+		else NSBeep();
+	} else [super keyDown:theEvent];
+}
+
+/*  Implement context menu  */
+- (NSMenu *)menuForEvent:(NSEvent *)theEvent
+{
+	NSPoint pt = [self convertPoint: [theEvent locationInWindow] fromView: nil];
+	int row = [self rowAtPoint: pt];
+	int column = [self columnAtPoint: pt];
+	NSRect cellFrame = [self frameOfCellAtColumn: column row: row];
+	if (cellFrame.size.height > 0 && cellFrame.size.width > 0) {
+		return [[[[self tableColumns] objectAtIndex: column] dataCell] menuForEvent: theEvent inRect: cellFrame ofView: self];
+	} else return nil;
+/*
+	if (column == 1 && row >= 0 && row < [self numberOfRows] - 1 && [self selectedRow] == row)
+		return [self menu];
+	else return nil; */
+}
+
+- (void)setUnderlineRow:(int)row
+{
+	if (row == underlineRow)
+		return;
+	if (underlineRow >= 0)
+		[self setNeedsDisplayInRect:[self rectOfRow:underlineRow]];
+	underlineRow = row;
+	if (underlineRow >= 0)
+		[self setNeedsDisplayInRect:[self rectOfRow:underlineRow]];		
+}
+
+- (void)drawRect: (NSRect)aRect
+{
+	NSRect rowRect;
+	[super drawRect:aRect];
+	if (underlineRow >= 0) {
+		float y;
+		rowRect = [self rectOfRow:underlineRow];
+		y = rowRect.origin.y + rowRect.size.height - 1;
+		[NSBezierPath strokeLineFromPoint:NSMakePoint(rowRect.origin.x + 1, y) toPoint:NSMakePoint(rowRect.origin.x + rowRect.size.width - 1, y)];
+	}
+}
+
+#if 0
+- (BOOL)keyDown: (NSEvent *)theEvent onObject: (id)theObject
+{
+	int column, row, dColumn, dRow, numRows, pageRows, n;
+	NSRect visibleRect;
+	unichar charCode;
+	charCode = [[theEvent charactersIgnoringModifiers] characterAtIndex: 0];
+	column = [self editedColumn];
+	row = [self editedRow];
+	dColumn = dRow = 0;
+	numRows = [self numberOfRows];
+	visibleRect = [self visibleRect];
+	pageRows = ([self rowsInRect: visibleRect]).length - 1;
+	switch (charCode) {
+		case NSEnterCharacter:
+			break;
+		case NSCarriageReturnCharacter:
+			dRow = 1;
+			break;
+		case NSTabCharacter:
+			dColumn = 1;
+			break;
+		case NSBackTabCharacter:	/*  Shift-TAB  */
+			dColumn = -1;
+			break;
+		case NSLeftArrowFunctionKey:
+			dColumn = -1;
+			break;
+		case NSRightArrowFunctionKey:
+			dColumn = 1;
+			break;
+		case NSUpArrowFunctionKey:
+			dRow = -1;
+			break;
+		case NSDownArrowFunctionKey:
+			dRow = 1;
+			break;
+		case NSHomeFunctionKey:
+			dRow = -(numRows - 1);
+			break;
+		case NSEndFunctionKey:
+			dRow = (numRows - 1);
+			break;
+		case NSPageUpFunctionKey:
+			dRow = -pageRows;
+			break;
+		case NSPageDownFunctionKey:
+			dRow = pageRows;
+			break;
+		case NSClearLineFunctionKey:
+			/*  Restore original string  */
+			[theObject setString: originalString];
+			[theObject selectAll: self];
+			return YES;
+		case '\x1b':	/*  escape  */
+			escapeFlag = YES;	//  Don't change the string
+			break;
+		default:
+		//	NSLog(@"charCode = %04x", (int)charCode);
+			return NO;
+	}
+	/*  End edit  */
+	if (![[self window] makeFirstResponder: self]) {
+		/*  Cannot end edit (the value is not valid)  */
+		NSBeep();
+		return YES;
+	}
+	
+	/*  Enter key, Esc key -> end edit  */
+	if (charCode == NSEnterCharacter || charCode == '\x1b')
+		return YES;
+
+	/*  Continue edit  */
+	row = [self selectedRow];	/*  May have changed during confirmation  */
+	row += dRow;
+	column += dColumn;
+	if (column > (n = [self numberOfColumns] - 1)) {
+		column = 0;
+		row++;
+	}
+	if (column < 0) {
+		column = n;
+		row--;
+	}
+	if (row < 0)
+		row = 0;
+	
+	if (charCode == NSPageUpFunctionKey || charCode == NSPageDownFunctionKey) {
+		NSClipView *clipView = (NSClipView *)[self superview];
+		NSPoint newOrigin = [clipView bounds].origin;
+		float amount = [self rectOfRow: row].origin.y - [self rectOfRow: [self selectedRow]].origin.y;
+	//	NSLog(@"clipView = %@, origin = (%g, %g) amount = %g", clipView, newOrigin.x, newOrigin.y, amount);
+		newOrigin.y += amount;
+		[clipView scrollToPoint: [clipView constrainScrollPoint: newOrigin]];
+	}
+	
+	if (charCode == NSCarriageReturnCharacter) {
+		/*  Insert empty event and continue  */
+		if (row > numRows - 1)
+			row = numRows - 1;
+		[[self dataSource] startEditAtRow: row insertMode: YES];
+	} else {
+		if (row > numRows - 2)
+			row = numRows - 2;
+		[self selectRow: row byExtendingSelection: NO];
+		[self editColumn: column row: row withEvent: nil select: YES];
+	}
+	return YES;
+}
+#endif
+
+@end

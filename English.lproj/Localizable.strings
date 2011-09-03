@@ -1,0 +1,5 @@
+/*  Progress panel messages  */
+"Alchemusica: Loading..."="Alchemusica: Loading...";		/* Window title for loading panel */
+"Loading %@..."="Loading %@...";						/* Message above the progress indicator */
+"Alchemusica: Saving..."="Alchemusica: Saving...";		/* Window title for saving panel */
+"Saving %@..."="Saving %@...";							/* Message above the progress indicator */

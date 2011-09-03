@@ -1,0 +1,775 @@
+//
+//  PlayingViewCotroller.m
+//
+//  Created by Toshi Nagata.
+/*
+    Copyright (c) 2000-2011 Toshi Nagata. All rights reserved.
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation version 2 of the License.
+ 
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+*/
+
+#import "PlayingViewController.h"
+#import "MyDocument.h"
+#import "MyMIDISequence.h"
+#import "RecordPanelController.h"
+#import "GraphicWindowController.h"
+#import "AudioSettingsPanelController.h"
+
+@implementation PlayingViewController
+
+- (id)init
+{
+    self = [super init];
+	if (self != nil) {
+	//	status = kMDPlayer_idle;
+	//	docArray = [[NSMutableArray allocWithZone: [self zone]] initWithCapacity: 16];
+		tickArray = [[NSMutableArray allocWithZone: [self zone]] initWithCapacity: 16];
+		calibrator = NULL;
+		totalTime = currentTime = 0;
+		timer = nil;
+	//	resumeTimer = nil;
+	//	shouldContinuePlay = NO;
+		isRecording = NO;
+	//	MDPlayerInitMIDIDevices();
+//		[[self window] makeKeyAndOrderFront: self];
+	}
+	return self;
+}
+
+- (void)dealloc
+{
+	if (timer != nil) {
+		[timer invalidate];
+		[timer release];
+		timer = nil;
+	}
+	if (calibrator != NULL)
+		MDCalibratorRelease(calibrator);
+//	[timer autorelease];
+	[tickArray release];
+//	[docArray release];
+    [[NSNotificationCenter defaultCenter]
+        removeObserver:self];
+	[super dealloc];
+}
+
+- (void)windowDidLoad
+{
+	NSFont *font;
+	MDTrack *track;
+	MDSequence *sequence;
+	MDStatus sts;
+
+	if (parentController == nil) {
+		NSLog(@"Internal error: parentController in PlayingViewController is not connected to any NSWindowController. Examine the nib file.");
+		return;
+	}
+
+	myDocument = (MyDocument *)[parentController document];
+
+	/*  Initialize the calibrator  */
+	sequence = [[myDocument myMIDISequence] mySequence];
+	track = MDSequenceGetTrack(sequence, 0);	/*  the conductor track  */
+	calibrator = MDCalibratorNew(sequence, track, kMDEventTempo, -1);	/*  create a new calibrator  */
+	if (calibrator != NULL)
+		sts = MDCalibratorAppend(calibrator, track, kMDEventTimeSignature, -1);
+	if (sts == kMDNoError)
+		sts = MDCalibratorAppend(calibrator, track, kMDEventMetaText, kMDMetaMarker);
+
+	[markerPopup removeAllItems];
+//	[tunePopup removeAllItems];
+	[markerPopup setEnabled: NO];
+//	[tunePopup setEnabled: NO];
+	font = [NSFont userFixedPitchFontOfSize: -1.0];
+	[timeField setFont: font];
+	[countField setFont: font];
+	[[NSNotificationCenter defaultCenter]
+		addObserver: self
+		selector: @selector(trackModified:)
+		name: MyDocumentTrackModifiedNotification
+		object: myDocument];
+	[self updateMarkerList];
+	[self refreshTimeDisplay];
+}
+
+- (void)refreshTimeDisplay
+{
+	MDPlayer *player = [[myDocument myMIDISequence] myPlayer];
+	MDTickType tick;
+	MDTimeType time;
+	double d, slider;
+	long bar, beat, count, marker, ntime;
+	int hour, min, sec, status;
+	NSString *countString, *timeString;
+	BOOL playingOrRecording = NO;
+
+	if (player == NULL) {
+		currentTime = 0;
+		countString = @"----:--:----";
+		timeString = @"--:--:--";
+		marker = -1;
+		slider = 0.0;
+	//	status = kMDPlayer_idle;
+		[recordButton setEnabled: NO];
+		[stopButton setEnabled: NO];
+		[playButton setEnabled: NO];
+		[pauseButton setEnabled: NO];
+		[ffButton setEnabled: NO];
+		[rewindButton setEnabled: NO];
+	} else {
+		MDPlayer *recordingPlayer;
+		status = MDPlayerGetStatus(player);
+		[stopButton setEnabled: YES];
+		[playButton setEnabled: YES];
+		[pauseButton setEnabled: YES];
+		[ffButton setEnabled: YES];
+		[rewindButton setEnabled: YES];
+		recordingPlayer = MDPlayerRecordingPlayer();
+		if (recordingPlayer == NULL) {
+			[recordButton setEnabled: YES];
+			[recordButton setHighlighted: NO];
+		} else if (recordingPlayer == player) {
+			[recordButton setEnabled: YES];
+			[recordButton setHighlighted: MDPlayerIsRecording(player)];
+		} else {
+			[recordButton setEnabled: NO];
+		}
+		if (status == kMDPlayer_playing || status == kMDPlayer_exhausted) {
+			playingOrRecording = YES;
+		//	currentTime = MDPlayerGetTime(player);  /*  Update the current time  */
+		}
+
+	/*	if (MDSequenceGetIndexOfRecordingTrack([[myDocument myMIDISequence] mySequence]) < 0)
+			[recordButton setEnabled: NO];
+		else [recordButton setEnabled: YES]; */
+
+	/*	[playButton hilite: (status == kMDPlayer_playing)];
+		[pauseButton hilite: (status == kMDPlayer_suspended)];
+		[recordButton hilite: isRecording]; */
+
+	//	if (resumeTimer != nil)
+	//		time = currentTime;		/*  During FF/Rew/Slider actions, time should come from the controls  */
+	//	else
+	//		time = currentTime = MDPlayerGetTime(player);
+		/*  Display tick and time  */
+		if (currentTime == 0) {
+			time = totalTime;
+			countString = @"----:--:----";
+			marker = -1;
+			slider = 0.0;
+		} else {
+			time = currentTime;
+			tick = MDCalibratorTimeToTick(calibrator, time);
+			MDCalibratorTickToMeasure(calibrator, tick, &bar, &beat, &count);
+			countString = [NSString stringWithFormat: @"%4ld:%2ld:%4ld", bar, beat, count];
+			if (totalTime > 0) {
+				slider = (double)time / totalTime * 100.0;
+			} else slider = 0.0;
+			marker = [tickArray count];
+			if (marker >= 1) {
+				d = (double)tick;
+				while (--marker >= 0) {
+					if ([[tickArray objectAtIndex: marker] doubleValue] <= d)
+						break;
+				}
+				if (marker < 0)
+					marker = 0;
+			} else marker = -1;
+		}
+		ntime = (long)(time / 1000000);
+		hour = ntime / 3600;
+		min = (ntime / 60) % 60;
+		sec = ntime % 60;
+		timeString = [NSString stringWithFormat: @"%02d:%02d:%02d", hour, min, sec];
+		[myDocument postPlayPositionNotification: (playingOrRecording ? MDCalibratorTimeToTick(calibrator, currentTime) : -1.0)];
+	}
+	[timeField setStringValue: timeString];
+	[countField setStringValue: countString];
+	[positionSlider setDoubleValue: slider];
+	if (marker >= 0)
+		[markerPopup selectItemAtIndex: marker];
+}
+
+/*
+- (void)resumeTimerCallback: (NSTimer *)timer
+{
+	MDPlayer *player;
+	if (activeIndex >= 0) {
+		player = [[[docArray objectAtIndex: activeIndex] myMIDISequence] myPlayer];
+		MDPlayerPreroll(player, MDCalibratorTimeToTick(calibrator, currentTime));
+		status = kMDPlayer_suspended;
+		if (shouldContinuePlay)
+			[self pressPlayButton: self];
+		else {
+			[playButton setState: NSOffState];
+			[pauseButton setState: NSOnState];
+		}
+	}
+    [resumeTimer invalidate];
+    [resumeTimer release];
+	resumeTimer = nil;
+	[timeField setBackgroundColor: [NSColor whiteColor]];
+	shouldContinuePlay = NO;
+}
+
+- (void)setResumeTimer
+{
+	if (resumeTimer == nil)
+		[timeField setBackgroundColor: [NSColor lightGrayColor]];
+	else
+		[resumeTimer invalidate];
+	
+	//  For better user experience, the play button is left pressed during
+	//	FF/Rew/Slider action
+	if (shouldContinuePlay)
+		[playButton setState: NSOnState];
+
+	resumeTimer = [[NSTimer scheduledTimerWithTimeInterval: 0.5 target: self selector:@selector(resumeTimerCallback:) userInfo:nil repeats:NO] retain];
+}
+*/
+
+- (void)updateMarkerList
+{
+    MDPointer *pos;
+    MDTrack *track;
+    MDSequence *sequence;
+
+	[markerPopup removeAllItems];
+	[markerPopup setEnabled: NO];
+	[tickArray removeAllObjects];
+//	totalTime = currentTime = 0;
+
+    sequence = [[myDocument myMIDISequence] mySequence];
+    if (sequence == NULL)
+        return;
+
+    /*  Total playing time  */
+    totalTime = MDCalibratorTickToTime(calibrator, MDSequenceGetDuration(sequence));
+    
+    /*  The marker list  */
+    track = MDSequenceGetTrack(sequence, 0);
+    pos = MDPointerNew(track);
+    if (pos != NULL) {
+        /*  Search all the markers in the conductor track  */
+        int n;
+        MDEvent *ep;
+        MDTickType tick;
+        NSString *name;
+        long length;
+        n = 0;
+        while ((ep = MDPointerForward(pos)) != NULL) {
+            if (MDIsTextMetaEvent(ep) && MDGetCode(ep) == kMDMetaMarker) {
+                tick = MDGetTick(ep);
+                name = [NSString stringWithFormat: @"%09d: %s", n++, MDGetMessageConstPtr(ep, &length)];	/*  Prefix the name with a serial number to ensure uniqueness of the titles  */
+                [tickArray addObject: [NSNumber numberWithDouble: (double)tick]];
+                [markerPopup addItemWithTitle: name];
+            }
+        }
+        while (--n >= 0) {
+            /*  Remove the serial numbers from the menu titles, and set tag  */
+            NSMenuItem *item = [markerPopup itemAtIndex: n];
+            if (item) {
+                [item setTitle: [[item title] substringFromIndex: 11]];
+                [item setTag: n];
+            }
+        }
+        [markerPopup setEnabled: ([markerPopup numberOfItems] > 0)];
+		MDPointerRelease(pos);
+    }
+}
+
+/*
+- (void)selectTuneAtIndex:(int)index
+{
+	MDSequence *sequence;
+	MDTrack *track;
+	MDStatus sts = kMDNoError;
+//	MDPointer *pos;
+//	MDEvent *ep;
+//	MDTickType tick;
+//	long length;
+//	NSString *name;
+//	int n;
+
+	if (index < 0 || index >= [tunePopup numberOfItems]) {
+		activeIndex = -1;
+		status = kMDPlayer_idle;
+		sequence = NULL;
+	} else {
+		[tunePopup selectItemAtIndex: index];
+		if (index == activeIndex)
+			return;
+		if (status == kMDPlayer_playing || status == kMDPlayer_suspended)
+			[self pressStopButton: self];
+		status = kMDPlayer_ready;
+		activeIndex = index;
+		sequence = [[[docArray objectAtIndex: index] myMIDISequence] mySequence];
+	}
+	isRecording = NO;
+
+	//  Remove old information
+	if (calibrator != NULL) {
+		MDCalibratorRelease(calibrator);
+		calibrator = NULL;
+	}
+
+	if (sequence != NULL) {
+		track = MDSequenceGetTrack(sequence, 0);	//  the conductor track
+		calibrator = MDCalibratorNew(sequence, track, kMDEventTempo, -1);	//  create a new calibrator
+		if (calibrator != NULL)
+			sts = MDCalibratorAppend(calibrator, track, kMDEventTimeSignature, -1);
+		if (sts == kMDNoError)
+			sts = MDCalibratorAppend(calibrator, track, kMDEventMetaText, kMDMetaMarker);
+	}
+    
+	[self updateMarkerList];
+	[self refreshTimeDisplay];
+}
+*/
+
+/*
+- (int)refreshMIDIDocument: (MyDocument *)document
+{
+	unsigned int n;
+
+	n = [docArray indexOfObject: document];
+	if (n == NSNotFound) {
+		[docArray addObject: document];
+		n = [docArray count] - 1;
+		//  Create a menu item with a dummy name that is unlikely to conflict with the existing name
+		[[tunePopup menu] addItemWithTitle: [document tuneName] action: nil keyEquivalent: @""];
+		[tunePopup setEnabled: YES];
+		if (activeIndex == -1)
+			[self selectTuneAtIndex: n];
+	} else {
+		//  Update the item name 
+		[[tunePopup itemAtIndex: n] setTitle: [document tuneName]];
+	//	if ([tunePopup indexOfSelectedItem] == n)
+	//		[self selectTuneAtIndex: n];	//  Refresh the internal information
+	}
+	return n;
+}
+*/
+/*
+- (void)removeMIDIDocument: (MyDocument *)document
+{
+	unsigned int n;
+	n = [docArray indexOfObject: document];
+	if (n != NSNotFound) {
+		if (n == activeIndex)
+			[self pressStopButton: self];
+		[docArray removeObjectAtIndex: n];
+		[tunePopup removeItemAtIndex: n];
+		if ([tunePopup numberOfItems] == 0) {
+			[tunePopup setEnabled: NO];
+			[self selectTuneAtIndex: -1];
+		} else {
+			if (n > 0)
+				n--;
+			[self selectTuneAtIndex: n];
+		}
+	}
+}
+*/
+
+- (void)timerCallback: (NSTimer *)timer
+{
+	MyMIDISequence *seq = [myDocument myMIDISequence];
+	MDPlayer *player = [seq myPlayer];
+	callbackCount++;
+	if (player != NULL) {
+		int status = MDPlayerGetStatus(player);
+		int isPlayerRecording = MDPlayerIsRecording(player);
+		if (status == kMDPlayer_playing || status == kMDPlayer_exhausted) {
+			currentTime = MDPlayerGetTime(player);  /*  Update the current time  */
+			[self refreshTimeDisplay];
+			#if 0
+			if (isRecording) {
+				NSDictionary *info = [seq recordingInfo];
+				if (isPlayerRecording) {
+					//  Check for automatic stop recording
+					if ([[info valueForKey: MyRecordingInfoStopFlagKey] boolValue]) {
+						MDTickType currentTick = MDCalibratorTimeToTick(calibrator, currentTime);
+						if (currentTick > [[info valueForKey: MyRecordingInfoStopTickKey] doubleValue]) {
+							//  Stop recording (but continue to play)
+							MDPlayerStopRecording(player);
+						}
+					}
+				}
+			}
+			#endif
+		}
+//		if (status != kMDPlayer_playing && !(status == kMDPlayer_exhausted && isRecording && !isAudioRecording)) {
+		if (status != kMDPlayer_playing) {
+			//  If not playing, then self stop
+			[self pressStopButton: self];
+		}
+		if (isRecording && isPlayerRecording && callbackCount % 10 == 0) {
+			[seq collectRecordedEvents];
+			[parentController reloadClientViews];
+		}
+	}
+/*	MyDocument *doc;
+	if (activeIndex >= 0 && status == kMDPlayer_playing) {
+		doc = [docArray objectAtIndex: activeIndex];
+		[self refreshTimeDisplay];
+	//	[playButton hilite: YES];
+		player = [[doc myMIDISequence] myPlayer];
+        if (player != NULL && MDPlayerGetStatus(player) == kMDPlayer_exhausted)
+			[self pressStopButton: self];
+	} */
+}
+
+#pragma mark ====== Action methods ======
+
+- (void)setCurrentTime: (MDTimeType)newTime
+{
+	int status;
+	MDTickType newTick, duration;
+	MDPlayer *player = [[myDocument myMIDISequence] myPlayer];
+	if (player == NULL || (status = MDPlayerGetStatus(player)) == kMDPlayer_playing || status == kMDPlayer_exhausted)
+		return;  /*  Do nothing  */
+	newTick = MDCalibratorTimeToTick(calibrator, newTime);
+	duration = [[myDocument myMIDISequence] sequenceDuration];
+	if (newTick > duration) {
+		newTick = duration;
+		newTime = MDCalibratorTickToTime(calibrator, newTick);
+	} else if (newTick < 0)
+		newTick = newTime = 0;
+	currentTime = newTime;
+	if (status == kMDPlayer_suspended)
+		[self pressStopButton: self];
+	[self refreshTimeDisplay];
+}
+
+- (void)setCurrentTick: (MDTickType)newTick
+{
+	[self setCurrentTime: MDCalibratorTickToTime(calibrator, newTick)];
+}
+
+- (void)prerollWithFeedback
+{
+	MDPlayer *player;
+	player = [[myDocument myMIDISequence] myPlayer];
+	if (player != NULL) {
+		[progressIndicator startAnimation: self];
+		MDPlayerPreroll(player, MDCalibratorTimeToTick(calibrator, currentTime), 1);
+		[progressIndicator stopAnimation: self];
+	}
+}
+
+- (void)restartAfterManualMovement
+{
+	int status;
+	MDPlayer *player = [[myDocument myMIDISequence] myPlayer];
+	if (player == NULL)
+		return;
+	status = MDPlayerGetStatus(player);
+	MDPlayerJumpToTick(player, MDCalibratorTimeToTick(calibrator, currentTime));
+	if (status == kMDPlayer_suspended || shouldContinuePlay) {
+		if (shouldContinuePlay) {
+			/*  Note: recording will be stopped and does not recover automatically  */
+		//	MDPlayerJumpToTick(player, MDCalibratorTimeToTick(calibrator, currentTime));
+			[self pressPlayButton: self];
+		} else {
+			[self prerollWithFeedback];
+		}
+	}
+	shouldContinuePlay = NO;
+}
+
+- (IBAction)moveSlider:(id)sender
+{
+	int status;
+	MDPlayer *player = [[myDocument myMIDISequence] myPlayer];
+	if (player == NULL)
+		return;
+	status = MDPlayerGetStatus(player);
+	if (status == kMDPlayer_playing || status == kMDPlayer_exhausted) {
+		[self pressStopButton: self];
+		shouldContinuePlay = YES;
+	}
+	currentTime = totalTime * ([sender doubleValue] / 100.0);
+	[self refreshTimeDisplay];
+	if ([[NSApp currentEvent] type] == NSLeftMouseUp)
+		[self restartAfterManualMovement];
+}
+
+- (IBAction)pressFFButton:(id)sender
+{
+	int status;
+	MDPlayer *player = [[myDocument myMIDISequence] myPlayer];
+	if (player == NULL)
+		return;
+	status = MDPlayerGetStatus(player);
+	if (status == kMDPlayer_playing || status == kMDPlayer_exhausted) {
+		[self pressStopButton: self];
+		shouldContinuePlay = YES;
+	}
+	currentTime += 1000000;
+	if (currentTime > totalTime)
+		currentTime = totalTime;
+	[self refreshTimeDisplay];
+	if ([[NSApp currentEvent] type] == NSLeftMouseUp)
+		[self restartAfterManualMovement];
+}
+
+- (IBAction)pressRewindButton:(id)sender
+{
+	int status;
+	MDPlayer *player = [[myDocument myMIDISequence] myPlayer];
+	if (player == NULL)
+		return;
+	status = MDPlayerGetStatus(player);
+	if (status == kMDPlayer_playing || status == kMDPlayer_exhausted) {
+		[self pressStopButton: self];
+		shouldContinuePlay = YES;
+	}
+	currentTime -= 1000000;
+	if (currentTime < 0)
+		currentTime = 0;
+	[self refreshTimeDisplay];
+	if ([[NSApp currentEvent] type] == NSLeftMouseUp)
+		[self restartAfterManualMovement];
+}
+
+- (IBAction)pressPauseButton:(id)sender
+{
+	int status;
+	MDPlayer *player = [[myDocument myMIDISequence] myPlayer];
+	if (player == NULL)
+		return;
+	status = MDPlayerGetStatus(player);
+	if (status == kMDPlayer_playing || status == kMDPlayer_exhausted) {
+		MDPlayerSuspend(player);
+		status = kMDPlayer_suspended;
+		[playButton setState: NSOffState];
+	} else if (status == kMDPlayer_ready || status == kMDPlayer_idle) {
+		/*  Jump to the "current" time, send MIDI events before that time, and wait for play  */
+		[self prerollWithFeedback];
+		status = kMDPlayer_suspended;	
+	} else return;
+	[pauseButton setState: NSOnState];
+/*	[[docArray objectAtIndex: activeIndex] postPlayPositionNotification]; */
+}
+
+- (void)pressPlayButtonWithRecording:(BOOL)isRecordButton
+{
+	int status;
+	MDPlayer *player = [[myDocument myMIDISequence] myPlayer];
+	if (player == NULL)
+		return;
+	status = MDPlayerGetStatus(player);
+	[playButton setState: NSOnState];
+	if (status == kMDPlayer_playing || status == kMDPlayer_exhausted)
+		return;
+	else if (status == kMDPlayer_suspended) {
+		[pauseButton setState: NSOffState];
+	} else if (status == kMDPlayer_ready || status == kMDPlayer_idle) {
+		MDPlayerJumpToTick(player, MDCalibratorTimeToTick(calibrator, currentTime));
+	}
+    if (isRecordButton) {
+		BOOL flag;
+		if (isAudioRecording)
+			flag = [myDocument startAudioRecording];
+		else
+			flag = [myDocument startRecording];
+		if (!flag) {
+			NSRunAlertPanel(@"Recording error", @"Cannot start recording", nil, nil, nil);
+			return;
+		}
+		isRecording = YES;
+    } else
+        MDPlayerStart(player);
+
+	/*  Enable timer for updating displays  */
+	/*  (Add for three modes, so that display is updated during modal loop or dragging)  */
+	timer = [[NSTimer allocWithZone:[self zone]] initWithFireDate:[NSDate dateWithTimeIntervalSinceNow:0.1] interval:0.1 target:self selector:@selector(timerCallback:) userInfo:nil repeats:YES];
+	[[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
+	[[NSRunLoop currentRunLoop] addTimer:timer forMode:NSModalPanelRunLoopMode];
+	[[NSRunLoop currentRunLoop] addTimer:timer forMode:NSEventTrackingRunLoopMode];
+
+	callbackCount = 0;
+	status = kMDPlayer_playing;
+}
+
+- (IBAction)pressPlayButton:(id)sender
+{
+    [self pressPlayButtonWithRecording: NO];
+}
+
+- (void)recordButtonPressed: (id)sender audioFlag: (BOOL)audioFlag
+{
+	RecordPanelController *controller;
+
+	//  Set the current time as the start tick
+	NSMutableDictionary *info = [NSMutableDictionary dictionaryWithDictionary: [[myDocument myMIDISequence] recordingInfo]];
+	[info setValue: [NSNumber numberWithDouble: MDCalibratorTimeToTick(calibrator, currentTime)] forKey: MyRecordingInfoStartTickKey];
+	[[myDocument myMIDISequence] setRecordingInfo: info];
+		
+    controller = [[RecordPanelController allocWithZone: [self zone]] initWithDocument: myDocument audio: audioFlag];
+	[controller reloadInfoFromDocument];
+	if (audioFlag)
+		[AudioSettingsPanelController openAudioSettingsPanel];
+	[[NSApplication sharedApplication] beginSheet: [controller window]
+		modalForWindow: [parentController window]
+		modalDelegate: self
+		didEndSelector: @selector(sheetDidEnd:returnCode:contextInfo:)
+		contextInfo: nil];
+}
+
+- (IBAction)pressRecordButton:(id)sender
+{
+	//  If "option" key is pressed then start audio recording
+	//  (This is very ugly and needs update later)
+	BOOL audioFlag = NO;
+	if ([[NSApp currentEvent] modifierFlags] & NSAlternateKeyMask)
+		audioFlag = YES;
+	[self recordButtonPressed: sender audioFlag: audioFlag];
+}
+
+- (void)sheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo
+{
+	RecordPanelController *cont = (RecordPanelController *)[sheet windowController];
+	NSDictionary *info;
+	[cont saveInfoToDocument];
+	[cont close];
+	if (returnCode == 1) {
+		info = [[myDocument myMIDISequence] recordingInfo];
+		currentTime = MDCalibratorTickToTime(calibrator, [[info valueForKey: MyRecordingInfoStartTickKey] doubleValue]);
+		isAudioRecording = [[info valueForKey: MyRecordingInfoIsAudioKey] boolValue];
+		[self pressPlayButtonWithRecording: YES];
+	}
+	[cont release];
+}
+
+- (IBAction)pressStopButton:(id)sender
+{
+	int status;
+	MDPlayer *player = [[myDocument myMIDISequence] myPlayer];
+	if (player == NULL)
+		return;
+	status = MDPlayerGetStatus(player);
+	if (status == kMDPlayer_ready || status == kMDPlayer_idle) {
+		MDPlayerJumpToTick(player, 0);		/*  Rewind to the beginning of the tune  */
+		currentTime = 0;
+	} else {
+		MDTimeType maxTime;
+		currentTime = MDPlayerGetTime(player);
+		if (timer != nil) {
+	/*	if (status == kMDPlayer_playing) { */
+			[timer invalidate];
+			[timer autorelease];
+            timer = nil;
+		}
+        if (isRecording) {
+			if (isAudioRecording)
+				[myDocument finishAudioRecording];
+			else
+				[myDocument finishRecording];
+			isRecording = NO;
+			isAudioRecording = NO;
+		}
+		MDPlayerStop(player);
+	/*	MDPlayerRefreshTrackDestinations(player);  *//*  Refresh internal track list  */
+		/*  Limit currentTime by sequence duration  */
+		maxTime = MDCalibratorTickToTime(calibrator, MDSequenceGetDuration([[myDocument myMIDISequence] mySequence]));
+		if (currentTime > maxTime)
+			currentTime = maxTime;
+	}
+	status = kMDPlayer_ready;
+	[self refreshTimeDisplay];
+//	[doc postPlayPositionNotification];
+	[playButton setState: NSOffState];
+	[pauseButton setState: NSOffState];
+	[recordButton setState: NSOffState];
+//	[doc postStopPlayingNotification];
+}
+
+- (IBAction)selectMarker:(id)sender
+{
+	int status;
+	int index;
+	MDTickType tick;
+	MDPlayer *player = [[myDocument myMIDISequence] myPlayer];
+	if (player == NULL)
+		return;
+	status = MDPlayerGetStatus(player);
+	index = [sender indexOfSelectedItem];
+	if (index >= 0 && index < [tickArray count]) {
+		if (status == kMDPlayer_playing || status == kMDPlayer_exhausted) {
+			shouldContinuePlay = YES;
+			[self pressStopButton: self];
+		}
+		tick = (MDTimeType)[[tickArray objectAtIndex: index] doubleValue];
+		currentTime = MDCalibratorTickToTime(calibrator, tick);
+		MDPlayerJumpToTick(player, tick);
+		if (shouldContinuePlay)
+			[self pressPlayButton: self];
+		else if (status == kMDPlayer_suspended) {
+			MDPlayerPreroll(player, tick, 1);
+			[pauseButton setState: NSOnState];
+		}
+		[self refreshTimeDisplay];
+		shouldContinuePlay = NO;
+	}
+}
+
+- (IBAction)tickTextEdited: (id)sender
+{
+	long bar, beat, subtick;
+	MDTickType tick;
+	if (MDEventParseTickString([[sender stringValue] UTF8String], &bar, &beat, &subtick) < 3)
+		return;
+	tick = MDCalibratorMeasureToTick(calibrator, bar, beat, subtick);
+	[self setCurrentTick: tick];
+}
+
+- (IBAction)timeTextEdited: (id)sender
+{
+	long hour, min, sec;
+	MDTimeType time;
+	const char *s;
+	int n;
+	s = [[sender stringValue] UTF8String];
+	n = sscanf(s, "%ld%*[^-0-9]%ld%*[^-0-9]%ld", &hour, &min, &sec);
+	switch (n) {
+		case 1: hour = min = 0; break;
+		case 2: hour = 0; break;
+		case 3: break;
+		default: return;
+	}
+	time = (((MDTimeType)hour * 60 + (MDTimeType)min) * 60 + (MDTimeType)sec) * 1000000;
+	[self setCurrentTime: time];
+}
+
+/*
+- (IBAction)selectTune:(id)sender
+{
+	[self selectTuneAtIndex: [tunePopup indexOfSelectedItem]];
+}
+*/
+
+#pragma mark ====== Notification Handler ======
+
+- (void)trackModified: (NSNotification *)notification
+{
+/*    long trackNo;
+    if ([docArray indexOfObject: [notification object]] != activeIndex)
+        return; */
+//	MDPlayer *player = [[myDocument myMIDISequence] myPlayer];
+//	if (player != NULL)
+//		MDPlayerRefreshTrackDestinations(player);  /*  Refresh internal track list  */
+	[self updateMarkerList];
+    [self refreshTimeDisplay];
+}
+
+@end
