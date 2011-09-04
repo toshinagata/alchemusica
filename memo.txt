@@ -753,7 +753,7 @@ svn mkdir svn+ssh://toshinagata1964@svn.sourceforge.jp/svnroot/alchemusica/trunk
 svn mkdir svn+ssh://toshinagata1964@svn.sourceforge.jp/svnroot/alchemusica/tags -m "Creating tags"
 svn mkdir svn+ssh://toshinagata1964@svn.sourceforge.jp/svnroot/alchemusica/branches -m "Creating branches"
 cd ~/Development/Alchemusica
-(build など、svn レポジトリに登録する必要のないファイルを削除)
+(build, Alchemusica.xcode/USERNAME.* など、svn レポジトリに登録する必要のないファイルを削除)
 svn import . svn+ssh://toshinagata1964@svn.sourceforge.jp/svnroot/alchemusica/trunk -m "initial import"
 cd ~/Development
 mv Alchemusica was_Alchemusica
