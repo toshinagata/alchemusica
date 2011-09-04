@@ -1680,7 +1680,8 @@ MDPlayerStart(MDPlayer *inPlayer)
 //	if (inPlayer->status != kMDPlayer_suspended) {
 //		MDPlayerPreroll(inPlayer, 0, 0);
 //	}
-	MDPlayerPreroll(inPlayer, MDCalibratorTimeToTick(inPlayer->calib, inPlayer->time), 0);
+	if (inPlayer->status != kMDPlayer_suspended)
+		MDPlayerPreroll(inPlayer, MDCalibratorTimeToTick(inPlayer->calib, inPlayer->time), 0);
 	
 	/*  Schedule special events  */
 	{
@@ -1792,6 +1793,11 @@ MDPlayerStop(MDPlayer *inPlayer)
 {
 	if (inPlayer == NULL || inPlayer->merger == NULL)
 		return kMDNoError;
+	if (inPlayer->status == kMDPlayer_suspended) {
+		inPlayer->stopTick = kMDMaxTick;
+		inPlayer->status = kMDPlayer_ready;
+		return kMDNoError;
+	}
 	if (inPlayer->status != kMDPlayer_playing && inPlayer->status != kMDPlayer_exhausted)
 		return kMDNoError;
 

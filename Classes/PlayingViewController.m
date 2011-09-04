@@ -135,25 +135,23 @@
 		recordingPlayer = MDPlayerRecordingPlayer();
 		if (recordingPlayer == NULL) {
 			[recordButton setEnabled: YES];
-			[recordButton setHighlighted: NO];
+			[recordButton setState: NSOffState];
 		} else if (recordingPlayer == player) {
 			[recordButton setEnabled: YES];
-			[recordButton setHighlighted: MDPlayerIsRecording(player)];
+			[recordButton setState: (MDPlayerIsRecording(player) ? NSOnState : NSOffState)];
 		} else {
 			[recordButton setEnabled: NO];
 		}
 		if (status == kMDPlayer_playing || status == kMDPlayer_exhausted) {
 			playingOrRecording = YES;
+			[playButton setState: NSOnState];
 		//	currentTime = MDPlayerGetTime(player);  /*  Update the current time  */
-		}
+		} else [playButton setState: NSOffState];
 
+		[pauseButton setState:(status == kMDPlayer_suspended ? NSOnState : NSOffState)];
 	/*	if (MDSequenceGetIndexOfRecordingTrack([[myDocument myMIDISequence] mySequence]) < 0)
 			[recordButton setEnabled: NO];
 		else [recordButton setEnabled: YES]; */
-
-	/*	[playButton hilite: (status == kMDPlayer_playing)];
-		[pauseButton hilite: (status == kMDPlayer_suspended)];
-		[recordButton hilite: isRecording]; */
 
 	//	if (resumeTimer != nil)
 	//		time = currentTime;		/*  During FF/Rew/Slider actions, time should come from the controls  */
@@ -408,7 +406,8 @@
 			#endif
 		}
 //		if (status != kMDPlayer_playing && !(status == kMDPlayer_exhausted && isRecording && !isAudioRecording)) {
-		if (status != kMDPlayer_playing) {
+//		if (status != kMDPlayer_playing && status != kMDPlayer_suspended) {
+		if (status == kMDPlayer_exhausted && !isRecording && !isAudioRecording) {
 			//  If not playing, then self stop
 			[self pressStopButton: self];
 		}
@@ -551,13 +550,13 @@
 	if (status == kMDPlayer_playing || status == kMDPlayer_exhausted) {
 		MDPlayerSuspend(player);
 		status = kMDPlayer_suspended;
-		[playButton setState: NSOffState];
+		[playButton setState:NSOffState];
 	} else if (status == kMDPlayer_ready || status == kMDPlayer_idle) {
 		/*  Jump to the "current" time, send MIDI events before that time, and wait for play  */
 		[self prerollWithFeedback];
 		status = kMDPlayer_suspended;	
 	} else return;
-	[pauseButton setState: NSOnState];
+	[pauseButton setState:(status == kMDPlayer_suspended ? NSOnState : NSOffState)];
 /*	[[docArray objectAtIndex: activeIndex] postPlayPositionNotification]; */
 }
 
@@ -568,11 +567,11 @@
 	if (player == NULL)
 		return;
 	status = MDPlayerGetStatus(player);
-	[playButton setState: NSOnState];
+	[playButton setState:NSOnState];
 	if (status == kMDPlayer_playing || status == kMDPlayer_exhausted)
 		return;
 	else if (status == kMDPlayer_suspended) {
-		[pauseButton setState: NSOffState];
+		[pauseButton setState:NSOnState];
 	} else if (status == kMDPlayer_ready || status == kMDPlayer_idle) {
 		MDPlayerJumpToTick(player, MDCalibratorTimeToTick(calibrator, currentTime));
 	}
@@ -647,6 +646,8 @@
 		currentTime = MDCalibratorTickToTime(calibrator, [[info valueForKey: MyRecordingInfoStartTickKey] doubleValue]);
 		isAudioRecording = [[info valueForKey: MyRecordingInfoIsAudioKey] boolValue];
 		[self pressPlayButtonWithRecording: YES];
+	} else {
+		[recordButton setState:NSOffState];
 	}
 	[cont release];
 }
@@ -688,9 +689,9 @@
 	status = kMDPlayer_ready;
 	[self refreshTimeDisplay];
 //	[doc postPlayPositionNotification];
-	[playButton setState: NSOffState];
-	[pauseButton setState: NSOffState];
-	[recordButton setState: NSOffState];
+	[playButton setState:NSOffState];
+	[pauseButton setState:NSOffState];
+	[recordButton setState:NSOffState];
 //	[doc postStopPlayingNotification];
 }
 
@@ -716,7 +717,7 @@
 			[self pressPlayButton: self];
 		else if (status == kMDPlayer_suspended) {
 			MDPlayerPreroll(player, tick, 1);
-			[pauseButton setState: NSOnState];
+			[pauseButton setState:NSOnState];
 		}
 		[self refreshTimeDisplay];
 		shouldContinuePlay = NO;
