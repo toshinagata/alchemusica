@@ -1511,10 +1511,6 @@ MDPlayerRefreshTrackDestinations(MDPlayer *inPlayer)
     if (inPlayer == NULL || inPlayer->merger == NULL || (sequence = MDMergerGetSequence(inPlayer->merger)) == NULL)
         return kMDNoError;
 	
-	oldTick = MDCalibratorTimeToTick(inPlayer->calib, inPlayer->time);
-
-	MDMergerReset(inPlayer->merger);
-
     num = MDSequenceGetNumberOfTracks(sequence);
 	inPlayer->trackNum = num;
     inPlayer->destIndex = (long *)re_malloc(inPlayer->destIndex, num * sizeof(long));
@@ -1531,11 +1527,11 @@ MDPlayerRefreshTrackDestinations(MDPlayer *inPlayer)
     if (temp == NULL)
         return kMDErrorOutOfMemory;
 
-	MDSequenceLock(sequence);
-	    
 	for (i = 0; i < inPlayer->destNum; i++)
         temp[i] = inPlayer->destInfo[i]->dev;
     origDestNum = inPlayer->destNum;
+
+	MDSequenceLock(sequence);
 
     /*  Update destIndex[] and destChannel[] */
     for (n = 0; n < num; n++) {
@@ -1571,10 +1567,11 @@ MDPlayerRefreshTrackDestinations(MDPlayer *inPlayer)
     if (inPlayer->destInfo == NULL) {
         status = kMDErrorOutOfMemory;
 	} else {
+		oldTick = MDCalibratorTimeToTick(inPlayer->calib, inPlayer->time);
+	/*	MDMergerReset(inPlayer->merger); */
 		for (i = origDestNum; i < inPlayer->destNum; i++)
 			inPlayer->destInfo[i] = MDPlayerNewDestinationInfo(temp[i]);
-		
-		MDPlayerJumpToTick(inPlayer, oldTick);
+	/*	MDPlayerJumpToTick(inPlayer, oldTick); */
 		status = kMDNoError;
 	}
 
@@ -1589,8 +1586,8 @@ MDPlayerRefreshTrackDestinations(MDPlayer *inPlayer)
 MDStatus
 MDPlayerJumpToTick(MDPlayer *inPlayer, MDTickType inTick)
 {
-	if (inPlayer->status == kMDPlayer_playing || inPlayer->status == kMDPlayer_exhausted)
-		MDPlayerStop(inPlayer);
+/*	if (inPlayer->status == kMDPlayer_playing || inPlayer->status == kMDPlayer_exhausted)
+		MDPlayerStop(inPlayer); */
 	MDMergerJumpToTick(inPlayer->merger, inTick);
 	MDCalibratorJumpToTick(inPlayer->calib, inTick);
 /*	inPlayer->tick = inTick;  */

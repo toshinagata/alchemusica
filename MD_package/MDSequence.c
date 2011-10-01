@@ -258,7 +258,7 @@ MDSequenceGetTrack(const MDSequence *inSequence, long index)
 #pragma mark ====== MDTrack attribute manipulations ======
 #endif
 
-static void
+void
 MDSequenceUpdateMuteBySoloFlag(MDSequence *inSequence)
 {
 	MDTrack *track;
@@ -682,17 +682,19 @@ MDSequenceDisposeMutex(MDSequence *inSequence)
 void
 MDSequenceLock(MDSequence *inSequence)
 {
+	int n;
 	if (inSequence == NULL || inSequence->mutex == NULL)
 		return;
-	pthread_mutex_lock(inSequence->mutex);
+	n = pthread_mutex_lock(inSequence->mutex);
 }
 
 void
 MDSequenceUnlock(MDSequence *inSequence)
 {
+	int n;
 	if (inSequence == NULL || inSequence->mutex == NULL)
 		return;
-	pthread_mutex_unlock(inSequence->mutex);
+	n = pthread_mutex_unlock(inSequence->mutex);
 }
 
 int

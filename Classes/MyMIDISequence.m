@@ -241,7 +241,10 @@ NSString
 	if (mySequence != NULL) {
 		MDTrack *track = MDSequenceGetTrack(mySequence, index);
 		if (track != NULL) {
+			MDTrackAttribute oldAttr = MDTrackGetAttribute(track);
 			MDTrackSetAttribute(track, attribute);
+			if ((oldAttr & kMDTrackAttributeSolo) != (attribute & kMDTrackAttributeSolo))
+				MDSequenceUpdateMuteBySoloFlag(mySequence);
 		}
 	}
 }

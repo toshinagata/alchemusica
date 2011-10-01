@@ -66,7 +66,7 @@ enum {
 
 /*  IDs for track list tableView  */
 static NSString *sTableColumnIDs[] = {
-	@"number", @"edit", @"visible", @"name", @"ch", @"mute", @"device"
+	@"number", @"edit", @"visible", @"name", @"ch", @"solo", @"mute", @"device"
 };
 
 enum {
@@ -75,14 +75,20 @@ enum {
 	kVisibleID = 2,
 	kTrackNameID = 3,
 	kChannelID = 4,
-	kMuteID = 5,
-	kDeviceNameID = 6
+	kSoloID = 5,
+	kMuteID = 6,
+	kDeviceNameID = 7
 };
 
 static NSImage *sPencilSmallImage = NULL;
 static NSImage *sEyeOpenImage = NULL;
 static NSImage *sEyeCloseImage = NULL;
 static NSImage *sSpeakerImage = NULL;
+static NSImage *sSpeakerGrayImage = NULL;
+static NSImage *sMuteImage = NULL;
+static NSImage *sMuteNonImage = NULL;
+static NSImage *sSoloImage = NULL;
+static NSImage *sSoloNonImage = NULL;
 
 static NSString *sNeedsReloadClientViewNotification = @"reload client views";
 
@@ -1755,16 +1761,30 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 			sEyeCloseImage = [[NSImage imageNamed: @"eye_close.png"] retain];
 		if (sSpeakerImage == NULL)
 			sSpeakerImage = [[NSImage imageNamed: @"speaker.png"] retain];
-
-		for (i = 0; i < 3; i++) {
-			static int s[] = {kEditableID, kVisibleID, kMuteID};
+		if (sSpeakerGrayImage == NULL)
+			sSpeakerGrayImage = [[NSImage imageNamed: @"speaker_gray.png"] retain];
+		if (sMuteImage == NULL)
+			sMuteImage = [[NSImage imageNamed: @"mute.png"] retain];
+		if (sMuteNonImage == NULL)
+			sMuteNonImage = [[NSImage imageNamed: @"mute_non.png"] retain];
+		if (sSoloImage == NULL)
+			sSoloImage = [[NSImage imageNamed: @"solo.png"] retain];
+		if (sSoloNonImage == NULL)
+			sSoloNonImage = [[NSImage imageNamed: @"solo_non.png"] retain];
+		
+		for (i = 0; i < 4; i++) {
+			static int s[] = {kEditableID, kVisibleID, kSoloID, kMuteID};
 		//	static NSString *n[] = {@"pencil_small.png", @"eye_open.png", @"speaker.png"};
-			NSImage *im[] = {sPencilSmallImage, sEyeOpenImage, sSpeakerImage};
+			NSImage *im[] = {sPencilSmallImage, sEyeOpenImage, sSoloImage, sSpeakerImage};
 			tableColumn = [myTableView tableColumnWithIdentifier: sTableColumnIDs[s[i]]];
 			cell = [[[ColorCell alloc] init] autorelease];
 			[cell setTarget: self];
 		//	[cell setAction: @selector(trackTableAction:)];
 			[cell setImage: im[i]];
+			if (s[i] == kSoloID) {
+				[cell setRepresentedObject:[NSColor colorWithDeviceRed:1.0 green:1.0 blue:0.3 alpha:1.0]];
+				[(ColorCell *)cell setStrokesColor:NO];
+			}
 			[tableColumn setDataCell: cell];
 			[[tableColumn headerCell] setImage: im[i]];
 		}
@@ -2337,13 +2357,22 @@ row:(int)rowIndex
 				return [[[self document] myMIDISequence] deviceName: rowIndex];
 		case kEditableID:
 		case kVisibleID:
+		case kSoloID:
 		case kMuteID: {
 			MDTrackAttribute attr;
 			attr = [[[self document] myMIDISequence] trackAttributeAtIndex: rowIndex];
 			if (idnum == kEditableID) {
 				return (attr & kMDTrackAttributeEditable ? sPencilSmallImage : nil);
+			} else if (idnum == kSoloID) {
+			//	return (attr & kMDTrackAttributeMute ? nil : sSpeakerImage);
+				return (attr & kMDTrackAttributeSolo ? sSoloImage : sSoloNonImage);
 			} else if (idnum == kMuteID) {
-				return (attr & kMDTrackAttributeMute ? nil : sSpeakerImage);
+				//	return (attr & kMDTrackAttributeMute ? nil : sSpeakerImage);
+				if (attr & kMDTrackAttributeMute)
+					return nil;
+				else if (attr & kMDTrackAttributeMuteBySolo)
+					return sSpeakerGrayImage;
+				else return sSpeakerImage;
 			} else if (idnum == kVisibleID) {
 				return (attr & kMDTrackAttributeHidden ? sEyeCloseImage : sEyeOpenImage);
 			} else return nil;
@@ -2378,16 +2407,15 @@ row:(int)rowIndex
 
 - (void)tableView:(NSTableView *)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
 {
+	MDTrackAttribute attr;
 	int idnum = sTableColumnIDToInt([aTableColumn identifier]);
 	if (idnum == kEditableID) {
-		MDTrackAttribute attr;
 		[aCell setRepresentedObject: [self colorForTrack: rowIndex enabled: YES]];		
 		attr = [[[self document] myMIDISequence] trackAttributeAtIndex: rowIndex];
-		if (attr & kMDTrackAttributeHidden) {
-			[aCell setFillsColor: NO];
-		} else {
-			[aCell setFillsColor: YES];
-		}
+		[aCell setFillsColor:(attr & kMDTrackAttributeHidden) == 0];
+	} else if (idnum == kSoloID) {
+		attr = [[[self document] myMIDISequence] trackAttributeAtIndex: rowIndex];
+		[aCell setFillsColor: (attr & kMDTrackAttributeSolo) != 0];
 	} else if (idnum == kChannelID || idnum == kDeviceNameID) {
 		if (rowIndex == 0)
 			[aCell setEnabled: NO];
@@ -2472,6 +2500,7 @@ row:(int)rowIndex
 	int idnum;
 	NSRect frame;
 	BOOL editableTrackWasHidden = NO;
+	BOOL shiftFlag = (([[NSApp currentEvent] modifierFlags] & NSShiftKeyMask) != 0);
 
     row = [myTableView clickedRow];
     column = [myTableView clickedColumn];
@@ -2493,6 +2522,9 @@ row:(int)rowIndex
 			//  However, if the flag is already set for all rows, then unset the flag.
 			case kEditableID:
 				attrMask = kMDTrackAttributeEditable;
+				break;
+			case kSoloID:
+				attrMask = kMDTrackAttributeSolo;
 				break;
 			case kMuteID:
 				attrMask = kMDTrackAttributeMute;
@@ -2543,7 +2575,6 @@ row:(int)rowIndex
 			return;
 		switch (idnum) {
 			case kEditableID: {
-				BOOL shiftFlag = (([[NSApp currentEvent] modifierFlags] & NSShiftKeyMask) != 0);
 				attr = [seq trackAttributeAtIndex: row];
 				if (attr & kMDTrackAttributeHidden)
 					break;
@@ -2556,6 +2587,9 @@ row:(int)rowIndex
 			}
 			case kMuteID:
 				[doc setMuteFlagOnTrack: row flag: -1];
+				break;
+			case kSoloID:
+				[doc setSoloFlagOnTrack: row flag: -1];
 				break;
 			case kVisibleID:
 				attr = [seq trackAttributeAtIndex: row];
@@ -2636,6 +2670,8 @@ row:(int)rowIndex
 	} */
 	/*  Rebuild sortedTrackNumbers later  */
 	visibleTrackCount = -1;
+	[lastSelectedTracks release];
+	lastSelectedTracks = [[NSIndexSet alloc] initWithIndexSet:[myTableView selectedRowIndexes]];
 	[self setNeedsReloadClientViews];
 }
 

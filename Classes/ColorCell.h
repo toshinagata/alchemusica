@@ -19,8 +19,10 @@
 
 @interface ColorCell : NSActionCell {
 	BOOL noFillsColor;
+	BOOL noStrokesColor;
 }
 - (BOOL)fillsColor;
 - (void)setFillsColor: (BOOL)flag;
-
+- (BOOL)strokesColor;
+- (void)setStrokesColor: (BOOL)flag;
 @end

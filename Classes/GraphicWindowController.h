@@ -129,6 +129,9 @@ enum {
 	//  Zoom/unzoom buffer and current position
 	NSMutableArray *zoomUndoBuffer;
 	int zoomUndoIndex;
+	
+	//  Selected tracks when the selection changed last
+	NSIndexSet *lastSelectedTracks;
 }
 
 //+ (NSCursor *)horizontalMoveCursor;

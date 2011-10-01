@@ -908,7 +908,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
         if (MDSequenceSetMuteFlagOnTrack(sequence, trackNo, flag)) {
             [[[self undoManager] prepareWithInvocationTarget: self]
                 setTrackAttributes: attr];
-            [self enqueueTrackModifiedNotification: trackNo];
+       //     [self enqueueTrackModifiedNotification: trackNo];
             [self updateTrackDestinations];
             return YES;
         }
@@ -924,7 +924,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
         if (MDSequenceSetSoloFlagOnTrack(sequence, trackNo, flag)) {
             [[[self undoManager] prepareWithInvocationTarget: self]
                 setTrackAttributes: attr];
-            [self enqueueTrackModifiedNotification: trackNo];
+        //    [self enqueueTrackModifiedNotification: trackNo];
             [self updateTrackDestinations];
             return YES;
         }

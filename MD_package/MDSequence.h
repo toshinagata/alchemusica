@@ -105,6 +105,9 @@ int		MDSequenceSetSoloFlagOnTrack(MDSequence *inSequence, long index, int flag);
 /*  index 番目のトラックの Mute フラグをセットする。flag = 0: OFF, 1: ON, -1: toggle  */
 int		MDSequenceSetMuteFlagOnTrack(MDSequence *inSequence, long index, int flag);
 
+/*  MuteBySolo フラグを更新する。Solo フラグを変更したあと呼び出す。  */
+void	MDSequenceUpdateMuteBySoloFlag(MDSequence *inSequence);
+
 /*  Record フラグが立っているトラックの番号を得る。なければ -1 を返す。  */
 long	MDSequenceGetIndexOfRecordingTrack(MDSequence *inSequence);
 

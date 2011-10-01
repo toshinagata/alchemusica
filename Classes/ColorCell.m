@@ -36,10 +36,10 @@
 	rep = [self representedObject];
 	if (rep != nil && [rep isKindOfClass: [NSColor class]]) {
 		[rep set];
-		if (noFillsColor)
-			NSFrameRect(cellFrame);
-		else
+		if (!noFillsColor)
 			NSRectFill(cellFrame);
+		else if (!noStrokesColor)
+			NSFrameRect(cellFrame);
 	}
 	image = [self objectValue];
 	if (image != nil && [image isKindOfClass: [NSImage class]]) {
@@ -61,6 +61,16 @@
 - (void)setFillsColor: (BOOL)flag
 {
 	noFillsColor = !flag;
+}
+
+- (BOOL)strokesColor
+{
+	return !noStrokesColor;
+}
+
+- (void)setStrokesColor: (BOOL)flag
+{
+	noStrokesColor = !flag;
 }
 
 @end

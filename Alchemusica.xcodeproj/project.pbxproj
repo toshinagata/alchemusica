@@ -144,6 +144,11 @@
 		E40C7A50140A87FD00969DC3 /* RubyConsoleWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A4E140A87FD00969DC3 /* RubyConsoleWindow.xib */; };
 		E40C7AC7140A94F700969DC3 /* MetronomeSettingsPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7AC5140A94F700969DC3 /* MetronomeSettingsPanel.xib */; };
 		E40C7ACC140A95D700969DC3 /* MetronomeSettingsPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E40C7ACB140A95D700969DC3 /* MetronomeSettingsPanelController.m */; };
+		E44590CA1413C1C400F5C20D /* mute.png in Resources */ = {isa = PBXBuildFile; fileRef = E44590C81413C1C400F5C20D /* mute.png */; };
+		E44590CB1413C1C400F5C20D /* mute_non.png in Resources */ = {isa = PBXBuildFile; fileRef = E44590C91413C1C400F5C20D /* mute_non.png */; };
+		E445911A1413CC0500F5C20D /* speaker_gray.png in Resources */ = {isa = PBXBuildFile; fileRef = E44591191413CC0500F5C20D /* speaker_gray.png */; };
+		E44591981413D9F200F5C20D /* solo.png in Resources */ = {isa = PBXBuildFile; fileRef = E44591971413D9F200F5C20D /* solo.png */; };
+		E445919C1413DA2D00F5C20D /* solo_non.png in Resources */ = {isa = PBXBuildFile; fileRef = E445919B1413DA2D00F5C20D /* solo_non.png */; };
 		E48F300111D8EE7B00491B45 /* AUViewWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E48F2FFF11D8EE7B00491B45 /* AUViewWindow.xib */; };
 		E48F30F111DB8B8D00491B45 /* AUCarbonWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E48F30EF11DB8B8D00491B45 /* AUCarbonWindow.xib */; };
 		E4951EA411D63CD000D827EC /* AUViewWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = E4951EA311D63CD000D827EC /* AUViewWindowController.m */; };
@@ -244,6 +249,11 @@
 		E43E5F210D92AD49002FDD1E /* MDRubyCore.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = MDRubyCore.m; path = Ruby_bindings/MDRubyCore.m; sourceTree = "<group>"; };
 		E43E5F220D92AD49002FDD1E /* MDRubyCore.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MDRubyCore.h; path = Ruby_bindings/MDRubyCore.h; sourceTree = "<group>"; };
 		E4402B790BF592170076972C /* ibeam.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ibeam.png; path = icons/ibeam.png; sourceTree = "<group>"; };
+		E44590C81413C1C400F5C20D /* mute.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = mute.png; path = icons/mute.png; sourceTree = "<group>"; };
+		E44590C91413C1C400F5C20D /* mute_non.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = mute_non.png; path = icons/mute_non.png; sourceTree = "<group>"; };
+		E44591191413CC0500F5C20D /* speaker_gray.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = speaker_gray.png; path = icons/speaker_gray.png; sourceTree = "<group>"; };
+		E44591971413D9F200F5C20D /* solo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = solo.png; path = icons/solo.png; sourceTree = "<group>"; };
+		E445919B1413DA2D00F5C20D /* solo_non.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = solo_non.png; path = icons/solo_non.png; sourceTree = "<group>"; };
 		E44A56B8074F99DB002034A7 /* loupe.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = loupe.png; path = icons/loupe.png; sourceTree = "<group>"; };
 		E44A56BA074F9A6F002034A7 /* NSCursorAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSCursorAdditions.h; path = Classes/NSCursorAdditions.h; sourceTree = "<group>"; };
 		E44A56BB074F9A6F002034A7 /* NSCursorAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSCursorAdditions.m; path = Classes/NSCursorAdditions.m; sourceTree = "<group>"; wrapsLines = 1; };
@@ -642,6 +652,11 @@
 				E4BAFFAD0C1C3ED800A5EAED /* eye_open.png */,
 				E4BAFFC20C1C44D800A5EAED /* eye_close.png */,
 				E4CD4D710C106B9800AF6017 /* speaker.png */,
+				E44591191413CC0500F5C20D /* speaker_gray.png */,
+				E44591971413D9F200F5C20D /* solo.png */,
+				E445919B1413DA2D00F5C20D /* solo_non.png */,
+				E44590C81413C1C400F5C20D /* mute.png */,
+				E44590C91413C1C400F5C20D /* mute_non.png */,
 				E4D803DC0737D6F400EB5804 /* move_around.png */,
 				E4DB1648063B485600A80105 /* stretch.png */,
 				E4ECB32B06E231BB00A80105 /* RecButton.png */,
@@ -824,6 +839,11 @@
 				E4C383F31411124C006F2661 /* AboutPanel.xib in Resources */,
 				E4C3844414111D23006F2661 /* lastBuild.txt in Resources */,
 				E4C384E514112400006F2661 /* Version in Resources */,
+				E44590CA1413C1C400F5C20D /* mute.png in Resources */,
+				E44590CB1413C1C400F5C20D /* mute_non.png in Resources */,
+				E445911A1413CC0500F5C20D /* speaker_gray.png in Resources */,
+				E44591981413D9F200F5C20D /* solo.png in Resources */,
+				E445919C1413DA2D00F5C20D /* solo_non.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
