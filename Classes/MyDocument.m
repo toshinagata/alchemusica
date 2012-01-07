@@ -2625,25 +2625,25 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 		
 		/*  Remove events between startTick and endTick  */
 		pt = MDPointerNew(track);
-		MDPointerJumpToTick(pt, startTick);
-		n1 = MDPointerGetPosition(pt);
-		MDPointerJumpToTick(pt, endTick);
-		n2 = MDPointerGetPosition(pt) - n1;
-		psobj = [[MDPointSetObject allocWithZone:[self zone]] init];
-		if (n2 > 0) {
-			MDPointSetAdd([psobj pointSet], n1, n2);
-			[self deleteMultipleEventsAt:psobj fromTrack:trackNo deletedEvents:NULL];
-		}
-		
-		/*  Shift events after endTick  */
-		n2 = MDTrackGetNumberOfEvents(track) - n1;
-		if (n2 > 0) {
-			MDPointSetClear([psobj pointSet]);
-			MDPointSetAdd([psobj pointSet], n1, n2);
-			[self modifyTick:[NSNumber numberWithLong:-deltaTick] ofMultipleEventsAt:psobj inTrack:trackNo mode:MyDocumentModifyAdd destinationPositions:nil];
+		if (MDPointerJumpToTick(pt, startTick) && (n1 = MDPointerGetPosition(pt)) >= 0) {
+			MDPointerJumpToTick(pt, endTick);
+			n2 = MDPointerGetPosition(pt) - n1;
+			psobj = [[MDPointSetObject allocWithZone:[self zone]] init];
+			if (n2 > 0) {
+				MDPointSetAdd([psobj pointSet], n1, n2);
+				[self deleteMultipleEventsAt:psobj fromTrack:trackNo deletedEvents:NULL];
+			}
+			
+			/*  Shift events after endTick  */
+			n2 = MDTrackGetNumberOfEvents(track) - n1;
+			if (n2 > 0) {
+				MDPointSetClear([psobj pointSet]);
+				MDPointSetAdd([psobj pointSet], n1, n2);
+				[self modifyTick:[NSNumber numberWithLong:-deltaTick] ofMultipleEventsAt:psobj inTrack:trackNo mode:MyDocumentModifyAdd destinationPositions:nil];
+			}
+			[psobj release];
 		}
 		MDPointerRelease(pt);
-		[psobj release];
 
 		/*  Change track duration  */
 		[self changeTrackDuration:MDTrackGetDuration(track) - deltaTick ofTrack:trackNo];
