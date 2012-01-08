@@ -1135,13 +1135,7 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 	
 	/*  Ring metronome  */
 	if (gMetronomeInfo.enableWhenPlay || (gMetronomeInfo.enableWhenRecord && inPlayer->isRecording)) {
-		unsigned char note1, note2, vel1, vel2;
-		buf[0] = 0x90 + (gMetronomeInfo.channel & 15);
-		note1 = gMetronomeInfo.note1;
-		note2 = gMetronomeInfo.note2;
-		vel1 = gMetronomeInfo.vel1;
-		vel2 = gMetronomeInfo.vel2;
-		dev = gMetronomeInfo.dev;
+		int isPrincipal = 0;
 		if (inPlayer->nextMetronomeBeat < 0) {
 			PrepareMetronomeForTick(inPlayer, now_tick);
 		}
@@ -1149,8 +1143,7 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 			if (inPlayer->nextMetronomeBeat >= inPlayer->nextMetronomeBar) {
 				/*  Ring the bell  */
 				nextTick = inPlayer->nextMetronomeBar;
-				buf[1] = note1;
-				buf[2] = vel1;
+				isPrincipal = 1;
 				if (inPlayer->nextMetronomeBar == inPlayer->nextTimeSignature) {
 					/*  Update the new beat/bar  */
 					long timebase = MDSequenceGetTimebase(MDMergerGetSequence(inPlayer->merger));
@@ -1177,16 +1170,13 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 			} else {
 				/*  Ring the click  */
 				nextTick = inPlayer->nextMetronomeBeat;
-				buf[1] = note2;
-				buf[2] = vel2;
+				isPrincipal = 0;
 				inPlayer->nextMetronomeBeat += inPlayer->metronomeBeat;
 			}
 			if (inPlayer->nextMetronomeBeat > inPlayer->nextMetronomeBar)
 				inPlayer->nextMetronomeBeat = inPlayer->nextMetronomeBar;
 			nextTime = MDCalibratorTickToTime(inPlayer->calib, nextTick);
-			MDPlayerSendRawMIDI(inPlayer, buf, 3, dev, nextTime);
-			buf[2] = 0;
-			MDPlayerSendRawMIDI(inPlayer, buf, 3, dev, nextTime + 80000);
+			MDPlayerRingMetronomeClick(inPlayer, nextTime, isPrincipal);
 		}
 	} else inPlayer->nextMetronomeBeat = -1;  /*  Disable internal information  */
 	
@@ -1330,11 +1320,30 @@ MDPlayerSendRawMIDI(MDPlayer *player, const unsigned char *p, int size, int dest
 		return -1;
 	if (player != NULL && scheduledTime >= 0)
 		timeStamp = ConvertMDTimeTypeToHostTime(scheduledTime + player->startTime);
+	else if (scheduledTime >= 0)
+		timeStamp = ConvertMDTimeTypeToHostTime(scheduledTime);
 	else timeStamp = 0;
 	packetPtr = MIDIPacketListInit(&packetList);
 	packetPtr = MIDIPacketListAdd(&packetList, sizeof(packetList), packetPtr, timeStamp, size, (Byte *)p);
 	sts = MIDISend(sMIDIOutputPortRef, (MIDIEndpointRef)eref, &packetList);
 	return sts;
+}
+
+void
+MDPlayerRingMetronomeClick(MDPlayer *inPlayer, MDTimeType atTime, int isPrincipal)
+{
+	unsigned char buf[4];
+	buf[0] = 0x90 + (gMetronomeInfo.channel & 15);
+	buf[1] = (isPrincipal ? gMetronomeInfo.note1 : gMetronomeInfo.note2);
+	buf[2] = (isPrincipal ? gMetronomeInfo.vel1 : gMetronomeInfo.vel2);
+	if (atTime == 0) {
+		atTime = GetHostTimeInMDTimeType();
+		if (inPlayer != NULL)
+			atTime -= inPlayer->startTime;
+	}
+	MDPlayerSendRawMIDI(inPlayer, buf, 3, gMetronomeInfo.dev, atTime);
+	buf[2] = 0;
+	MDPlayerSendRawMIDI(inPlayer, buf, 3, gMetronomeInfo.dev, atTime + 80000);
 }
 
 #pragma mark ====== MDPlayer Functions ======

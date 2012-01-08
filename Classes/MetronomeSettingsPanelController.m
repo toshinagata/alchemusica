@@ -190,6 +190,7 @@ static id sharedMetronomeSettingsPanelController;
 	else if (sender == metronomeVelocity2Text)
 		key = MetronomeVelocity2Key;
 	[def setValue:[NSNumber numberWithInt:ival] forKey:key];
+	MDPlayerRingMetronomeClick(NULL, 0, (key == MetronomeNote1Key || key == MetronomeVelocity1Key) ? 1 : 0);
 	[self updateDisplay];
 }
 
@@ -208,6 +209,7 @@ static id sharedMetronomeSettingsPanelController;
 	else if (sender == metronomeVelocity2Stepper)
 		key = MetronomeVelocity2Key;
 	[def setValue:[NSNumber numberWithInt:ival] forKey:key];
+	MDPlayerRingMetronomeClick(NULL, 0, (key == MetronomeNote1Key || key == MetronomeVelocity1Key) ? 1 : 0);
 	[self updateDisplay];
 }
 

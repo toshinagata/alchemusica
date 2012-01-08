@@ -421,19 +421,21 @@ MDEventNoteNameToNoteNumber(const char *p)
 		/*  Note number  */
 		code = atoi(p);
 	} else {
-		if (*p >= 'a' && *p <= 'g') {
-			static unsigned char table[] = { 9, 11, 0, 2, 4, 5, 7 };
+		static unsigned char table[] = { 9, 11, 0, 2, 4, 5, 7 };
+		if (*p >= 'A' && *p <= 'G')
+			code = table[*p++ - 'A'];
+		else if (*p >= 'a' && *p <= 'g')
 			code = table[*p++ - 'a'];
-			if (*p == '+' || *p == '#') {
-				code++;
-				p++;
-			} else if (*p == '-' || *p == 'b') {
-				code--;
-				p++;
-			}
-			n = atoi(p);
-			code += (n + (sIsNote60C4 ? 0 : 1) + 1) * 12;
-		} else return -1;
+		else return -1;
+		if (*p == '+' || *p == '#') {
+			code++;
+			p++;
+		} else if (*p == '-' || *p == 'b') {
+			code--;
+			p++;
+		}
+		n = atoi(p);
+		code += (n + (sIsNote60C4 ? 0 : 1) + 1) * 12;
 	}
 	return code;
 }

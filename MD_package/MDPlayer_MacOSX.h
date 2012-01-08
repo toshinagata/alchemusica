@@ -76,6 +76,7 @@ MDTickType	MDPlayerGetTick(MDPlayer *inPlayer);
 void		MDPlayerSetMIDIThruDeviceAndChannel(long dev, int ch);
 MDStatus	MDPlayerBacktrackEvents(MDPlayer *inPlayer, const long *inEventType, const long *inEventTypeLastOnly);
 int			MDPlayerSendRawMIDI(MDPlayer *player, const unsigned char *p, int size, int destDevice, MDTimeType scheduledTime);
+void		MDPlayerRingMetronomeClick(MDPlayer *inPlayer, MDTimeType atTime, int isPrincipal);
 
 void		MDPlayerReloadDeviceInformation(void);
 long		MDPlayerGetNumberOfDestinations(void);
