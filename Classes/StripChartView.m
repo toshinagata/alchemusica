@@ -582,11 +582,17 @@ getYValue(const MDEvent *ep, int eventKind)
 	NSRect r;
 	NSBezierPath *path;
 
-	if (lineShape == 0) {
+	
+	n = [[self dataSource] graphicTool];
+	if (n == kGraphicSelectTool && localSelectionMode != kGraphicRectangleSelectionMode) {
 		[super drawSelectRegion];
 		return;
 	}
 	
+	//  Pencil mode or rectangle selection mode (without hitting existing chart) causes pencil editing
+	//  Set the line shape (>0): this is the indicator for pencil editing (used in the mouseUp handler)
+	lineShape = [[self dataSource] graphicLineShape];
+
 	//  selectPoints is an instance variable of GraphicClientView
 	n = [selectPoints count];
 	if (n == 0)
@@ -1060,9 +1066,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 	NSPoint pt;
 
 	if ([[self dataSource] graphicTool] == kGraphicPencilTool) {
-		//  Pencil mode: set the line shape (>0)
-		lineShape = [[self dataSource] graphicLineShape];
-		//  Invoke the common dragging procedure
+		//  Invoke the common dragging procedure without checking mouse hitting on the existing chart
 		//  The overridden method drawSelectRegion: implements the specific treatment
 		//  for this class.
 		[super doMouseDown: theEvent];
