@@ -1576,11 +1576,12 @@ MDPlayerRefreshTrackDestinations(MDPlayer *inPlayer)
     if (inPlayer->destInfo == NULL) {
         status = kMDErrorOutOfMemory;
 	} else {
+		MDCalibratorReset(inPlayer->calib);
 		oldTick = MDCalibratorTimeToTick(inPlayer->calib, inPlayer->time);
-	/*	MDMergerReset(inPlayer->merger); */
+		MDMergerReset(inPlayer->merger);
+		MDMergerJumpToTick(inPlayer->merger, oldTick);
 		for (i = origDestNum; i < inPlayer->destNum; i++)
 			inPlayer->destInfo[i] = MDPlayerNewDestinationInfo(temp[i]);
-	/*	MDPlayerJumpToTick(inPlayer, oldTick); */
 		status = kMDNoError;
 	}
 

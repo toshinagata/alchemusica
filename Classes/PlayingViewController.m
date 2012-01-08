@@ -96,6 +96,16 @@
 		selector: @selector(trackModified:)
 		name: MyDocumentTrackModifiedNotification
 		object: myDocument];
+	[[NSNotificationCenter defaultCenter]
+	 addObserver: self
+	 selector: @selector(trackInserted:)
+	 name: MyDocumentTrackInsertedNotification
+	 object: myDocument];
+	[[NSNotificationCenter defaultCenter]
+	 addObserver: self
+	 selector: @selector(trackDeleted:)
+	 name: MyDocumentTrackDeletedNotification
+	 object: myDocument];
 	[self updateMarkerList];
 	[self refreshTimeDisplay];
 }
@@ -763,14 +773,22 @@
 
 - (void)trackModified: (NSNotification *)notification
 {
-/*    long trackNo;
-    if ([docArray indexOfObject: [notification object]] != activeIndex)
-        return; */
-//	MDPlayer *player = [[myDocument myMIDISequence] myPlayer];
-//	if (player != NULL)
-//		MDPlayerRefreshTrackDestinations(player);  /*  Refresh internal track list  */
 	[self updateMarkerList];
     [self refreshTimeDisplay];
+}
+
+- (void)trackInserted: (NSNotification *)notification
+{
+	MDPlayer *player = [[myDocument myMIDISequence] myPlayer];
+	if (player != NULL)
+		MDPlayerRefreshTrackDestinations(player);  /*  Refresh internal track list  */
+	[self updateMarkerList];
+    [self refreshTimeDisplay];
+}
+
+- (void)trackDeleted: (NSNotification *)notification
+{
+	[self trackInserted:notification];
 }
 
 @end
