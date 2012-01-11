@@ -44,21 +44,18 @@ def shift_selected_events
 	  item(:text, :title=>"Shift amount"),
 	  layout(6,
 	    item(:text, :title=>"bar"),
-	    item(:textfield, :width=>35, :tag=>"bar"),
+	    item(:textfield, :width=>50, :tag=>"bar"),
 	    item(:text, :title=>"beat"),
-	    item(:textfield, :width=>35, :tag=>"beat"),
+	    item(:textfield, :width=>50, :tag=>"beat"),
 	    item(:text, :title=>"tick"),
-	    item(:textfield, :width=>35, :tag=>"tick")),
+	    item(:textfield, :width=>50, :tag=>"tick")),
 	  item(:checkbox, :title=>"Shift backward", :tag=>"backward"))
   }
   p hash
   if hash[:status] == 0
-	bar = hash["bar"]
-	bar = (bar ? Float(bar) : 0)
-	beat = hash["beat"]
-	beat = (beat ? Float(beat) : 0)
-	tick = hash["tick"]
-	tick = (tick ? Float(tick) : 0)
+	bar = hash["bar"].to_f
+	beat = hash["beat"].to_f
+	tick = hash["tick"].to_f
 	sign = (hash["backward"] == 0 ? 1 : -1)
 	if (bar == 0 && beat == 0)
 	  delta = sign * tick
