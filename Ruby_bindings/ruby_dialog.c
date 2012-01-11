@@ -1252,7 +1252,7 @@ s_RubyDialog_doItemAction(VALUE val)
 	VALUE self = (VALUE)vp[0];
 	RDItem *ip = (RDItem *)vp[1];
 	RDItem *ip2;
-	VALUE ival, itval, actval;
+	VALUE ival, itval, tval, actval;
 	RubyDialog *dref = s_RubyDialog_GetController(self);
 	VALUE items = rb_iv_get(self, "_items");
 	int nitems = RARRAY_LEN(items);
@@ -1263,7 +1263,7 @@ s_RubyDialog_doItemAction(VALUE val)
 	itval = s_RubyDialog_ItemAtIndex(self, ival);
 	
 	/*  Handle radio group  */
-	if (s_RubyDialogItem_Attr(itval, sTypeSymbol) == sRadioSymbol) {
+	if ((tval = s_RubyDialogItem_Attr(itval, sTypeSymbol)) == sRadioSymbol) {
 		VALUE gval = s_RubyDialogItem_Attr(itval, sRadioGroupSymbol);
 		if (gval == Qnil) {
 			/*  All other radio buttons with no radio group will be deselected  */
@@ -1301,9 +1301,16 @@ s_RubyDialog_doItemAction(VALUE val)
 		/*  If "action" method is defined, then call it without arguments  */
 		rb_funcall(itval, SYM2ID(sActionSymbol), 0);
 	} else {
-		/*  Default action (only for default buttons)  */
+		/*  Default action (for default buttons)  */
 		if (idx == 0 || idx == 1)
 			s_RubyDialog_EndModal(1, &itval, self);
+		else if (tval == sTextFieldSymbol) {
+			if (RubyDialogCallback_lastKeyCode() == 13) {
+				/*  Return key was pressed: send "OK" action  */
+				tval = INT2NUM(0);
+				s_RubyDialog_EndModal(1, &tval, self);
+			}
+		}
 	}
 	return Qnil;
 }

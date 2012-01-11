@@ -86,12 +86,12 @@ VALUE cMRDialog = Qfalse;
 
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification
 {
-	unichar ch;
-	NSEvent *currentEvent = [NSApp currentEvent];
+//	unichar ch;
+//	NSEvent *currentEvent = [NSApp currentEvent];
 	if (dval == NULL)
 		return;
-	if ([currentEvent type] == NSKeyDown && ((ch = [[currentEvent charactersIgnoringModifiers] characterAtIndex:0]) == NSNewlineCharacter || ch == NSEnterCharacter))
-		return;
+/*	if ([currentEvent type] == NSKeyDown && ((ch = [[currentEvent charactersIgnoringModifiers] characterAtIndex:0]) == NSNewlineCharacter || ch == NSEnterCharacter || ch == NSCarriageReturnCharacter))
+		return; */
 	/*  Send action  */
 	id obj = [aNotification object];
 	[obj sendAction:[obj action] to:[obj target]];
@@ -667,6 +667,15 @@ RubyDialogCallback_resizeToBest(RDItem *item)
 	}
 	size = [(NSView *)item frame].size;
 	return RDSizeFromNSSize(size);
+}
+
+int
+RubyDialogCallback_lastKeyCode(void)
+{
+	NSEvent *currentEvent = [NSApp currentEvent];
+	if ([currentEvent type] == NSKeyDown)
+		return [[currentEvent characters] characterAtIndex:0];
+	else return -1;
 }
 
 int

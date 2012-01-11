@@ -95,6 +95,8 @@ STUB int RubyDialogCallback_selectedSubItem(RDItem *item);
 STUB RDSize RubyDialogCallback_sizeOfString(RDItem *item, const char *s);
 STUB RDSize RubyDialogCallback_resizeToBest(RDItem *item);
 
+STUB int RubyDialogCallback_lastKeyCode(void);
+	
 STUB int RubyDialogCallback_savePanel(const char *title, const char *dirname, const char *wildcard, char *buf, int bufsize);
 STUB int RubyDialogCallback_openPanel(const char *title, const char *dirname, const char *wildcard, char ***array, int for_directories, int multiple_selection);
 
