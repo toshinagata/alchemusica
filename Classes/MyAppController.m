@@ -448,26 +448,17 @@ char *
 MyAppCallback_getGlobalSettings(const char *key)
 {
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-	id obj = [defaults objectForKey: @"MDRuby"];
-	if (obj != nil) {
-		obj = [obj objectForKey: [NSString stringWithUTF8String: key]];
-		if (obj != nil)
-			return strdup([obj UTF8String]);
-	}
-	return NULL;
+	id obj = [defaults valueForKeyPath:[NSString stringWithUTF8String:key]];
+	if (obj != nil)
+		return strdup([obj UTF8String]);
+	else return NULL;
 }
 
 void
 MyAppCallback_setGlobalSettings(const char *key, const char *value)
 {
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-	id obj = [defaults objectForKey: @"MDRuby"];
-	if (obj == nil)
-		obj = [NSMutableDictionary dictionary];
-	else
-		obj = [NSMutableDictionary dictionaryWithDictionary: obj];
-	[obj setObject: [NSString stringWithUTF8String: value] forKey: [NSString stringWithUTF8String: key]];
-	[defaults setObject: obj forKey: @"MDRuby"];
+	[defaults setValue:[NSString stringWithUTF8String:value] forKeyPath:[NSString stringWithUTF8String:key]];
 }
 
 void
