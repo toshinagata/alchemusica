@@ -3019,6 +3019,8 @@ row:(int)rowIndex
 		return NO;
 	} else if (sel == @selector(openEventListWindow:) || sel == @selector(deleteSelectedTracks:)) {
 		return [myTableView numberOfSelectedRows] > 0;
+	} else if (sel == @selector(shiftSelectedEvents:)) {
+		return [[self document] isSelectionEmptyInEditableTracks:YES] == NO;
 	} else if ([self respondsToSelector:sel]) {
 		return YES;
 	} else return NO;
