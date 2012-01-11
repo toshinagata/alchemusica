@@ -2512,6 +2512,21 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	return count;
 }
 
+- (BOOL)isSelectionEmptyInEditableTracks:(BOOL)editableOnly
+{
+	int i;
+	int ntracks = [selections count];
+	for (i = 0; i < ntracks; i++) {
+		MDSelectionObject *selection;
+		if (editableOnly && ([self trackAttributeForTrack: i] & kMDTrackAttributeEditable) == 0)
+			continue;
+		selection = (MDSelectionObject *)[selections objectAtIndex: i];
+		if (MDPointSetGetCount([selection pointSet]) > 0)
+			return NO;
+	}
+	return YES;
+}
+
 #pragma mark ==== Menu Commands ====
 
 - (IBAction)performStartPlay: (id)sender

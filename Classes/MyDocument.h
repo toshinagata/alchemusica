@@ -155,6 +155,7 @@ typedef enum MyDocumentModifyMode {
 
 - (MDSelectionObject *)eventSetInTrack: (long)trackNo eventKind: (int)eventKind eventCode: (int)eventCode fromTick: (MDTickType)fromTick toTick: (MDTickType)toTick fromData: (float)fromData toData: (float)toData inPointSet: (MDPointSetObject *)pointSet;
 - (long)countMIDIEventsForTrack: (long)index inSelection: (MDSelectionObject *)sel;
+- (BOOL)isSelectionEmptyInEditableTracks:(BOOL)editableOnly;
 
 - (float)timebase;
 
