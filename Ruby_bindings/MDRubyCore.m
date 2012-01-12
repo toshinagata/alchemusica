@@ -430,11 +430,9 @@ s_Kernel_ExecuteScript(VALUE self, VALUE fname)
 static VALUE
 s_Kernel_GetGlobalSettings(VALUE self, VALUE key)
 {
-	char *p = MyAppCallback_getGlobalSettings(StringValuePtr(key));
+	const char *p = MyAppCallback_getGlobalSettings(StringValuePtr(key));
 	if (p != NULL) {
-		VALUE retval = rb_eval_string(p);
-		free(p);
-		return retval;
+		return rb_str_new2(p);
 	} else return Qnil;
 }
 
@@ -447,8 +445,9 @@ s_Kernel_GetGlobalSettings(VALUE self, VALUE key)
 static VALUE
 s_Kernel_SetGlobalSettings(VALUE self, VALUE key, VALUE value)
 {
-	VALUE sval = rb_inspect(value);
-	MyAppCallback_setGlobalSettings(StringValuePtr(key), StringValuePtr(sval));
+	key = rb_obj_as_string(key);
+	value = rb_obj_as_string(value);
+	MyAppCallback_setGlobalSettings(StringValuePtr(key), StringValuePtr(value));
 	return value;
 }
 

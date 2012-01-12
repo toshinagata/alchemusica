@@ -40,3 +40,7 @@ extern NSString *MyAppControllerModalPanelTimerNotification;
 - (void)getVersion:(NSString **)outVersion copyright:(NSString **)outCopyright lastBuild:(NSString **)outLastBuild;
 
 @end
+
+extern id MyAppCallback_getObjectGlobalSettings(id keyPath);
+extern void MyAppCallback_setObjectGlobalSettings(id keyPath, id value);
+extern void MyAppCallback_saveGlobalSettings(void);

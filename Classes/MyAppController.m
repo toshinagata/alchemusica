@@ -105,6 +105,7 @@ static int sScriptMenuCount = 0;
 - (void)applicationWillTerminate:(NSNotification *)aNotification
 {
 	MDAudioDispose();
+	MyAppCallback_saveGlobalSettings();
 }
 
 static void
@@ -431,6 +432,8 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 
 #pragma mark ====== Plain-C interface ======
 
+static NSMutableDictionary *sGlobalSettings = nil;
+
 void
 MyAppCallback_loadGlobalSettings(void)
 {
@@ -440,25 +443,75 @@ MyAppCallback_loadGlobalSettings(void)
 void
 MyAppCallback_saveGlobalSettings(void)
 {
-	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-	[defaults synchronize];
+	if (sGlobalSettings != nil) {
+		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+		[defaults setValue:sGlobalSettings forKey:@"settings"];
+		[defaults synchronize];
+	}
 }
 
-char *
+id
+MyAppCallback_getObjectGlobalSettings(id keyPath)
+{
+	if (sGlobalSettings == nil) {
+		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+		sGlobalSettings = [defaults valueForKey:@"settings"];
+		if (sGlobalSettings == nil) {
+			sGlobalSettings = [[NSMutableDictionary alloc] init];
+			[defaults setValue:sGlobalSettings forKey:@"settings"];
+		}
+	}
+	if (keyPath != nil)
+		return [sGlobalSettings valueForKeyPath:keyPath];
+	else return nil;
+}
+
+void
+MyAppCallback_setObjectGlobalSettings(id keyPath, id value)
+{
+	id dic, obj, key;
+	const char *p, *pp;
+	p = [keyPath UTF8String];
+	if (sGlobalSettings == nil)
+		obj = MyAppCallback_getObjectGlobalSettings(nil);  /*  Initialize sGlobalSettings  */
+	dic = key = nil;
+	obj = sGlobalSettings;
+	while ((pp = strchr(p, '.')) != NULL) {
+		key = [NSString stringWithFormat:@"%.*s", (int)(pp - p), p];
+		dic = obj;
+		obj = [dic valueForKey:key];
+		if (obj == nil) {
+			obj = [NSMutableDictionary dictionary];
+			[dic setValue:obj forKey:key];
+		}
+		p = pp + 1;
+	}
+	/*  Set the given object  */
+	/*  If the container (= obj) is not mutable, then make it mutable  */
+	if (dic != nil && ![obj isKindOfClass:[NSMutableDictionary class]]) {
+		obj = [NSMutableDictionary dictionaryWithDictionary:obj];
+		[dic setValue:obj forKey:key];
+	}
+	key = [NSString stringWithUTF8String:p];
+	[obj setValue:value forKey:key];
+}
+
+const char *
 MyAppCallback_getGlobalSettings(const char *key)
 {
-	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-	id obj = [defaults valueForKeyPath:[NSString stringWithUTF8String:key]];
-	if (obj != nil)
-		return strdup([obj UTF8String]);
+	id obj = MyAppCallback_getObjectGlobalSettings([NSString stringWithUTF8String:key]);
+	if (obj != nil) {
+		if (![obj isKindOfClass:[NSString class]])
+			obj = [obj description];
+		return [obj UTF8String];
+	}
 	else return NULL;
 }
 
 void
 MyAppCallback_setGlobalSettings(const char *key, const char *value)
 {
-	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-	[defaults setValue:[NSString stringWithUTF8String:value] forKeyPath:[NSString stringWithUTF8String:key]];
+	MyAppCallback_setObjectGlobalSettings([NSString stringWithUTF8String:key], [NSString stringWithUTF8String:value]);
 }
 
 void

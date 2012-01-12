@@ -22,14 +22,14 @@
 #include "MDHeaders.h"
 
 NSString
-*MetronomeDeviceKey = @"metronomeDevice",
-*MetronomeChannelKey = @"metronomeChannel",
-*MetronomeNote1Key = @"metronomeNote1",
-*MetronomeNote2Key = @"metronomeNote2",
-*MetronomeVelocity1Key = @"metronomeVelocity1",
-*MetronomeVelocity2Key = @"metronomeVelocity2",
-*MetronomeEnableWhenPlayKey = @"metronomeEnableWhenPlay",
-*MetronomeEnableWhenRecordKey = @"metronomeEnableWhenRecord";
+*MetronomeDeviceKey = @"metronome.device",
+*MetronomeChannelKey = @"metronome.channel",
+*MetronomeNote1Key = @"metronome.note1",
+*MetronomeNote2Key = @"metronome.note2",
+*MetronomeVelocity1Key = @"metronome.velocity1",
+*MetronomeVelocity2Key = @"metronome.velocity2",
+*MetronomeEnableWhenPlayKey = @"metronome.enableWhenPlay",
+*MetronomeEnableWhenRecordKey = @"metronome.enableWhenRecord";
 
 static id sharedMetronomeSettingsPanelController;
 
@@ -39,53 +39,53 @@ static id sharedMetronomeSettingsPanelController;
 {
 	/*  Initialize the global metronome settings  */
 	id obj;
-	NSUserDefaults *def = [NSUserDefaults standardUserDefaults];
-	obj = [def objectForKey:MetronomeDeviceKey];
+	obj = MyAppCallback_getObjectGlobalSettings(MetronomeDeviceKey);
 	if (obj != nil)
 		gMetronomeInfo.dev = MDPlayerGetDestinationNumberFromName([obj UTF8String]);
 	else gMetronomeInfo.dev = -1;
-	obj = [def objectForKey:MetronomeChannelKey];
+	obj = MyAppCallback_getObjectGlobalSettings(MetronomeChannelKey);
 	if (obj == nil) {
 		obj = [NSNumber numberWithInt:0];
-		[def setObject:obj forKey:MetronomeChannelKey];
+		MyAppCallback_setObjectGlobalSettings(MetronomeChannelKey, obj);
 	}
 	gMetronomeInfo.channel = [obj intValue] % 16;
-	obj = [def objectForKey:MetronomeNote1Key];
+	obj = MyAppCallback_getObjectGlobalSettings(MetronomeNote1Key);
 	if (obj == nil) {
 		obj = [NSNumber numberWithInt:64];
-		[def setObject:obj forKey:MetronomeNote1Key];
+		MyAppCallback_setObjectGlobalSettings(MetronomeNote1Key, obj);
 	}
 	gMetronomeInfo.note1 = [obj intValue] % 128;
-	obj = [def objectForKey:MetronomeNote2Key];
+	obj = MyAppCallback_getObjectGlobalSettings(MetronomeNote2Key);
 	if (obj == nil) {
 		obj = [NSNumber numberWithInt:60];
-		[def setObject:obj forKey:MetronomeNote2Key];
+		MyAppCallback_setObjectGlobalSettings(MetronomeNote2Key, obj);
 	}
 	gMetronomeInfo.note2 = [obj intValue] % 128;
-	obj = [def objectForKey:MetronomeVelocity1Key];
+	obj = MyAppCallback_getObjectGlobalSettings(MetronomeVelocity1Key);
 	if (obj == nil) {
 		obj = [NSNumber numberWithInt:127];
-		[def setObject:obj forKey:MetronomeVelocity1Key];
+		MyAppCallback_setObjectGlobalSettings(MetronomeVelocity1Key, obj);
 	}
 	gMetronomeInfo.vel1 = [obj intValue] % 128;
-	obj = [def objectForKey:MetronomeVelocity2Key];
+	obj = MyAppCallback_getObjectGlobalSettings(MetronomeVelocity2Key);
 	if (obj == nil) {
 		obj = [NSNumber numberWithInt:127];
-		[def setObject:obj forKey:MetronomeVelocity2Key];
+		MyAppCallback_setObjectGlobalSettings(MetronomeVelocity2Key, obj);
 	}
 	gMetronomeInfo.vel2 = [obj intValue] % 128;
-	obj = [def objectForKey:MetronomeEnableWhenPlayKey];
+	obj = MyAppCallback_getObjectGlobalSettings(MetronomeEnableWhenPlayKey);
 	if (obj == nil) {
 		obj = [NSNumber numberWithBool:NO];
-		[def setObject:obj forKey:MetronomeEnableWhenPlayKey];
+		MyAppCallback_setObjectGlobalSettings(MetronomeEnableWhenPlayKey, obj);
 	}
 	gMetronomeInfo.enableWhenPlay = [obj boolValue];
-	obj = [def objectForKey:MetronomeEnableWhenRecordKey];
+	obj = MyAppCallback_getObjectGlobalSettings(MetronomeEnableWhenRecordKey);
 	if (obj == nil) {
 		obj = [NSNumber numberWithBool:YES];
-		[def setObject:obj forKey:MetronomeEnableWhenRecordKey];
+		MyAppCallback_setObjectGlobalSettings(MetronomeEnableWhenRecordKey, obj);
 	}
 	gMetronomeInfo.enableWhenRecord = [obj boolValue];
+	MyAppCallback_saveGlobalSettings();
 }
 
 + (void)openMetronomeSettingsPanel
@@ -118,18 +118,17 @@ static id sharedMetronomeSettingsPanelController;
 {
 	int i, ival;
 	id obj;
-	NSUserDefaults *def = [NSUserDefaults standardUserDefaults];
-	obj = [def valueForKey:MetronomeDeviceKey];
+	obj = MyAppCallback_getObjectGlobalSettings(MetronomeDeviceKey);
 	[metronomeDevicePopUp selectItemWithTitle: obj];
 	if (obj)
 		gMetronomeInfo.dev = MDPlayerGetDestinationNumberFromName([obj UTF8String]);
 	else gMetronomeInfo.dev = -1;
-	ival = [[def valueForKey:MetronomeChannelKey] intValue];
+	ival = [MyAppCallback_getObjectGlobalSettings(MetronomeChannelKey) intValue];
 	[metronomeChannelPopUp selectItemAtIndex: ival];
 	gMetronomeInfo.channel = ival % 16;
 	for (i = 0; i < 2; i++) {
 		char nname[6];
-		obj = [def valueForKey:(i == 0 ? MetronomeNote1Key : MetronomeNote2Key)];
+		obj = MyAppCallback_getObjectGlobalSettings(i == 0 ? MetronomeNote1Key : MetronomeNote2Key);
 		if (obj == nil)
 			ival = (i == 0 ? 64 : 60);
 		else ival = [obj intValue];
@@ -139,7 +138,7 @@ static id sharedMetronomeSettingsPanelController;
 		if (i == 0)
 			gMetronomeInfo.note1 = ival % 128;
 		else gMetronomeInfo.note2 = ival % 128;
-		obj = [def valueForKey:(i == 0 ? MetronomeVelocity1Key : MetronomeVelocity2Key)];
+		obj = MyAppCallback_getObjectGlobalSettings(i == 0 ? MetronomeVelocity1Key : MetronomeVelocity2Key);
 		if (obj == nil)
 			ival = (i == 0 ? 127 : 120);
 		else ival = [obj intValue];
@@ -149,11 +148,11 @@ static id sharedMetronomeSettingsPanelController;
 			gMetronomeInfo.vel1 = ival % 128;
 		else gMetronomeInfo.vel2 = ival % 128;
 	}
-	obj = [def objectForKey:MetronomeEnableWhenPlayKey];
+	obj = MyAppCallback_getObjectGlobalSettings(MetronomeEnableWhenPlayKey);
 	ival = (obj != nil && [obj boolValue]);
 	gMetronomeInfo.enableWhenPlay = ival;
 	[metronomeEnableWhenPlayCheck setState:(ival ? NSOnState : NSOffState)];
-	obj = [def objectForKey:MetronomeEnableWhenRecordKey];
+	obj = MyAppCallback_getObjectGlobalSettings(MetronomeEnableWhenRecordKey);
 	ival = (obj != nil && [obj boolValue]);
 	gMetronomeInfo.enableWhenRecord = ival;
 	[metronomeEnableWhenRecordCheck setState:(ival ? NSOnState : NSOffState)];
@@ -161,21 +160,20 @@ static id sharedMetronomeSettingsPanelController;
 
 - (IBAction)popUpSelected:(id)sender
 {
-	NSUserDefaults *def = [NSUserDefaults standardUserDefaults];
 	id item = [sender selectedItem];
 	NSString *str;
 	if (sender == metronomeDevicePopUp) {
 		str = [item title];
-		[def setValue: str forKey: MetronomeDeviceKey];
+		MyAppCallback_setObjectGlobalSettings(MetronomeDeviceKey, str);
 	} else if (sender == metronomeChannelPopUp) {
-		[def setValue:[NSNumber numberWithInt:[sender indexOfSelectedItem]] forKey:MetronomeChannelKey];
+		MyAppCallback_setObjectGlobalSettings(MetronomeChannelKey, [NSNumber numberWithInt:[sender indexOfSelectedItem]]);
 	}
+	MyAppCallback_saveGlobalSettings();
 	[self updateDisplay];
 }
 
 - (IBAction)metronomeClickTextChanged:(id)sender
 {
-	NSUserDefaults *def = [NSUserDefaults standardUserDefaults];
 	NSString *str;
 	id key;
 	int ival;
@@ -189,14 +187,14 @@ static id sharedMetronomeSettingsPanelController;
 		key = MetronomeVelocity1Key;
 	else if (sender == metronomeVelocity2Text)
 		key = MetronomeVelocity2Key;
-	[def setValue:[NSNumber numberWithInt:ival] forKey:key];
-	MDPlayerRingMetronomeClick(NULL, 0, (key == MetronomeNote1Key || key == MetronomeVelocity1Key) ? 1 : 0);
+	MyAppCallback_setObjectGlobalSettings(key, [NSNumber numberWithInt:ival]);
+	MyAppCallback_saveGlobalSettings();
 	[self updateDisplay];
+	MDPlayerRingMetronomeClick(NULL, 0, (key == MetronomeNote1Key || key == MetronomeVelocity1Key) ? 1 : 0);
 }
 
 - (IBAction)metronomeClickStepperMoved:(id)sender
 {
-	NSUserDefaults *def = [NSUserDefaults standardUserDefaults];
 	int ival;
 	id key;
 	ival = [sender intValue];
@@ -208,16 +206,17 @@ static id sharedMetronomeSettingsPanelController;
 		key = MetronomeVelocity1Key;
 	else if (sender == metronomeVelocity2Stepper)
 		key = MetronomeVelocity2Key;
-	[def setValue:[NSNumber numberWithInt:ival] forKey:key];
-	MDPlayerRingMetronomeClick(NULL, 0, (key == MetronomeNote1Key || key == MetronomeVelocity1Key) ? 1 : 0);
+	MyAppCallback_setObjectGlobalSettings(key, [NSNumber numberWithInt:ival]);
+	MyAppCallback_saveGlobalSettings();
 	[self updateDisplay];
+	MDPlayerRingMetronomeClick(NULL, 0, (key == MetronomeNote1Key || key == MetronomeVelocity1Key) ? 1 : 0);
 }
 
 - (IBAction)checkBoxPressed:(id)sender
 {
-	NSUserDefaults *def = [NSUserDefaults standardUserDefaults];
 	int state = [sender state];
-	[def setValue:[NSNumber numberWithBool:(state == NSOnState)] forKey:(sender == metronomeEnableWhenPlayCheck ? MetronomeEnableWhenPlayKey : MetronomeEnableWhenRecordKey)];
+	MyAppCallback_setObjectGlobalSettings((sender == metronomeEnableWhenPlayCheck ? MetronomeEnableWhenPlayKey : MetronomeEnableWhenRecordKey), [NSNumber numberWithBool:(state == NSOnState)]);
+	MyAppCallback_saveGlobalSettings();
 	[self updateDisplay];
 }
 

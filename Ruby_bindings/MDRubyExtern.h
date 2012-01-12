@@ -44,8 +44,9 @@ extern int MRSequenceUnregister(void *myDocument);
 
 void Ruby_getVersionStrings(const char **version, const char **copyright);
 	
-STUB char *MyAppCallback_getGlobalSettings(const char *key);
+STUB const char *MyAppCallback_getGlobalSettings(const char *key);
 STUB void MyAppCallback_setGlobalSettings(const char *key, const char *value);
+STUB void MyAppCallback_saveGlobalSettings(void);
 STUB int MyAppCallback_showScriptMessage(const char *fmt, ...);
 STUB void MyAppCallback_setConsoleColor(int color);
 STUB void MyAppCallback_showRubyPrompt(void);
