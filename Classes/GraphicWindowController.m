@@ -2143,24 +2143,24 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 		case kIbeamButtonTag:
 			[[[[self window] contentView] viewWithTag: kSelectButtonTag] setState: NSOffState];
 			[[[[self window] contentView] viewWithTag: kPencilButtonTag] setState: NSOffState];
-			[[[[self window] contentView] viewWithTag: kShapePopUpTag] setEnabled: NO];
-			[[[[self window] contentView] viewWithTag: kModePopUpTag] setEnabled: NO];
+		//	[[[[self window] contentView] viewWithTag: kShapePopUpTag] setEnabled: NO];
+		//	[[[[self window] contentView] viewWithTag: kModePopUpTag] setEnabled: NO];
 			graphicTool = kGraphicSelectTool;
 			graphicSelectionMode = kGraphicIbeamSelectionMode;
 			break;
 		case kSelectButtonTag:
 			[[[[self window] contentView] viewWithTag: kIbeamButtonTag] setState: NSOffState];
 			[[[[self window] contentView] viewWithTag: kPencilButtonTag] setState: NSOffState];
-			[[[[self window] contentView] viewWithTag: kShapePopUpTag] setEnabled: NO];
-			[[[[self window] contentView] viewWithTag: kModePopUpTag] setEnabled: NO];
+		//	[[[[self window] contentView] viewWithTag: kShapePopUpTag] setEnabled: NO];
+		//	[[[[self window] contentView] viewWithTag: kModePopUpTag] setEnabled: NO];
 			graphicTool = kGraphicSelectTool;
 			graphicSelectionMode = kGraphicRectangleSelectionMode;
 			break;
 		case kPencilButtonTag:
 			[[[[self window] contentView] viewWithTag: kIbeamButtonTag] setState: NSOffState];
 			[[[[self window] contentView] viewWithTag: kSelectButtonTag] setState: NSOffState];
-			[[[[self window] contentView] viewWithTag: kShapePopUpTag] setEnabled: YES];
-			[[[[self window] contentView] viewWithTag: kModePopUpTag] setEnabled: YES];
+		//	[[[[self window] contentView] viewWithTag: kShapePopUpTag] setEnabled: YES];
+		//	[[[[self window] contentView] viewWithTag: kModePopUpTag] setEnabled: YES];
 			graphicTool = kGraphicPencilTool;
 			break;
 	}
