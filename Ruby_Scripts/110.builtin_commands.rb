@@ -14,7 +14,8 @@ class Sequence
 #  The commands in this file are hardcoded so that the names should not be modified
 
 def change_control_number
-  hash = RubyDialog.run {
+  hash = RubyDialog.run("Change Control Number") {
+	@bind_global_settings = "change_control_number_dialog"
     layout(1,
 	  layout(2,
 	    item(:text, :title=>"Old control number"),
@@ -39,7 +40,8 @@ def change_control_number
 end
 
 def shift_selected_events
-  hash = RubyDialog.run {
+  hash = RubyDialog.run("Shift Selected Events") {
+    @bind_global_settings = "shift_selected_events_dialog"
 	layout(1,
 	  item(:text, :title=>"Shift amount"),
 	  layout(6,
@@ -87,7 +89,8 @@ def scale_selected_time_dialog
   new_e_tick = e_tick
   new_duration = duration
   seq = self
-  hash = RubyDialog.run {
+  hash = RubyDialog.run("Scale Selected Time") {
+    @bind_global_settings = "scale_selected_time_dialog"
     str_to_tick = proc { |str|
 		a = str.scan(/\d+/)
 		while a.length < 3; a.unshift("1"); end

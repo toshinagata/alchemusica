@@ -927,7 +927,23 @@ s_RubyDialog_Item(int argc, VALUE *argv, VALUE self)
 		else if (rect.size.width < rect.size.height && rect.size.height == 2)
 			rb_ivar_set(new_item, SYM2ID(sVFillSymbol), Qtrue);
 	}
-
+	
+	if (rb_hash_lookup(hash, sValueSymbol) == Qnil && (val = rb_hash_lookup(hash, sTagSymbol)) != Qnil) {
+		/*  If @bind_global_settings has a String object and this item has a tag, then 
+			get the value from the global settings.  */
+		VALUE bindval = rb_iv_get(self, "@bind_global_settings");
+		if (TYPE(bindval) == T_STRING) {
+			char *key_string;
+			const char *val_string;
+			val = rb_obj_as_string(val);
+			asprintf(&key_string, "%s.%s", StringValuePtr(bindval), StringValuePtr(val));
+			val_string = MyAppCallback_getGlobalSettings(key_string);
+			free(key_string);
+			if (val_string != NULL)
+				s_RubyDialogItem_SetAttr(new_item, sValueSymbol, rb_str_new2(val_string));
+		}
+	}
+	
 	return new_item;
 }
 
@@ -1054,10 +1070,13 @@ s_RubyDialog_EndModal(int argc, VALUE *argv, VALUE self)
 	}
 	if (retval == Qundef) {
 		/*  The default return value  */
+		int i;
 		VALUE items = rb_iv_get(self, "_items");
 		int len = RARRAY_LEN(items);
 		VALUE *ptr = RARRAY_PTR(items);
-		int i;
+		VALUE bind = rb_iv_get(self, "@bind_global_settings");
+		if (TYPE(bind) != T_STRING)
+			bind = Qnil;
 		retval = rb_hash_new();
 		/*  Get values for controls with defined tags  */
 		for (i = 2; i < len; i++) {
@@ -1068,6 +1087,15 @@ s_RubyDialog_EndModal(int argc, VALUE *argv, VALUE self)
 				VALUE val;
 				val = s_RubyDialogItem_Attr(ptr[i], sValueSymbol);
 				rb_hash_aset(retval, tag, val);
+				if (bind != Qnil) {
+					/*  Set the value to the global settings  */
+					char *key_string;
+					tag = rb_obj_as_string(tag);
+					val = rb_obj_as_string(val);
+					asprintf(&key_string, "%s.%s", StringValuePtr(bind), StringValuePtr(tag));
+					MyAppCallback_setGlobalSettings(key_string, StringValuePtr(val));
+					free(key_string);
+				}
 			}
 		}
 		rb_hash_aset(retval, ID2SYM(rb_intern("status")), INT2NUM(flag));
