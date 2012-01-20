@@ -184,9 +184,12 @@ typedef enum MyDocumentModifyMode {
 - (IBAction)performPausePlay: (id)sender;
 - (IBAction)performStartMIDIRecording: (id)sender;
 - (IBAction)performStartAudioRecording: (id)sender;
+
+//  General editing
 - (IBAction)insertBlankTime:(id)sender;
 - (IBAction)deleteSelectedTime:(id)sender;
 - (IBAction)scaleSelectedTime:(id)sender;
+- (IBAction)quantizeSelectedEvents:(id)sender;
 
 //  Recording
 - (BOOL)startRecording;

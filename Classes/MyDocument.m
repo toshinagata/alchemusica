@@ -26,6 +26,7 @@
 #import "GraphicWindowController.h"
 #import "PlayingViewController.h"
 #import "MyAppController.h"
+#import "QuantizePanelController.h"
 
 #include "MDRubyExtern.h"
 
@@ -2812,6 +2813,85 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	}
 }
 
+- (IBAction)quantizeSelectedEvents:(id)sender
+{
+	int result;
+	QuantizePanelController *cont = [[QuantizePanelController alloc] init];
+	[cont setTimebase:[self timebase]];
+	result = [NSApp runModalForWindow:[cont window]];
+	[cont close];
+	[cont release];
+	if (result == NSRunStoppedResponse) {
+		float note, strength, swing;
+		int trackNo;
+		NSMutableData *dt = [NSMutableData data];
+		MDCalibrator *calib = [[self myMIDISequence] sharedCalibrator];
+		NSWindowController *mainCont = [[NSApp mainWindow] windowController];
+		id obj = MyAppCallback_getObjectGlobalSettings(QuantizeNoteKey);
+		note = (obj ? [obj floatValue] : [self timebase]);
+		obj = MyAppCallback_getObjectGlobalSettings(QuantizeStrengthKey);
+		strength = (obj ? [obj floatValue] : 1.0);
+		obj = MyAppCallback_getObjectGlobalSettings(QuantizeSwingKey);
+		swing = (obj ? [obj floatValue] : 0.5);
+		for (trackNo = [[self myMIDISequence] trackCount] - 1; trackNo >= 1; trackNo--) {
+			MDTickType *tptr;
+			long n1, n2, index;
+			MDTrack *track;
+			MDTickType baseTick, nextBaseTick;
+			long baseMeasure;
+			MDPointSetObject *psobj;
+			MDPointSet *pset;
+			MDPointer *pt;
+			MDEvent *ep;
+			if (![mainCont isFocusTrack:trackNo])
+				continue;
+			track = [[self myMIDISequence] getTrackAtIndex:trackNo];
+			psobj = [self selectionOfTrack:trackNo];
+			if (psobj == nil || (pset = [psobj pointSet]) == NULL || (n1 = MDPointSetGetCount(pset)) == 0)
+				continue;
+			[dt setLength:sizeof(MDTickType) * n1];
+			tptr = (MDTickType *)[dt mutableBytes];
+			pt = MDPointerNew(track);
+			index = -1;
+			baseMeasure = -1;
+			n1 = 0;
+			while ((ep = MDPointerForwardWithPointSet(pt, pset, &index)) != NULL) {
+				double d;
+				MDTickType etick = MDGetTick(ep);
+				MDTickType targetTick;
+				if (baseMeasure < 0) {
+					long beat, tick;
+					MDCalibratorTickToMeasure(calib, etick, &baseMeasure, &beat, &tick);
+					baseTick = MDCalibratorMeasureToTick(calib, baseMeasure, 0, 0);
+					nextBaseTick = MDCalibratorMeasureToTick(calib, ++baseMeasure, 0, 0);
+				} else if (etick >= nextBaseTick) {
+					baseTick = nextBaseTick;
+					nextBaseTick = MDCalibratorMeasureToTick(calib, ++baseMeasure, 0, 0);
+				}
+				d = (double)(etick - baseTick) / (note * 2.0);
+				n2 = floor(d);
+				d -= n2;
+				targetTick = baseTick + n2 * note * 2;
+				/*
+				+-------------+---|-------+
+				0             1  1+swing  2
+				*/
+				if (d < 0.25 + swing * 0.25) {
+					/*  Use above targetTick  */
+				} else if (d < 0.75 + swing * 0.25) {
+					targetTick += note * (1 + swing);
+				} else {
+					targetTick += note * 2;
+				}
+				etick = floor(etick + (targetTick - etick) * strength + 0.5);
+				tptr[n1++] = etick;
+			}
+			[self modifyTick:dt ofMultipleEventsAt:psobj inTrack:trackNo mode:MyDocumentModifySet destinationPositions:nil];
+			MDPointerRelease(pt);
+		}
+	}
+}
+
 - (BOOL)validateUserInterfaceItem: (id)anItem
 {
 	SEL sel = [anItem action];
@@ -2823,6 +2903,8 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 		MDTickType startTick, endTick;
 		[self getEditingRangeStart:&startTick end:&endTick];
 		return (startTick < endTick);
+	} else if (sel == @selector(quantizeSelectedEvents:)) {
+		return [self isSelectionEmptyInEditableTracks:YES] == NO;
 	}
 	return [super validateUserInterfaceItem:anItem];
 }
