@@ -758,3 +758,33 @@ svn import . svn+ssh://toshinagata1964@svn.sourceforge.jp/svnroot/alchemusica/tr
 cd ~/Development
 mv Alchemusica was_Alchemusica
 svn co svn+ssh://toshinagata1964@svn.sourceforge.jp/svnroot/alchemusica/trunk Alchemusica
+
+  タグの付け方。
+svn copy svn+ssh://toshinagata1964@svn.sourceforge.jp/svnroot/alchemusica/trunk svn+ssh://toshinagata1964@svn.sourceforge.jp/svnroot/alchemusica/tags/version_x_y_z -m "version x.y.z"
+
+2012.1.21.
+　バージョン 0.6.1
+クオンタイズを実装。（Events メニュー）
+グラフィックウィンドウで、ライン形状とオペレーションモード (set/add...) のポップアップボタンを常に有効にした。
+初期設定の保存方法を変更。一部の設定が初期化されてしまうかも。すみません。
+イベントをシフトするコマンドを実装。（Events メニュー）
+トラックの挿入／削除が演奏に反映されていなかったので修正。
+ストリップチャートの編集が、矩形選択モードでもできるようにした。
+メトロノーム設定ウィンドウが正しく動作していなかったので修正。また、クリック音の設定を変更したとき音を鳴らすようにした。
+"Detele selected time" がトラックにイベントが無いときクラッシュしていたので修正。
+トラックソロ機能を実装。
+ポーズボタンが正しくハイライトされていなかったので修正。
+
+- Quantize selected events menu command is implemented.
+- Ruby dialogs can be bound to the global settings by assigning @bind_global_settings instance variable.
+- Graphic window: the popup buttons for line shape and operation mode (set/add/...) are always enabled.
+- The global settings are again restructured. The settings are now under "settings" entry of the user default.
+- set/get_global_settings command changes feature: the setting is no longer placed under "MDRuby" but directly in the UserDefaults, and the key path is now recognized.
+- Text field in the Ruby dialog causes "OK" as the default action when return key is pressed.
+- Shift selected events command is enabled.
+- Inserting/deleting tracks was not reflected in the MIDI playing. Fixed.
+- Editing strip chart is also possible when rectangle selection mode is enabled.
+- Metronome setting window was not working correctly when the note name is edited. Fixed. Rings metronome bell/click during editing.
+- Deleting selected time causes crash when there are no events in the editing track. Fixed.
+- Solo track capability is implemented.
+- The Pause button was not highlighted correctly. Fixed.
