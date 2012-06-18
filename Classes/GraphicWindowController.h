@@ -40,13 +40,14 @@ enum {
 	kGraphicDraw = 4   //  allow inserting new events (with pencil tools)
 };
 
-//  Graphic Tool (returned by graphicTool: )
+//  Graphic Tool (returned by graphicTool)
 enum {
-	kGraphicSelectTool = 1,
+	kGraphicRectangleSelectTool = 1,
+	kGraphicIbeamSelectTool,
 	kGraphicPencilTool
 };
 
-//  Line shape (returned by graphicLineShape: )
+//  Line shape (returned by graphicLineShape)
 enum {
 	kGraphicLinearShape = 1,
 	kGraphicParabolaShape,
@@ -55,15 +56,16 @@ enum {
 	kGraphicRandomShape
 };
 
-//  Selection mode (returned by selectionMode: )
+/*
+//  Selection mode (returned by graphicSelectionMode)
 enum {
     kGraphicRectangleSelectionMode = 0,
 	kGraphicIbeamSelectionMode,
     kGraphicMarqueeSelectionMode
 };
+*/
 
-
-//  Editing mode for strip chart (returned by graphicEditingMode: )
+//  Editing mode for strip chart (returned by graphicEditingMode)
 enum {
 	kGraphicSetMode = 1,
 	kGraphicAddMode,
@@ -121,7 +123,7 @@ enum {
 	int graphicTool;
 	int graphicLineShape;
 	int graphicEditingMode;
-	int graphicSelectionMode;
+//	int graphicSelectionMode;
 	
 	//  Client view that received the last mouse event
 	int lastMouseClientViewIndex;
@@ -220,7 +222,7 @@ enum {
 - (int)graphicTool;
 - (int)graphicLineShape;
 - (int)graphicEditingMode;
-- (int)graphicSelectionMode;
+//- (int)graphicSelectionMode;
 - (GraphicClientView *)clientViewAtIndex: (int)index;
 
 //  Action methods for track table

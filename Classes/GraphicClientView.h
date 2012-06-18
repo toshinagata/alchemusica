@@ -26,7 +26,7 @@ enum {
 @interface GraphicClientView : NSView {
     id dataSource;				//  The data source
     float minValue, maxValue;
-    int localSelectionMode;     // Get value from -[GraphicWindowController graphicSelectionMode] in mouseDown handler and keep value. Some client (like TimeChartView) may want to override the selection mode.
+    int localGraphicTool;     // Get value from -[GraphicWindowController graphicTool] in mouseDown handler and keep value. Some client (like TimeChartView) may want to override the selection mode.
     BOOL isDragging;
     BOOL isLoupeDragging;
     unsigned int initialModifierFlags;

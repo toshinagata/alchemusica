@@ -332,7 +332,8 @@ typedef struct TimeScalingRecord {
 	} else {
 		[super doMouseDown: theEvent];
 	}
-	localSelectionMode = kGraphicIbeamSelectionMode;
+	if (localGraphicTool == kGraphicRectangleSelectTool)
+		localGraphicTool = kGraphicIbeamSelectTool;
 }
 
 - (void)doMouseDragged: (NSEvent *)theEvent

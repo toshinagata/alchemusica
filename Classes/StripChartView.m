@@ -298,8 +298,8 @@ getYValue(const MDEvent *ep, int eventKind)
 	pt.y = floor(bounds.origin.x + bounds.size.height / 2) + 0.5;
 	[[NSColor lightGrayColor] set];
 	[NSBezierPath strokeLineFromPoint: pt toPoint: NSMakePoint(pt.x + bounds.size.width, pt.y)];
-
-//	if ([self isDragging])
+	
+	if ([self isDragging])
 		[self drawSelectRegion];
 }
 
@@ -582,16 +582,15 @@ getYValue(const MDEvent *ep, int eventKind)
 	NSRect r;
 	NSBezierPath *path;
 
-	
 	n = [[self dataSource] graphicTool];
-	if (n == kGraphicSelectTool && localSelectionMode != kGraphicRectangleSelectionMode) {
+	if (lineShape == 0 && (n == kGraphicIbeamSelectTool || n == kGraphicRectangleSelectTool)) {
 		[super drawSelectRegion];
 		return;
 	}
 	
-	//  Pencil mode or rectangle selection mode (without hitting existing chart) causes pencil editing
+	//  Pencil mode
 	//  Set the line shape (>0): this is the indicator for pencil editing (used in the mouseUp handler)
-	lineShape = [[self dataSource] graphicLineShape];
+//	lineShape = [[self dataSource] graphicLineShape];
 
 	//  selectPoints is an instance variable of GraphicClientView
 	n = [selectPoints count];
@@ -1035,10 +1034,10 @@ cubicReverseFunc(float x, const float *points, float tt)
 	long pos;
 	MDEvent *ep;
 	int n, tool;
-	NSPoint pt = [theEvent locationInWindow];
-	pt = [self convertPoint: pt fromView: nil];
+	NSPoint pt = [NSEvent mouseLocation]; /*  Use mouseLocation in case this is called from flagsChanged: handler (not implemented yet)  */
+	pt = [self convertPoint: [[self window] convertScreenToBase:pt] fromView: nil];
 	tool = [[self dataSource] graphicTool];
-	if (tool == kGraphicPencilTool) {
+	if (tool == kGraphicPencilTool || (tool == kGraphicRectangleSelectTool && ([theEvent modifierFlags] & NSCommandKeyMask) != 0)) {
 		[[NSCursor pencilCursor] set];
 		return;
 	}
@@ -1065,11 +1064,14 @@ cubicReverseFunc(float x, const float *points, float tt)
 	NSRect bounds;
 	NSPoint pt;
 
-	if ([[self dataSource] graphicTool] == kGraphicPencilTool) {
+	if (localGraphicTool == kGraphicRectangleSelectTool && ([theEvent modifierFlags] & NSCommandKeyMask) != 0)
+		localGraphicTool = kGraphicPencilTool;
+	if (localGraphicTool == kGraphicPencilTool) {
 		//  Invoke the common dragging procedure without checking mouse hitting on the existing chart
 		//  The overridden method drawSelectRegion: implements the specific treatment
 		//  for this class.
 		[super doMouseDown: theEvent];
+		lineShape = [[self dataSource] graphicLineShape];
 		return;
 	}
 	
@@ -1187,6 +1189,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 	//  editing mode
 	if (lineShape > 0) {
 		[self doPencilEdit];
+		lineShape = 0;
 		return;
 	}
 	

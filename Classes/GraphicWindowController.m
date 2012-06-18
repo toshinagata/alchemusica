@@ -1899,7 +1899,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 		[myPopUpButton setFrame: frame];
 		[myPopUpButton setBezelStyle: NSShadowlessSquareBezelStyle];
 		
-		graphicTool = kGraphicSelectTool;
+		graphicTool = kGraphicRectangleSelectTool;
 		graphicLineShape = kGraphicLinearShape;
 		graphicEditingMode = kGraphicSetMode;
 		
@@ -2143,24 +2143,18 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 		case kIbeamButtonTag:
 			[[[[self window] contentView] viewWithTag: kSelectButtonTag] setState: NSOffState];
 			[[[[self window] contentView] viewWithTag: kPencilButtonTag] setState: NSOffState];
-		//	[[[[self window] contentView] viewWithTag: kShapePopUpTag] setEnabled: NO];
-		//	[[[[self window] contentView] viewWithTag: kModePopUpTag] setEnabled: NO];
-			graphicTool = kGraphicSelectTool;
-			graphicSelectionMode = kGraphicIbeamSelectionMode;
+			graphicTool = kGraphicIbeamSelectTool;
+		//	graphicSelectionMode = kGraphicIbeamSelectionMode;
 			break;
 		case kSelectButtonTag:
 			[[[[self window] contentView] viewWithTag: kIbeamButtonTag] setState: NSOffState];
 			[[[[self window] contentView] viewWithTag: kPencilButtonTag] setState: NSOffState];
-		//	[[[[self window] contentView] viewWithTag: kShapePopUpTag] setEnabled: NO];
-		//	[[[[self window] contentView] viewWithTag: kModePopUpTag] setEnabled: NO];
-			graphicTool = kGraphicSelectTool;
-			graphicSelectionMode = kGraphicRectangleSelectionMode;
+			graphicTool = kGraphicRectangleSelectTool;
+		//	graphicSelectionMode = kGraphicRectangleSelectionMode;
 			break;
 		case kPencilButtonTag:
 			[[[[self window] contentView] viewWithTag: kIbeamButtonTag] setState: NSOffState];
 			[[[[self window] contentView] viewWithTag: kSelectButtonTag] setState: NSOffState];
-		//	[[[[self window] contentView] viewWithTag: kShapePopUpTag] setEnabled: YES];
-		//	[[[[self window] contentView] viewWithTag: kModePopUpTag] setEnabled: YES];
 			graphicTool = kGraphicPencilTool;
 			break;
 	}
@@ -2222,11 +2216,6 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 	return graphicEditingMode;
 }
 
-- (int)graphicSelectionMode
-{
-	return graphicSelectionMode;
-}
-
 static BOOL
 mouseMovedInView(NSView *view, NSEvent *theEvent)
 {
@@ -2239,6 +2228,7 @@ mouseMovedInView(NSView *view, NSEvent *theEvent)
     if (NSMouseInRect(pt, rect, [view isFlipped])) {
         if ([view respondsToSelector: @selector(doMouseMoved:)])
             [(id)view doMouseMoved: theEvent];
+		else [[NSCursor arrowCursor] set];
         return YES;
     } else return NO;
 }
@@ -2252,9 +2242,11 @@ mouseMovedInView(NSView *view, NSEvent *theEvent)
 			[self mouseEvent:theEvent receivedByClientView:records[i].client];
 			break;
 		}
-        if (mouseMovedInView(records[i].ruler, theEvent) || mouseMovedInView(records[i].splitter, theEvent))
+        if (mouseMovedInView(records[i].splitter, theEvent) || mouseMovedInView(records[i].ruler, theEvent))
             break;
     }
+	if (i == myClientViewsCount)
+		[[NSCursor arrowCursor] set];
 }
 
 - (void)mouseEntered: (NSEvent *)theEvent

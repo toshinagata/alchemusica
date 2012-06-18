@@ -17,6 +17,7 @@
 
 #import "GraphicSplitterView.h"
 #import "GraphicWindowController.h"
+#import "NSCursorAdditions.h"
 #import "MDObjects.h"
 
 @implementation GraphicSplitterView
@@ -178,6 +179,11 @@ searchMenuItemWithTag(NSMenu *menu, int tag)
 			continue;
 		[controller splitterView: self isDraggedTo: origin.y + (mousePt.y - startPt.y) confirm: (type == NSLeftMouseUp)];
 	} while (type == NSLeftMouseDragged);
+}
+
+- (void)doMouseMoved:(NSEvent *)theEvent
+{
+	[[NSCursor verticalMoveCursor] set];
 }
 
 - (void)createSubmenus

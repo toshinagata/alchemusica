@@ -181,7 +181,7 @@
     NSPoint pt1, pt2;
     NSRect rect;
     if (selectPoints != nil && [selectPoints count] > 1) {
-        if (localSelectionMode == kGraphicRectangleSelectionMode || localSelectionMode == kGraphicIbeamSelectionMode) {
+        if (localGraphicTool == kGraphicRectangleSelectTool || localGraphicTool == kGraphicIbeamSelectTool || localGraphicTool == kGraphicPencilTool) {
             pt1 = [[selectPoints objectAtIndex: 0] pointValue];
             pt2 = [[selectPoints objectAtIndex: 1] pointValue];
             rect.origin = pt1;
@@ -190,7 +190,7 @@
                 rect.size.width = -rect.size.width;
                 rect.origin.x = pt2.x;
             }
-			if (localSelectionMode == kGraphicRectangleSelectionMode) {
+			if (localGraphicTool == kGraphicRectangleSelectTool) {
 				rect.size.height = pt2.y - pt1.y;
 				if (rect.size.height < 0) {
 					rect.size.height = -rect.size.height;
@@ -257,42 +257,9 @@
 
 - (BOOL)isPointInSelectRegion: (NSPoint)point
 {
-#if 1
 	if (selectionPath != nil)
 		return [selectionPath containsPoint: point];
 	else return NO;
-#else
-    NSPoint pt1, pt2;
-    if (localSelectionMode == kGraphicRectangleSelectionMode || localSelectionMode == kGraphicIbeamSelectionMode) {
-        if (selectPoints != nil && [selectPoints count] >= 2) {
-            float w0, w1;
-            pt1 = [[selectPoints objectAtIndex: 0] pointValue];
-            pt2 = [[selectPoints objectAtIndex: 1] pointValue];
-            if (pt1.x < pt2.x) {
-                w0 = pt1.x;
-                w1 = pt2.x;
-            } else {
-                w0 = pt2.x;
-                w1 = pt1.x;
-            }
-            if (point.x < w0 || point.x > w1)
-                return NO;
-			if (localSelectionMode == kGraphicRectangleSelectionMode) {
-				if (pt1.y < pt2.y) {
-					w0 = pt1.y;
-					w1 = pt2.y;
-				} else {
-					w0 = pt2.y;
-					w1 = pt1.y;
-				}
-				if (point.y < w0 || point.y > w1)
-					return NO;
-			}
-            return YES;
-        } else return NO;
-    }
-    return NO;
-#endif
 }
 
 - (void)autoscrollTimerCallback: (NSTimer *)timer
@@ -332,7 +299,7 @@
     initialModifierFlags = [theEvent modifierFlags];
     currentModifierFlags = initialModifierFlags;
     isDragging = isLoupeDragging = NO;
-	localSelectionMode = [dataSource graphicSelectionMode];  // May be overridden in doMouseDown:
+	localGraphicTool = [dataSource graphicTool];  // May be overridden in doMouseDown:
     [self doMouseDown: theEvent];
 }
 
@@ -380,12 +347,16 @@
     if (pt.y > bounds.origin.y + bounds.size.height)
         pt.y = bounds.origin.y + bounds.size.height;
     val = [NSValue valueWithPoint: pt];
-    if (localSelectionMode == kGraphicRectangleSelectionMode || localSelectionMode == kGraphicIbeamSelectionMode) {
-        if ([selectPoints count] == 1)
-            [selectPoints addObject: val];
-        else
-            [selectPoints replaceObjectAtIndex: 1 withObject: val];
-    }
+	/*  This is for linear (rectangle or ibeam) selection; also for pencil editing of strip chart */
+	if (localGraphicTool == kGraphicRectangleSelectTool || localGraphicTool == kGraphicIbeamSelectTool || localGraphicTool == kGraphicPencilTool) {
+		if ([selectPoints count] == 1)
+			[selectPoints addObject: val];
+		else
+			[selectPoints replaceObjectAtIndex: 1 withObject: val];
+	} else {
+		/*  If marquee selection tool or free-hand pencil tool is to be implemented, 
+		    the last point should be added to selectPoints here  */
+	}
     [self doMouseDragged: theEvent];
     [self displayIfNeeded];
 }

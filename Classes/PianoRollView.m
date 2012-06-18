@@ -608,12 +608,15 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	long track;
 	long pos;
 	MDEvent *ep;
-	int n;
+	int n, tool;
 	NSPoint pt = [theEvent locationInWindow];
 	pt = [self convertPoint: pt fromView: nil];
 	n = [self findNoteUnderPoint: pt track: &track position: &pos mdEvent: &ep];
+	tool = [[self dataSource] graphicTool];
 	if (n > 0)
 		[self setDraggingCursor: n];
+	else if (tool == kGraphicPencilTool || (tool == kGraphicRectangleSelectTool && ([theEvent modifierFlags] & NSCommandKeyMask) != 0))
+		[[NSCursor pencilCursor] set];
 	else [super doMouseMoved: theEvent];
 }
 
@@ -651,6 +654,10 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	float ys = [self yScale];
 	NSPoint pt = [self convertPoint: [theEvent locationInWindow] fromView: nil];
 //	shiftDown = (([theEvent modifierFlags] & NSShiftKeyMask) != 0);
+	
+	if (localGraphicTool == kGraphicRectangleSelectTool && ([theEvent modifierFlags] & NSCommandKeyMask) != 0)
+		localGraphicTool = kGraphicPencilTool;
+
 	draggingMode = [self findNoteUnderPoint: pt track: &mouseDownTrack position: &mouseDownPos mdEvent: &ep];
 	pt.x = [dataSource quantizedPixelFromPixel: pt.x];
 	draggingStartPoint = draggingPoint = pt;
@@ -660,7 +667,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 		playingVelocity = MDGetNoteOnVelocity(ep);
 		[self playMIDINoteWithVelocity: playingVelocity];
 		return;
-	} else if ([[self dataSource] graphicTool] == kGraphicPencilTool) {
+	} else if (localGraphicTool == kGraphicPencilTool) {
 		pencilOn = YES;
 		[self invalidateDraggingRegion];
 		[self displayIfNeeded];

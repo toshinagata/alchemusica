@@ -395,7 +395,7 @@
 		F5F22F0C022FBBC501A80002 /* StopButton.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = StopButton.icns; path = icons/StopButton.icns; sourceTree = "<group>"; };
 		F5F9405D00EE2B4E01000001 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = /System/Library/Frameworks/CoreMIDI.framework; sourceTree = "<absolute>"; };
 		F5FB767800F88D8601000001 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
-		F5FFC0B40237AAD301A80002 /* Localizable.strings */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = English.lproj/Localizable.strings; sourceTree = "<group>"; };
+		F5FFC0B40237AAD301A80002 /* Localizable.strings */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = English.lproj/Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -754,7 +754,14 @@
 			isa = PBXProject;
 			buildConfigurationList = E428451A09AA2B7A00CB93B9 /* Build configuration list for PBXProject "Alchemusica" */;
 			compatibilityVersion = "Xcode 2.4";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 2A37F4AAFDCFA73011CA2CEA /* MIDI-cocoa-2 */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -1120,6 +1127,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
+				GCC_VERSION = 4.0;
 				HEADER_SEARCH_PATHS = "$HOME/Development/ruby-1.8.7-static";
 				INFOPLIST_FILE = "Alchemusica-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
@@ -1147,6 +1155,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
+				GCC_VERSION = 4.0;
 				HEADER_SEARCH_PATHS = "$HOME/Development/ruby-1.8.7-static";
 				INFOPLIST_FILE = "Alchemusica-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
@@ -1174,6 +1183,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
+				GCC_VERSION = 4.0;
 				HEADER_SEARCH_PATHS = "$HOME/Development/ruby-1.8.7-static";
 				INFOPLIST_FILE = "Alchemusica-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
