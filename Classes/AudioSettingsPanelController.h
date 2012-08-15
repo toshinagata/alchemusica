@@ -20,9 +20,11 @@
 
 @interface AudioSettingsPanelController : NSWindowController {
 	NSTimer *timer;				/*  Refresh the display periodically during playing  */
+	NSMutableArray *knobValues; /*  The current knob values  */
 }
 + (void)openAudioSettingsPanel;
 - (void)updateDisplay;
+- (void)timerCallback:(NSTimer *)timer;
 - (IBAction)myPopUpAction:(id)sender;
 - (IBAction)volumeSliderMoved:(id)sender;
 - (IBAction)panKnobMoved:(id)sender;

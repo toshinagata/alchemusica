@@ -272,6 +272,12 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 	[AboutWindowController showModalAboutWindow];
 }
 
+- (IBAction)updateAudioAndMIDISettings:(id)sender
+{
+	MDAudioUpdateDeviceInfo();
+	MDPlayerReloadDeviceInformation();
+}
+
 - (BOOL)validateUserInterfaceItem: (id)anItem
 {
 	SEL sel = [anItem action];

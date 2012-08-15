@@ -43,6 +43,8 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 		sharedAudioSettingsPanelController = [[AudioSettingsPanelController alloc] initWithWindowNibName: @"AudioSettingsPanel"];
 	}
 	[[sharedAudioSettingsPanelController window] makeKeyAndOrderFront: nil];
+	[sharedAudioSettingsPanelController updateDisplay];
+	[sharedAudioSettingsPanelController timerCallback:nil];
 }
 
 - (void)updateDisplay
@@ -51,7 +53,12 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 	NSMenu *menu;
 	MDAudioDeviceInfo *dp;
 	MDAudioMusicDeviceInfo *mp;
-	
+	if (knobValues == nil) {
+		knobValues = [[NSMutableArray arrayWithCapacity:kMDAudioNumberOfStreams] retain];
+		for (idx = 0; idx < kMDAudioNumberOfStreams; idx++) {
+			[knobValues addObject:[NSNumber numberWithFloat:0.0]];
+		}
+	}
 	for (idx = 0; idx < kMDAudioNumberOfStreams; idx++) {
 		id view;
 		int tagOffset;
@@ -143,7 +150,9 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 				ampRight = 100.0;
 			if (ampRight < 0.0)
 				ampRight = 0.0;
-			[[self viewWithTag: kPanKnobBase + tagOffset] setFloatValue: pan * 100.0];
+			/*  The pan slider uses 60-100 (for 0 to 0.5) and 0-40 (for 0.5 to 1.0) */
+			[[self viewWithTag: kPanKnobBase + tagOffset] setFloatValue: (pan - 0.5) * 80 + (pan < 0.5 ? 100 : 0)];
+			[knobValues replaceObjectAtIndex:idx withObject:[NSNumber numberWithFloat:pan]];
 			[[self viewWithTag: kVolumeSliderBase + tagOffset] setFloatValue: volume * 100.0];
 			[[self viewWithTag: kLeftLevelIndicatorBase + tagOffset] setFloatValue: ampLeft];
 			[[self viewWithTag: kRightLevelIndicatorBase + tagOffset] setFloatValue: ampRight];
@@ -169,10 +178,20 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 }
 - (IBAction)panKnobMoved:(id)sender
 {
+	float pan, opan;
 	int idx = [sender tag] - kPanKnobBase;
 	if (idx >= kOutputTagOffset)
 		idx += (kMDAudioFirstIndexForOutputStream - kOutputTagOffset);
-	MDAudioSetMixerPan(idx, [sender floatValue] * 0.01);
+	pan = [sender floatValue];
+	pan = (pan >= 50.0 ? pan - 100.0 : pan) / 80.0 + 0.5;
+	opan = [[knobValues objectAtIndex:idx] floatValue];
+	if (pan < 0.0 || pan > 1.0 || (opan < 0.25 && pan > 0.75) || (opan > 0.75 && pan < 0.25)) {
+		/*  Do not change value  */
+		[sender setFloatValue:(opan - 0.5) * 80 + (opan < 0.5 ? 100 : 0)];
+		return;
+	}
+	[knobValues replaceObjectAtIndex:idx withObject:[NSNumber numberWithFloat:pan]];
+	MDAudioSetMixerPan(idx, pan);
 }
 
 - (IBAction)myPopUpAction: (id)sender
