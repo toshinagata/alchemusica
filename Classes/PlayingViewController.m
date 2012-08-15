@@ -135,7 +135,6 @@
 		[ffButton setEnabled: NO];
 		[rewindButton setEnabled: NO];
 	} else {
-		MDPlayer *recordingPlayer;
 		status = MDPlayerGetStatus(player);
 		[stopButton setEnabled: YES];
 		[playButton setEnabled: YES];
@@ -146,31 +145,12 @@
 			[recordButton setState:NSOnState];
 		else
 			[recordButton setState:NSOffState];
-	/*	recordingPlayer = MDPlayerRecordingPlayer();
-		if (recordingPlayer == NULL) {
-			[recordButton setEnabled: YES];
-			[recordButton setState: NSOffState];
-		} else if (recordingPlayer == player) {
-			[recordButton setEnabled: YES];
-			[recordButton setState: (MDPlayerIsRecording(player) ? NSOnState : NSOffState)];
-		} else {
-			[recordButton setEnabled: NO];
-		} */
 		if (status == kMDPlayer_playing || status == kMDPlayer_exhausted) {
 			playingOrRecording = YES;
 			[playButton setState: NSOnState];
-		//	currentTime = MDPlayerGetTime(player);  /*  Update the current time  */
 		} else [playButton setState: NSOffState];
 
 		[pauseButton setState:(status == kMDPlayer_suspended ? NSOnState : NSOffState)];
-	/*	if (MDSequenceGetIndexOfRecordingTrack([[myDocument myMIDISequence] mySequence]) < 0)
-			[recordButton setEnabled: NO];
-		else [recordButton setEnabled: YES]; */
-
-	//	if (resumeTimer != nil)
-	//		time = currentTime;		/*  During FF/Rew/Slider actions, time should come from the controls  */
-	//	else
-	//		time = currentTime = MDPlayerGetTime(player);
 		/*  Display tick and time  */
 		if (currentTime == 0) {
 			time = totalTime;

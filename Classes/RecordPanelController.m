@@ -37,6 +37,20 @@
 	[super dealloc];
 }
 
+static id
+sAllowedExtensionsForTag(int tag)
+{
+	id obj;
+	if (tag == 1) {
+		obj = [NSArray arrayWithObjects:@"wav", nil];
+	} else if (tag == 0) {
+		obj = [NSArray arrayWithObjects:@"aiff", @"aif", nil];
+	} else {
+		obj = nil;
+	}
+	return obj;
+}
+
 - (void)updateDisplay
 {
 	MyMIDISequence *seq = [myDocument myMIDISequence];
@@ -221,6 +235,9 @@
 
 - (void)reloadInfoFromDocument
 {
+	NSString *str1, *str2;
+	id obj;
+	int tag;
 	MyMIDISequence *seq = [myDocument myMIDISequence];
 
 	//  In case window is not yet visible
@@ -254,6 +271,23 @@
 	
 	[info setValue: [NSNumber numberWithBool: isAudio] forKey: MyRecordingInfoIsAudioKey];
 
+	str1 = [[myDocument fileURL] path];
+	str2 = [info valueForKey: MyRecordingInfoFileNameKey];
+	obj = [info valueForKey:MyRecordingInfoAudioRecordingFormatKey];
+	tag = (obj == nil ? 0 : [obj intValue]);
+	obj = sAllowedExtensionsForTag(tag);
+	if (str2 == nil && str1 != nil) {
+		str2 = [[str1 lastPathComponent] stringByDeletingPathExtension];
+		if (obj != nil)
+			str2 = [str2 stringByAppendingPathExtension:[obj objectAtIndex:0]];
+		[info setValue:str2 forKey:MyRecordingInfoFileNameKey];
+	}
+	str2 = [info valueForKey:MyRecordingInfoFolderNameKey];
+	if (str2 == nil && str1 != nil) {
+		str2 = [str1 stringByDeletingLastPathComponent];
+		[info setValue:str2 forKey:MyRecordingInfoFolderNameKey];
+	}
+	
 	[self updateDisplay];
 }
 
@@ -408,9 +442,16 @@
 - (IBAction)chooseDestinationFile:(id)sender
 {
 	NSSavePanel *panel = [NSSavePanel savePanel];
-	NSString *filename, *foldername;
+	NSString *filename, *foldername, *docpath;
+	id obj;
+	int tag;
 	filename = [info valueForKey: MyRecordingInfoFileNameKey];
 	foldername = [info valueForKey: MyRecordingInfoFolderNameKey];
+	obj = [info valueForKey:MyRecordingInfoAudioRecordingFormatKey];
+	tag = (obj == nil ? 0 : [obj intValue]);
+	obj = sAllowedExtensionsForTag(tag);
+	if (obj)
+		[panel setAllowedFileTypes:obj];
 	if ([panel runModalForDirectory: [foldername stringByExpandingTildeInPath] file: filename] == NSFileHandlingPanelOKButton) {
 		foldername = [[panel directory] stringByAbbreviatingWithTildeInPath];
 		filename = [[panel filename] lastPathComponent];
