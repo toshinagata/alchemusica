@@ -408,10 +408,10 @@ MyRecordingInfoFileExtensionForFormat(int format)
 	tick = (MDTickType)[[recordingInfo valueForKey: MyRecordingInfoStartTickKey] doubleValue];
 	if (tick >= 0 && tick < kMDMaxTick)
 		MDPlayerJumpToTick(myPlayer, tick);
-	if ([[recordingInfo valueForKey: MyRecordingInfoStopFlagKey] boolValue]) {
+/*	if ([[recordingInfo valueForKey: MyRecordingInfoStopFlagKey] boolValue]) {
 		tick = (MDTickType)[[recordingInfo valueForKey: MyRecordingInfoStopTickKey] doubleValue];
 		MDPlayerScheduleStopTick(myPlayer, tick);
-	}
+	} */
     MDPlayerStartRecording(myPlayer);
     return kMDNoError;
 }
@@ -546,10 +546,10 @@ MyRecordingInfoFileExtensionForFormat(int format)
 	
 /*	#error "Maybe need to set up audio thru device here" */
 
-	if ([[recordingInfo valueForKey: MyRecordingInfoStopFlagKey] boolValue]) {
+/*	if ([[recordingInfo valueForKey: MyRecordingInfoStopFlagKey] boolValue]) {
 		tick = (MDTickType)[[recordingInfo valueForKey: MyRecordingInfoStopTickKey] doubleValue];
 		MDPlayerScheduleStopTick(myPlayer, tick);
-	}
+	} */
 	
     MDPlayerStart(myPlayer);
 	MDAudioStartRecording();

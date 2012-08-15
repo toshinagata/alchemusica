@@ -96,7 +96,7 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 			[view selectItemWithTag: n + 1];
 		if (n >= 0 || !isInput) {
 			view = [self viewWithTag: kPanKnobBase + tagOffset];
-			[view setEnabled: YES];
+			[view setEnabled: (isInput != 0)];
 			view = [self viewWithTag: kVolumeSliderBase + tagOffset];
 			[view setEnabled: YES];
 			view = [self viewWithTag: kLeftLevelIndicatorBase + tagOffset];

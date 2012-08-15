@@ -1023,7 +1023,7 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 			if (nextTick > now_tick)
 				break;  /*  Should be processed in the next interrupt cycle  */
 			code = MDGetCode(ep);
-			if (code == kMDSpecialEndOfSequence || code == kMDSpecialStopPlaying) {
+			if ((code == kMDSpecialEndOfSequence && !inPlayer->isRecording) || code == kMDSpecialStopPlaying) {
 				if (inPlayer->isRecording)
 					MDPlayerStopRecording(inPlayer);
 				if (MDAudioIsRecording())
@@ -1136,13 +1136,15 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 	/*  Ring metronome  */
 	if (gMetronomeInfo.enableWhenPlay || (gMetronomeInfo.enableWhenRecord && inPlayer->isRecording)) {
 		int isPrincipal = 0;
+		MDTickType metTick;
+		MDTimeType metTime;
 		if (inPlayer->nextMetronomeBeat < 0) {
 			PrepareMetronomeForTick(inPlayer, now_tick);
 		}
-		while (inPlayer->nextMetronomeBeat < nextTick) {
+		while (inPlayer->nextMetronomeBeat < prefetch_tick) {
 			if (inPlayer->nextMetronomeBeat >= inPlayer->nextMetronomeBar) {
 				/*  Ring the bell  */
-				nextTick = inPlayer->nextMetronomeBar;
+				metTick = inPlayer->nextMetronomeBar;
 				isPrincipal = 1;
 				if (inPlayer->nextMetronomeBar == inPlayer->nextTimeSignature) {
 					/*  Update the new beat/bar  */
@@ -1169,17 +1171,18 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 					inPlayer->nextMetronomeBar = inPlayer->nextTimeSignature;
 			} else {
 				/*  Ring the click  */
-				nextTick = inPlayer->nextMetronomeBeat;
+				metTick = inPlayer->nextMetronomeBeat;
 				isPrincipal = 0;
 				inPlayer->nextMetronomeBeat += inPlayer->metronomeBeat;
 			}
 			if (inPlayer->nextMetronomeBeat > inPlayer->nextMetronomeBar)
 				inPlayer->nextMetronomeBeat = inPlayer->nextMetronomeBar;
-			nextTime = MDCalibratorTickToTime(inPlayer->calib, nextTick);
-			MDPlayerRingMetronomeClick(inPlayer, nextTime, isPrincipal);
+			metTime = MDCalibratorTickToTime(inPlayer->calib, metTick);
+			MDPlayerRingMetronomeClick(inPlayer, metTime, isPrincipal);
 		}
+		nextTick = inPlayer->nextMetronomeBeat;
 	} else inPlayer->nextMetronomeBeat = -1;  /*  Disable internal information  */
-	
+
 	*outNextTick = nextTick;
 	return bytesSent;
 }
@@ -1212,7 +1215,7 @@ MyTimerFunc(MDPlayer *player)
     }
     
 	player->time = now_time;
-	if (tick >= kMDMaxTick || player->status == kMDPlayer_exhausted) {
+	if (tick >= kMDMaxTick || (player->status == kMDPlayer_exhausted && !player->isRecording)) {
 		player->status = kMDPlayer_exhausted;
 		//	player->time = MDCalibratorTickToTime(player->calib, MDSequenceGetDuration(MDMergerGetSequence(player->merger)));
 		if (tick >= kMDMaxTick)
@@ -1696,16 +1699,14 @@ MDPlayerStart(MDPlayer *inPlayer)
 		MDTickType tick, duration;
 		duration = MDSequenceGetDuration(sequence);
 		MDSetKind(&anEvent, kMDEventSpecial);
-		if (inPlayer->stopTick < kMDMaxTick) {
-			MDSetCode(&anEvent, kMDSpecialStopPlaying);
-			MDSetTick(&anEvent, inPlayer->stopTick);
-			RegisterEventInNoteOffTrack(inPlayer, &anEvent);
-		}
-		if (inPlayer->isRecording)
-			tick = kMDMaxTick - 1;  /* Don't stop at the end of sequence  */
-		else tick = duration;
+		if (inPlayer->stopTick < kMDMaxTick)
+			tick = inPlayer->stopTick;
+		else tick = kMDMaxTick - 1;
+		MDSetCode(&anEvent, kMDSpecialStopPlaying);
+		MDSetTick(&anEvent, inPlayer->stopTick);
+		RegisterEventInNoteOffTrack(inPlayer, &anEvent);
 		MDSetCode(&anEvent, kMDSpecialEndOfSequence);
-		MDSetTick(&anEvent, tick);
+		MDSetTick(&anEvent, duration);
 		RegisterEventInNoteOffTrack(inPlayer, &anEvent);
 	}
 	

@@ -142,7 +142,11 @@
 		[pauseButton setEnabled: YES];
 		[ffButton setEnabled: YES];
 		[rewindButton setEnabled: YES];
-		recordingPlayer = MDPlayerRecordingPlayer();
+		if (isRecording)
+			[recordButton setState:NSOnState];
+		else
+			[recordButton setState:NSOffState];
+	/*	recordingPlayer = MDPlayerRecordingPlayer();
 		if (recordingPlayer == NULL) {
 			[recordButton setEnabled: YES];
 			[recordButton setState: NSOffState];
@@ -151,7 +155,7 @@
 			[recordButton setState: (MDPlayerIsRecording(player) ? NSOnState : NSOffState)];
 		} else {
 			[recordButton setEnabled: NO];
-		}
+		} */
 		if (status == kMDPlayer_playing || status == kMDPlayer_exhausted) {
 			playingOrRecording = YES;
 			[playButton setState: NSOnState];
@@ -399,25 +403,28 @@
 		if (status == kMDPlayer_playing || status == kMDPlayer_exhausted) {
 			currentTime = MDPlayerGetTime(player);  /*  Update the current time  */
 			[self refreshTimeDisplay];
-			#if 0
 			if (isRecording) {
 				NSDictionary *info = [seq recordingInfo];
-				if (isPlayerRecording) {
+			//	if (isPlayerRecording) {
 					//  Check for automatic stop recording
 					if ([[info valueForKey: MyRecordingInfoStopFlagKey] boolValue]) {
 						MDTickType currentTick = MDCalibratorTimeToTick(calibrator, currentTime);
 						if (currentTick > [[info valueForKey: MyRecordingInfoStopTickKey] doubleValue]) {
 							//  Stop recording (but continue to play)
-							MDPlayerStopRecording(player);
+							if (isAudioRecording)
+								[myDocument finishAudioRecording];
+							else
+								[myDocument finishRecording];
+							isRecording = NO;
+							[recordButton setState:NSOffState];
 						}
 					}
-				}
+			//	}
 			}
-			#endif
 		}
 //		if (status != kMDPlayer_playing && !(status == kMDPlayer_exhausted && isRecording && !isAudioRecording)) {
 //		if (status != kMDPlayer_playing && status != kMDPlayer_suspended) {
-		if (status == kMDPlayer_exhausted && !isRecording && !isAudioRecording) {
+		if (status == kMDPlayer_exhausted && (!isRecording || isAudioRecording)) {
 			//  If not playing, then self stop
 			[self pressStopButton: self];
 		}
@@ -596,6 +603,7 @@
 			return;
 		}
 		isRecording = YES;
+		[recordButton setState:NSOnState];
     } else
         MDPlayerStart(player);
 
@@ -688,6 +696,7 @@
 				[myDocument finishRecording];
 			isRecording = NO;
 			isAudioRecording = NO;
+			[recordButton setState:NSOnState];
 		}
 		MDPlayerStop(player);
 	/*	MDPlayerRefreshTrackDestinations(player);  *//*  Refresh internal track list  */

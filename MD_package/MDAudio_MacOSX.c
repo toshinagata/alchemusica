@@ -1208,6 +1208,9 @@ MDAudioSetMixerPan(int idx, float pan)
 	int scope;
 	if (idx >= 0 && idx < kMDAudioNumberOfInputStreams) {
 		scope = kAudioUnitScope_Input;
+	} else if (idx >= kMDAudioFirstIndexForOutputStream && idx < kMDAudioNumberOfStreams) {
+		idx -= kMDAudioFirstIndexForOutputStream;
+		scope = kAudioUnitScope_Output;
 	} else return kMDErrorCannotSetupAudio;
 	CHECK_ERR(err, AudioUnitSetParameter(gAudio->mixerUnit, kStereoMixerParam_Pan, scope, idx, f32, 0));
 	return kMDNoError;
