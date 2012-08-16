@@ -1,5 +1,5 @@
 /*
- Copyright 2010-2011 Toshi Nagata.  All rights reserved.
+ Copyright 2010-2012 Toshi Nagata.  All rights reserved.
  
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -442,7 +442,7 @@ sAllowedExtensionsForTag(int tag)
 - (IBAction)chooseDestinationFile:(id)sender
 {
 	NSSavePanel *panel = [NSSavePanel savePanel];
-	NSString *filename, *foldername, *docpath;
+	NSString *filename, *foldername;
 	id obj;
 	int tag;
 	filename = [info valueForKey: MyRecordingInfoFileNameKey];
