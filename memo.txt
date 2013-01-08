@@ -788,3 +788,19 @@ svn copy svn+ssh://toshinagata1964@svn.sourceforge.jp/svnroot/alchemusica/trunk 
 - Deleting selected time causes crash when there are no events in the editing track. Fixed.
 - Solo track capability is implemented.
 - The Pause button was not highlighted correctly. Fixed.
+
+2012.8.16.
+バージョン 0.6.2
+オーディオ録音ダイアログで、ファイル名の初期値をプロジェクト名から生成するようにした。
+MIDI/オーディオ録音で停止する条件をはっきりさせた（停止位置が指定されていない場合は、MIDI 録音は停止せず、オーディオ録音はシーケンス終了と同時に停止する）。
+Update Audio/MIDI Info メニューを実装。
+Audio Settings ウィンドウで、ポップアップメニューでデバイスを選択すると、前と同じデバイスであってもいったんオーディオ処理をリセットするようにした。（雑音を取り込んでいるときに有効）
+ピアノロールの選択処理を改善。（まだ問題あるかも）
+
+- Audio recording dialog now uses the document folder and name for save destinations
+- Handling of MIDI/Audio recording is improved; specifically, policy of stop MIDI play is made clear
+- Update Audio/MIDI Info menu command is implemented. The Audio settings window is improved.
+- Selection mode of the piano roll window is being reworked. (May be still imcomplete)
+
+2013.1.8.
+　やっぱりシーケンス終了と同時にオーディオ録音が終了するのは不便だな。

@@ -404,7 +404,7 @@
 		}
 //		if (status != kMDPlayer_playing && !(status == kMDPlayer_exhausted && isRecording && !isAudioRecording)) {
 //		if (status != kMDPlayer_playing && status != kMDPlayer_suspended) {
-		if (status == kMDPlayer_exhausted && (!isRecording || isAudioRecording)) {
+		if (status == kMDPlayer_exhausted && !isRecording && !isAudioRecording) {
 			//  If not playing, then self stop
 			[self pressStopButton: self];
 		}

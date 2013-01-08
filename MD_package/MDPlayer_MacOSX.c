@@ -1023,13 +1023,21 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 			if (nextTick > now_tick)
 				break;  /*  Should be processed in the next interrupt cycle  */
 			code = MDGetCode(ep);
-			if ((code == kMDSpecialEndOfSequence && !inPlayer->isRecording) || code == kMDSpecialStopPlaying) {
+			if (code == kMDSpecialStopPlaying) {
+				if (inPlayer->isRecording)
+					MDPlayerStopRecording(inPlayer);
+				if (MDAudioIsRecording())
+					MDAudioStopRecording();
+			} else if (code == kMDSpecialEndOfSequence) {
+				inPlayer->status = kMDPlayer_exhausted;
+			}
+/*			if ((code == kMDSpecialEndOfSequence && !inPlayer->isRecording) || code == kMDSpecialStopPlaying) {
 				if (inPlayer->isRecording)
 					MDPlayerStopRecording(inPlayer);
 				if (MDAudioIsRecording())
 					MDAudioStopRecording();
 				inPlayer->status = kMDPlayer_exhausted;
-			}
+			} */
 			break;
 		}
 
@@ -1215,7 +1223,7 @@ MyTimerFunc(MDPlayer *player)
     }
     
 	player->time = now_time;
-	if (tick >= kMDMaxTick || (player->status == kMDPlayer_exhausted && !player->isRecording)) {
+	if (tick >= kMDMaxTick && !player->isRecording && !MDAudioIsRecording()) {
 		player->status = kMDPlayer_exhausted;
 		//	player->time = MDCalibratorTickToTime(player->calib, MDSequenceGetDuration(MDMergerGetSequence(player->merger)));
 		if (tick >= kMDMaxTick)
@@ -1910,7 +1918,7 @@ MDTimeType
 MDPlayerGetTime(MDPlayer *inPlayer)
 {
 	if (inPlayer != NULL) {
-		if (inPlayer->status == kMDPlayer_playing) {
+		if (inPlayer->status == kMDPlayer_playing || inPlayer->status == kMDPlayer_exhausted) {
 			return GetHostTimeInMDTimeType() - inPlayer->startTime;
 		} else {
 			return inPlayer->time;
