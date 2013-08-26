@@ -1976,12 +1976,12 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 	} else if (obj == [theWindow fieldEditor: NO forObject: nil]) {
 		obj = [obj delegate];
 	}
-	if ([obj isKindOfClass: [NSView class]]) {
+/*	if ([obj isKindOfClass: [NSView class]]) {
 		frame = [[obj superview] convertRect: [obj frame] toView: nil];
 		//  Don't change focus if clicked on itself
 		if (NSPointInRect(pt, frame))
 			return;
-	}
+	} */
 	
 	if (NSPointInRect(pt, [[myMainView superview] convertRect: [myMainView frame] toView: nil])) {
 		[theWindow makeFirstResponder: myMainView];
@@ -3016,6 +3016,18 @@ row:(int)rowIndex
 	} else if ([self respondsToSelector:sel]) {
 		return YES;
 	} else return NO;
+}
+
+#pragma mark ==== Key actions ====
+
+- (void)keyDown:(NSEvent *)theEvent
+{
+	unichar charCode = [[theEvent charactersIgnoringModifiers] characterAtIndex: 0];
+	if (charCode == NSBackspaceCharacter || charCode == NSDeleteCharacter) {
+		[self delete:self];
+	} else {
+		[super keyDown:theEvent];
+	}
 }
 
 @end

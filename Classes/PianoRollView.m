@@ -651,6 +651,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	MDEvent *ep;
 //	NSSize size;
 //	BOOL shiftDown;
+	
 	float ys = [self yScale];
 	NSPoint pt = [self convertPoint: [theEvent locationInWindow] fromView: nil];
 //	shiftDown = (([theEvent modifierFlags] & NSShiftKeyMask) != 0);
