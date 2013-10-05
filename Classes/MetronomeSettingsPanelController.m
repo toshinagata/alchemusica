@@ -85,6 +85,7 @@ static id sharedMetronomeSettingsPanelController;
 		MyAppCallback_setObjectGlobalSettings(MetronomeEnableWhenRecordKey, obj);
 	}
 	gMetronomeInfo.enableWhenRecord = [obj boolValue];
+	gMetronomeInfo.duration = 80000;
 	MyAppCallback_saveGlobalSettings();
 }
 

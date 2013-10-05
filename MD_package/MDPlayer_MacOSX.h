@@ -30,6 +30,7 @@ typedef struct MetronomeInfoRecord {
 	int vel2;
 	char enableWhenPlay;
 	char enableWhenRecord;
+	long duration;
 } MetronomeInfoRecord;
 
 extern MetronomeInfoRecord gMetronomeInfo;

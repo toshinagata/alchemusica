@@ -233,7 +233,7 @@ sMDAudioRecordProc(void* inRefCon, AudioUnitRenderActionFlags* ioActionFlags, co
 {
 	OSStatus err = noErr;
 	
-	{ static int count = 0; if (++count == 100) { dprintf(1, "sMDAudioRecordProc called at %f, ioData->mNumberBuffers = %d\n", (double)inTimeStamp->mSampleTime, (int)ioData->mNumberBuffers); count = 0; } }
+	{ static int count = 0; if (++count == 100) { dprintf(3, "sMDAudioRecordProc called at %f, ioData->mNumberBuffers = %d\n", (double)inTimeStamp->mSampleTime, (int)ioData->mNumberBuffers); count = 0; } }
 	
 	/*  Render into audio buffer  */
 	err = AudioUnitRender(gAudio->mixerUnit, ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);

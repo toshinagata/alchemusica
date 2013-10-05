@@ -975,13 +975,14 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 	MDTickType nextTick;
 	MDMerger *merger;
 	MDEvent *ep;
+	MDEvent metEvent;
 	OSStatus sts;
 	unsigned char buf[4];
 	const unsigned char *p;
 	int track, processed;
 	long dev, n, bytesSent;
 	MDDestinationInfo *info;
-	unsigned char isNoteOff;
+	unsigned char isNoteOff, isMetronome;
 
 	/*  Initialize the MIDIPacketLists  */
 	for (n = inPlayer->destNum - 1; n >= 0; n--) {
@@ -998,16 +999,82 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 
 	/*  Create the MIDIPacketLists  */
 	while (1) {
-		if (inPlayer->noteOffTick <= MDMergerGetTick(merger)) {
+		MDTickType mergerTick = MDMergerGetTick(merger);
+		MDTickType metroTick;
+		MDTickType noteOffTick = inPlayer->noteOffTick;
+		isMetronome = isNoteOff = 0;
+		if (gMetronomeInfo.enableWhenPlay || (gMetronomeInfo.enableWhenRecord && inPlayer->isRecording)) {
+			if (inPlayer->nextMetronomeBeat < 0) {
+				PrepareMetronomeForTick(inPlayer, now_tick);
+			}
+			metroTick = inPlayer->nextMetronomeBeat;
+			if (metroTick >= inPlayer->nextMetronomeBar)
+				metroTick = inPlayer->nextMetronomeBar;
+		} else metroTick = kMDMaxTick;
+		/*  Check which comes first, metronome or note-off or real MIDI event  */
+		if ((inPlayer->status == kMDPlayer_exhausted && inPlayer->isRecording && metroTick < kMDMaxTick) || (metroTick <= noteOffTick && metroTick <= mergerTick)) {
+			/*  Metronome  */
+			int isPrincipal = 0;
+			MDTickType metDuration;
+			isMetronome = 1;
+			if (metroTick <= prefetch_tick) {
+				if (inPlayer->nextMetronomeBeat >= inPlayer->nextMetronomeBar) {
+					/*  Ring the bell  */
+					isPrincipal = 1;
+					if (inPlayer->nextMetronomeBar == inPlayer->nextTimeSignature) {
+						/*  Update the new beat/bar  */
+						long timebase = MDSequenceGetTimebase(MDMergerGetSequence(inPlayer->merger));
+						MDCalibratorJumpToTick(inPlayer->calib, inPlayer->nextTimeSignature);
+						ep = MDCalibratorGetEvent(inPlayer->calib, NULL, kMDEventTimeSignature, -1);
+						if (ep == NULL) {
+							/*  This cannot happen ... */
+							inPlayer->metronomeBeat = timebase;
+							inPlayer->metronomeBar = timebase * 4;
+						} else {
+							const unsigned char *p = MDGetMetaDataPtr(ep);
+							inPlayer->metronomeBeat = timebase * p[2] / 24;
+							inPlayer->metronomeBar = timebase * p[0] * 4 / (1 << p[1]);
+						}
+						ep = MDCalibratorGetNextEvent(inPlayer->calib, NULL, kMDEventTimeSignature, -1);
+						if (ep == NULL)
+							inPlayer->nextTimeSignature = kMDMaxTick;
+						else inPlayer->nextTimeSignature = MDGetTick(ep);
+					}
+					inPlayer->nextMetronomeBeat = inPlayer->nextMetronomeBar + inPlayer->metronomeBeat;
+					inPlayer->nextMetronomeBar += inPlayer->metronomeBar;
+					if (inPlayer->nextMetronomeBar > inPlayer->nextTimeSignature)
+						inPlayer->nextMetronomeBar = inPlayer->nextTimeSignature;
+				} else {
+					/*  Ring the click  */
+					isPrincipal = 0;
+					inPlayer->nextMetronomeBeat += inPlayer->metronomeBeat;
+				}
+				if (inPlayer->nextMetronomeBeat > inPlayer->nextMetronomeBar)
+					inPlayer->nextMetronomeBeat = inPlayer->nextMetronomeBar;
+			}
+			MDEventInit(&metEvent);
+			MDSetKind(&metEvent, kMDEventNote);
+			MDSetCode(&metEvent, (isPrincipal ? gMetronomeInfo.note1 : gMetronomeInfo.note2));
+			MDSetNoteOnVelocity(&metEvent, (isPrincipal ? gMetronomeInfo.vel1 : gMetronomeInfo.vel2));
+			MDSetNoteOffVelocity(&metEvent, 0);
+			MDSetTick(&metEvent, metroTick);
+			MDSetChannel(&metEvent, gMetronomeInfo.channel & 15);
+			metDuration = MDCalibratorTimeToTick(inPlayer->calib, MDCalibratorTickToTime(inPlayer->calib, metroTick) + gMetronomeInfo.duration) - metroTick;
+			MDSetDuration(&metEvent, metDuration);
+			ep = &metEvent;
+		} else if (noteOffTick <= mergerTick) {
+			/*  Registered note off  */
 			ep = MDPointerCurrent(inPlayer->noteOffPtr);
 			if (ep != NULL && MDGetKind(ep) != kMDEventSpecial)
 				dev = MDGetLData(ep);
 			isNoteOff = 1;
 		} else {
+			/*  Ordinary MIDI event  */
 			ep = MDMergerCurrent(merger);
 			track = MDMergerGetCurrentTrack(merger);
 			isNoteOff = 0;
 		}
+
 		if (ep == NULL) {
 			nextTick = kMDMaxTick;
 			break;	/*  No more data  */
@@ -1041,7 +1108,12 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 			break;
 		}
 
-        if (isNoteOff == 0) {
+		if (isMetronome) {
+			for (dev = 0; dev < inPlayer->destNum; dev++) {
+				if (inPlayer->destInfo[dev]->dev == gMetronomeInfo.dev)
+					break;
+			}
+        } else if (!isNoteOff) {
 			if (track >= inPlayer->trackNum)
 				goto next;  /*  track number out of range  */
             if (inPlayer->trackAttr[track] & (kMDTrackAttributeMute | kMDTrackAttributeMuteBySolo))
@@ -1057,13 +1129,20 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 		if (MDIsSysexEvent(ep)) {
 			p = MDGetMessageConstPtr(ep, &n);
 		} else if (MDIsChannelEvent(ep)) {
+			int channel;
+			if (isMetronome) 
+				channel = gMetronomeInfo.channel;
+			else if (isNoteOff)
+				channel = MDGetChannel(ep);
+			else
+				channel = inPlayer->destChannel[track];
 			memset(buf, 0, 4);
 			n = MDEventToMIDIMessage(ep, buf);
             if (isNoteOff == 0)
-                buf[0] |= inPlayer->destChannel[track];
+                buf[0] |= channel;
 			p = buf;
 			/*  For debug  */
-            dprintf(2, "Port %d, (%08ld) %02X %02X %02X\n", (int)inPlayer->destIndex[track], (long)MDGetTick(ep), (int)buf[0], (int)buf[1], (int)buf[2]);
+            dprintf(2, "Port %d, (%08ld) %02X %02X %02X\n", (int)dev, (long)MDGetTick(ep), (int)buf[0], (int)buf[1], (int)buf[2]);
 			/*  ---------  */
 			if (MDGetKind(ep) == kMDEventNote) {
 				/*  Register note-off */
@@ -1071,7 +1150,7 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 				MDEventInit(&event);
 				MDSetKind(&event, kMDEventInternalNoteOff);
 				MDSetCode(&event, MDGetCode(ep));
-				MDSetChannel(&event, inPlayer->destChannel[track]);
+				MDSetChannel(&event, channel);
 				MDSetNoteOffVelocity(&event, MDGetNoteOffVelocity(ep));
 				MDSetTick(&event, MDGetTick(ep) + MDGetDuration(ep));
 				MDSetLData(&event, dev);
@@ -1113,8 +1192,8 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 			if ((ep = MDPointerCurrent(inPlayer->noteOffPtr)) != NULL)
 				inPlayer->noteOffTick = MDGetTick(ep);
 			else inPlayer->noteOffTick = kMDMaxTick;
-            dprintf(2, "%s[%d]: unregister note-off (total %ld)\n", MDTrackGetNumberOfEvents(inPlayer->noteOff));
-		} else {
+            dprintf(2, "%d: unregister note-off (total %ld)\n", MDGetCode(ep), MDTrackGetNumberOfEvents(inPlayer->noteOff));
+		} else if (!isMetronome) {
 			MDMergerForward(merger);
 		}
 		processed++;
@@ -1140,57 +1219,7 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 			}
 		}
 	}
-	
-	/*  Ring metronome  */
-	if (gMetronomeInfo.enableWhenPlay || (gMetronomeInfo.enableWhenRecord && inPlayer->isRecording)) {
-		int isPrincipal = 0;
-		MDTickType metTick;
-		MDTimeType metTime;
-		if (inPlayer->nextMetronomeBeat < 0) {
-			PrepareMetronomeForTick(inPlayer, now_tick);
-		}
-		while (inPlayer->nextMetronomeBeat < prefetch_tick) {
-			if (inPlayer->nextMetronomeBeat >= inPlayer->nextMetronomeBar) {
-				/*  Ring the bell  */
-				metTick = inPlayer->nextMetronomeBar;
-				isPrincipal = 1;
-				if (inPlayer->nextMetronomeBar == inPlayer->nextTimeSignature) {
-					/*  Update the new beat/bar  */
-					long timebase = MDSequenceGetTimebase(MDMergerGetSequence(inPlayer->merger));
-					MDCalibratorJumpToTick(inPlayer->calib, inPlayer->nextTimeSignature);
-					ep = MDCalibratorGetEvent(inPlayer->calib, NULL, kMDEventTimeSignature, -1);
-					if (ep == NULL) {
-						/*  This cannot happen ... */
-						inPlayer->metronomeBeat = timebase;
-						inPlayer->metronomeBar = timebase * 4;
-					} else {
-						const unsigned char *p = MDGetMetaDataPtr(ep);
-						inPlayer->metronomeBeat = timebase * p[2] / 24;
-						inPlayer->metronomeBar = timebase * p[0] * 4 / (1 << p[1]);
-					}
-					ep = MDCalibratorGetNextEvent(inPlayer->calib, NULL, kMDEventTimeSignature, -1);
-					if (ep == NULL)
-						inPlayer->nextTimeSignature = kMDMaxTick;
-					else inPlayer->nextTimeSignature = MDGetTick(ep);
-				}
-				inPlayer->nextMetronomeBeat = inPlayer->nextMetronomeBar + inPlayer->metronomeBeat;
-				inPlayer->nextMetronomeBar += inPlayer->metronomeBar;
-				if (inPlayer->nextMetronomeBar > inPlayer->nextTimeSignature)
-					inPlayer->nextMetronomeBar = inPlayer->nextTimeSignature;
-			} else {
-				/*  Ring the click  */
-				metTick = inPlayer->nextMetronomeBeat;
-				isPrincipal = 0;
-				inPlayer->nextMetronomeBeat += inPlayer->metronomeBeat;
-			}
-			if (inPlayer->nextMetronomeBeat > inPlayer->nextMetronomeBar)
-				inPlayer->nextMetronomeBeat = inPlayer->nextMetronomeBar;
-			metTime = MDCalibratorTickToTime(inPlayer->calib, metTick);
-			MDPlayerRingMetronomeClick(inPlayer, metTime, isPrincipal);
-		}
-		nextTick = inPlayer->nextMetronomeBeat;
-	} else inPlayer->nextMetronomeBeat = -1;  /*  Disable internal information  */
-
+		
 	*outNextTick = nextTick;
 	return bytesSent;
 }
@@ -1231,6 +1260,8 @@ MyTimerFunc(MDPlayer *player)
 		player->time = MDCalibratorTickToTime(player->calib, tick);
 		return -1;
 	} else {
+		if (tick >= kMDMaxTick && player->nextMetronomeBeat < tick)
+			tick = player->nextMetronomeBeat;
 		next_time = MDCalibratorTickToTime(player->calib, tick + 1);
 		next_time -= (now_time + kMDPlayerPrefetchInterval);
 		if (next_time < kMDPlayerMinimumInterval)
@@ -1247,7 +1278,7 @@ MyThreadFunc(void *param)
 {
 	MDPlayer *player = (MDPlayer *)param;
 	long time_to_wait;
-	while (player->status == kMDPlayer_playing && player->shouldTerminate == 0) {
+	while ((player->status == kMDPlayer_playing || (player->status == kMDPlayer_exhausted && player->isRecording)) && player->shouldTerminate == 0) {
 		time_to_wait = MyTimerFunc(player);
 		if (time_to_wait < 0)
 			break;
@@ -1354,7 +1385,7 @@ MDPlayerRingMetronomeClick(MDPlayer *inPlayer, MDTimeType atTime, int isPrincipa
 	}
 	MDPlayerSendRawMIDI(inPlayer, buf, 3, gMetronomeInfo.dev, atTime);
 	buf[2] = 0;
-	MDPlayerSendRawMIDI(inPlayer, buf, 3, gMetronomeInfo.dev, atTime + 80000);
+	MDPlayerSendRawMIDI(inPlayer, buf, 3, gMetronomeInfo.dev, atTime + gMetronomeInfo.duration);
 }
 
 #pragma mark ====== MDPlayer Functions ======
@@ -1543,7 +1574,7 @@ MDPlayerRefreshTrackDestinations(MDPlayer *inPlayer)
     if (inPlayer->trackAttr == NULL)
         return kMDErrorOutOfMemory;
 
-    temp = (long *)malloc(num * sizeof(long));
+    temp = (long *)malloc((num + 1) * sizeof(long));
     if (temp == NULL)
         return kMDErrorOutOfMemory;
 
@@ -1582,6 +1613,17 @@ MDPlayerRefreshTrackDestinations(MDPlayer *inPlayer)
         inPlayer->trackAttr[n] = MDTrackGetAttribute(track);
         dprintf(2, "%s%d%s", (n==0?"trackAttr={":""), inPlayer->trackAttr[n], (n==num-1?"}\n":","));
     }
+	/*  Register device for metronome output  */
+	if (gMetronomeInfo.enableWhenPlay || gMetronomeInfo.enableWhenRecord) {
+		for (i = 0; i < inPlayer->destNum; i++) {
+			if (temp[i] == gMetronomeInfo.dev)
+				break;
+		}
+		if (i == inPlayer->destNum) {
+			temp[i] = gMetronomeInfo.dev;
+			inPlayer->destNum++;
+		}
+	}
     /*  Allocate destInfo[]  */
     inPlayer->destInfo = (MDDestinationInfo **)re_malloc(inPlayer->destInfo, inPlayer->destNum * sizeof(MDDestinationInfo *));
     if (inPlayer->destInfo == NULL) {
