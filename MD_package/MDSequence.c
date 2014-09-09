@@ -464,7 +464,7 @@ MDSequenceResetCalibrators(MDSequence *inSequence)
 	･ MDSequenceSingleChannelMode
    -------------------------------------- */
 MDStatus
-MDSequenceSingleChannelMode(MDSequence *inSequence)
+MDSequenceSingleChannelMode(MDSequence *inSequence, int separate)
 {
     long n;
     long nch[16];
@@ -474,74 +474,76 @@ MDSequenceSingleChannelMode(MDSequence *inSequence)
         return kMDNoError;
 
     /*  Pass 1: Separate multi-channel tracks  */
-    for (n = inSequence->num - 1; n >= 0; n--) {
-        MDTrack *track, *ntrack[16];
-        MDPointer *pt;
-        MDPointSet *pset;
-        int nnch, i;
-        track = MDSequenceGetTrack(inSequence, n);
-        nnch = 0;
-        for (i = 0; i < 16; i++) {
-            nch[i] = MDTrackGetNumberOfChannelEvents(track, i);
-            if (nch[i] > 0)
-                nnch++;
-        }
-        if (nnch <= 1)
-            continue;
-        memset(ntrack, 0, sizeof(ntrack));
-        ntrack[0] = MDTrackNewFromTrack(track);  /*  Duplicate  */
-        if (ntrack[0] == NULL)
-            return kMDErrorOutOfMemory;
-        pt = MDPointerNew(ntrack[0]);
-        pset = MDPointSetNew();
-        if (pt == NULL || pset == NULL)
-            return kMDErrorOutOfMemory;
-        for (i = 15; i >= 1; i--) {
-            MDEvent *ep;
-            if (nch[i] == 0)
-                continue;
-            MDPointerSetPosition(pt, -1);
-            MDPointSetClear(pset);
-            while ((ep = MDPointerForward(pt)) != NULL) {
-                if (MDIsChannelEvent(ep) && MDGetChannel(ep) == i) {
-                    sts = MDPointSetAdd(pset, MDPointerGetPosition(pt), 1);
-                    if (sts != kMDNoError)
-                        break;
-                }
-            }
-            if (sts == kMDNoError)
-                sts = MDTrackUnmerge(ntrack[0], &ntrack[i], pset);
-            if (sts == kMDNoError) {
-                nnch--;
-                if (nnch == 1)
-                    break;
-            } else break;
-        }
-        MDPointSetRelease(pset);
-        MDPointerRelease(pt);
-        if (sts == kMDNoError) {
-            for (i = 15; i >= 0; i--) {
-                if (ntrack[i] == NULL)
-                    continue;
-                if (MDSequenceInsertTrack(inSequence, n + 1, ntrack[i]) < 0) {
-                    sts = kMDErrorOutOfMemory;
-                    break;
-                } else {
-                    ntrack[i] = NULL;
-                }
-            }
-        }
-        if (sts == kMDNoError) {
-            MDSequenceDeleteTrack(inSequence, n);
-        } else {
-            /*  Dispose all temporary objects and returns error  */
-            for (i = 0; i < 16; i++) {
-                if (ntrack[i] != NULL)
-                    MDTrackRelease(ntrack[i]);
-            }
-            return sts;
-        }
-    }
+	if (separate) {
+		for (n = inSequence->num - 1; n >= 0; n--) {
+			MDTrack *track, *ntrack[16];
+			MDPointer *pt;
+			MDPointSet *pset;
+			int nnch, i;
+			track = MDSequenceGetTrack(inSequence, n);
+			nnch = 0;
+			for (i = 0; i < 16; i++) {
+				nch[i] = MDTrackGetNumberOfChannelEvents(track, i);
+				if (nch[i] > 0)
+					nnch++;
+			}
+			if (nnch <= 1)
+				continue;
+			memset(ntrack, 0, sizeof(ntrack));
+			ntrack[0] = MDTrackNewFromTrack(track);  /*  Duplicate  */
+			if (ntrack[0] == NULL)
+				return kMDErrorOutOfMemory;
+			pt = MDPointerNew(ntrack[0]);
+			pset = MDPointSetNew();
+			if (pt == NULL || pset == NULL)
+				return kMDErrorOutOfMemory;
+			for (i = 15; i >= 1; i--) {
+				MDEvent *ep;
+				if (nch[i] == 0)
+					continue;
+				MDPointerSetPosition(pt, -1);
+				MDPointSetClear(pset);
+				while ((ep = MDPointerForward(pt)) != NULL) {
+					if (MDIsChannelEvent(ep) && MDGetChannel(ep) == i) {
+						sts = MDPointSetAdd(pset, MDPointerGetPosition(pt), 1);
+						if (sts != kMDNoError)
+							break;
+					}
+				}
+				if (sts == kMDNoError)
+					sts = MDTrackUnmerge(ntrack[0], &ntrack[i], pset);
+				if (sts == kMDNoError) {
+					nnch--;
+					if (nnch == 1)
+						break;
+				} else break;
+			}
+			MDPointSetRelease(pset);
+			MDPointerRelease(pt);
+			if (sts == kMDNoError) {
+				for (i = 15; i >= 0; i--) {
+					if (ntrack[i] == NULL)
+						continue;
+					if (MDSequenceInsertTrack(inSequence, n + 1, ntrack[i]) < 0) {
+						sts = kMDErrorOutOfMemory;
+						break;
+					} else {
+						ntrack[i] = NULL;
+					}
+				}
+			}
+			if (sts == kMDNoError) {
+				MDSequenceDeleteTrack(inSequence, n);
+			} else {
+				/*  Dispose all temporary objects and returns error  */
+				for (i = 0; i < 16; i++) {
+					if (ntrack[i] != NULL)
+						MDTrackRelease(ntrack[i]);
+				}
+				return sts;
+			}
+		}
+	}
     
     /*  Pass 2: Remap all events to MIDI channel 0, and set the track channels  */
     for (n = inSequence->num - 1; n >= 0; n--) {
@@ -553,11 +555,11 @@ MDSequenceSingleChannelMode(MDSequence *inSequence)
             continue;
         memset(newch, 0, 16);
         nnch = 0;
-        /*  Sanity check  */
+        /*  Set the track channel  */
         for (i = 0; i < 16; i++) {
             if (MDTrackGetNumberOfChannelEvents(track, i) > 0) {
                 MDTrackSetTrackChannel(track, i);
-                if (nnch++ > 0)
+                if (separate && nnch++ > 0)
                     fprintf(stderr, "Warning: Internal inconsistency in function MDSequenceSingleChannelMode, file %s, line %d\n", __FILE__, __LINE__);
             }
         }

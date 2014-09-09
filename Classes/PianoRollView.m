@@ -238,11 +238,19 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	MDTickType startTick, endTick;
 	int startNote, endNote;
 	MDTickType duration;
+	static float sDash[] = { 2, 2 };
+	BOOL isDraggingImage = NO;
+	
+	if (draggingMode > 0 && draggingMode < 3 && draggingImage != nil)
+		isDraggingImage = YES;
+
 	if (cacheArray == nil || originTick != cacheTick)
 		[self cacheNotesBeforeTick: originTick];
 	num = [dataSource visibleTrackCount];
 	normalPath = [[NSBezierPath allocWithZone: [self zone]] init];
 	selectedPath = [[NSBezierPath allocWithZone: [self zone]] init];
+	if (isDraggingImage)
+		[selectedPath setLineDash:sDash count:2 phase:0.0];
 	startTick = (MDTickType)(aRect.origin.x / ppt);
 	endTick = (MDTickType)((aRect.origin.x + aRect.size.width) / ppt);
 //	NSLog(@"drawNotesInRect: startTick %ld endTick %ld", (long)startTick, (long)endTick);
@@ -689,11 +697,20 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	float ys = [self yScale];
 	pt.x = [dataSource quantizedPixelFromPixel: pt.x];
 	if (draggingMode > 0) {
+
+		if (draggingMode == 1 || draggingMode == 3)
+			pt.y = draggingStartPoint.y;
+		else if (draggingMode == 2) {
+			pt.x = draggingStartPoint.x;
+			pt.y = floor((pt.y - draggingStartPoint.y) / ys + 0.5) * ys + draggingStartPoint.y;
+		}
+				
 		if (draggingImage == nil) {
 			//  Create an NSImage for dragging
 			NSRect rect, rect2, bounds;
 			NSSize size;
 			float pixelQuantum;
+			NSImage *image;
 			MyDocument *document = [dataSource document];
 			BOOL shiftDown = (([theEvent modifierFlags] & NSShiftKeyMask) != 0);
 			BOOL optionDown = (([theEvent modifierFlags] & NSAlternateKeyMask) != 0);
@@ -718,10 +735,11 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 			rect.origin.y = pt.y - size.height;
 			rect.size.width = size.width * 2;
 			rect.size.height = size.height * 2;
-			draggingImage = [[NSImage allocWithZone: [self zone]] initWithSize: rect.size];
-			[draggingImage lockFocus];
+			image = [[NSImage allocWithZone: [self zone]] initWithSize: rect.size];
+			[image lockFocus];
 			[self drawNotesInRect: rect selectionOnly: YES offset: NSMakePoint(-rect.origin.x, -rect.origin.y) addDuration: 0];
-			[draggingImage unlockFocus];
+			[image unlockFocus];
+			draggingImage = image;
 			[self setDraggingCursor: draggingMode + (draggingMode != 3 && optionDown ? 16 : 0)];
 			[self invalidateDraggingRegion];
 			[self displayIfNeeded];
@@ -742,13 +760,6 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 				limitRect.size.width -= pixelQuantum;
 		}
 	
-		if (draggingMode == 1 || draggingMode == 3)
-			pt.y = draggingStartPoint.y;
-		else if (draggingMode == 2) {
-			pt.x = draggingStartPoint.x;
-			pt.y = floor((pt.y - draggingStartPoint.y) / ys + 0.5) * ys + draggingStartPoint.y;
-		}
-
 		//  Support autoscroll (cf. GraphicClientView.mouseDragged)
 		if (autoscrollTimer != nil) {
 			[autoscrollTimer invalidate];

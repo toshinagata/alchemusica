@@ -272,7 +272,7 @@ NSString
 			FCLOSE(stream);
 		} else sts = kMDErrorCannotOpenFile;
         if (sts == kMDNoError)
-            sts = MDSequenceSingleChannelMode(sequence);
+            sts = MDSequenceSingleChannelMode(sequence, 1);
 		if (sts != kMDNoError) {
 			MDSequenceRelease(sequence);
 			sequence = NULL;

@@ -112,8 +112,8 @@ void	MDSequenceUpdateMuteBySoloFlag(MDSequence *inSequence);
 long	MDSequenceGetIndexOfRecordingTrack(MDSequence *inSequence);
 
 /*  Single channel mode に移行する。Single channel mode では、すべての MIDI イベントのチャンネルは０になり、実際に MIDI チャンネルが必要な時（MIDI入出力時、およびSMFのインポート／エキスポート時）にはトラックチャンネルの値が使われる。 */
-/* すべてのトラックの内容がチェックされ、複数のチャンネルにまたがっているトラックはチャンネルごとに分割される。各トラックごとのMIDIチャンネルが一つになったあと、その値がトラックチャンネルがセットされ、MIDIイベントのチャンネルの値は０になる。 */
-MDStatus	MDSequenceSingleChannelMode(MDSequence *inSequence);
+/* separate が non-zero ならば、すべてのトラックの内容がチェックされ、複数のチャンネルにまたがっているトラックはチャンネルごとに分割される。各トラックごとのMIDIチャンネルが一つになったあと、その値がトラックチャンネルがセットされ、MIDIイベントのチャンネルの値は０になる。 */
+MDStatus	MDSequenceSingleChannelMode(MDSequence *inSequence, int separate);
 
 /*  Multi channel mode に移行する。MIDIイベントのchannelフィールドにトラックチャンネルの値をセットする。デフォルトは multi channel mode。 */
 MDStatus	MDSequenceMultiChannelMode(MDSequence *inSequence);

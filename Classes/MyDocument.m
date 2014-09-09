@@ -3066,7 +3066,10 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	FCLOSE(sp);
 	if (sts != kMDNoError)
 		return NO;
-	
+
+	/*  Make it single channel (without separating the multi-channel track)  */
+	MDSequenceSingleChannelMode(seq, 0);
+
 	sp = MDStreamOpenData((void *)[catData bytes], [catData length]);
 	if (sp == NULL)
 		return NO;

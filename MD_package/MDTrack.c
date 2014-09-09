@@ -1305,8 +1305,11 @@ MDTrackRemapChannel(MDTrack *inTrack, const unsigned char *newch)
     long nnch[16];
     long n;
     MDBlock *block;
+	static unsigned char allzero[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     if (inTrack == NULL)
         return;
+	if (newch == NULL)
+		newch = allzero;
     for (n = 0; n < 16; n++)
         nnch[n] = 0;
     for (block = inTrack->first; block != NULL; block = block->next) {
