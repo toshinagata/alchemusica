@@ -1130,11 +1130,11 @@ cubicReverseFunc(float x, const float *points, float tt)
 		BOOL optionDown = (([theEvent modifierFlags] & NSAlternateKeyMask) != 0);
 		pt.x = [dataSource quantizedPixelFromPixel: pt.x];
 		//  Support autoscroll (cf. GraphicClientView.mouseDragged)
-		if (autoscrollTimer != nil) {
+	/*	if (autoscrollTimer != nil) {
 			[autoscrollTimer invalidate];
 			[autoscrollTimer release];
 			autoscrollTimer = nil;
-		}
+		} */
 		if (stripDraggingMode == 1) {
 			/*  horizontal or vertical, depending on the mouse position  */
 			NSSize delta;
@@ -1156,11 +1156,11 @@ cubicReverseFunc(float x, const float *points, float tt)
 			pt.y = draggingStartPoint.y;
 		else
 			pt.x = draggingStartPoint.x;
-		pt = [self convertPoint: pt toView: nil];
+	/*	pt = [self convertPoint: pt toView: nil];
 	//	[self invalidateDraggingRegion];
 		if ([self autoscroll: [theEvent mouseEventWithLocation: pt]])
 			autoscrollTimer = [[NSTimer scheduledTimerWithTimeInterval: 0.2 target: self selector:@selector(autoscrollTimerCallback:) userInfo: theEvent repeats: NO] retain];
-		pt = [self convertPoint: pt fromView: nil];
+		pt = [self convertPoint: pt fromView: nil]; */
 		if (pt.x < limitRect.origin.x)
 			pt.x = limitRect.origin.x;
 		else if (pt.x > limitRect.origin.x + limitRect.size.width)
@@ -1263,6 +1263,25 @@ cubicReverseFunc(float x, const float *points, float tt)
 		MDPointSetRelease(pset);
 		MDPointerRelease(pt);
 	}
+}
+
+- (void)startExternalDraggingAtPoint:(NSPoint)aPoint mode:(int)aMode
+{
+	stripDraggingMode = aMode;
+	draggingStartPoint = draggingPoint = aPoint;
+	[self setNeedsDisplay:YES];
+}
+
+- (void)endExternalDragging
+{
+	stripDraggingMode = 0;
+	[self setNeedsDisplay:YES];
+}
+
+- (void)setExternalDraggingPoint:(NSPoint)aPoint
+{
+	draggingPoint = aPoint;
+	[self setNeedsDisplay:YES];
 }
 
 @end

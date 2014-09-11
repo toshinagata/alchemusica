@@ -876,6 +876,7 @@ sTableColumnIDToInt(id identifier)
 {
     NSRect visibleRect, documentRect;
 	int i;
+	float x;
     if (myClientViewsCount == 0)
         return;
     if (pos < 0)
@@ -885,8 +886,12 @@ sTableColumnIDToInt(id identifier)
 		documentRect = [records[i].client frame];
 		if (pos > documentRect.size.width)
 			pos = documentRect.size.width;
-		visibleRect.origin.x = documentRect.origin.x + pos;
-		[records[i].client scrollPoint: visibleRect.origin];
+		x = documentRect.origin.x + pos;
+		if (fabs(x - visibleRect.origin.x) > 0.2) {
+			visibleRect.origin.x = x;
+			[records[i].client scrollPoint: visibleRect.origin];
+			[records[i].client setNeedsDisplay:YES];
+		}
 	}
 }
 
@@ -1969,7 +1974,6 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 	NSPoint pt = [theEvent locationInWindow];
 	NSWindow *theWindow = [self window];
 	id obj = [theWindow firstResponder];
-	NSRect frame;
 	
 	if ([obj isKindOfClass: [NSActionCell class]]) {
 		obj = [obj controlView];

@@ -16,6 +16,7 @@
 
 #import "PianoRollView.h"
 #import "GraphicWindowController.h"
+#import "StripChartView.h"
 #import "MyDocument.h"
 #import "MyMIDISequence.h"
 #import "MDObjects.h"
@@ -693,6 +694,8 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 
 - (void)doMouseDragged: (NSEvent *)theEvent
 {
+	int i;
+	id clientView;
 	NSPoint pt = [self convertPoint: [theEvent locationInWindow] fromView: nil];
 	float ys = [self yScale];
 	pt.x = [dataSource quantizedPixelFromPixel: pt.x];
@@ -758,10 +761,18 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 			limitRect.size.width = floor(limitRect.size.width / pixelQuantum) * pixelQuantum;
 			if (limitRect.size.width + limitRect.origin.x > bounds.origin.x + bounds.size.width)
 				limitRect.size.width -= pixelQuantum;
+			if (draggingMode == 1) {
+				//  Notify stripChartViews to scroll
+				for (i = 0; (clientView = [dataSource clientViewAtIndex:i]) != nil; i++) {
+					if ([clientView isKindOfClass:[StripChartView class]]) {
+						[clientView startExternalDraggingAtPoint:draggingStartPoint mode:draggingMode];
+					}
+				}
+			}
 		}
 	
 		//  Support autoscroll (cf. GraphicClientView.mouseDragged)
-		if (autoscrollTimer != nil) {
+	/*	if (autoscrollTimer != nil) {
 			[autoscrollTimer invalidate];
 			[autoscrollTimer release];
 			autoscrollTimer = nil;
@@ -770,7 +781,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 		[self invalidateDraggingRegion];
 		if ([self autoscroll: [theEvent mouseEventWithLocation: pt]])
 			autoscrollTimer = [[NSTimer scheduledTimerWithTimeInterval: 0.2 target: self selector:@selector(autoscrollTimerCallback:) userInfo: theEvent repeats: NO] retain];
-		pt = [self convertPoint: pt fromView: nil];
+		pt = [self convertPoint: pt fromView: nil]; */
 
 		if (draggingMode != 3) {
 			if (pt.x < limitRect.origin.x)
@@ -785,6 +796,14 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 		draggingPoint = pt;
 		[self invalidateDraggingRegion];
 		[self displayIfNeeded];
+		if (draggingMode == 1) {
+			//  Notify stripChartViews to scroll
+			for (i = 0; (clientView = [dataSource clientViewAtIndex:i]) != nil; i++) {
+				if ([clientView isKindOfClass:[StripChartView class]]) {
+					[clientView setExternalDraggingPoint:pt];
+				}
+			}
+		}
 	} else if (pencilOn) {
 		[self invalidateDraggingRegion];
 		draggingPoint = pt;
@@ -857,6 +876,16 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 		}
 		[draggingImage release];
 		draggingImage = nil;
+		if (draggingMode == 1) {
+			//  Notify stripChartViews
+			int i;
+			id clientView;
+			for (i = 0; (clientView = [dataSource clientViewAtIndex:i]) != nil; i++) {
+				if ([clientView isKindOfClass:[StripChartView class]]) {
+					[clientView endExternalDragging];
+				}
+			}
+		}
 		draggingMode = 0;
 	//	[self displayIfNeeded];
 		return;

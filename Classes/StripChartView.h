@@ -43,6 +43,11 @@ enum {
 - (void)setKindAndCode: (long)kindAndCode;
 - (long)kindAndCode;
 
+//  Dragging support (accompanying PianoRollView)
+- (void)startExternalDraggingAtPoint:(NSPoint)aPoint mode:(int)aMode;
+- (void)endExternalDragging;
+- (void)setExternalDraggingPoint:(NSPoint)aPoint;
+
 //  Accessor methods for StripChartRulerView
 //- (float)minValue;
 //- (float)maxValue;
