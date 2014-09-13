@@ -19,6 +19,7 @@
 #import "RubyConsoleWindowController.h"
 #import "MyAppController.h"
 #include "MDRubyExtern.h"
+#include "MDHeaders.h"
 
 @implementation RubyConsoleWindowController
 
@@ -33,69 +34,13 @@ static RubyConsoleWindowController *shared;
 	return shared;
 }
 
-#if 0
-#pragma mark ------ Unused ------
-//  NSTextView delegate method
-- (BOOL)textView:(NSTextView *)aTextView doCommandBySelector:(SEL)aSelector
+- (void)windowDidLoad
 {
-	if (aSelector == @selector(insertNewline:)) {
-		NSRange range;
-		[aTextView insertNewline: self];
-		range = [aTextView selectedRange];
-		if (range.location + range.length >= [[aTextView textStorage] length]) {
-			/*  Get the last line  */
-			NSRange range2;
-			NSString *str = [[aTextView textStorage] string];
-			range.length = range.location - 1;
-			range.location = 0;
-			range2 = [str rangeOfString: @"\n" options: NSBackwardsSearch range: range];
-			if (range2.location == NSNotFound)
-				range2.location = 0;
-			else range2.location++;
-			range2.length = 1;
-			if ([[str substringWithRange: range2] isEqualToString: @"%"])
-				range2.location++;
-			range2.length = range.length - range2.location + 1; /*  Include last newline  */
-			str = [str substringWithRange: range2];
-			
-			{
-				/*  Invoke Ruby interpreter  */
-				VALUE val, script;
-				int status;
-				script = rb_str_new2([str UTF8String]);
-				val = Ruby_CallMethodWithInterrupt(Qundef, 0, script, &status);
-			/*	rb_protect(Ruby_EnableInterrupt, Qnil, &status2);
-				val = rb_eval_string_protect([str UTF8String], &status);
-				rb_protect(Ruby_DisableInterrupt, Qnil, &status2); */
-				if (status == 0) {
-					val = rb_protect(rb_inspect, val, &status);
-					MyAppCallback_showScriptMessage("%s\n", StringValuePtr(val));
-					[self showRubyPrompt];
-				} else {
-					MyAppCallback_showScriptError(status);
-					/*  Next prompt is already shown here  */
-				}
-			}
-		}
-		return YES;
-	}
-	return NO;
+	NSFont *font;
+	[super windowDidLoad];
+	font = [NSFont userFixedPitchFontOfSize:11.0];
+	[consoleView setFont:font];
 }
-
-- (IBAction)openRubyConsole: (id)sender
-{
-	[[consoleView window] makeKeyAndOrderFront: self];
-}
-
-- (IBAction)clearConsoleLog: (id)sender
-{
-	[consoleView setString: @""];
-	[self showRubyPrompt];
-}
-
-#else
-
-#pragma mark ------ Used ------
 
 - (void)flushMessage
 {
@@ -212,8 +157,12 @@ static RubyConsoleWindowController *shared;
 	
 	//  Invoke ruby interpreter
 	int status;
-	RubyValue val = Ruby_evalRubyScriptOnDocument([script UTF8String], [[NSApp delegate] documentAtIndex: 0], &status);
-
+	char *cscript = strdup([script UTF8String]);
+	RubyValue val = Ruby_evalRubyScriptOnDocument(cscript, [[NSApp delegate] documentAtIndex: 0], &status);
+	cscript[strlen(cscript) - 1] = 0;  /*  Remove the last newline  */
+	AssignArray(&commandHistory, &nCommandHistory, sizeof(char *), nCommandHistory, &cscript);
+	if (nCommandHistory >= MAX_HISTORY_LINES)
+		DeleteArray(&commandHistory, &nCommandHistory, sizeof(char *), 0, 1, NULL);
 	defaultColor = [[NSColor redColor] retain];
 	if (status != 0)
 		Ruby_showError(status);
@@ -225,6 +174,74 @@ static RubyConsoleWindowController *shared;
 	defaultColor = nil;
 	[self showRubyPrompt];
 	[consoleView setSelectedRange: NSMakeRange([[consoleView string] length], 0)];
+	commandHistoryIndex = valueHistoryIndex = -1;
+}
+
+- (BOOL)showHistory:(int)updown
+{
+	BOOL up = (updown < 0);
+	BOOL option = ([[NSApp currentEvent] modifierFlags] & NSAlternateKeyMask) != 0;
+	NSTextStorage *storage = [consoleView textStorage];
+	char *p;
+	if (commandHistoryIndex == -1 && valueHistoryIndex == -1) {
+		if (!up)
+			return NO;
+		historyPos = [storage length];
+	}
+	if (option) {
+		if (up) {
+			if (valueHistoryIndex == -1) {
+				if (nValueHistory == 0)
+					return NO;
+				valueHistoryIndex = nValueHistory;
+			}
+			if (valueHistoryIndex <= 0)
+				return YES; /* Key is processed but do nothing */
+			valueHistoryIndex--;
+			p = valueHistory[valueHistoryIndex];
+		} else {
+			if (valueHistoryIndex == -1)
+				return YES;  /*  Do nothing  */
+			if (valueHistoryIndex == nValueHistory - 1) {
+				valueHistoryIndex = -1;
+				p = "";
+			} else {
+				valueHistoryIndex++;
+				p = valueHistory[valueHistoryIndex];
+			}
+		}
+	} else {
+		if (up) {
+			if (commandHistoryIndex == -1) {
+				if (nCommandHistory == 0)
+					return NO;
+				commandHistoryIndex = nCommandHistory;
+			}
+			if (commandHistoryIndex <= 0)
+				return YES; /* Do nothing */
+			commandHistoryIndex--;
+			p = commandHistory[commandHistoryIndex];
+		} else {
+			if (commandHistoryIndex == -1)
+				return YES;  /*  Do nothing  */
+			if (commandHistoryIndex == nCommandHistory - 1) {
+				commandHistoryIndex = -1;
+				p = "";
+			} else {
+				commandHistoryIndex++;
+				p = commandHistory[commandHistoryIndex];
+			}
+		}
+	}
+	if (p == NULL)
+		p = "";
+	[storage deleteCharactersInRange:NSMakeRange(historyPos, [storage length] - historyPos)];
+	while (isspace(*p))
+		p++;
+	[self setConsoleColor:(option ? 4 : 1)];
+	[self appendMessage:[NSString stringWithUTF8String:p]];
+	[self setConsoleColor:0];
+	return YES;
 }
 
 - (BOOL)textView:(NSTextView *)aTextView doCommandBySelector:(SEL)aSelector
@@ -232,11 +249,15 @@ static RubyConsoleWindowController *shared;
 	if (aSelector == @selector(insertNewline:)) {
 		[self onEnterPressed: self];
 		return YES;
+	} else if (aSelector == @selector(moveUp:) || aSelector == @selector(moveDown:)) {
+		NSArray *a = [aTextView selectedRanges];
+		NSRange r;
+		if ([a count] == 1 && (r = [[a objectAtIndex:0] rangeValue]).length == 0 && r.location == [[aTextView textStorage] length])
+			return [self showHistory:(aSelector == @selector(moveDown:) ? 1 : -1)];
+		else return NO;
 	}
 	return NO;
 }
-
-#endif
 
 @end
 

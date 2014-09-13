@@ -18,9 +18,18 @@
 
 #import <Cocoa/Cocoa.h>
 
+#define MAX_HISTORY_LINES 1000
+
 @interface RubyConsoleWindowController : NSWindowController {
 	IBOutlet NSTextView *consoleView;
 	NSColor *defaultColor;
+
+	//  History support
+	char **valueHistory, **commandHistory;
+	int nValueHistory, nCommandHistory;
+	int valueHistoryIndex, commandHistoryIndex;
+	long historyPos;
+	long keyInputPos;
 }
 + (RubyConsoleWindowController *)sharedRubyConsoleWindowController;
 

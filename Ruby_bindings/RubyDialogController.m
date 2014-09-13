@@ -126,6 +126,27 @@ VALUE cMRDialog = Qfalse;
 	}
 }
 
+#pragma mark ====== TableView data source protocol ======
+
+- (int)numberOfRowsInTableView:(NSTableView *)aTableView
+{
+	return RubyDialog_GetTableItemCount((RubyValue)dval, (RDItem *)aTableView);
+}
+
+- (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
+{
+	char buf[1024];
+	int column = [[aTableView tableColumns] indexOfObject:aTableColumn];
+	RubyDialog_GetTableItemText((RubyValue)dval, (RDItem *)aTableView, rowIndex, column, buf, sizeof buf);
+	return [NSString stringWithUTF8String:buf];
+}
+
+- (void)tableView:(NSTableView *)aTableView setObjectValue:(id)anObject forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
+{
+	int column = [[aTableView tableColumns] indexOfObject:aTableColumn];
+	RubyDialog_SetTableItemText((RubyValue)dval, (RDItem *)aTableView, rowIndex, column, [anObject UTF8String]);
+}
+
 @end
 
 #pragma mark ====== Plain C Interface ======
@@ -506,7 +527,7 @@ RubyDialogCallback_createItem(RubyDialog *dref, const char *type, const char *ti
 			r1 = (btn1 != nil ? [btn1 frame] : NSZeroRect);
 			r2 = (btn2 != nil ? [btn2 frame] : NSZeroRect);
 			r1 = NSUnionRect(r1, r2);
-			crect.size.height += r1.size.height + r1.origin.y * 2;
+			crect.size.height += r1.size.height + r1.origin.y;
 		}
 		if (contentFrame.size.width < crect.size.width) {
 			contentFrame.size.width = crect.size.width;

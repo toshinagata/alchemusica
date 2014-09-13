@@ -764,3 +764,91 @@ MDArrayFetchPtr(const MDArray *arrayRef, long inIndex)
 		return NULL;
 	return (char *)arrayRef->data + inIndex * arrayRef->elemSize;
 }
+
+#pragma mark ====== Simpler Array Implementation ======
+
+/*  Assign a value to an array. An array is represented by two fields; count and base,
+ *  where base is a pointer to an array and count is the number of items.
+ *  The memory block of the array is allocated by 8*item_size. If the index exceeds
+ *  that limit, then a new memory block is allocated.  */
+void *
+AssignArray(void *base, int *count, int item_size, int idx, const void *value)
+{
+	void **bp = (void **)base;
+	if (*count == 0 || idx / 8 > (*count - 1) / 8) {
+		int new_size = (idx / 8 + 1) * 8;
+		if (*bp == NULL)
+			*bp = calloc(item_size, new_size);
+		else
+			*bp = realloc(*bp, new_size * item_size);
+		if (*bp == NULL)
+			return NULL;
+		memset((char *)*bp + *count * item_size, 0, (new_size - *count) * item_size);
+	}
+	if (idx >= *count)
+		*count = idx + 1;
+	if (value != NULL)
+		memcpy((char *)*bp + idx * item_size, value, item_size);
+	return (char *)*bp + idx * item_size;
+}
+
+/*  Allocate a new array. This works consistently with AssignArray().
+ *  Don't mix calloc()/malloc() with AssignArray(); that causes disasters!
+ *  (free() is OK though).  */
+void *
+NewArray(void *base, int *count, int item_size, int nitems)
+{
+	void **bp = (void *)base;
+	*bp = NULL;
+	*count = 0;
+	if (nitems > 0)
+		return AssignArray(base, count, item_size, nitems - 1, NULL);
+	else return NULL;
+}
+
+/*  Insert items to an array.  */
+void *
+InsertArray(void *base, int *count, int item_size, int idx, int nitems, const void *value)
+{
+	void **bp = (void *)base;
+	void *p;
+	int ocount = *count;
+	if (nitems <= 0)
+		return NULL;
+	/*  Allocate storage  */
+	p = AssignArray(base, count, item_size, *count + nitems - 1, NULL);
+	if (p == NULL)
+		return NULL;
+	/*  Move items if necessary  */
+	if (idx < ocount)
+		memmove((char *)*bp + (idx + nitems) * item_size, (char *)*bp + idx * item_size, (ocount - idx) * item_size);
+	/*  Copy items  */
+	if (value != NULL)
+		memmove((char *)*bp + idx * item_size, value, nitems * item_size);
+	else
+		memset((char *)*bp + idx * item_size, 0, nitems * item_size);
+	return (char *)*bp + idx * item_size;
+}
+
+void *
+DeleteArray(void *base, int *count, int item_size, int idx, int nitems, void *outValue)
+{
+	void **bp = (void *)base;
+	if (nitems <= 0 || idx < 0 || idx >= *count)
+		return NULL;
+	if (nitems > *count - idx)
+		nitems = *count - idx;
+	/*  Copy items  */
+	if (outValue != NULL)
+		memmove(outValue, (char *)*bp + idx * item_size, nitems * item_size);
+	/*  Move items  */
+	if (idx + nitems < *count)
+		memmove((char *)*bp + idx * item_size, (char *)*bp + (idx + nitems) * item_size, (*count - idx - nitems) * item_size);
+	*count -= nitems;
+	if (*count == 0) {
+		free(*bp);
+		*bp = NULL;
+	}
+	return NULL;
+}
+

@@ -131,6 +131,12 @@ long		MDArrayFetch(const MDArray *arrayRef, long inIndex, long inLength, void *o
 
 void *		MDArrayFetchPtr(const MDArray *arrayRef, long inIndex);
 
+/*  Simpler Array implementation  */
+void *AssignArray(void *base, int *count, int item_size, int idx, const void *value);
+void *NewArray(void *base, int *count, int item_size, int nitems);
+void *InsertArray(void *base, int *count, int item_size, int idx, int nitems, const void *value);
+void *DeleteArray(void *base, int *count, int item_size, int idx, int nitems, void *outValue);
+	
 #ifdef __cplusplus
 }
 #endif
