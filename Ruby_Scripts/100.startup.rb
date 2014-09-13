@@ -16,10 +16,10 @@
 #  Convenience methods for MRDialog
 #  These definitions allow MRDialog#run and MRDialog#new to accept a block,
 #  which is executed under the context of the MRDialog object.
-class RubyDialog
+class Dialog
 
   def self.run(*args, &block)
-    obj = RubyDialog.new(*args)
+    obj = Dialog.new(*args)
     obj.instance_eval(&block)
     obj.run
   end

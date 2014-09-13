@@ -26,6 +26,9 @@
 @interface RubyDialogController : NSWindowController {
 	RubyValue dval;  /*  Ruby object representing this object  */
 	NSMutableArray *ditems;  /*  Array of dialog items  */
+@public
+	NSTimer *myTimer;
+	BOOL onKeyHandlerEnabled;
 }
 - (void)dialogItemAction: (id)sender;
 - (void)setRubyObject: (RubyValue)val;

@@ -36,13 +36,15 @@ VALUE cMRDialog = Qfalse;
 
 - (void)dealloc
 {
+	if (myTimer != nil)
+		[myTimer invalidate];
 	[ditems release];
 	[super dealloc];
 }
 
 - (void)dialogItemAction: (id)sender
 {
-	RubyDialog_doItemAction(dval, (RDItem *)sender);
+	RubyDialog_doItemAction(dval, (RDItem *)sender, 0);
 
 //	int tag = [self searchDialogItem: sender];
 //	if (tag == 0)  /*  OK button  */
@@ -77,6 +79,27 @@ VALUE cMRDialog = Qfalse;
 	else return ui;
 }
 
+- (void)timerCallback:(NSTimer *)theTimer
+{
+	RubyDialog_doTimerAction((RubyValue)dval);
+}
+
+- (int)startIntervalTimer: (float)millisec
+{
+	if (myTimer != nil)
+		[myTimer invalidate];
+	myTimer = [NSTimer scheduledTimerWithTimeInterval:millisec / 1000.0 target:self selector:@selector(timerCallback:) userInfo:nil repeats:YES];
+	return 1;
+}
+
+- (void)stopIntervalTimer
+{
+	if (myTimer != nil) {
+		[myTimer invalidate];
+		myTimer = nil;
+	}
+}
+
 - (BOOL)control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor
 {
 	if (dval == NULL)
@@ -86,15 +109,21 @@ VALUE cMRDialog = Qfalse;
 
 - (void)controlTextDidEndEditing:(NSNotification *)aNotification
 {
-//	unichar ch;
-//	NSEvent *currentEvent = [NSApp currentEvent];
 	if (dval == NULL)
 		return;
-/*	if ([currentEvent type] == NSKeyDown && ((ch = [[currentEvent charactersIgnoringModifiers] characterAtIndex:0]) == NSNewlineCharacter || ch == NSEnterCharacter || ch == NSCarriageReturnCharacter))
-		return; */
 	/*  Send action  */
 	id obj = [aNotification object];
 	[obj sendAction:[obj action] to:[obj target]];
+	if ([obj isKindOfClass:[NSTextField class]] && [self searchDialogItem:obj] >= 0) {
+		//  User-defined text field
+		id movementCode = [[aNotification userInfo] objectForKey:@"NSTextMovement"];
+		if (movementCode != nil && [movementCode intValue] == NSReturnTextMovement) {
+			//  Return key is pressed
+			//  Send key event to the window (to process default button)
+			//  See the Cocoa documentation for -[NSTextField textDidEndEditing:]
+			[[self window] performKeyEquivalent:[NSApp currentEvent]];
+		}
+	}
 }
 
 @end
@@ -102,7 +131,7 @@ VALUE cMRDialog = Qfalse;
 #pragma mark ====== Plain C Interface ======
 
 RubyDialog *
-RubyDialogCallback_new(void)
+RubyDialogCallback_new(int style)
 {
 	RubyDialogController *cont = [[RubyDialogController alloc] initWithWindowNibName: @"RubyDialog"];
 	[[cont window] orderOut: nil];
@@ -146,9 +175,57 @@ RubyDialogCallback_endModal(RubyDialog *dref, int status)
 }
 
 void
+RubyDialogCallback_destroy(RubyDialog *dref)
+{
+	[(RubyDialogController *)dref stopIntervalTimer];
+	[(RubyDialogController *)dref close];
+}
+
+
+void
 RubyDialogCallback_close(RubyDialog *dref)
 {
+	[(RubyDialogController *)dref stopIntervalTimer];
 	[(RubyDialogController *)dref close];
+}
+
+void
+RubyDialogCallback_show(RubyDialog *dref)
+{
+	if (((RubyDialogController *)dref)->myTimer != NULL)
+		[(RubyDialogController *)dref startIntervalTimer:-1];
+	[[(RubyDialogController *)dref window] makeKeyAndOrderFront:nil];
+}
+
+void
+RubyDialogCallback_hide(RubyDialog *dref)
+{
+	[(RubyDialogController *)dref stopIntervalTimer];
+	[[(RubyDialogController *)dref window] orderOut:nil];	
+}
+
+int
+RubyDialogCallback_isActive(RubyDialog *dref)
+{
+	return [[(RubyDialogController *)dref window] isVisible];
+}
+
+int
+RubyDialogCallback_startIntervalTimer(RubyDialog *dref, float interval)
+{
+	return [(RubyDialogController *)dref startIntervalTimer:interval * 1000];
+}
+
+void
+RubyDialogCallback_stopIntervalTimer(RubyDialog *dref)
+{
+	[(RubyDialogController *)dref stopIntervalTimer];
+}
+
+void
+RubyDialogCallback_enableOnKeyHandler(RubyDialog *dref, int flag)
+{
+	((RubyDialogController *)dref)->onKeyHandlerEnabled = (flag != 0);
 }
 
 static inline RDRect
@@ -200,6 +277,22 @@ RubyDialogCallback_windowMinSize(RubyDialog *dref)
 }
 
 void
+RubyDialogCallback_setWindowMinSize(RubyDialog *dref, RDSize size)
+{
+	[[(RubyDialogController *)dref window] setMinSize:NSMakeSize(size.width, size.height)];
+}
+
+RDSize
+RubyDialogCallback_windowSize(RubyDialog *dref)
+{
+	NSSize size = [[[(RubyDialogController *)dref window] contentView] bounds].size;
+	RDSize rsize;
+	rsize.width = size.width;
+	rsize.height = size.height;
+	return rsize;
+}
+
+void
 RubyDialogCallback_setWindowSize(RubyDialog *dref, RDSize size)
 {
 	NSWindow *win = [(RubyDialogController *)dref window];
@@ -208,11 +301,17 @@ RubyDialogCallback_setWindowSize(RubyDialog *dref, RDSize size)
 	nsize.height = size.height;
 	[win setContentSize: nsize];
 	[win center];
-/*	NSRect frame = [win frame];
-	frame.size.width = size.width;
-	frame.size.height = size.height;
-	[win setFrame: frame display: YES];
-	[win center]; */
+}
+
+void
+RubyDialogCallback_setAutoResizeEnabled(RubyDialog *dref, int flag)
+{
+}
+
+int
+RubyDialogCallback_isAutoResizeEnabled(RubyDialog *dref)
+{
+	return 1;
 }
 
 void
@@ -221,9 +320,10 @@ RubyDialogCallback_createStandardButtons(RubyDialog *dref, const char *oktitle, 
 	RubyDialogController *cont = (RubyDialogController *)dref;
 	id okButton = [cont dialogItemAtIndex: 0];
 	id cancelButton = [cont dialogItemAtIndex: 1];
-	if (oktitle != NULL && oktitle[0] != 0)
+	if (oktitle != NULL && oktitle[0] != 0) {
 		[okButton setTitle: [NSString stringWithUTF8String: oktitle]];
-	else [okButton setHidden: YES];
+		[[cont window] setDefaultButtonCell:[okButton cell]];
+	} else [okButton setHidden: YES];
 	if (canceltitle != NULL && canceltitle[0] != 0)
 		[cancelButton setTitle: [NSString stringWithUTF8String: canceltitle]];
 	else [cancelButton setHidden: YES];
@@ -312,11 +412,33 @@ RubyDialogCallback_createItem(RubyDialog *dref, const char *type, const char *ti
 	} else if (strcmp(type, "view") == 0) {
 		/*  Panel  */
 		view = [[[NSView alloc] initWithFrame: rect] autorelease];
+	} else if (strcmp(type, "layout_view") == 0) {
+		/*  Panel (for layout only)  */
+		view = [[[NSView alloc] initWithFrame: rect] autorelease];
+	} else if (strcmp(type, "line") == 0) {
+		/*  Separator line  */
+		NSBox *box;
+		if (rect.size.width > rect.size.height)
+			rect.size.height = 1.0;
+		else rect.size.width = 1.0;
+		box = [[[NSBox alloc] initWithFrame: rect] autorelease];
+		[box setBoxType:NSBoxSeparator];
+		view = box;
 	} else if (strcmp(type, "button") == 0) {
 		/*  Button  */
 		NSButton *bn = [[[NSButton alloc] initWithFrame: rect] autorelease];
 		[bn setButtonType: NSMomentaryPushInButton];
 		[bn setBezelStyle: NSRoundedBezelStyle];
+		[[bn cell] setControlSize: NSSmallControlSize];
+		[bn setFont: font];
+		[bn setTitle: tstr];
+		[bn sizeToFit];
+		view = bn;
+	} else if (strcmp(type, "togglebutton") == 0) {
+		/*  Toggle Button  */
+		NSButton *bn = [[[NSButton alloc] initWithFrame: rect] autorelease];
+		[bn setButtonType: NSToggleButton];
+		[bn setBezelStyle: NSRegularSquareBezelStyle];
 		[[bn cell] setControlSize: NSSmallControlSize];
 		[bn setFont: font];
 		[bn setTitle: tstr];
@@ -344,6 +466,9 @@ RubyDialogCallback_createItem(RubyDialog *dref, const char *type, const char *ti
 		[bn setTitle: tstr];
 		[bn sizeToFit];
 		view = bn;
+	} else if (strcmp(type, "table") == 0) {
+		/*  TODO implement table  */
+		return NULL;
 	} else return NULL;
 	
 	{  /*  Resize the frame rect  */
@@ -363,6 +488,38 @@ RubyDialogCallback_createItem(RubyDialog *dref, const char *type, const char *ti
 		[(id)view setAction: @selector(dialogItemAction:)];
 		[(id)view setTarget: cont];
 	}
+	
+	if (strcmp(type, "layout_view") == 0) {
+		/*  Layout view: resize the window if it is too small  */
+		NSRect contentFrame = [[[cont window] contentView] frame];
+		NSRect crect = rect;
+		id btn1, btn2;
+		BOOL mod = NO;
+		crect.size.width += crect.origin.x * 2;
+		crect.size.height += crect.origin.y * 2;
+		crect.origin.x = crect.origin.y = 0;
+		btn1 = btn2 = nil;
+		if (((btn1 = [cont dialogItemAtIndex:0]) != nil && ![btn1 isHidden]) ||
+			((btn2 = [cont dialogItemAtIndex:1]) != nil && ![btn2 isHidden])) {
+			//  At least one standard button is visible: we need to add area for the buttons
+			NSRect r1, r2;
+			r1 = (btn1 != nil ? [btn1 frame] : NSZeroRect);
+			r2 = (btn2 != nil ? [btn2 frame] : NSZeroRect);
+			r1 = NSUnionRect(r1, r2);
+			crect.size.height += r1.size.height + r1.origin.y * 2;
+		}
+		if (contentFrame.size.width < crect.size.width) {
+			contentFrame.size.width = crect.size.width;
+			mod = YES;
+		}
+		if (contentFrame.size.height < crect.size.height) {
+			contentFrame.size.height = crect.size.height;
+			mod = YES;
+		}
+		if (mod)
+			[[cont window] setContentSize:contentFrame.size];
+	}
+	
 	if (gRubyDialogIsFlipped) {
 		/*  Update the y coordinate  */
 		NSRect superRect = [[view superview] frame];
@@ -537,6 +694,137 @@ RubyDialogCallback_isItemHidden(RDItem *item)
 }
 
 void
+RubyDialogCallback_setFontForItem(RDItem *item, int size, int family, int style, int weight)
+{
+	NSFont *font;
+	NSFontDescriptor *desc;
+	int mask = 0;
+	if (![(id)item respondsToSelector:@selector(font)])
+		return;
+	font = [(id)item font];
+	desc = [font fontDescriptor];
+	if (size != 0)
+		desc = [desc fontDescriptorWithSize:size];
+	if (family == 2)
+		desc = [desc fontDescriptorWithFamily:@"Times"];
+	else if (family == 3)
+		desc = [desc fontDescriptorWithFamily:@"Helvetica"];
+	else if (family == 4)
+		desc = [desc fontDescriptorWithFamily:@"Monaco"];
+	if ((style == 2 || style == 3) && family != 4)
+		mask |= NSItalicFontMask;
+	if (weight == 2 && family != 4)
+		mask |= NSBoldFontMask;
+	if (mask != 0)
+		desc = [desc fontDescriptorWithSymbolicTraits:mask];
+	font = [NSFont fontWithDescriptor:desc size:0];  //  Setting size here does not work.
+	[(id)item setFont:font];
+}
+
+int
+RubyDialogCallback_getFontForItem(RDItem *item, int *size, int *family, int *style, int *weight)
+{
+	NSFont *font;
+	NSFontDescriptor *desc;
+	unsigned int symbolicTrait;
+	int fam, sz, st, w;
+	const unsigned int serifs = 
+	NSFontOldStyleSerifsClass | NSFontTransitionalSerifsClass | NSFontModernSerifsClass |
+	NSFontClarendonSerifsClass | NSFontSlabSerifsClass | NSFontFreeformSerifsClass;
+	const unsigned int sans_serifs = NSFontSansSerifClass;
+	const unsigned int monospace = NSFontMonoSpaceTrait;
+	
+	if (![(id)item respondsToSelector:@selector(font)])
+		return 0;
+	font = [(id)item font];
+	desc = [font fontDescriptor];
+	symbolicTrait = [desc symbolicTraits];
+	
+	fam = sz = st = w = 0;
+	sz = [font pointSize];
+	if (symbolicTrait & serifs)
+		fam = 2;
+	if (symbolicTrait & sans_serifs)
+		fam = 3;
+	if (symbolicTrait & monospace)
+		fam = 4;
+	if (symbolicTrait & NSFontItalicTrait)
+		st = 3;
+	if (symbolicTrait & NSFontBoldTrait)
+		w = 2;
+	if (family != NULL)
+		*family = fam;
+	if (style != NULL)
+		*style = st;
+	if (size != NULL)
+		*size = sz;
+	if (weight != NULL)
+		*weight = w;
+	return 1;
+}
+
+void
+RubyDialogCallback_setForegroundColorForItem(RDItem *item, const double *col)
+{
+	if ([(id)item respondsToSelector:@selector(setTextColor:)]) {
+		NSColor *color = [NSColor colorWithDeviceRed:col[0] green:col[1] blue:col[2] alpha:col[3]];		
+		[(id)item setTextColor:color];
+	}
+}
+
+void
+RubyDialogCallback_setBackgroundColorForItem(RDItem *item, const double *col)
+{
+	if ([(id)item respondsToSelector:@selector(setBackgroundColor:)]) {
+		NSColor *color = [NSColor colorWithDeviceRed:col[0] green:col[1] blue:col[2] alpha:col[3]];		
+		[(id)item setBackgroundColor:color];
+	}
+}
+
+void
+RubyDialogCallback_getForegroundColorForItem(RDItem *item, double *col)
+{
+	if ([(id)item respondsToSelector:@selector(textColor)]) {
+		float rgba[4];
+		NSColor *color = [(id)item textColor];
+		[color getRed:rgba green:rgba + 1 blue:rgba + 2 alpha:rgba + 3];
+		col[0] = rgba[0];
+		col[1] = rgba[1];
+		col[2] = rgba[2];
+		col[3] = rgba[3];
+	}
+}
+
+void
+RubyDialogCallback_getBackgroundColorForItem(RDItem *item, double *col)
+{
+	if ([(id)item respondsToSelector:@selector(backgroundColor)]) {
+		float rgba[4];
+		NSColor *color = [(id)item textColor];
+		[color getRed:rgba green:rgba + 1 blue:rgba + 2 alpha:rgba + 3];
+		col[0] = rgba[0];
+		col[1] = rgba[1];
+		col[2] = rgba[2];
+		col[3] = rgba[3];
+	}
+}
+
+int
+RubyDialogCallback_appendString(RDItem *item, const char *str)
+{
+	if ([(id)item respondsToSelector:@selector(textStorage)]) {
+		NSTextStorage *st = [(id)item textStorage];
+		[st replaceCharactersInRange:NSMakeRange([st length], 0) withString:[NSString stringWithUTF8String:str]];
+		return 1;
+	} else if ([(id)item respondsToSelector:@selector(setStringValue:)]) {
+		NSString *st = [(id)item stringValue];
+		[(id)item setStringValue:[st stringByAppendingFormat:@"%s", str]];
+		return 1;
+	}
+	return 0;
+}
+
+void
 RubyDialogCallback_setEditableForItem(RDItem *item, int flag)
 {
 	RubyDialogCallback_setEnabledForItem(item, flag);
@@ -567,6 +855,13 @@ void
 RubyDialogCallback_setNeedsDisplay(RDItem *item, int flag)
 {
 	[(NSView *)item setNeedsDisplay:flag];
+}
+
+void
+RubyDialogCallback_setNeedsDisplayInRect(RDItem *item, RDRect rect, int eraseBackground)
+{
+	NSRect nrect = NSMakeRect(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+	[(NSView *)item setNeedsDisplayInRect:nrect];
 }
 
 int
@@ -669,6 +964,67 @@ RubyDialogCallback_resizeToBest(RDItem *item)
 	return RDSizeFromNSSize(size);
 }
 
+char
+RubyDialogCallback_deleteTableColumn(RDItem *item, int col)
+{
+	if ([(NSView *)item isKindOfClass:[NSTableView class]]) {
+		id column = [(NSTableView *)item tableColumnWithIdentifier:[NSNumber numberWithInt:col]];
+		if (column != nil) {
+			[(NSTableView *)item removeTableColumn:column];
+			return 1;
+		}
+	}
+	return 0;
+}
+
+char
+RubyDialogCallback_insertTableColumn(RDItem *item, int col, const char *heading, int format, int width)
+{
+	if ([(NSView *)item isKindOfClass:[NSTableView class]]) {
+		NSTableColumn *column = [[[NSTableColumn alloc] initWithIdentifier:[NSNumber numberWithInt:col]] autorelease];
+		[[column headerCell] setStringValue:[NSString stringWithUTF8String:heading]];
+		[(NSTableView *)item addTableColumn:column];
+		return 1;
+	} else return 0;
+}
+
+int
+RubyDialogCallback_countTableColumn(RDItem *item)
+{
+	if ([(NSView *)item isKindOfClass:[NSTableView class]]) {
+		return [(NSTableView *)item numberOfColumns];
+	} else return -1;
+}
+
+char
+RubyDialogCallback_isTableRowSelected(RDItem *item, int row)
+{
+	if ([(NSView *)item isKindOfClass:[NSTableView class]]) {
+		return [(NSTableView *)item isRowSelected:row];
+	} else return 0;
+}
+
+char
+RubyDialogCallback_setSelectedTableRow(RDItem *item, struct MDPointSet *rg, int extend)
+{
+	if ([(NSView *)item isKindOfClass:[NSTableView class]]) {
+		NSMutableIndexSet *iset = [NSMutableIndexSet indexSet];
+		int i, n;
+		for (i = 0; (n = MDPointSetGetNthPoint(rg, i)) >= 0; i++)
+			[iset addIndex: i];
+		[(NSTableView *)item selectRowIndexes:iset byExtendingSelection:extend];
+		return 1;
+	} else return 0;
+}
+
+void
+RubyDialogCallback_refreshTable(RDItem *item)
+{
+	if ([(NSView *)item isKindOfClass:[NSTableView class]]) {
+		[(NSTableView *)item reloadData];
+	}
+}
+
 int
 RubyDialogCallback_lastKeyCode(void)
 {
@@ -722,4 +1078,217 @@ RubyDialogCallback_openPanel(const char *title, const char *dirname, const char 
 	} else result = 0;
 	[panel close];
 	return result;
+}
+
+#pragma mark ====== Plain C Interface (Device Context) ======
+
+RDDeviceContext *
+RubyDialogCallback_getDeviceContextForRubyDialog(RubyDialog *dref)
+{
+	RubyDialogController *cont = (RubyDialogController *)dref;
+	return (RDDeviceContext *)[[[cont window] graphicsContext] graphicsPort];
+}
+
+void
+RubyDialogCallback_clear(RDDeviceContext *dc)
+{
+	CGContextRef cref = (CGContextRef)dc;
+	CGRect rect = CGContextGetClipBoundingBox(cref);
+	CGContextClearRect(cref, rect);
+}
+
+void
+RubyDialogCallback_drawEllipse(RDDeviceContext *dc, float x, float y, float r1, float r2)
+{
+	CGContextRef cref = (CGContextRef)dc;
+	CGRect rect = CGRectMake(x - r1, x - r2, r1 * 2, r2 * 2);
+	CGContextStrokeEllipseInRect(cref, rect);
+}
+
+void
+RubyDialogCallback_drawLine(RDDeviceContext *dc, int ncoords, float *coords)
+{
+	int i;
+	CGContextRef cref = (CGContextRef)dc;
+	CGContextBeginPath(cref);
+	CGContextMoveToPoint(cref, coords[0], coords[1]);
+	for (i = 1; i < ncoords; i++) {
+		CGContextAddLineToPoint(cref, coords[i * 2], coords[i * 2 + 1]);
+	}
+	CGContextStrokePath(cref);
+}
+
+void
+RubyDialogCallback_drawRectangle(RDDeviceContext *dc, float x, float y, float width, float height, float round)
+{
+	CGContextRef cref = (CGContextRef)dc;
+	if (round * 2 > width)
+		round = width * 0.5;
+	if (round * 2 > height)
+		round = height * 0.5;
+	if (round < 1.0)
+		round = 0.0;
+	if (round > 0) {
+		CGContextBeginPath(cref);
+		CGContextAddArc(cref, x + round, y + round, round, 3.1415927, 3.1415927 * 1.5, 0);
+		CGContextAddArc(cref, x + width - round, y + round, round, 3.1415927 * 1.5, 3.1415927 * 2.0, 0);
+		CGContextAddArc(cref, x + width - round, y + height - round, round, 0, 3.1415927 * 0.5, 0);
+		CGContextAddArc(cref, x + round, y + height - round, round, 3.1415927 * 0.5, 3.1415927, 0);
+		CGContextClosePath(cref);
+		CGContextStrokePath(cref);
+	} else {
+		CGRect r = CGRectMake(x, y, width, height);
+		CGContextStrokeRect(cref, r);
+	}
+}
+
+void
+RubyDialogCallback_drawText(RDDeviceContext *dc, const char *s, float x, float y)
+{
+	CGContextRef cref = (CGContextRef)dc;
+	CGContextShowTextAtPoint(cref, x, y, s, strlen(s));
+}
+
+void
+RubyDialogCallback_setFont(RDDeviceContext *dc, void **args)
+{
+	int i;
+	float fontSize = 12;
+	const char *fontName = NULL;
+	CGContextRef cref = (CGContextRef)dc;
+	for (i = 0; args[i] != NULL; i += 2) {
+		if (strcmp((const char *)args[i], "size") == 0) {
+			fontSize = *((float *)(args[i + 1]));
+		} else if (strcmp((const char *)args[i], "style") == 0) {
+		} else if (strcmp((const char *)args[i], "family") == 0) {
+		} else if (strcmp((const char *)args[i], "weight") == 0) {
+		} else if (strcmp((const char *)args[i], "name") == 0) {
+			fontName = (const char *)args[i + 1];
+		}
+	}
+	if (fontName == NULL)
+		CGContextSetFontSize(cref, fontSize);
+	else
+		CGContextSelectFont(cref, fontName, fontSize, kCGEncodingFontSpecific);
+}
+
+void
+RubyDialogCallback_setPen(RDDeviceContext *dc, void **args)
+{
+	int i;
+	float width;
+	CGContextRef cref = (CGContextRef)dc;
+	width = 1.0;
+	if (args != NULL) {
+		for (i = 0; args[i] != NULL; i += 2) {
+			if (strcmp((const char *)args[i], "color") == 0) {
+				float *fp = (float *)args[i + 1];
+				CGContextSetRGBStrokeColor(cref, fp[0], fp[1], fp[2], fp[3]);
+			} else if (strcmp((const char *)args[i], "width") == 0) {
+				width = *((float *)(args[i + 1]));
+				CGContextSetLineWidth(cref, width);
+			} else if (strcmp((const char *)args[i], "style") == 0) {
+				int style = (int)(args[i + 1]);
+				float dash[4];
+				float *dashp = dash;
+				int dashLen;
+				switch (style) {
+					case 0: dashp = NULL; dashLen = 0; break;
+					case 1: CGContextSetRGBStrokeColor(cref, 0, 0, 0, 0); break;
+					case 2: dash[0] = dash[1] = width; dashLen = 2; break;
+					case 3: dash[0] = width * 4; dash[1] = width * 2; dashLen = 2; break; 
+					case 4: dash[0] = dash[1] = width * 2; dashLen = 2; break;
+					case 5: dash[0] = dash[1] = width; dash[2] = dash[3] = width * 4; dashLen = 4; break;
+					default: dashp = NULL; dashLen = 0; break;
+				}
+				if (style != 1)
+					CGContextSetLineDash(cref, 0, dashp, dashLen);
+			}
+		}
+	}
+}
+
+void
+RubyDialogCallback_setBrush(RDDeviceContext *dc, void **args)
+{
+	int i;
+	CGContextRef cref = (CGContextRef)dc;
+	if (args != NULL) {
+		for (i = 0; args[i] != NULL; i += 2) {
+			if (strcmp((const char *)args[i], "color") == 0) {
+				float *fp = (float *)args[i + 1];
+				CGContextSetRGBFillColor(cref, fp[0], fp[1], fp[2], fp[3]);
+			}
+		}
+	}
+}
+
+#pragma mark ====== Bitmap ======
+
+RDBitmap *
+RubyDialogCallback_createBitmap(int width, int height, int depth)
+{
+	CGContextRef bitmap;
+	void *data = malloc(width * height * (depth / 8));
+	CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
+	bitmap = CGBitmapContextCreate(data, width, height, depth / 4, (depth / 8) * width, colorSpace, kCGImageAlphaLast);
+	CGColorSpaceRelease(colorSpace);
+	return (RDBitmap *)bitmap;
+}
+
+void
+RubyDialogCallback_releaseBitmap(RDBitmap *bitmap)
+{
+	if (bitmap != NULL) {
+		void *data = CGBitmapContextGetData((CGContextRef)bitmap);
+		free(data);
+		CGContextRelease((CGContextRef)bitmap);
+	}
+}
+
+
+/*  Set focus on a bitmap and execute the given function  */
+/*  This trick is necessary for platform like wxWidgets where the device context
+    must be allocated on stack.
+    It is not necessary for platform like Quartz-OSX where the device context is
+    allocated in the heap.  */
+static RDBitmap *s_temp_dc_pointer = NULL;
+int
+RubyDialogCallback_executeWithFocusOnBitmap(RDBitmap *bitmap, void (*callback)(void *), void *ptr)
+{
+	if (s_temp_dc_pointer != NULL)
+		return -1;  /*  Recursive call is not allowed  */
+	s_temp_dc_pointer = bitmap;
+	(*callback)(ptr);
+	s_temp_dc_pointer = NULL;
+	return 0;
+}
+
+RDDeviceContext *
+RubyDialogCallback_getDeviceContextForBitmap(RDBitmap *bitmap)
+{
+	return (RDDeviceContext *)bitmap;
+}
+
+int
+RubyDialogCallback_saveBitmapToFile(RDBitmap *bitmap, const char *fname)
+{
+	CGImageRef outImage = CGBitmapContextCreateImage((CGContextRef)bitmap);
+	CFURLRef outURL = (CFURLRef)[NSURL fileURLWithPath:[NSString stringWithUTF8String:fname]];
+	int len = strlen(fname);
+	CFStringRef bitmapType = kUTTypePNG;
+	int retval = 1;
+	if (len >= 4) {
+		if (strcasecmp(fname + len - 4, ".png") == 0)
+			bitmapType = kUTTypePNG;
+		else if (strcasecmp(fname + len - 4, ".tif") == 0 || (len >= 5 && strcasecmp(fname + len - 5, ".tiff") == 0))
+			bitmapType = kUTTypeTIFF;
+	}
+    CGImageDestinationRef outDestination = CGImageDestinationCreateWithURL(outURL, kUTTypeJPEG, 1, NULL);
+    CGImageDestinationAddImage(outDestination, outImage, NULL);
+    if (!CGImageDestinationFinalize(outDestination))
+		retval = 0;
+    CFRelease(outDestination);
+    CGImageRelease(outImage);
+	return retval;
 }

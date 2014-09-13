@@ -12,7 +12,7 @@
 class Sequence
 
 def change_control_number_ext
-  hash = RubyDialog.run {
+  hash = Dialog.run {
     layout(1,
 	  layout(2,
 	    item(:text, :title=>"Old control number"),
