@@ -592,6 +592,7 @@ s_executeRubyOnDocument(VALUE vinfo)
 						retp2 = va_arg(ap, void *);
 					break;
 			} /* end switch */
+			rb_ary_push(args, aval);
 			p++;
 		} /* end while */
 	} /* end if */

@@ -27,6 +27,7 @@
 	RubyValue dval;  /*  Ruby object representing this object  */
 	NSMutableArray *ditems;  /*  Array of dialog items  */
 @public
+	int style;  /* Window style */
 	NSTimer *myTimer;
 	BOOL onKeyHandlerEnabled;
 }

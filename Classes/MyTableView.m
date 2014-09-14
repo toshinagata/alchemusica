@@ -34,6 +34,18 @@
 	underlineRow = -1;
 }
 
+- (void)editColumn:(int)columnIndex row:(int)rowIndex withEvent:(NSEvent *)theEvent select:(BOOL)flag
+{
+	//  If the delegate implements special editing feature, call it.
+	id delegate = [self delegate];
+	if ([delegate respondsToSelector:@selector(myTableView:shouldEditColumn:row:)]) {
+		if (![[self delegate] myTableView:self shouldEditColumn:columnIndex row:rowIndex])
+			return;
+	}
+	//  If it does not, then do the usual thing
+	[super editColumn:columnIndex row:rowIndex withEvent:theEvent select:flag];
+}
+
 - (void)textDidBeginEditing: (NSNotification *)aNotification
 {
 	//  Make a copy of the original string

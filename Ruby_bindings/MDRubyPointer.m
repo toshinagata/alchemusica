@@ -25,12 +25,6 @@
 //  Pointer class
 VALUE rb_cMRPointer = Qfalse;
 
-//  Internal structure
-typedef struct MRPointerInfo {
-	MyDocumentTrackInfo trackInfo;  //  MDTrack is _not_ retained
-	MDPointer *pointer;             //  MDPointer _is_ retained
-} MRPointerInfo;
-
 #pragma mark ====== Event kind symbols ======
 
 static struct {
@@ -675,7 +669,16 @@ MRPointer_GetDataSub(const MDEvent *ep)
 		case kMDEventSysexCont: {
 			long messageLength;
 			const char *cp = (const char *)MDGetMessageConstPtr(ep, &messageLength);
-			return rb_str_new(cp, messageLength);
+			if (kind == kMDEventSysex || kind == kMDEventSysexCont) {
+				long i;
+				vals[0] = rb_ary_new2(messageLength);
+				for (i = 0; i < messageLength; i++) {
+					rb_ary_store(vals[0], i, INT2FIX((unsigned char)cp[i]));
+				}
+				return vals[0];
+			} else {
+				return rb_str_new(cp, messageLength);
+			}
 		}
 		case kMDEventSMPTE: {
 			const MDSMPTERecord *rp = MDGetSMPTERecordPtr(ep);

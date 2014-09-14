@@ -29,3 +29,7 @@
 - (void)setUnderlineRow:(int)row;
 //- (BOOL)keyDown: (NSEvent *)theEvent onObject: (id)theObject;
 @end
+
+@interface NSObject (MyTableViewAddition)
+- (BOOL)myTableView:(MyTableView *)tableView shouldEditColumn:(int)column row:(int)row;
+@end

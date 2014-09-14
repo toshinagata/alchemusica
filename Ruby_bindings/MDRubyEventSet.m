@@ -592,7 +592,7 @@ MREventSet_SetTrack(VALUE self, VALUE val)
 {
 	if (!rb_obj_is_kind_of(val, rb_cMRTrack))
 		rb_raise(rb_eTypeError, "track value must be Track type");
-	rb_ivar_set(val, s_ID_track, val);
+	rb_ivar_set(self, s_ID_track, val);
 	return val;
 }
 

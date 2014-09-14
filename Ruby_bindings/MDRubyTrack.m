@@ -19,6 +19,8 @@
 #import "MyDocument.h"
 #import "MyMIDISequence.h"
 #import "MDObjects.h"
+#import "MDRubyPointer.h"
+
 #include "MDRuby.h"
 
 //  Track class
@@ -402,22 +404,47 @@ static VALUE
 s_MRTrack_EventSet(int argc, VALUE *argv, VALUE self)
 {
 	MDPointSet *pset;
-	VALUE val;
+	VALUE val, rval;
 	long max, n;
 
 	const MyDocumentTrackInfo *ip = TrackInfoFromMRTrackValue(self);
 	if (ip == NULL || ip->track == NULL)
 		rb_raise(rb_eStandardError, "Internal error: track not defined");
 
+	n = MDTrackGetNumberOfEvents(ip->track);
+
 	/*  Create a MREventSet object  */
-	val = rb_funcall(rb_cMREventSet, rb_intern("new"), argc, argv);
+	/*  (without the accompanying block)  */
+	if (argc == 0) {
+		/*  The default set is (0...nevents)  */
+		rval = rb_range_new(INT2NUM(0), INT2NUM(n), 1);
+		argc = 1;
+		argv = &rval;
+	}
+	
+	val = rb_funcall2(rb_cMREventSet, rb_intern("new"), argc, argv);
 	
 	/*  Limit by the number of actual events  */
 	pset = MDPointSetFromValue(val);
-	n = MDTrackGetNumberOfEvents(ip->track);
 	max = MDPointSetMaximum(pset);
 	if (n <= max)
 		MDPointSetRemove(pset, n, max - n + 1);
+	
+	if (rb_block_given_p()) {
+		VALUE pval;
+		MRPointerInfo *pvalinfo;
+		MDPointSet *ps_to_remove = MDPointSetNew();
+		long i;
+		pval = s_MRTrack_Pointer(self, Qnil);
+		Data_Get_Struct(pval, MRPointerInfo, pvalinfo);
+		for (i = 0; (n = MDPointSetGetNthPoint(pset, i)) >= 0; i++) {
+			MDPointerSetPosition(pvalinfo->pointer, n);
+			if (!RTEST(rb_yield(pval)))
+				MDPointSetAdd(ps_to_remove, n, 1);
+		}
+		MDPointSetRemovePointSet(pset, ps_to_remove);
+		MDPointSetRelease(ps_to_remove);
+	}
 	
 	/*  Set track  */
 	MREventSet_SetTrack(val, self);

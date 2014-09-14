@@ -24,6 +24,7 @@
 //#import "MyFieldEditor.h"
 #import "MDObjects.h"
 #import "EventFilterPanelController.h"
+#import "MDRubyExtern.h"
 
 @implementation ListWindowController
 
@@ -859,6 +860,25 @@ row:(int)rowIndex
 	if (row == myCount)
 		return nil;
 	else return menu;
+}
+
+//  MyTableView delegate method
+- (BOOL)myTableView:(MyTableView *)tableView shouldEditColumn:(int)column row:(int)row
+{
+	if (tableView == myEventTrackView) {
+		MDEvent *ep = [self eventPointerForTableRow:row];
+		int count = [self eventPositionForTableRow:row];
+		if (ep == NULL)
+			return NO;
+		if (MDGetKind(ep) == kMDEventSysex) {
+			//  Special editing feature
+			int n = Ruby_callMethodOfDocument("edit_sysex_dialog", [self document], 0, "ii", (int)myTrackNumber, count);
+			if (n != 0)
+				Ruby_showError(n);
+			return NO;
+		}
+	}
+	return YES;
 }
 
 //  NSControl delegate method; check if the edited text is valid

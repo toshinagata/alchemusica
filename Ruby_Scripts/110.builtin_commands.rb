@@ -173,4 +173,32 @@ def scale_selected_time_dialog
   end
 end
 
+def edit_sysex_dialog(track_no, event_no)
+  seq = self
+  tracks = (0...seq.ntracks).map { |i| seq.track(i).name }
+  sysexs = seq.track(track_no).eventset { |pt| pt.kind == :sysex }
+  sysex_names = sysexs.map { |pt|
+    "#{pt.position + 1} - #{seq.tick_to_measure(pt.tick).join(':')}"
+  }
+  sysex_idx = sysexs.find_index { |pt| pt.position == event_no } || -1
+  if (sysex_idx >= 0)
+    data = seq.track(track_no).event(event_no).data
+	sysex_data = ""
+	data.each_with_index { |d, i|
+	  sysex_data += sprintf("%02X", d) + (i % 8 == 7 ? "\n" : " ")
+	}
+	sysex_desc = sysex_data
+  end
+  hash = Dialog.run("Edit Sysex", "OK", "Cancel", :resizable=>true) {
+    layout(1,
+	  layout(2,
+	    item(:text, :title=>"Track"),
+		item(:popup, :subitems=>tracks, :value=>track_no),
+	    item(:text, :title=>"Sysex"),
+		item(:popup, :subitems=>sysex_names, :value=>sysex_idx)),
+	  item(:textview, :value=>sysex_data, :width=>200, :height=>100),
+	  item(:textview, :value=>sysex_desc, :width=>200, :height=>80))
+  }
+end
+
 end

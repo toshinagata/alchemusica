@@ -21,11 +21,18 @@
 
 #include <ruby.h>
 #include "MDHeaders.h"
+#include "MyDocument.h"
 
 @class MyDocument;
 
 //  Pointer class
 extern VALUE rb_cMRPointer;
+
+//  Internal structure
+typedef struct MRPointerInfo {
+	MyDocumentTrackInfo trackInfo;  //  MDTrack is _not_ retained
+	MDPointer *pointer;             //  MDPointer _is_ retained
+} MRPointerInfo;
 
 VALUE MREventSymbolFromEventKindAndCode(int kind, int code, int *is_generic);
 int MREventKindAndCodeFromEventSymbol(VALUE sym, int *code, int *is_generic);

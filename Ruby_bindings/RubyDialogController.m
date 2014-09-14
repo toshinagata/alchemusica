@@ -100,6 +100,18 @@ VALUE cMRDialog = Qfalse;
 	}
 }
 
+- (void)cancel:(id)sender
+{
+	//  Send action for the "cancel" button
+	id ditem;
+	//  If we are editing a text view, then ignore ESC or control-period
+	if ([[[self window] firstResponder] isKindOfClass:[NSTextView class]])
+		return;
+	ditem = [self dialogItemAtIndex:1];
+	if (ditem != nil && ![ditem isHidden] && [ditem isEnabled])
+		RubyDialog_doItemAction(dval, (RDItem *)ditem, 0);
+}
+
 - (BOOL)control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor
 {
 	if (dval == NULL)
@@ -124,6 +136,12 @@ VALUE cMRDialog = Qfalse;
 			[[self window] performKeyEquivalent:[NSApp currentEvent]];
 		}
 	}
+}
+
+- (void)textDidChange:(NSNotification *) aNotification
+{
+	id view = [[aNotification object] enclosingScrollView];
+	[self dialogItemAction:view];
 }
 
 #pragma mark ====== TableView data source protocol ======
@@ -154,7 +172,48 @@ VALUE cMRDialog = Qfalse;
 RubyDialog *
 RubyDialogCallback_new(int style)
 {
-	RubyDialogController *cont = [[RubyDialogController alloc] initWithWindowNibName: @"RubyDialog"];
+	NSRect rect = NSMakeRect(390, 382, 220, 55);
+	NSWindow *win;
+	int mask = NSTitledWindowMask;
+
+	//  Window style
+	if (style & rd_Resizable)
+		mask |= NSResizableWindowMask;
+	if (style & rd_HasCloseBox)
+		mask |= NSClosableWindowMask | NSMiniaturizableWindowMask;
+
+	win = [[NSWindow alloc] initWithContentRect:rect
+			styleMask:mask
+			backing:NSBackingStoreBuffered defer:YES];
+
+	//	RubyDialogController *cont = [[RubyDialogController alloc] initWithWindowNibName: @"RubyDialog"];
+
+	RubyDialogController *cont = [[RubyDialogController alloc] initWithWindow:win];
+	cont->style = style;
+
+	{
+		/*  Create OK/Cancel buttons  */
+		int i;
+		for (i = 0; i < 2; i++) {
+			if (i == 0) {
+				rect = NSMakeRect(125, 13, 80, 28);
+			} else {
+				rect = NSMakeRect(15, 13, 80, 28);
+			}
+			NSButton *bn = [[[NSButton alloc] initWithFrame: rect] autorelease];
+			[bn setButtonType: NSMomentaryPushInButton];
+			[bn setBezelStyle: NSRoundedBezelStyle];
+			[[bn cell] setControlSize: NSSmallControlSize];
+			[bn setTag:i];
+			[bn setTitle: (i == 0 ? @"OK" : @"Cancel")];
+			[bn setAction: @selector(dialogItemAction:)];
+			[bn setTarget: cont];
+			[[win contentView] addSubview:bn];
+		}
+	}
+	
+	[cont windowDidLoad];
+	[win autorelease];
 	[[cont window] orderOut: nil];
 	return (RubyDialog *)cont;
 }
@@ -183,6 +242,8 @@ int
 RubyDialogCallback_runModal(RubyDialog *dref)
 {
 	RubyDialogController *cont = (RubyDialogController *)dref;
+	if (cont->style & rd_HasCloseBox)
+		return -1;  /*  Cannot run  */
 	[[cont window] makeKeyAndOrderFront: nil];
 	if ([NSApp runModalForWindow: [cont window]] == NSRunStoppedResponse)
 		return 0;  /*  OK  */
@@ -327,12 +388,15 @@ RubyDialogCallback_setWindowSize(RubyDialog *dref, RDSize size)
 void
 RubyDialogCallback_setAutoResizeEnabled(RubyDialog *dref, int flag)
 {
+	NSWindow *win = [(RubyDialogController *)dref window];
+	[[win contentView] setAutoresizesSubviews:(flag != 0)];
 }
 
 int
 RubyDialogCallback_isAutoResizeEnabled(RubyDialog *dref)
 {
-	return 1;
+	NSWindow *win = [(RubyDialogController *)dref window];
+	return [[win contentView] autoresizesSubviews];
 }
 
 void
@@ -356,10 +420,10 @@ OffsetForItemRect(const char *type)
 	NSRect offset = NSMakeRect(0, 0, 0, 0);
 	if (strcmp(type, "textfield") == 0)
 		offset.size.height = 5;
-	else if (strcmp(type, "button") == 0) {
-		offset.size.width = 24;
-		offset.size.height = 14;
-	}
+//	else if (strcmp(type, "button") == 0) {
+//		offset.size.width = 24;
+//		offset.size.height = 14;
+//	}
 	return offset;
 }
 
@@ -367,6 +431,7 @@ RDItem *
 RubyDialogCallback_createItem(RubyDialog *dref, const char *type, const char *title, RDRect frame)
 {
 	NSView *view = nil;
+	NSView *itemView = nil;  //  The textview object is NSScrollView but the content is NSTextView
 	NSRect rect, offset;
 	RubyDialogController *cont = ((RubyDialogController *)dref);
 	NSString *tstr = (title ? [NSString stringWithUTF8String: title] : nil);
@@ -422,14 +487,16 @@ RubyDialogCallback_createItem(RubyDialog *dref, const char *type, const char *ti
 		[tv setAutoresizingMask: NSViewWidthSizable];
 		[[tv textContainer] setContainerSize: NSMakeSize(contentSize.width, FLT_MAX)];
 		[[tv textContainer] setWidthTracksTextView: YES];
+		[[tv textContainer] setHeightTracksTextView: NO];
 		font = [NSFont userFixedPitchFontOfSize: 0];
 		[tv setFont: font];
-		//	[control setDelegate: d];
+		[tv setDelegate: cont];
 		[tv setRichText: NO];
 		[tv setSelectable: YES];
 		[tv setEditable: YES];
 		[sv setDocumentView: tv];
 		view = sv;
+		itemView = tv;
 	} else if (strcmp(type, "view") == 0) {
 		/*  Panel  */
 		view = [[[NSView alloc] initWithFrame: rect] autorelease];
@@ -504,12 +571,6 @@ RubyDialogCallback_createItem(RubyDialog *dref, const char *type, const char *ti
 		[view setFrame: rect];  /*  For flipped coordinate system (like Cocoa), the y-coordinate will need update after being added to the superview */
 	}
 	
-	[cont addDialogItem: view];
-	if ([view respondsToSelector: @selector(setAction:)]) {
-		[(id)view setAction: @selector(dialogItemAction:)];
-		[(id)view setTarget: cont];
-	}
-	
 	if (strcmp(type, "layout_view") == 0) {
 		/*  Layout view: resize the window if it is too small  */
 		NSRect contentFrame = [[[cont window] contentView] frame];
@@ -539,6 +600,15 @@ RubyDialogCallback_createItem(RubyDialog *dref, const char *type, const char *ti
 		}
 		if (mod)
 			[[cont window] setContentSize:contentFrame.size];
+	}
+	
+	[cont addDialogItem: view];
+	if (itemView == nil)
+		itemView = view;
+
+	if ([itemView respondsToSelector: @selector(setAction:)]) {
+		[itemView setAction: @selector(dialogItemAction:)];
+		[itemView setTarget: cont];
 	}
 	
 	if (gRubyDialogIsFlipped) {
@@ -619,8 +689,8 @@ RubyDialogCallback_setStringToItem(RDItem *item, const char *s)
 {
 	NSView *view = (NSView *)item;
 	NSString *str = [NSString stringWithUTF8String: s];
-	if ([view isKindOfClass: [NSTextView class]]) {
-		[(NSTextView *)view setString: str];
+	if ([view isKindOfClass: [NSScrollView class]]) {
+		[[(NSScrollView *)view documentView] setString: str];
 	} else if ([view respondsToSelector: @selector(setStringValue:)]) {
 		[(id)view setStringValue: str];
 	}
@@ -631,8 +701,8 @@ RubyDialogCallback_getStringFromItem(RDItem *item, char *buf, int bufsize)
 {
 	NSView *view = (NSView *)item;
 	NSString *str;
-	if ([view isKindOfClass: [NSTextView class]]) {
-		str = [(NSTextView *)view string];
+	if ([view isKindOfClass: [NSScrollView class]]) {
+		str = [[(NSScrollView *)view documentView] string];
 	} else if ([view respondsToSelector: @selector(stringValue:)]) {
 		str = [(id)view stringValue];
 	} else {
@@ -647,8 +717,8 @@ RubyDialogCallback_getStringPtrFromItem(RDItem *item)
 {
 	NSView *view = (NSView *)item;
 	NSString *str;
-	if ([view isKindOfClass: [NSTextView class]]) {
-		str = [(NSTextView *)view string];
+	if ([view isKindOfClass: [NSScrollView class]]) {
+		str = [[(NSScrollView *)view documentView] string];
 	} else if ([view respondsToSelector: @selector(stringValue)]) {
 		str = [(id)view stringValue];
 	} else return NULL;
@@ -684,8 +754,8 @@ void
 RubyDialogCallback_setEnabledForItem(RDItem *item, int flag)
 {
 	NSView *view = (NSView *)item;
-	if ([view isKindOfClass: [NSTextView class]]) {
-		[(NSTextView *)view setEditable: (flag != 0)];
+	if ([view isKindOfClass: [NSScrollView class]]) {
+		[[(NSScrollView *)view documentView] setEditable: (flag != 0)];
 	} else if ([view respondsToSelector: @selector(setEnabled:)]) {
 		[(id)view setEnabled: (flag != 0)];
 	}
@@ -695,8 +765,8 @@ int
 RubyDialogCallback_isItemEnabled(RDItem *item)
 {
 	NSView *view = (NSView *)item;
-	if ([view isKindOfClass: [NSTextView class]]) {
-		return [(NSTextView *)view isEditable];
+	if ([view isKindOfClass: [NSScrollView class]]) {
+		return [[(NSScrollView *)view documentView] isEditable];
 	} else if ([view respondsToSelector: @selector(isEnabled)]) {
 		return [(id)view isEnabled];
 	} else return 0;
@@ -720,9 +790,12 @@ RubyDialogCallback_setFontForItem(RDItem *item, int size, int family, int style,
 	NSFont *font;
 	NSFontDescriptor *desc;
 	int mask = 0;
-	if (![(id)item respondsToSelector:@selector(font)])
+	NSView *itemView = (NSView *)item;
+	if ([itemView isKindOfClass:[NSScrollView class]])
+		itemView = [(NSScrollView *)itemView documentView];
+	if (![itemView respondsToSelector:@selector(font)])
 		return;
-	font = [(id)item font];
+	font = [itemView font];
 	desc = [font fontDescriptor];
 	if (size != 0)
 		desc = [desc fontDescriptorWithSize:size];
@@ -739,7 +812,7 @@ RubyDialogCallback_setFontForItem(RDItem *item, int size, int family, int style,
 	if (mask != 0)
 		desc = [desc fontDescriptorWithSymbolicTraits:mask];
 	font = [NSFont fontWithDescriptor:desc size:0];  //  Setting size here does not work.
-	[(id)item setFont:font];
+	[itemView setFont:font];
 }
 
 int
@@ -754,10 +827,13 @@ RubyDialogCallback_getFontForItem(RDItem *item, int *size, int *family, int *sty
 	NSFontClarendonSerifsClass | NSFontSlabSerifsClass | NSFontFreeformSerifsClass;
 	const unsigned int sans_serifs = NSFontSansSerifClass;
 	const unsigned int monospace = NSFontMonoSpaceTrait;
+	NSView *itemView = (NSView *)item;
+	if ([itemView isKindOfClass:[NSScrollView class]])
+		itemView = [(NSScrollView *)itemView documentView];
 	
-	if (![(id)item respondsToSelector:@selector(font)])
+	if (![itemView respondsToSelector:@selector(font)])
 		return 0;
-	font = [(id)item font];
+	font = [itemView font];
 	desc = [font fontDescriptor];
 	symbolicTrait = [desc symbolicTraits];
 	
@@ -787,25 +863,34 @@ RubyDialogCallback_getFontForItem(RDItem *item, int *size, int *family, int *sty
 void
 RubyDialogCallback_setForegroundColorForItem(RDItem *item, const double *col)
 {
-	if ([(id)item respondsToSelector:@selector(setTextColor:)]) {
+	NSView *itemView = (NSView *)item;
+	if ([itemView isKindOfClass:[NSScrollView class]])
+		itemView = [(NSScrollView *)itemView documentView];
+	if ([itemView respondsToSelector:@selector(setTextColor:)]) {
 		NSColor *color = [NSColor colorWithDeviceRed:col[0] green:col[1] blue:col[2] alpha:col[3]];		
-		[(id)item setTextColor:color];
+		[itemView setTextColor:color];
 	}
 }
 
 void
 RubyDialogCallback_setBackgroundColorForItem(RDItem *item, const double *col)
 {
-	if ([(id)item respondsToSelector:@selector(setBackgroundColor:)]) {
+	NSView *itemView = (NSView *)item;
+	if ([itemView isKindOfClass:[NSScrollView class]])
+		itemView = [(NSScrollView *)itemView documentView];
+	if ([itemView respondsToSelector:@selector(setBackgroundColor:)]) {
 		NSColor *color = [NSColor colorWithDeviceRed:col[0] green:col[1] blue:col[2] alpha:col[3]];		
-		[(id)item setBackgroundColor:color];
+		[itemView setBackgroundColor:color];
 	}
 }
 
 void
 RubyDialogCallback_getForegroundColorForItem(RDItem *item, double *col)
 {
-	if ([(id)item respondsToSelector:@selector(textColor)]) {
+	NSView *itemView = (NSView *)item;
+	if ([itemView isKindOfClass:[NSScrollView class]])
+		itemView = [(NSScrollView *)itemView documentView];
+	if ([itemView respondsToSelector:@selector(textColor)]) {
 		float rgba[4];
 		NSColor *color = [(id)item textColor];
 		[color getRed:rgba green:rgba + 1 blue:rgba + 2 alpha:rgba + 3];
@@ -819,7 +904,10 @@ RubyDialogCallback_getForegroundColorForItem(RDItem *item, double *col)
 void
 RubyDialogCallback_getBackgroundColorForItem(RDItem *item, double *col)
 {
-	if ([(id)item respondsToSelector:@selector(backgroundColor)]) {
+	NSView *itemView = (NSView *)item;
+	if ([itemView isKindOfClass:[NSScrollView class]])
+		itemView = [(NSScrollView *)itemView documentView];
+	if ([itemView respondsToSelector:@selector(backgroundColor)]) {
 		float rgba[4];
 		NSColor *color = [(id)item textColor];
 		[color getRed:rgba green:rgba + 1 blue:rgba + 2 alpha:rgba + 3];
@@ -833,13 +921,16 @@ RubyDialogCallback_getBackgroundColorForItem(RDItem *item, double *col)
 int
 RubyDialogCallback_appendString(RDItem *item, const char *str)
 {
-	if ([(id)item respondsToSelector:@selector(textStorage)]) {
-		NSTextStorage *st = [(id)item textStorage];
+	NSView *itemView = (NSView *)item;
+	if ([itemView isKindOfClass:[NSScrollView class]])
+		itemView = [(NSScrollView *)itemView documentView];
+	if ([itemView respondsToSelector:@selector(textStorage)]) {
+		NSTextStorage *st = [itemView textStorage];
 		[st replaceCharactersInRange:NSMakeRange([st length], 0) withString:[NSString stringWithUTF8String:str]];
 		return 1;
-	} else if ([(id)item respondsToSelector:@selector(setStringValue:)]) {
-		NSString *st = [(id)item stringValue];
-		[(id)item setStringValue:[st stringByAppendingFormat:@"%s", str]];
+	} else if ([itemView respondsToSelector:@selector(setStringValue:)]) {
+		NSString *st = [itemView stringValue];
+		[itemView setStringValue:[st stringByAppendingFormat:@"%s", str]];
 		return 1;
 	}
 	return 0;
@@ -962,8 +1053,11 @@ RubyDialogCallback_selectedSubItem(RDItem *item)
 RDSize
 RubyDialogCallback_sizeOfString(RDItem *item, const char *s)
 {
-	if ([(NSView *)item respondsToSelector: @selector(font)]) {
-		NSFont *font = [(id)item font];
+	NSView *itemView = (NSView *)item;
+	if ([itemView isKindOfClass:[NSScrollView class]])
+		itemView = [(NSScrollView *)itemView documentView];
+	if ([itemView respondsToSelector: @selector(font)]) {
+		NSFont *font = [itemView font];
 		NSString *str = [NSString stringWithUTF8String: s];
 		NSDictionary *attr = [NSDictionary dictionaryWithObjectsAndKeys: font, NSFontAttributeName, nil];
 		NSSize size = [str sizeWithAttributes: attr];

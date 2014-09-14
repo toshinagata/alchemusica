@@ -814,6 +814,8 @@ s_RubyDialog_Run(VALUE self)
 	iflag = Ruby_SetInterruptFlag(Qfalse);
 	retval = RubyDialogCallback_runModal(dref);
 	Ruby_SetInterruptFlag(iflag);
+	if (retval == -1)
+		rb_raise(rb_eStandardError, "A modal dialog cannot have a close box");
 	RubyDialogCallback_destroy(dref);
 	s_RubyDialog_Forget(self);
 	return rb_iv_get(self, "_retval");
