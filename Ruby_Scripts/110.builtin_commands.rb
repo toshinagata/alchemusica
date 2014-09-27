@@ -197,7 +197,8 @@ def edit_sysex_dialog(track_no, event_no)
 	    item(:text, :title=>"Sysex"),
 		item(:popup, :subitems=>sysex_names, :value=>sysex_idx)),
 	  item(:textview, :value=>sysex_data, :width=>200, :height=>100),
-	  item(:textview, :value=>sysex_desc, :width=>200, :height=>80))
+	  item(:textview, :value=>sysex_desc, :width=>200, :height=>80),
+	  :flex=>[0,0,0,0,1,1])
   }
 end
 

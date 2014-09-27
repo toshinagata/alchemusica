@@ -27,11 +27,19 @@ VALUE cMRDialog = Qfalse;
 
 - (void)windowDidLoad
 {
+	NSView *contentView;
 	[super windowDidLoad];
+	autoResizeEnabled = YES;
 	ditems = [[NSMutableArray array] retain];
 	[ditems addObject: [[[self window] contentView] viewWithTag: 0]];  /*  OK button  */
 	[ditems addObject: [[[self window] contentView] viewWithTag: 1]];  /*  Cancel button  */
 	gRubyDialogIsFlipped = 1;
+	contentView = [[self window] contentView];
+	[contentView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+	[contentView setAutoresizesSubviews:NO];
+	mySize = [[[self window] contentView] frame].size;
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidResize:)
+												 name:NSWindowDidResizeNotification object:[self window]];
 }
 
 - (void)dealloc
@@ -142,6 +150,86 @@ VALUE cMRDialog = Qfalse;
 {
 	id view = [[aNotification object] enclosingScrollView];
 	[self dialogItemAction:view];
+}
+
+static void
+sResizeSubViews(RubyValue dval, NSView *view, int dx, int dy)
+{
+	NSArray *subviews = [view subviews];
+	int idx, n = [subviews count];
+	for (idx = 0; idx < n; idx++) {
+		int i, d, f, d1, d2, d3, ddx, ddy;
+		NSView *current = [subviews objectAtIndex:idx];
+		NSRect frame = [current frame];
+		int flex = RubyDialog_getFlexFlags(dval, (RDItem *)current);
+		if (flex < 0)
+			continue;		
+		for (i = 0, f = flex; i < 2; i++, f /= 2) {
+			if (i == 0)
+				d = dx;
+			else
+				d = dy;
+			switch (f & 21) {  /*  left, right, width (or top, bottom, height) */
+				case 21:  /*  all flex  */
+					d1 = d2 = d / 3;
+					d3 = d - d1 - d2;
+					break;
+				case 5:   /*  left & right  */
+					d1 = d / 2;
+					d2 = 0;
+					d3 = d - d1;
+					break;
+				case 17:  /*  left & width  */
+					d1 = d / 2;
+					d2 = d - d1;
+					d3 = 0;
+					break;
+				case 20:  /*  right & width  */
+					d1 = 0;
+					d2 = d / 2;
+					d3 = d - d2;
+					break;
+				case 1:   /*  left  */
+					d1 = d;
+					d2 = d3 = 0;
+					break;
+				case 4:   /*  right */
+					d3 = d;
+					d1 = d2 = 0;
+					break;
+				case 16:  /*  width  */
+					d2 = d;
+					d1 = d3 = 0;
+					break;
+				default:  /*  no resize  */
+					d1 = d2 = d3 = 0;
+					break;
+			}
+			if (i == 0) {
+				frame.origin.x += d1;
+				frame.size.width += d2;
+				ddx = d2;
+			} else {
+				frame.origin.y += (gRubyDialogIsFlipped ? d1 : d3);
+				frame.size.height += d2;
+				ddy = d2;
+			}
+		}
+		if (ddx != 0 || ddy != 0)
+			sResizeSubViews(dval, current, ddx, ddy);
+		[current setFrame:frame];
+	}
+}
+
+- (void)windowDidResize:(NSNotification *)notification
+{
+	NSSize size = [[self window] frame].size;
+	if (mySize.width != 0 && mySize.height != 0 && autoResizeEnabled) {
+		/*  Resize the subviews  */
+		sResizeSubViews((RubyValue)dval, [[self window] contentView], size.width - mySize.width, size.height - mySize.height);
+	}
+	mySize.width = size.width;
+	mySize.height = size.height;
 }
 
 #pragma mark ====== TableView data source protocol ======
@@ -394,15 +482,17 @@ RubyDialogCallback_setWindowSize(RubyDialog *dref, RDSize size)
 void
 RubyDialogCallback_setAutoResizeEnabled(RubyDialog *dref, int flag)
 {
-	NSWindow *win = [(RubyDialogController *)dref window];
-	[[win contentView] setAutoresizesSubviews:(flag != 0)];
+	((RubyDialogController *)dref)->autoResizeEnabled = (flag != 0);
+//	NSWindow *win = [(RubyDialogController *)dref window];
+//	[[win contentView] setAutoresizesSubviews:(flag != 0)];
 }
 
 int
 RubyDialogCallback_isAutoResizeEnabled(RubyDialog *dref)
 {
-	NSWindow *win = [(RubyDialogController *)dref window];
-	return [[win contentView] autoresizesSubviews];
+	return ((RubyDialogController *)dref)->autoResizeEnabled;
+//	NSWindow *win = [(RubyDialogController *)dref window];
+//	return [[win contentView] autoresizesSubviews];
 }
 
 void
@@ -506,9 +596,15 @@ RubyDialogCallback_createItem(RubyDialog *dref, const char *type, const char *ti
 	} else if (strcmp(type, "view") == 0) {
 		/*  Panel  */
 		view = [[[NSView alloc] initWithFrame: rect] autorelease];
+		/*  Autoresizing is handled in our own way  */
+		[view setAutoresizesSubviews:NO];
+		[view setAutoresizingMask:NSViewNotSizable];
 	} else if (strcmp(type, "layout_view") == 0) {
 		/*  Panel (for layout only)  */
 		view = [[[NSView alloc] initWithFrame: rect] autorelease];
+		/*  Autoresizing is handled in our own way  */
+		[view setAutoresizesSubviews:NO];
+		[view setAutoresizingMask:NSViewNotSizable];
 	} else if (strcmp(type, "line") == 0) {
 		/*  Separator line  */
 		NSBox *box;

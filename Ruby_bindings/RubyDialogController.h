@@ -30,6 +30,8 @@
 	int style;  /* Window style */
 	NSTimer *myTimer;
 	BOOL onKeyHandlerEnabled;
+	BOOL autoResizeEnabled;
+	NSSize mySize;
 }
 - (void)dialogItemAction: (id)sender;
 - (void)setRubyObject: (RubyValue)val;
