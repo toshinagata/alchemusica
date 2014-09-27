@@ -41,8 +41,8 @@
 #include "MDUtility.h"
 #endif
 
-#ifndef __MDPointSet__
-#include "MDPointSet.h"
+#ifndef __IntGroup_h__
+#include "IntGroup.h"
 #endif
 
 #ifndef __MDPlayer__

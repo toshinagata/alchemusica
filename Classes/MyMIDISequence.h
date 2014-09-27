@@ -45,7 +45,7 @@ extern NSString
 	*MyRecordingInfoFileNameKey,        // NSString; destination file name (for audio only)
 	*MyRecordingInfoOverwriteExistingFileFlagKey, // bool; silently overwrite existing files (for audio only)
 	*MyRecordingInfoMultiFileNamesKey,  // NSMutableArray of NSString; destination file names (for multiple audio recording only)
-	*MyRecordingInfoTrackSelectionsKey, // NSMutableArray of MDPointSetObjects; representing track selections (for multiple audio recording only)
+	*MyRecordingInfoTrackSelectionsKey, // NSMutableArray of IntGroupObjects; representing track selections (for multiple audio recording only)
 	*MyRecordingInfoIsAudioKey,         // bool; is audio recording?
 	*MyRecordingInfoAudioPlayThroughKey, // bool; audio play through?
 	*MyRecordingInfoDestinationChannelKey, // int; MIDI channel (0..15; 16 if incoming channel is to be kept)

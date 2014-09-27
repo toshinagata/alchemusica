@@ -169,7 +169,7 @@ static float sDashWidth = 8.0;
 {
 	int num, trackNum, i;
 	MDTrack *track;
-	MDPointSet *pset;
+	IntGroup *pset;
 //	MDPointer *pt;
 //	MDEvent *ep;
 	[cacheArray release];
@@ -188,26 +188,26 @@ static float sDashWidth = 8.0;
 		}
 	#if 1
 		pset = MDTrackSearchEventsWithDurationCrossingTick(track, tick);
-//		fprintf(stderr, "%s[%d]: track %p tick %ld, ", __FILE__, __LINE__, track, (long)tick); MDPointSetDump(pset);
+//		fprintf(stderr, "%s[%d]: track %p tick %ld, ", __FILE__, __LINE__, track, (long)tick); IntGroupDump(pset);
 	#else
-		pset = MDPointSetNew();
+		pset = IntGroupNew();
 		if (pset != NULL) {
 			pt = MDPointerNew(track);
 			if (pt != NULL) {
 				MDPointerJumpToTick(pt, tick);
 				while ((ep = MDPointerBackward(pt)) != NULL) {
 					if (MDGetKind(ep) == kMDEventNote && MDGetTick(ep) + MDGetDuration(ep) >= tick)
-						MDPointSetAdd(pset, MDPointerGetPosition(pt), 1);
+						IntGroupAdd(pset, MDPointerGetPosition(pt), 1);
 				}
 				MDPointerRelease(pt);
 			}
 		}
 	//	fprintf(stderr, "%s[%d]: ", __FILE__, __LINE__);
-	//	MDPointSetDump(pset);
+	//	IntGroupDump(pset);
 	#endif
-		[cacheArray addObject: [[[MDPointSetObject allocWithZone: [self zone]] initWithMDPointSet: pset] autorelease]];
+		[cacheArray addObject: [[[IntGroupObject allocWithZone: [self zone]] initWithMDPointSet: pset] autorelease]];
 		if (pset != NULL)
-			MDPointSetRelease(pset);
+			IntGroupRelease(pset);
 	}
 }
 
@@ -259,9 +259,9 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	endNote = ceil((aRect.origin.y + aRect.size.height) / ys);
 	for (i = num; i >= 0; i--) {
 		int trackNum;
-		long n;
+		int n;
 		MDTrack *track;
-		MDPointSet *pset;
+		IntGroup *pset;
 		MDPointer *pt;
 		MDEvent *ep;
 		NSColor *color;
@@ -457,9 +457,9 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	theNote = floor(aPoint.y / ys);
 	for (i = 0; i < num; i++) {
 		int trackNum;
-		long n;
+		int n;
 		MDTrack *track;
-		MDPointSet *pset;
+		IntGroup *pset;
 		MDPointer *pt;
 		MDEvent *ep;
 		trackNum = [dataSource sortedTrackNumberAtIndex: i];
@@ -525,11 +525,11 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	ys = [self yScale];
 	ppt = [dataSource pixelsPerTick];
 	for (i = 0; (n = [dataSource sortedTrackNumberAtIndex: i]) >= 0; i++) {
-		long index;
+		int index;
 		MDPointer *pt;
 		MDEvent *ep;
 		MDTrack *track = [[document myMIDISequence] getTrackAtIndex: n];
-		MDPointSet *pset = [[document selectionOfTrack: n] pointSet];
+		IntGroup *pset = [[document selectionOfTrack: n] pointSet];
 		if (track == NULL || pset == NULL)
 			continue;
 		pt = MDPointerNew(track);
@@ -956,7 +956,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 			MDTrack *track;
 			MDPointer *pt;
 			MDEvent *ep;
-			MDPointSet *pset;
+			IntGroup *pset;
 			MDSelectionObject *obj;
 			if (![dataSource isFocusTrack: trackNo])
 				continue;
@@ -966,7 +966,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 			pt = MDPointerNew(track);
 			if (pt == NULL)
 				break;
-			pset = MDPointSetNew();
+			pset = IntGroupNew();
 			if (pset == NULL)
 				break;
 			MDPointerJumpToTick(pt, minTick);
@@ -978,7 +978,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 				point.x = floor(MDGetTick(ep) * ppt);
 				point.y = floor(MDGetCode(ep) * ys + 0.5) + 0.5 * ys;
 				if ([self isPointInSelectRegion: point]) {
-					if (MDPointSetAdd(pset, MDPointerGetPosition(pt), 1) != kMDNoError)
+					if (IntGroupAdd(pset, MDPointerGetPosition(pt), 1) != kMDNoError)
 						break;
 				}
 			}
@@ -989,7 +989,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 				[document setSelection: obj inTrack: trackNo sender: self];
 			}
 			[obj release];
-			MDPointSetRelease(pset);
+			IntGroupRelease(pset);
 			MDPointerRelease(pt);
 		}
 		return;

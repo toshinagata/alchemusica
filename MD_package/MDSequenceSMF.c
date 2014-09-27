@@ -814,7 +814,7 @@ MDSequenceWriteSMFTrackNameAndDevice(MDSMFConvert *cref)
 
 /*  Write one SMF track  */
 static MDStatus
-MDSequenceWriteSMFTrackWithSelection(MDSMFConvert *cref, MDPointSet *pset, char eotSelected)
+MDSequenceWriteSMFTrackWithSelection(MDSMFConvert *cref, IntGroup *pset, char eotSelected)
 {
 	MDPointer *ptr;
 	MDEvent *eref;
@@ -825,7 +825,7 @@ MDSequenceWriteSMFTrackWithSelection(MDSMFConvert *cref, MDPointSet *pset, char 
 	MDTickType noteOffTick;
 	int n, count;
 	long nevents;
-	long idx;
+	int idx;
 	const unsigned char sEndOfTrack[3] = { kMDEventSMFMeta, kMDMetaEndOfTrack, 0 };
 
 	/*  Initialize track info  */
@@ -846,17 +846,17 @@ MDSequenceWriteSMFTrackWithSelection(MDSMFConvert *cref, MDPointSet *pset, char 
 
 	count = 0;
 	idx = -1;
-	if (pset == NULL || pset == (MDPointSet *)(-1)) {
+	if (pset == NULL || pset == (IntGroup *)(-1)) {
 		nevents = MDTrackGetNumberOfEvents(cref->temptrk);
 		result = MDSequenceWriteSMFTrackNameAndDevice(cref);
 		if (result != kMDNoError)
 			return result;
 	} else
-		nevents = MDPointSetGetCount(pset);
+		nevents = IntGroupGetCount(pset);
 
 	while (
 		(eref = 
-			((pset == NULL || pset == (MDPointSet *)(-1))
+			((pset == NULL || pset == (IntGroup *)(-1))
 				? MDPointerForward(ptr) 
 				: MDPointerForwardWithPointSet(ptr, pset, &idx)
 			)
@@ -987,7 +987,7 @@ MDSequenceWriteSMFTrackWithSelection(MDSMFConvert *cref, MDPointSet *pset, char 
 
 	/*  Write the end-of-track event  */
 	if (result == kMDNoError) {
-		if (eotSelected || pset == NULL || pset == (MDPointSet *)(-1))
+		if (eotSelected || pset == NULL || pset == (IntGroup *)(-1))
 			cref->deltatime = MDTrackGetDuration(cref->temptrk) - cref->tick;
 		else
 			cref->deltatime = 1;
@@ -1003,7 +1003,7 @@ MDSequenceWriteSMFTrackWithSelection(MDSMFConvert *cref, MDPointSet *pset, char 
 }
 
 MDStatus
-MDSequenceWriteSMFWithSelection(MDSequence *inSequence, MDPointSet **psetArray, char *eotSelectFlags, STREAM stream, MDSequenceCallback callback, void *cbdata)
+MDSequenceWriteSMFWithSelection(MDSequence *inSequence, IntGroup **psetArray, char *eotSelectFlags, STREAM stream, MDSequenceCallback callback, void *cbdata)
 {
 	MDStatus result = kMDNoError;
 	MDSMFConvert conv;
@@ -1042,13 +1042,13 @@ MDSequenceWriteSMFWithSelection(MDSequence *inSequence, MDPointSet **psetArray, 
 	
 	/*  Write each track  */
 	for (trkno = 0; trkno < trkmax; trkno++) {
-		MDPointSet *pset;
+		IntGroup *pset;
 		char eotSelected;
 		if (psetArray != NULL) {
 			pset = psetArray[trkno];
 			if (pset == NULL) {
 			/*	if (trkno == 0)
-					pset = (MDPointSet *)(-1);	*//*  An empty selection; conductor track will always be written */
+					pset = (IntGroup *)(-1);	*//*  An empty selection; conductor track will always be written */
 			/*	else */
 					continue;
 			}
@@ -1071,7 +1071,7 @@ MDSequenceWriteSMFWithSelection(MDSequence *inSequence, MDPointSet **psetArray, 
             conv.track_channel = 16;
 		if (MDWriteStreamFormat(conv.stream, "A4N", "MTrk", 0L) == 2) {
 			conv.pos = FTELL(conv.stream) - 4;
-		/*	if (pset == (MDPointSet *)(-1))
+		/*	if (pset == (IntGroup *)(-1))
 				result = kMDNoError;
 			else */
 			result = MDSequenceWriteSMFTrackWithSelection(&conv, pset, eotSelected);

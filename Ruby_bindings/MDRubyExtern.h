@@ -22,12 +22,17 @@
 extern "C" {
 #endif
 
+#ifndef STUB
 #define STUB extern
+#endif
 
 /*  This definition is intended to work around 'VALUE' type in sources without "ruby.h"  */
+#ifndef RubyValue_is_Defined
+#define RubyValue_is_Defined
 typedef void *RubyValue;
 #define RubyNil (RubyValue)4
 #define RubyFalse (RubyValue)0
+#endif
 
 extern void Ruby_startup(void);
 extern void Ruby_showError(int status);

@@ -21,7 +21,7 @@
 @class MyMIDISequence;
 @class MDEventObject;
 @class MDTrackObject;
-@class MDPointSetObject;
+@class IntGroupObject;
 @class MDSelectionObject;
 @class GraphicWindowController;
 
@@ -93,7 +93,7 @@ typedef enum MyDocumentModifyMode {
 - (void)enqueueTrackModifiedNotification: (long)trackNo;
 - (void)postTrackModifiedNotification: (NSNotification *)notification;
 - (void)postPlayPositionNotification: (MDTickType)tick;
-//- (void)postSelectionDidChangeNotification: (long)trackNo selectionChange: (MDPointSetObject *)set sender: (id)sender;
+//- (void)postSelectionDidChangeNotification: (long)trackNo selectionChange: (IntGroupObject *)set sender: (id)sender;
 //- (void)postStopPlayingNotification;
 
 //  Action methods for undo/redo support
@@ -108,19 +108,19 @@ typedef enum MyDocumentModifyMode {
 - (BOOL)deleteEventAt: (long)position fromTrack: (long)trackNo;
 - (BOOL)replaceEvent: (MDEventObject *)eventObj inTrack: (long)trackNo;
 
-- (BOOL)insertMultipleEvents: (MDTrackObject *)trackObj at: (MDPointSetObject *)pointSet toTrack: (long)trackNo selectInsertedEvents: (BOOL)flag insertedPositions: (MDPointSet **)outPtr;
-- (BOOL)deleteMultipleEventsAt: (MDPointSetObject *)pointSet fromTrack: (long)trackNo deletedEvents: (MDTrack **)outPtr;
-- (BOOL)duplicateMultipleEventsAt: (MDPointSetObject *)pointSet ofTrack: (long)trackNo selectInsertedEvents: (BOOL)flag;
+- (BOOL)insertMultipleEvents: (MDTrackObject *)trackObj at: (IntGroupObject *)pointSet toTrack: (long)trackNo selectInsertedEvents: (BOOL)flag insertedPositions: (IntGroup **)outPtr;
+- (BOOL)deleteMultipleEventsAt: (IntGroupObject *)pointSet fromTrack: (long)trackNo deletedEvents: (MDTrack **)outPtr;
+- (BOOL)duplicateMultipleEventsAt: (IntGroupObject *)pointSet ofTrack: (long)trackNo selectInsertedEvents: (BOOL)flag;
 
 //  Modify action methods; theData is one of the following, NSNumber, NSData (an array of MDTickType, short or float) or NSArray.
-- (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (MDPointSetObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions;
-+ (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (MDPointSetObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (id)doc mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions;
-- (BOOL)modifyCodes: (id)theData ofMultipleEventsAt: (MDPointSetObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode;
-+ (BOOL)modifyCodes: (id)theData ofMultipleEventsAt: (MDPointSetObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (MyDocument *)doc mode: (MyDocumentModifyMode)mode;
-- (BOOL)modifyDurations: (id)theData ofMultipleEventsAt: (MDPointSetObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode;
-+ (BOOL)modifyDurations: (id)theData ofMultipleEventsAt: (MDPointSetObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (MyDocument *)doc mode: (MyDocumentModifyMode)mode;
-- (BOOL)modifyData: (id)theData forEventKind: (unsigned char)eventKind ofMultipleEventsAt: (MDPointSetObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode;
-+ (BOOL)modifyData: (id)theData forEventKind: (unsigned char)eventKind ofMultipleEventsAt: (MDPointSetObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (MyDocument *)doc mode: (MyDocumentModifyMode)mode;
+- (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions;
++ (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (id)doc mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions;
+- (BOOL)modifyCodes: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode;
++ (BOOL)modifyCodes: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (MyDocument *)doc mode: (MyDocumentModifyMode)mode;
+- (BOOL)modifyDurations: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode;
++ (BOOL)modifyDurations: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (MyDocument *)doc mode: (MyDocumentModifyMode)mode;
+- (BOOL)modifyData: (id)theData forEventKind: (unsigned char)eventKind ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode;
++ (BOOL)modifyData: (id)theData forEventKind: (unsigned char)eventKind ofMultipleEventsAt: (IntGroupObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (MyDocument *)doc mode: (MyDocumentModifyMode)mode;
 
 - (const MDEvent *)eventAtPosition: (long)position inTrack: (long)trackNo;
 
@@ -143,7 +143,7 @@ typedef enum MyDocumentModifyMode {
 - (BOOL)selectAllEventsInTrack: (long)trackNo sender: (id)sender;
 - (BOOL)unselectAllEventsInTrack: (long)trackNo sender: (id)sender;
 - (BOOL)unselectAllEventsInAllTracks: (id)sender;
-- (BOOL)addSelection: (MDPointSetObject *)set inTrack: (long)trackNo sender: (id)sender;
+- (BOOL)addSelection: (IntGroupObject *)set inTrack: (long)trackNo sender: (id)sender;
 - (BOOL)isSelectedAtPosition: (long)position inTrack: (long)trackNo;
 
 //- (void)setNeedsUpdateEditingRange: (BOOL)flag;
@@ -153,7 +153,7 @@ typedef enum MyDocumentModifyMode {
 
 - (MDSelectionObject *)selectionOfTrack: (long)trackNo;
 
-- (MDSelectionObject *)eventSetInTrack: (long)trackNo eventKind: (int)eventKind eventCode: (int)eventCode fromTick: (MDTickType)fromTick toTick: (MDTickType)toTick fromData: (float)fromData toData: (float)toData inPointSet: (MDPointSetObject *)pointSet;
+- (MDSelectionObject *)eventSetInTrack: (long)trackNo eventKind: (int)eventKind eventCode: (int)eventCode fromTick: (MDTickType)fromTick toTick: (MDTickType)toTick fromData: (float)fromData toData: (float)toData inPointSet: (IntGroupObject *)pointSet;
 - (long)countMIDIEventsForTrack: (long)index inSelection: (MDSelectionObject *)sel;
 - (BOOL)isSelectionEmptyInEditableTracks:(BOOL)editableOnly;
 

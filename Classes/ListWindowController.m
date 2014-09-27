@@ -336,17 +336,17 @@ EventSelector(const MDEvent *ep, long position, void *inUserData)
 - (void)reloadSelection
 {
     MDSelectionObject *obj = [[self document] selectionOfTrack: myTrackNumber];
-    MDPointSet *pset = [obj pointSet];
+    IntGroup *pset = [obj pointSet];
 	NSMutableIndexSet *iset = [NSMutableIndexSet indexSet];
-	long min = MDPointSetMinimum(pset);
-	long max = MDPointSetMaximum(pset);
+	long min = IntGroupMinimum(pset);
+	long max = IntGroupMaximum(pset);
     selectionDidChangeNotificationLevel++;
 	if (myTrack != NULL && myPointer != NULL) {
 		MDPointerSetPosition(myPointer, -1);
 		myRow = 0;
 		while (MDPointerForwardWithSelector(myPointer, EventSelector, myFilter) != NULL) {
 			long pos = MDPointerGetPosition(myPointer);
-			if (pos >= min && MDPointSetLookup(pset, pos, NULL))
+			if (pos >= min && IntGroupLookup(pset, pos, NULL))
 				[iset addIndex: myRow];
 			if (pos > max)
 				break;
@@ -844,7 +844,7 @@ row:(int)rowIndex
 			isLastRowSelected = YES;
             continue;
 		}
-        sts = MDPointSetAdd(pointSet->pointSet, [self eventPositionForTableRow: theRow], 1);
+        sts = IntGroupAdd(pointSet->pointSet, [self eventPositionForTableRow: theRow], 1);
         if (sts != kMDNoError)
             break;
     }
@@ -1094,7 +1094,7 @@ row:(int)rowIndex
 - (IBAction)deleteSelectedEvents: (id)sender
 {
 	NSEnumerator *en = [myEventTrackView selectedRowEnumerator];
-	MDPointSetObject *pointSet = [[[MDPointSetObject allocWithZone: [self zone]] init] autorelease];
+	IntGroupObject *pointSet = [[[IntGroupObject allocWithZone: [self zone]] init] autorelease];
 	MDStatus sts;
 	BOOL mod;
 	id obj;
@@ -1104,12 +1104,12 @@ row:(int)rowIndex
 		n = [obj intValue];
 		if (n == eot)
 			continue;
-		sts = MDPointSetAdd(pointSet->pointSet, [self eventPositionForTableRow: n], 1);
+		sts = IntGroupAdd(pointSet->pointSet, [self eventPositionForTableRow: n], 1);
 		if (sts != kMDNoError)
 			return;		//  Cannot proceed
 	}
 	mod = [(MyDocument *)[self document]
-			deleteMultipleEventsAt: (MDPointSetObject *)pointSet
+			deleteMultipleEventsAt: (IntGroupObject *)pointSet
 		   fromTrack: myTrackNumber deletedEvents: NULL];
 	if (mod) {
 		[[[self document] undoManager] setActionName:NSLocalizedString(

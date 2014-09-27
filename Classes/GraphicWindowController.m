@@ -2045,7 +2045,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
             if (track < 0)
                 continue;
             pointSet = [document selectionOfTrack: track];
-            if (pointSet == nil || MDPointSetGetCount([pointSet pointSet]) <= 0)
+            if (pointSet == nil || IntGroupGetCount([pointSet pointSet]) <= 0)
                 continue;
 			[document duplicateMultipleEventsAt: pointSet ofTrack: track selectInsertedEvents: YES];
 		}
@@ -2057,7 +2057,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
             if (track < 0)
                 continue;
             pointSet = [document selectionOfTrack: track];
-            if (pointSet == nil || MDPointSetGetCount([pointSet pointSet]) <= 0)
+            if (pointSet == nil || IntGroupGetCount([pointSet pointSet]) <= 0)
                 continue;
             [document modifyTick: deltaTickNum ofMultipleEventsAt: pointSet inTrack: track mode: MyDocumentModifyAdd destinationPositions: nil];
         }
@@ -2069,7 +2069,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
             if (track < 0)
                 continue;
             pointSet = [document selectionOfTrack: track];
-            if (pointSet == nil || MDPointSetGetCount([pointSet pointSet]) <= 0)
+            if (pointSet == nil || IntGroupGetCount([pointSet pointSet]) <= 0)
                 continue;
             [document modifyCodes: deltaNum ofMultipleEventsAt: pointSet inTrack: track mode: MyDocumentModifyAdd];
         }
@@ -2089,7 +2089,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
             if (track < 0)
                 continue;
             pointSet = [document selectionOfTrack: track];
-            if (pointSet == nil || MDPointSetGetCount([pointSet pointSet]) <= 0)
+            if (pointSet == nil || IntGroupGetCount([pointSet pointSet]) <= 0)
                 continue;
             [document modifyDurations: deltaTickNum ofMultipleEventsAt: pointSet inTrack: track mode: MyDocumentModifyAdd];
         }
@@ -2109,7 +2109,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
             if (track < 0)
                 continue;
             pointSet = [document selectionOfTrack: track];
-            if (pointSet == nil || MDPointSetGetCount([pointSet pointSet]) <= 0)
+            if (pointSet == nil || IntGroupGetCount([pointSet pointSet]) <= 0)
                 continue;
 			if (optionFlag) {
 				if ([document duplicateMultipleEventsAt: pointSet ofTrack: track selectInsertedEvents: YES])
@@ -2125,7 +2125,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
             if (track < 0)
                 continue;
             pointSet = [document selectionOfTrack: track];
-            if (pointSet == nil || MDPointSetGetCount([pointSet pointSet]) <= 0)
+            if (pointSet == nil || IntGroupGetCount([pointSet pointSet]) <= 0)
                 continue;
             [document modifyData: deltaNum forEventKind: kind ofMultipleEventsAt: pointSet inTrack: track mode: MyDocumentModifyAdd];
         }

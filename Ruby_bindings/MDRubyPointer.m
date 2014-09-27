@@ -460,7 +460,7 @@ MRPointer_NextInSelection(VALUE self)
 {
 	MRPointerInfo *ip = s_MRPointerInfoFromValue(self);
 	MDPointer *pt = ip->pointer;
-	MDPointSet *pset = [[ip->trackInfo.doc selectionOfTrack: ip->trackInfo.num] pointSet];
+	IntGroup *pset = [[ip->trackInfo.doc selectionOfTrack: ip->trackInfo.num] pointSet];
 	if (MDPointerForwardWithPointSet(pt, pset, NULL) == NULL) {
 		return Qfalse;
 	} else return Qtrue;
@@ -478,7 +478,7 @@ MRPointer_LastInSelection(VALUE self)
 {
 	MRPointerInfo *ip = s_MRPointerInfoFromValue(self);
 	MDPointer *pt = ip->pointer;
-	MDPointSet *pset = [[ip->trackInfo.doc selectionOfTrack: ip->trackInfo.num] pointSet];
+	IntGroup *pset = [[ip->trackInfo.doc selectionOfTrack: ip->trackInfo.num] pointSet];
 	if (MDPointerBackwardWithPointSet(pt, pset, NULL) == NULL) {
 		return Qfalse;
 	} else return Qtrue;

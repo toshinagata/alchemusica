@@ -76,6 +76,18 @@ Ruby_NewFileStringValue(const char *fstr)
 #endif
 }
 
+char *
+Ruby_EncodedStringValuePtr(VALUE *valp)
+{
+	return StringValuePtr(*valp);
+}
+
+VALUE
+Ruby_NewEncodedStringValue(const char *str, int len)
+{
+	return rb_str_new(str, len);
+}
+
 VALUE
 Ruby_ObjToStringObj(VALUE val)
 {

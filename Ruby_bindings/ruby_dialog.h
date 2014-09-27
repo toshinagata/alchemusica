@@ -18,22 +18,39 @@
 #ifndef __ruby_dialog_h__
 #define __ruby_dialog_h__
 
-#include "MDRubyExtern.h"
+/*  'IntGroup' is an opaque pointer used for setting/getting selection of a 'Table' dialog item.
+    We only need the following functions:
+    IntGroup *IntGroupFromValue(VALUE val);  //  Get an opaque IntGroup pointer from a Ruby value
+    VALUE ValueFromIntGroup(IntGroup *ip);   //  Create a Ruby value from an IntGroup pointer
+    void IntGroupRelease(IntGroup *ip);      //  Release an IntGroup pointer. 
+  We need to call IntGroupRelease() after we are done with the IntGroup pointer. Note that
+  we call it after calling ValueFromIntGroup(ip) (because we are 'done' with ip).
+*/
 
-#define EncodedStringValuePtr(v) StringValuePtr(v)
+#include "IntGroup.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 	
-/*  RubyDialog class  */
-/* extern VALUE rb_cDialog; */
-
 /*  Style of the dialog frame  */
 enum {
 	rd_Resizable = 1,
 	rd_HasCloseBox = 2,
 };
+
+#ifndef RubyValue_is_Defined
+#define RubyValue_is_Defined
+typedef void *RubyValue;
+#define RubyNil (RubyValue)4
+#define RubyFalse (RubyValue)0
+#endif
+
+#ifndef STUB
+#define STUB extern
+#endif
+
+extern void Ruby_showError(int status);
 
 /*  True if y-coordinate grows from bottom to top (like Cocoa)  */
 extern int gRubyDialogIsFlipped;
@@ -43,9 +60,6 @@ typedef struct RubyDialog RubyDialog;
 typedef struct RDItem RDItem;
 typedef struct RDDeviceContect RDDeviceContext;
 typedef struct RDBitmap RDBitmap;
-
-/*  Forward declaration  */
-struct MDPointSet;
 
 /*  Non-opaque structures  */
 typedef struct RDPoint { float x, y; } RDPoint;
@@ -78,7 +92,8 @@ extern void RubyDialog_OnPopUpMenuSelected(RubyValue self, RDItem *ip, int row, 
 
 extern void RubyDialogInitClass(void);
 
-/*  Stub routines  */
+/*  Stub entries  */
+STUB RubyValue RubyDialogCallback_parentModule(void);	
 STUB RubyDialog *RubyDialogCallback_new(int style);
 STUB void RubyDialogCallback_release(RubyDialog *dref);
 STUB void RubyDialogCallback_setRubyObject(RubyDialog *dref, RubyValue val);
@@ -102,7 +117,8 @@ STUB void RubyDialogCallback_setWindowSize(RubyDialog *dref, RDSize size);
 
 STUB void RubyDialogCallback_setAutoResizeEnabled(RubyDialog *dref, int flag);
 STUB int RubyDialogCallback_isAutoResizeEnabled(RubyDialog *dref);
-STUB int RubyDialogCallback_Listen(RubyDialog *dref, void *obj, const char *objtype, const char *msg, RubyValue oval, RubyValue pval);
+
+//STUB int RubyDialogCallback_Listen(RubyDialog *dref, void *obj, const char *objtype, const char *msg, RubyValue oval, RubyValue pval);
 
 STUB void RubyDialogCallback_createStandardButtons(RubyDialog *dref, const char *oktitle, const char *canceltitle);
 STUB RDItem *RubyDialogCallback_createItem(RubyDialog *dref, const char *type, const char *title, RDRect frame);
@@ -152,8 +168,9 @@ STUB char RubyDialogCallback_insertTableColumn(RDItem *item, int col, const char
 STUB char RubyDialogCallback_deleteTableColumn(RDItem *item, int col);
 STUB int RubyDialogCallback_countTableColumn(RDItem *item);
 STUB char RubyDialogCallback_isTableRowSelected(RDItem *item, int row);
-/*STUB char RubyDialogCallback_setTableRowSelected(RDItem *item, int row, int flag);*/
-STUB char RubyDialogCallback_setSelectedTableRow(RDItem *item, struct MDPointSet *rg, int extend);
+STUB IntGroup *RubyDialogCallback_selectedTableRows(RDItem *item);
+STUB char RubyDialogCallback_setSelectedTableRows(RDItem *item, IntGroup *ig, int extend);
+// STUB char RubyDialogCallback_setTableRowSelected(RDItem *item, int row, int flag);
 STUB void RubyDialogCallback_refreshTable(RDItem *item);
 
 STUB int RubyDialogCallback_savePanel(const char *title, const char *dirname, const char *wildcard, char *buf, int bufsize);

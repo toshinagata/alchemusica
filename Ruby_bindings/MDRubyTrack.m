@@ -360,7 +360,7 @@ s_MRTrack_Selection(VALUE self)
 	if (ip != NULL && ip->doc != nil) {
 		MDSelectionObject *sel = [ip->doc selectionOfTrack: ip->num];
 		if (sel != nil)
-			return MREventSetValueFromPointSetAndTrackInfo([sel pointSet], ip->track, ip->doc, sel->isEndOfTrackSelected);
+			return MREventSetValueFromIntGroupAndTrackInfo([sel pointSet], ip->track, ip->doc, sel->isEndOfTrackSelected);
 		else return Qnil;
 	}
 	rb_raise(rb_eTypeError, "selection cannot be defined for non-document tracks");
@@ -382,7 +382,7 @@ s_MRTrack_SetSelection(VALUE self, VALUE sval)
 		if (sval == Qnil)
 			sel = [[MDSelectionObject alloc] init];
 		else
-			sel = [[MDSelectionObject alloc] initWithMDPointSet: MDPointSetFromValue(sval)];
+			sel = [[MDSelectionObject alloc] initWithMDPointSet: IntGroupFromValue(sval)];
 		if (rb_obj_is_kind_of(sval, rb_cMREventSet) && RTEST(MREventSet_EOTSelected(sval)))
 			sel->isEndOfTrackSelected = YES;
 		[ip->doc setSelection: sel inTrack: ip->num sender: nil];
@@ -403,7 +403,7 @@ s_MRTrack_SetSelection(VALUE self, VALUE sval)
 static VALUE
 s_MRTrack_EventSet(int argc, VALUE *argv, VALUE self)
 {
-	MDPointSet *pset;
+	IntGroup *pset;
 	VALUE val, rval;
 	long max, n;
 
@@ -425,25 +425,25 @@ s_MRTrack_EventSet(int argc, VALUE *argv, VALUE self)
 	val = rb_funcall2(rb_cMREventSet, rb_intern("new"), argc, argv);
 	
 	/*  Limit by the number of actual events  */
-	pset = MDPointSetFromValue(val);
-	max = MDPointSetMaximum(pset);
+	pset = IntGroupFromValue(val);
+	max = IntGroupMaximum(pset);
 	if (n <= max)
-		MDPointSetRemove(pset, n, max - n + 1);
+		IntGroupRemove(pset, n, max - n + 1);
 	
 	if (rb_block_given_p()) {
 		VALUE pval;
 		MRPointerInfo *pvalinfo;
-		MDPointSet *ps_to_remove = MDPointSetNew();
+		IntGroup *ps_to_remove = IntGroupNew();
 		long i;
 		pval = s_MRTrack_Pointer(self, Qnil);
 		Data_Get_Struct(pval, MRPointerInfo, pvalinfo);
-		for (i = 0; (n = MDPointSetGetNthPoint(pset, i)) >= 0; i++) {
+		for (i = 0; (n = IntGroupGetNthPoint(pset, i)) >= 0; i++) {
 			MDPointerSetPosition(pvalinfo->pointer, n);
 			if (!RTEST(rb_yield(pval)))
-				MDPointSetAdd(ps_to_remove, n, 1);
+				IntGroupAdd(ps_to_remove, n, 1);
 		}
-		MDPointSetRemovePointSet(pset, ps_to_remove);
-		MDPointSetRelease(ps_to_remove);
+		IntGroupRemoveIntGroup(pset, ps_to_remove);
+		IntGroupRelease(ps_to_remove);
 	}
 	
 	/*  Set track  */
@@ -461,13 +461,13 @@ s_MRTrack_EventSet(int argc, VALUE *argv, VALUE self)
 static VALUE
 s_MRTrack_AllEvents(VALUE self)
 {
-	MDPointSet *pset;
+	IntGroup *pset;
 	const MyDocumentTrackInfo *ip = TrackInfoFromMRTrackValue(self);
 	if (ip == NULL || ip->track == NULL)
 		rb_raise(rb_eStandardError, "Internal error: track not defined");
-	pset = MDPointSetNew();
-	MDPointSetAdd(pset, 0, MDTrackGetNumberOfEvents(ip->track));
-	return MREventSetValueFromPointSetAndTrackInfo(pset, ip->track, ip->doc, 1);
+	pset = IntGroupNew();
+	IntGroupAdd(pset, 0, MDTrackGetNumberOfEvents(ip->track));
+	return MREventSetValueFromIntGroupAndTrackInfo(pset, ip->track, ip->doc, 1);
 }
 
 /*
@@ -616,20 +616,20 @@ static VALUE
 s_MRTrack_Merge(int argc, VALUE *argv, VALUE self)
 {
 	VALUE tval, pval, rval;
-	MDPointSet *pset, *pset2;
+	IntGroup *pset, *pset2;
 	MDTrack *tr;
 	int success;
 	const MyDocumentTrackInfo *ip = TrackInfoFromMRTrackValue(self);
 	rb_scan_args(argc, argv, "11", &tval, &pval);
 	if (pval != Qnil)
-		pset = MDPointSetFromValue(pval);
+		pset = IntGroupFromValue(pval);
 	else
 		pset = NULL;
 	tr = MDTrackFromMRTrackValue(tval);
 	if (tr == NULL)
 		rb_raise(rb_eArgError, "track is not given");
 	if (ip->doc != nil) {
-		MDPointSetObject *psobj = (pset == NULL ? nil : [[[MDPointSetObject alloc] initWithMDPointSet: pset] autorelease]);
+		IntGroupObject *psobj = (pset == NULL ? nil : [[[IntGroupObject alloc] initWithMDPointSet: pset] autorelease]);
 		MDTrackObject *trobj = [[[MDTrackObject alloc] initWithMDTrack: tr] autorelease];
 		success = [ip->doc insertMultipleEvents: trobj at: psobj toTrack: ip->num selectInsertedEvents: NO insertedPositions: &pset2];
 	} else {
@@ -640,8 +640,8 @@ s_MRTrack_Merge(int argc, VALUE *argv, VALUE self)
 		/*  pset2 is undefined  */
 		rb_raise(rb_eStandardError, "cannot merge events");
 	}
-	rval = ValueFromMDPointSet(pset2);
-	MDPointSetRelease(pset2);
+	rval = ValueFromIntGroup(pset2);
+	IntGroupRelease(pset2);
 	return rval;
 }
 
@@ -654,11 +654,11 @@ s_MRTrack_Merge(int argc, VALUE *argv, VALUE self)
 static VALUE
 s_MRTrack_Copy(VALUE self, VALUE sval)
 {
-	MDPointSet *pset;
+	IntGroup *pset;
 	MDTrack *track;
 	VALUE rval;
 	const MyDocumentTrackInfo *ip = TrackInfoFromMRTrackValue(self);
-	pset = MDPointSetFromValue(sval);
+	pset = IntGroupFromValue(sval);
 	if (MDTrackExtract(ip->track, &track, pset) != 0)
 		rb_raise(rb_eStandardError, "cannot copy events");
 	rval = MRTrackValueFromTrackInfo(track, nil, -1);
@@ -675,14 +675,14 @@ s_MRTrack_Copy(VALUE self, VALUE sval)
 static VALUE
 s_MRTrack_Cut(VALUE self, VALUE sval)
 {
-	MDPointSet *pset;
+	IntGroup *pset;
 	MDTrack *track;
 	VALUE rval;
 	int success;
 	const MyDocumentTrackInfo *ip = TrackInfoFromMRTrackValue(self);
-	pset = MDPointSetFromValue(sval);
+	pset = IntGroupFromValue(sval);
 	if (ip->doc != nil) {
-		MDPointSetObject *psobj = [[[MDPointSetObject alloc] initWithMDPointSet: pset] autorelease];
+		IntGroupObject *psobj = [[[IntGroupObject alloc] initWithMDPointSet: pset] autorelease];
 		success = [ip->doc deleteMultipleEventsAt: psobj fromTrack: ip->num deletedEvents: &track];
 	} else {
 		success = (MDTrackUnmerge(ip->track, &track, pset) != 0);

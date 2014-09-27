@@ -36,15 +36,15 @@
 - (MDTrack *)track;
 @end
 
-@interface MDPointSetObject : NSObject {
+@interface IntGroupObject : NSObject {
 @public
-	MDPointSet *pointSet;
+	IntGroup *pointSet;
 }
-- (id)initWithMDPointSet: (MDPointSet *)inPointSet;
-- (MDPointSet *)pointSet;
+- (id)initWithMDPointSet: (IntGroup *)inPointSet;
+- (IntGroup *)pointSet;
 @end
 
-@interface MDSelectionObject : MDPointSetObject {
+@interface MDSelectionObject : IntGroupObject {
 @public
 	MDTickType startTick, endTick;
 	MDTrack *track;  /*  For caching only  */

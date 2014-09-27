@@ -21,12 +21,12 @@
 #include "MDHeaders.h"
 #include <ruby.h>
 
-extern VALUE rb_cMRPointSet, rb_cMREventSet;
+extern VALUE rb_cIntGroup, rb_cMREventSet;
 
-extern MDPointSet *MDPointSetFromValue(VALUE val);
-extern VALUE ValueFromMDPointSet(MDPointSet *pset);
+extern IntGroup *IntGroupFromValue(VALUE val);
+extern VALUE ValueFromIntGroup(IntGroup *pset);
 
-extern VALUE MREventSetValueFromPointSetAndTrackInfo(MDPointSet *pset, MDTrack *track, void *myDocument, int isEndOfTrackSelected);
+extern VALUE MREventSetValueFromIntGroupAndTrackInfo(IntGroup *pset, MDTrack *track, void *myDocument, int isEndOfTrackSelected);
 extern VALUE MREventSet_Track(VALUE self);
 extern VALUE MREventSet_EOTSelected(VALUE self);
 extern VALUE MREventSet_SetTrack(VALUE self, VALUE val);

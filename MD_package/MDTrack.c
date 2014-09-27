@@ -673,7 +673,7 @@ MDTrackAppendEvents(MDTrack *inTrack, const MDEvent *inEvent, long count)
 	･ MDTrackMerge
    -------------------------------------- */
 MDStatus
-MDTrackMerge(MDTrack *inTrack1, const MDTrack *inTrack2, MDPointSet **ioSet)
+MDTrackMerge(MDTrack *inTrack1, const MDTrack *inTrack2, IntGroup **ioSet)
 {
 	MDPointer *src1;	/*  The source position in inTrack1  */
 	MDPointer *src2;	/*  The source position in inTrack2  */
@@ -683,7 +683,7 @@ MDTrackMerge(MDTrack *inTrack1, const MDTrack *inTrack2, MDPointSet **ioSet)
 	long	destPosition;
 	long	i;
 	MDTickType tick1, duration1, duration2;
-	MDPointSet *pset = NULL;
+	IntGroup *pset = NULL;
 	MDStatus result = kMDNoError;
 	MDBlock *block;
 
@@ -701,7 +701,7 @@ MDTrackMerge(MDTrack *inTrack1, const MDTrack *inTrack2, MDPointSet **ioSet)
 	MDPointerSetPosition(src2, inTrack2->num - 1);
 
 	if (ioSet != NULL) {
-		pset = MDPointSetNew();
+		pset = IntGroupNew();
 		if (pset == NULL)
 			return kMDErrorOutOfMemory;
 	}
@@ -741,7 +741,7 @@ MDTrackMerge(MDTrack *inTrack1, const MDTrack *inTrack2, MDPointSet **ioSet)
 			if (MDIsTickEqual(eventSrc1, eventSrc2)) {
 				if (ioSet != NULL && *ioSet != NULL) {
 					/*  Consult *ioSet whether we should select eventSrc2 or not  */
-					if (MDPointSetLookup(*ioSet, MDPointerGetPosition(dest), NULL))
+					if (IntGroupLookup(*ioSet, MDPointerGetPosition(dest), NULL))
 						prefer_2_over_1 = 1;
 				}
 			} else if (MDIsTickGreater(eventSrc2, eventSrc1)) {
@@ -753,9 +753,9 @@ MDTrackMerge(MDTrack *inTrack1, const MDTrack *inTrack2, MDPointSet **ioSet)
 		/*	fprintf(stderr, "MDTrackMerge: MDEventCopy %ld from %ld (t1=%ld, t2=%ld)\n", MDPointerGetPosition(dest), MDPointerGetPosition(src2), t1, t2); */
 			eventSrc2 = MDPointerBackward(src2);
 			if (pset != NULL) {
-				if (MDPointSetAdd(pset, destPosition, 1) != kMDNoError) {
+				if (IntGroupAdd(pset, destPosition, 1) != kMDNoError) {
 					result = kMDErrorOutOfMemory;
-					MDPointSetRelease(pset);
+					IntGroupRelease(pset);
 					pset = NULL;
 				}
 			}
@@ -787,7 +787,7 @@ MDTrackMerge(MDTrack *inTrack1, const MDTrack *inTrack2, MDPointSet **ioSet)
 	if (ioSet != NULL)
 		*ioSet = pset;
 	else if (pset != NULL)
-		MDPointSetRelease(pset);
+		IntGroupRelease(pset);
 
 /*	MDTrackCheck(inTrack1);
 	MDTrackCheck(inTrack2); */
@@ -799,7 +799,7 @@ MDTrackMerge(MDTrack *inTrack1, const MDTrack *inTrack2, MDPointSet **ioSet)
 	･ MDTrackUnmerge
    -------------------------------------- */
 static MDStatus
-sMDTrackUnmergeSub(MDTrack *inTrack, MDTrack **outTrack, const MDPointSet *inSet, int deleteFlag)
+sMDTrackUnmergeSub(MDTrack *inTrack, MDTrack **outTrack, const IntGroup *inSet, int deleteFlag)
 {
 	MDPointer *src;
 	MDPointer *dest;
@@ -813,7 +813,7 @@ sMDTrackUnmergeSub(MDTrack *inTrack, MDTrack **outTrack, const MDPointSet *inSet
 	MDTrack *newTrack;
 	MDBlock *block;
 
-	if (inTrack == NULL || inSet == NULL || (ptCount = MDPointSetGetCount(inSet)) == 0)
+	if (inTrack == NULL || inSet == NULL || (ptCount = IntGroupGetCount(inSet)) == 0)
 		return kMDErrorNoEvents;
 	
 	/*  Allocate a destination track  */
@@ -837,9 +837,9 @@ sMDTrackUnmergeSub(MDTrack *inTrack, MDTrack **outTrack, const MDPointSet *inSet
 	noteCount = 0;
 
 	/*  Copy the events  */
-	for (index = 0; index < MDPointSetGetIntervalCount(inSet); index++) {
-		start = MDPointSetGetStartPoint(inSet, index);
-		length = MDPointSetGetInterval(inSet, index);
+	for (index = 0; index < IntGroupGetIntervalCount(inSet); index++) {
+		start = IntGroupGetStartPoint(inSet, index);
+		length = IntGroupGetInterval(inSet, index);
 		MDPointerSetPosition(src, start);
 		eventSrc = MDPointerCurrent(src);
 		while (eventDest != NULL && eventSrc != NULL && --length >= 0) {
@@ -874,9 +874,9 @@ sMDTrackUnmergeSub(MDTrack *inTrack, MDTrack **outTrack, const MDPointSet *inSet
 
 	if (deleteFlag) {
 		/*  Delete the events from the source track  */
-		for (index = MDPointSetGetIntervalCount(inSet) - 1; index >= 0; index--) {
-			start = MDPointSetGetStartPoint(inSet, index);
-			length = MDPointSetGetInterval(inSet, index);
+		for (index = IntGroupGetIntervalCount(inSet) - 1; index >= 0; index--) {
+			start = IntGroupGetStartPoint(inSet, index);
+			length = IntGroupGetInterval(inSet, index);
 			if (start < inTrack->num) {
 				MDPointerSetPosition(src, start);
 				if (start + length > inTrack->num)
@@ -910,13 +910,13 @@ sMDTrackUnmergeSub(MDTrack *inTrack, MDTrack **outTrack, const MDPointSet *inSet
 }
 
 MDStatus
-MDTrackUnmerge(MDTrack *inTrack, MDTrack **outTrack, const MDPointSet *inSet)
+MDTrackUnmerge(MDTrack *inTrack, MDTrack **outTrack, const IntGroup *inSet)
 {
 	return sMDTrackUnmergeSub(inTrack, outTrack, inSet, 1);
 }
 
 MDStatus
-MDTrackExtract(MDTrack *inTrack, MDTrack **outTrack, const MDPointSet *inSet)
+MDTrackExtract(MDTrack *inTrack, MDTrack **outTrack, const IntGroup *inSet)
 {
 	return sMDTrackUnmergeSub(inTrack, outTrack, inSet, 0);
 }
@@ -931,7 +931,7 @@ MDTrackSplitByMIDIChannel(MDTrack *inTrack, MDTrack **outTracks)
 	int i, n, nn;
 	MDPointer *pt;
 	MDEvent *ep;
-	MDPointSet *pset;
+	IntGroup *pset;
 	pt = MDPointerNew(inTrack);
 	if (pt == NULL)
 		return 0;
@@ -960,7 +960,7 @@ MDTrackSplitByMIDIChannel(MDTrack *inTrack, MDTrack **outTracks)
 		return 1;
 	}
 	nn = n;
-	pset = MDPointSetNew();
+	pset = IntGroupNew();
 	if (pset == NULL) {
 		MDPointerRelease(pt);
 		return 0;
@@ -975,20 +975,20 @@ MDTrackSplitByMIDIChannel(MDTrack *inTrack, MDTrack **outTracks)
 			outTracks[i] = inTrack;
 			break;
 		}
-		MDPointSetClear(pset);
+		IntGroupClear(pset);
 		MDPointerSetPosition(pt, -1);
 		while ((ep = MDPointerForward(pt)) != NULL) {
 			if (MDIsChannelEvent(ep) && MDGetChannel(ep) == i)
-				MDPointSetAdd(pset, MDPointerGetPosition(pt), 1);
+				IntGroupAdd(pset, MDPointerGetPosition(pt), 1);
 		}
 		if (MDTrackUnmerge(inTrack, &(outTracks[i]), pset) != kMDNoError) {
 			MDPointerRelease(pt);
-			MDPointSetRelease(pset);
+			IntGroupRelease(pset);
 			return 0;
 		}
 	}
 	MDPointerRelease(pt);
-	MDPointSetRelease(pset);
+	IntGroupRelease(pset);
 	return nn;
 }
 
@@ -1228,15 +1228,15 @@ MDTrackGetLargestTick(MDTrack *inTrack)
 /* --------------------------------------
 	･ MDTrackSearchEventsWithDurationCrossingTick
    -------------------------------------- */
-MDPointSet *
+IntGroup *
 MDTrackSearchEventsWithDurationCrossingTick(MDTrack *inTrack, MDTickType inTick)
 {
-    MDPointSet *pset;
+    IntGroup *pset;
     long position, i;
     MDTickType tick, largestTick;
     MDBlock *block;
     MDEvent *ep;
-    pset = MDPointSetNew();
+    pset = IntGroupNew();
     if (pset == NULL)
         return NULL;
     position = 0;
@@ -1251,8 +1251,8 @@ MDTrackSearchEventsWithDurationCrossingTick(MDTrack *inTrack, MDTickType inTick)
                 if (MDHasDuration(ep)) {
                     tick += MDGetDuration(ep);
                     if (tick >= inTick) {
-                        if (MDPointSetAdd(pset, position + i, 1) != kMDNoError) {
-                            MDPointSetRelease(pset);
+                        if (IntGroupAdd(pset, position + i, 1) != kMDNoError) {
+                            IntGroupRelease(pset);
                             return NULL;
                         }
                     }
@@ -1271,20 +1271,20 @@ MDTrackSearchEventsWithDurationCrossingTick(MDTrack *inTrack, MDTickType inTick)
 /* --------------------------------------
 	･ MDTrackSearchEventsWithSelector
    -------------------------------------- */
-MDPointSet *
+IntGroup *
 MDTrackSearchEventsWithSelector(MDTrack *inTrack, MDEventSelector inSelector, void *inUserData)
 {
-    MDPointSet *pset;
+    IntGroup *pset;
 	MDPointer *pt;
     MDEvent *ep;
-    pset = MDPointSetNew();
+    pset = IntGroupNew();
 	pt = MDPointerNew(inTrack);
     if (pset == NULL || pt == NULL)
         return NULL;
 	while ((ep = MDPointerForwardWithSelector(pt, inSelector, inUserData)) != NULL) {
-		if (MDPointSetAdd(pset, MDPointerGetPosition(pt), 1) != kMDNoError) {
+		if (IntGroupAdd(pset, MDPointerGetPosition(pt), 1) != kMDNoError) {
 			MDPointerRelease(pt);
-			MDPointSetRelease(pset);
+			IntGroupRelease(pset);
 			return NULL;
 		}
 	}
@@ -2273,15 +2273,15 @@ MDPointerBackwardWithSelector(MDPointer *inPointer, MDEventSelector inSelector, 
 	･ MDPointerSetPositionWithPointSet
    -------------------------------------- */
 int
-MDPointerSetPositionWithPointSet(MDPointer *inPointer, MDPointSet *inPointSet, long offset, long *outIndex)
+MDPointerSetPositionWithPointSet(MDPointer *inPointer, IntGroup *inPointSet, long offset, int *outIndex)
 {
     long index, position, pos, len;
     if (inPointSet == NULL)
         return 0;
     index = position = 0;
-    while ((len = MDPointSetGetInterval(inPointSet, index)) >= 0) {
+    while ((len = IntGroupGetInterval(inPointSet, index)) >= 0) {
         if (offset - position < len) {
-            pos = MDPointSetGetStartPoint(inPointSet, index);
+            pos = IntGroupGetStartPoint(inPointSet, index);
             if (outIndex != NULL)
                 *outIndex = index;
             return MDPointerSetPosition(inPointer, pos + (offset - position));
@@ -2300,9 +2300,10 @@ MDPointerSetPositionWithPointSet(MDPointer *inPointer, MDPointSet *inPointSet, l
 	･ MDPointerForwardWithPointSet
    -------------------------------------- */
 MDEvent *
-MDPointerForwardWithPointSet(MDPointer *inPointer, MDPointSet *inPointSet, long *index)
+MDPointerForwardWithPointSet(MDPointer *inPointer, IntGroup *inPointSet, int *index)
 {
-    long pt, n;
+    long pt;
+	int n;
 	if (index == NULL) {
 		n = -1;
 		index = &n;
@@ -2313,10 +2314,10 @@ MDPointerForwardWithPointSet(MDPointer *inPointer, MDPointSet *inPointSet, long 
 		return NULL;
 	}
 	if (*index >= 0) {
-		if ((pt = MDPointSetGetEndPoint(inPointSet, *index)) >= 0) {
+		if ((pt = IntGroupGetEndPoint(inPointSet, *index)) >= 0) {
 			if (inPointer->position >= pt) {
 				(*index)++;
-				pt = MDPointSetGetStartPoint(inPointSet, *index);
+				pt = IntGroupGetStartPoint(inPointSet, *index);
 				if (pt < 0)
 					goto end_of_pset;
 				MDPointerSetRelativePosition(inPointer, pt - inPointer->position);
@@ -2324,8 +2325,8 @@ MDPointerForwardWithPointSet(MDPointer *inPointer, MDPointSet *inPointSet, long 
 			return MDPointerCurrent(inPointer);
 		} else goto end_of_pset;  /*  This should not happen  */
 	} else {
-		if (!MDPointSetLookup(inPointSet, inPointer->position, index)) {
-			pt = MDPointSetGetStartPoint(inPointSet, *index);
+		if (!IntGroupLookup(inPointSet, inPointer->position, index)) {
+			pt = IntGroupGetStartPoint(inPointSet, *index);
 			if (pt < 0)
 				goto end_of_pset;
 			MDPointerSetRelativePosition(inPointer, pt - inPointer->position);
@@ -2342,9 +2343,10 @@ MDPointerForwardWithPointSet(MDPointer *inPointer, MDPointSet *inPointSet, long 
 	･ MDPointerBackwardWithPointSet
    -------------------------------------- */
 MDEvent *
-MDPointerBackwardWithPointSet(MDPointer *inPointer, MDPointSet *inPointSet, long *index)
+MDPointerBackwardWithPointSet(MDPointer *inPointer, IntGroup *inPointSet, int *index)
 {
-    long pt, n;
+    long pt;
+	int n;
 	if (index == NULL) {
 		n = -1;
 		index = &n;
@@ -2354,10 +2356,10 @@ MDPointerBackwardWithPointSet(MDPointer *inPointer, MDPointSet *inPointSet, long
         return NULL;
 	}
 	if (*index >= 0) {
-		if ((pt = MDPointSetGetStartPoint(inPointSet, *index)) >= 0) {        
+		if ((pt = IntGroupGetStartPoint(inPointSet, *index)) >= 0) {        
 			if (inPointer->position < pt) {
 				(*index)--;
-				pt = MDPointSetGetEndPoint(inPointSet, *index);
+				pt = IntGroupGetEndPoint(inPointSet, *index);
 				if (pt < 0)
 					goto pset_exhausted;
 				MDPointerSetRelativePosition(inPointer, (pt - 1) - inPointer->position);
@@ -2365,9 +2367,9 @@ MDPointerBackwardWithPointSet(MDPointer *inPointer, MDPointSet *inPointSet, long
 			return MDPointerCurrent(inPointer);
 		} else goto pset_exhausted;  /*  This should not happen  */
 	} else {
-		if (!MDPointSetLookup(inPointSet, inPointer->position, index)) {
+		if (!IntGroupLookup(inPointSet, inPointer->position, index)) {
 			(*index)--;
-			pt = MDPointSetGetEndPoint(inPointSet, *index);
+			pt = IntGroupGetEndPoint(inPointSet, *index);
 			if (pt < 0)
 				goto pset_exhausted;
 			MDPointerSetRelativePosition(inPointer, (pt - 1) - inPointer->position);

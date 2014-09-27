@@ -72,7 +72,6 @@
 		E400BC1211D627730032B969 /* MDSequence.c in Sources */ = {isa = PBXBuildFile; fileRef = E4CF0D590746E734000ADE20 /* MDSequence.c */; };
 		E400BC1311D627730032B969 /* MDSequenceSMF.c in Sources */ = {isa = PBXBuildFile; fileRef = E4CF0D5B0746E734000ADE20 /* MDSequenceSMF.c */; };
 		E400BC1411D627730032B969 /* MDCalibrator.c in Sources */ = {isa = PBXBuildFile; fileRef = E4CF0D4E0746E734000ADE20 /* MDCalibrator.c */; };
-		E400BC1511D627730032B969 /* MDPointSet.c in Sources */ = {isa = PBXBuildFile; fileRef = E4CF0D570746E734000ADE20 /* MDPointSet.c */; };
 		E400BC1611D627730032B969 /* MDUtility.c in Sources */ = {isa = PBXBuildFile; fileRef = E4CF0D5E0746E734000ADE20 /* MDUtility.c */; };
 		E400BC1711D627730032B969 /* MDPlayer_MacOSX.c in Sources */ = {isa = PBXBuildFile; fileRef = E4CF0D540746E734000ADE20 /* MDPlayer_MacOSX.c */; };
 		E400BC1811D627730032B969 /* MDAudio_MacOSX.c in Sources */ = {isa = PBXBuildFile; fileRef = E405989D0D311A9700161E25 /* MDAudio_MacOSX.c */; };
@@ -144,6 +143,7 @@
 		E40C7A50140A87FD00969DC3 /* RubyConsoleWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A4E140A87FD00969DC3 /* RubyConsoleWindow.xib */; };
 		E40C7AC7140A94F700969DC3 /* MetronomeSettingsPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7AC5140A94F700969DC3 /* MetronomeSettingsPanel.xib */; };
 		E40C7ACC140A95D700969DC3 /* MetronomeSettingsPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E40C7ACB140A95D700969DC3 /* MetronomeSettingsPanelController.m */; };
+		E4216C2119D6CD3E00533630 /* IntGroup.c in Sources */ = {isa = PBXBuildFile; fileRef = E4216C1F19D6CD3E00533630 /* IntGroup.c */; };
 		E44590CA1413C1C400F5C20D /* mute.png in Resources */ = {isa = PBXBuildFile; fileRef = E44590C81413C1C400F5C20D /* mute.png */; };
 		E44590CB1413C1C400F5C20D /* mute_non.png in Resources */ = {isa = PBXBuildFile; fileRef = E44590C91413C1C400F5C20D /* mute_non.png */; };
 		E445911A1413CC0500F5C20D /* speaker_gray.png in Resources */ = {isa = PBXBuildFile; fileRef = E44591191413CC0500F5C20D /* speaker_gray.png */; };
@@ -228,6 +228,8 @@
 		E40EDA4C0BBFFD2600B3FE78 /* GraphicBackgroundView.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = GraphicBackgroundView.m; path = Classes/GraphicBackgroundView.m; sourceTree = "<group>"; };
 		E41CC3DF0F599ACF006E6817 /* RubyConsoleWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RubyConsoleWindowController.h; path = Classes/RubyConsoleWindowController.h; sourceTree = "<group>"; };
 		E41CC3E00F599ACF006E6817 /* RubyConsoleWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RubyConsoleWindowController.m; path = Classes/RubyConsoleWindowController.m; sourceTree = "<group>"; };
+		E4216C1F19D6CD3E00533630 /* IntGroup.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = IntGroup.c; path = MD_package/IntGroup.c; sourceTree = "<group>"; };
+		E4216C2019D6CD3E00533630 /* IntGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IntGroup.h; path = MD_package/IntGroup.h; sourceTree = "<group>"; };
 		E4266C730966379B00C04A48 /* selection.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = selection.png; path = icons/selection.png; sourceTree = "<group>"; };
 		E4266C81096647F100C04A48 /* pencil.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = pencil.png; path = icons/pencil.png; sourceTree = "<group>"; };
 		E4266D0D0966681100C04A48 /* MyPopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyPopUpButton.m; path = Classes/MyPopUpButton.m; sourceTree = "<group>"; };
@@ -320,8 +322,6 @@
 		E4CF0D540746E734000ADE20 /* MDPlayer_MacOSX.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDPlayer_MacOSX.c; path = MD_package/MDPlayer_MacOSX.c; sourceTree = "<group>"; };
 		E4CF0D550746E734000ADE20 /* MDPlayer_MacOSX.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MDPlayer_MacOSX.h; path = MD_package/MDPlayer_MacOSX.h; sourceTree = "<group>"; };
 		E4CF0D560746E734000ADE20 /* MDPlayer.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MDPlayer.h; path = MD_package/MDPlayer.h; sourceTree = "<group>"; };
-		E4CF0D570746E734000ADE20 /* MDPointSet.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDPointSet.c; path = MD_package/MDPointSet.c; sourceTree = "<group>"; };
-		E4CF0D580746E734000ADE20 /* MDPointSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDPointSet.h; path = MD_package/MDPointSet.h; sourceTree = "<group>"; };
 		E4CF0D590746E734000ADE20 /* MDSequence.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDSequence.c; path = MD_package/MDSequence.c; sourceTree = "<group>"; };
 		E4CF0D5A0746E734000ADE20 /* MDSequence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDSequence.h; path = MD_package/MDSequence.h; sourceTree = "<group>"; };
 		E4CF0D5B0746E734000ADE20 /* MDSequenceSMF.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDSequenceSMF.c; path = MD_package/MDSequenceSMF.c; sourceTree = "<group>"; };
@@ -424,6 +424,8 @@
 				E4CF0D530746E734000ADE20 /* MDHeaders.h */,
 				E4CF0D500746E734000ADE20 /* MDCommon.h */,
 				E4CF0D520746E734000ADE20 /* MDEvent.h */,
+				E4216C2019D6CD3E00533630 /* IntGroup.h */,
+				E4216C1F19D6CD3E00533630 /* IntGroup.c */,
 				E4CF0D510746E734000ADE20 /* MDEvent.c */,
 				E4CF0D5D0746E734000ADE20 /* MDTrack.h */,
 				E4CF0D5C0746E734000ADE20 /* MDTrack.c */,
@@ -432,8 +434,6 @@
 				E4CF0D5B0746E734000ADE20 /* MDSequenceSMF.c */,
 				E4CF0D4F0746E734000ADE20 /* MDCalibrator.h */,
 				E4CF0D4E0746E734000ADE20 /* MDCalibrator.c */,
-				E4CF0D580746E734000ADE20 /* MDPointSet.h */,
-				E4CF0D570746E734000ADE20 /* MDPointSet.c */,
 				E4CF0D5F0746E734000ADE20 /* MDUtility.h */,
 				E4CF0D5E0746E734000ADE20 /* MDUtility.c */,
 				E4CF0D560746E734000ADE20 /* MDPlayer.h */,
@@ -893,7 +893,6 @@
 				E400BC1211D627730032B969 /* MDSequence.c in Sources */,
 				E400BC1311D627730032B969 /* MDSequenceSMF.c in Sources */,
 				E400BC1411D627730032B969 /* MDCalibrator.c in Sources */,
-				E400BC1511D627730032B969 /* MDPointSet.c in Sources */,
 				E400BC1611D627730032B969 /* MDUtility.c in Sources */,
 				E400BC1711D627730032B969 /* MDPlayer_MacOSX.c in Sources */,
 				E400BC1811D627730032B969 /* MDAudio_MacOSX.c in Sources */,
@@ -946,6 +945,7 @@
 				E40C7ACC140A95D700969DC3 /* MetronomeSettingsPanelController.m in Sources */,
 				E4C383FC141117F9006F2661 /* AboutWindowController.m in Sources */,
 				E4F81DC714C1CC3100F63BA6 /* QuantizePanelController.m in Sources */,
+				E4216C2119D6CD3E00533630 /* IntGroup.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

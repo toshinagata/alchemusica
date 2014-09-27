@@ -23,27 +23,27 @@
 
 #pragma mark ====== MRPointSet Class ======
 
-/*  The MRPointSet class is dependent only on MDPointSet  */
+/*  The MRPointSet class is dependent only on IntGroup  */
 
-VALUE rb_cMRPointSet;
+VALUE rb_cIntGroup;
 
-MDPointSet *
-MDPointSetFromValue(VALUE val)
+IntGroup *
+IntGroupFromValue(VALUE val)
 {
-	MDPointSet *pset;
-	if (!rb_obj_is_kind_of(val, rb_cMRPointSet))
-		val = rb_funcall(rb_cMRPointSet, rb_intern("new"), 1, val);
-	Data_Get_Struct(val, MDPointSet, pset);
+	IntGroup *pset;
+	if (!rb_obj_is_kind_of(val, rb_cIntGroup))
+		val = rb_funcall(rb_cIntGroup, rb_intern("new"), 1, val);
+	Data_Get_Struct(val, IntGroup, pset);
 	return pset;
 }
 
 VALUE
-ValueFromMDPointSet(MDPointSet *pset)
+ValueFromIntGroup(IntGroup *pset)
 {
 	if (pset == NULL)
 		return Qnil;
-	MDPointSetRetain(pset);
-    return Data_Wrap_Struct(rb_cMRPointSet, 0, (void (*)(void *))MDPointSetRelease, pset);
+	IntGroupRetain(pset);
+    return Data_Wrap_Struct(rb_cIntGroup, 0, (void (*)(void *))IntGroupRelease, pset);
 }
 
 void
@@ -56,7 +56,7 @@ MRPointSet_RaiseIfError(int err)
 			case kMDErrorOutOfRange: s = "out of range"; break;
 			default: s = ""; break;
 		}
-		rb_raise(rb_eStandardError, "%s error occurred during MDPointSet operation", s);
+		rb_raise(rb_eStandardError, "%s error occurred during IntGroup operation", s);
 	}
 }
 
@@ -64,15 +64,15 @@ MRPointSet_RaiseIfError(int err)
 VALUE
 MRPointSet_Alloc(VALUE klass)
 {
-	MDPointSet *pset = MDPointSetNew();
-    return Data_Wrap_Struct(klass, 0, (void (*)(void *))MDPointSetRelease, pset);
+	IntGroup *pset = IntGroupNew();
+    return Data_Wrap_Struct(klass, 0, (void (*)(void *))IntGroupRelease, pset);
 }
 
 /*  Iterator block for initializer  */
 static VALUE
 s_MRPointSet_Initialize_i(VALUE val, VALUE pset1)
 {
-	MRPointSet_RaiseIfError(MDPointSetAdd((MDPointSet *)pset1, NUM2INT(val), 1));
+	MRPointSet_RaiseIfError(IntGroupAdd((IntGroup *)pset1, NUM2INT(val), 1));
 	return Qnil;
 }
 
@@ -89,13 +89,13 @@ s_MRPointSet_Initialize_i(VALUE val, VALUE pset1)
 static VALUE
 s_MRPointSet_Initialize(int argc, VALUE *argv, VALUE self)
 {
-	MDPointSet *pset1;
-	Data_Get_Struct(self, MDPointSet, pset1);
+	IntGroup *pset1;
+	Data_Get_Struct(self, IntGroup, pset1);
 	while (argc-- > 0) {
 		VALUE arg = *argv++;
 		int type = TYPE(arg);
-		if (rb_obj_is_kind_of(arg, rb_cMRPointSet))
-			rb_funcall(rb_cMRPointSet, rb_intern("merge"), 1, arg);
+		if (rb_obj_is_kind_of(arg, rb_cIntGroup))
+			rb_funcall(rb_cIntGroup, rb_intern("merge"), 1, arg);
 		else if (rb_obj_is_kind_of(arg, rb_cRange)) {
 			int sp, ep;
 			sp = NUM2INT(rb_funcall(arg, rb_intern("begin"), 0));
@@ -103,21 +103,21 @@ s_MRPointSet_Initialize(int argc, VALUE *argv, VALUE self)
 			if (RTEST(rb_funcall(arg, rb_intern("exclude_end?"), 0)))
 				ep--;
 			if (ep >= sp)
-				MRPointSet_RaiseIfError(MDPointSetAdd(pset1, sp, ep - sp + 1));
+				MRPointSet_RaiseIfError(IntGroupAdd(pset1, sp, ep - sp + 1));
 		} else if (rb_respond_to(arg, rb_intern("each")) && type != T_STRING)
 			rb_iterate(rb_each, arg, s_MRPointSet_Initialize_i, (VALUE)pset1);
 		else
-			MRPointSet_RaiseIfError(MDPointSetAdd(pset1, NUM2INT(arg), 1));
+			MRPointSet_RaiseIfError(IntGroupAdd(pset1, NUM2INT(arg), 1));
 	}
 	if (rb_block_given_p()) {
-		MDPointSet *pset2 = MDPointSetNew();
+		IntGroup *pset2 = IntGroupNew();
 		int i, n;
-		for (i = 0; (n = MDPointSetGetNthPoint(pset1, i)) >= 0; i++) {
+		for (i = 0; (n = IntGroupGetNthPoint(pset1, i)) >= 0; i++) {
 			n = NUM2INT(rb_yield(INT2NUM(n)));
 			if (n >= 0)
-				MRPointSet_RaiseIfError(MDPointSetAdd(pset2, n, 1));
+				MRPointSet_RaiseIfError(IntGroupAdd(pset2, n, 1));
 		}
-		MRPointSet_RaiseIfError(MDPointSetCopy(pset1, pset2));
+		MRPointSet_RaiseIfError(IntGroupCopy(pset1, pset2));
 	}
 	return Qnil;
 }
@@ -131,9 +131,9 @@ s_MRPointSet_Initialize(int argc, VALUE *argv, VALUE self)
 static VALUE
 s_MRPointSet_Clear(VALUE self)
 {
-	MDPointSet *pset;
-	Data_Get_Struct(self, MDPointSet, pset);
-	MDPointSetClear(pset);
+	IntGroup *pset;
+	Data_Get_Struct(self, IntGroup, pset);
+	IntGroupClear(pset);
 	return self;
 }
 
@@ -146,12 +146,12 @@ s_MRPointSet_Clear(VALUE self)
 static VALUE
 s_MRPointSet_InitializeCopy(VALUE self, VALUE val)
 {
-	MDPointSet *pset1, *pset2;
-	Data_Get_Struct(self, MDPointSet, pset1);
-	if (!rb_obj_is_kind_of(val, rb_cMRPointSet))
-		rb_raise(rb_eTypeError, "MDPointSet instance is expected");
-    Data_Get_Struct(val, MDPointSet, pset2);
-	MDPointSetCopy(pset1, pset2);
+	IntGroup *pset1, *pset2;
+	Data_Get_Struct(self, IntGroup, pset1);
+	if (!rb_obj_is_kind_of(val, rb_cIntGroup))
+		rb_raise(rb_eTypeError, "IntGroup instance is expected");
+    Data_Get_Struct(val, IntGroup, pset2);
+	IntGroupCopy(pset1, pset2);
 	return self;
 }
 
@@ -164,9 +164,9 @@ s_MRPointSet_InitializeCopy(VALUE self, VALUE val)
 static VALUE
 s_MRPointSet_Length(VALUE self)
 {
-	MDPointSet *pset;
-	Data_Get_Struct(self, MDPointSet, pset);
-	return INT2NUM(MDPointSetGetCount(pset));
+	IntGroup *pset;
+	Data_Get_Struct(self, IntGroup, pset);
+	return INT2NUM(IntGroupGetCount(pset));
 }
 
 /*
@@ -178,10 +178,10 @@ s_MRPointSet_Length(VALUE self)
 static VALUE
 s_MRPointSet_MemberP(VALUE self, VALUE val)
 {
-	MDPointSet *pset;
+	IntGroup *pset;
 	int n = NUM2INT(val);
-	Data_Get_Struct(self, MDPointSet, pset);
-	return (MDPointSetLookup(pset, n, NULL) ? Qtrue : Qfalse);
+	Data_Get_Struct(self, IntGroup, pset);
+	return (IntGroupLookup(pset, n, NULL) ? Qtrue : Qfalse);
 }
 
 /*
@@ -193,11 +193,11 @@ s_MRPointSet_MemberP(VALUE self, VALUE val)
 static VALUE
 s_MRPointSet_ElementAtIndex(VALUE self, VALUE val)
 {
-	MDPointSet *pset;
+	IntGroup *pset;
 	int n;
 	int index = NUM2INT(rb_Integer(val));
-	Data_Get_Struct(self, MDPointSet, pset);
-	n = MDPointSetGetNthPoint(pset, index);
+	Data_Get_Struct(self, IntGroup, pset);
+	n = IntGroupGetNthPoint(pset, index);
 	return (n >= 0 ? INT2NUM(n) : Qnil);
 }
 
@@ -210,11 +210,11 @@ s_MRPointSet_ElementAtIndex(VALUE self, VALUE val)
 static VALUE
 s_MRPointSet_Each(VALUE self)
 {
-	MDPointSet *pset;
+	IntGroup *pset;
 	int i, j, sp, ep;
-	Data_Get_Struct(self, MDPointSet, pset);
-	for (i = 0; (sp = MDPointSetGetStartPoint(pset, i)) >= 0; i++) {
-		ep = MDPointSetGetEndPoint(pset, i);
+	Data_Get_Struct(self, IntGroup, pset);
+	for (i = 0; (sp = IntGroupGetStartPoint(pset, i)) >= 0; i++) {
+		ep = IntGroupGetEndPoint(pset, i);
 		for (j = sp; j < ep; j++) {
 			rb_yield(INT2NUM(j));
 		}
@@ -231,18 +231,18 @@ s_MRPointSet_Each(VALUE self)
 static VALUE
 s_MRPointSet_Add(VALUE self, VALUE val)
 {
-	MDPointSet *pset, *pset2;
+	IntGroup *pset, *pset2;
     if (OBJ_FROZEN(self))
-		rb_error_frozen("MDPointSet");
-	Data_Get_Struct(self, MDPointSet, pset);
+		rb_error_frozen("IntGroup");
+	Data_Get_Struct(self, IntGroup, pset);
 	if (rb_obj_is_kind_of(val, rb_cNumeric)) {
 		int n = NUM2INT(rb_Integer(val));
 		if (n < 0)
 			rb_raise(rb_eRangeError, "the integer group can contain only non-negative values");
-		MDPointSetAdd(pset, n, 1);
+		IntGroupAdd(pset, n, 1);
 	} else {
-		pset2 = MDPointSetFromValue(val);
-		MDPointSetAddPointSet(pset, pset2);
+		pset2 = IntGroupFromValue(val);
+		IntGroupAddIntGroup(pset, pset2);
 	}
 	return self;
 }
@@ -256,17 +256,17 @@ s_MRPointSet_Add(VALUE self, VALUE val)
 static VALUE
 s_MRPointSet_Delete(VALUE self, VALUE val)
 {
-	MDPointSet *pset, *pset2;
+	IntGroup *pset, *pset2;
     if (OBJ_FROZEN(self))
-		rb_error_frozen("MDPointSet");
-	Data_Get_Struct(self, MDPointSet, pset);
+		rb_error_frozen("IntGroup");
+	Data_Get_Struct(self, IntGroup, pset);
 	if (rb_obj_is_kind_of(val, rb_cNumeric)) {
 		int n = NUM2INT(rb_Integer(val));
-		if (n >= 0 && MDPointSetLookup(pset, n, NULL))
-			MDPointSetRemove(pset, n, 1);
+		if (n >= 0 && IntGroupLookup(pset, n, NULL))
+			IntGroupRemove(pset, n, 1);
 	} else {
-		pset2 = MDPointSetFromValue(val);
-		MDPointSetRemovePointSet(pset, pset2);
+		pset2 = IntGroupFromValue(val);
+		IntGroupRemoveIntGroup(pset, pset2);
 	}
 	return self;
 }
@@ -280,32 +280,32 @@ s_MRPointSet_Delete(VALUE self, VALUE val)
 static VALUE
 s_MRPointSet_Reverse(VALUE self, VALUE val)
 {
-	MDPointSet *pset, *pset2;
+	IntGroup *pset, *pset2;
     if (OBJ_FROZEN(self))
-		rb_error_frozen("MDPointSet");
-	Data_Get_Struct(self, MDPointSet, pset);
+		rb_error_frozen("IntGroup");
+	Data_Get_Struct(self, IntGroup, pset);
 	if (rb_obj_is_kind_of(val, rb_cNumeric)) {
 		int n = NUM2INT(rb_Integer(val));
-		if (n >= 0 && MDPointSetLookup(pset, n, NULL))
-			MDPointSetReverse(pset, n, 1);
+		if (n >= 0 && IntGroupLookup(pset, n, NULL))
+			IntGroupReverse(pset, n, 1);
 	} else {
-		pset2 = MDPointSetFromValue(val);
-		MDPointSetReversePointSet(pset, pset2);
+		pset2 = IntGroupFromValue(val);
+		IntGroupReverseIntGroup(pset, pset2);
 	}
 	return self;
 }
 
 static VALUE
-s_MRPointSet_Binary(VALUE self, VALUE val, MDStatus (*func)(const MDPointSet *, const MDPointSet *, MDPointSet *))
+s_MRPointSet_Binary(VALUE self, VALUE val, int (*func)(const IntGroup *, const IntGroup *, IntGroup *))
 {
-	MDPointSet *pset1, *pset2, *pset3;
+	IntGroup *pset1, *pset2, *pset3;
 	VALUE retval;
-	Data_Get_Struct(self, MDPointSet, pset1);
-	pset2 = MDPointSetFromValue(val);
-/*	retval = MRPointSet_Alloc(rb_cMRPointSet); */
+	Data_Get_Struct(self, IntGroup, pset1);
+	pset2 = IntGroupFromValue(val);
+/*	retval = MRPointSet_Alloc(rb_cIntGroup); */
 	retval = rb_obj_dup(self); /* the return value will have the same class as self  */
-	Data_Get_Struct(retval, MDPointSet, pset3);
-	MDPointSetClear(pset3);
+	Data_Get_Struct(retval, IntGroup, pset3);
+	IntGroupClear(pset3);
 	MRPointSet_RaiseIfError(func(pset1, pset2, pset3));
 	return retval;
 }
@@ -322,7 +322,7 @@ s_MRPointSet_Binary(VALUE self, VALUE val, MDStatus (*func)(const MDPointSet *, 
 static VALUE
 s_MRPointSet_Union(VALUE self, VALUE val)
 {
-	return s_MRPointSet_Binary(self, val, MDPointSetUnion);
+	return s_MRPointSet_Binary(self, val, IntGroupUnion);
 }
 
 /*
@@ -336,7 +336,7 @@ s_MRPointSet_Union(VALUE self, VALUE val)
 static VALUE
 s_MRPointSet_Intersection(VALUE self, VALUE val)
 {
-	return s_MRPointSet_Binary(self, val, MDPointSetIntersect);
+	return s_MRPointSet_Binary(self, val, IntGroupIntersect);
 }
 
 /*
@@ -350,7 +350,7 @@ s_MRPointSet_Intersection(VALUE self, VALUE val)
 static VALUE
 s_MRPointSet_Difference(VALUE self, VALUE val)
 {
-	return s_MRPointSet_Binary(self, val, MDPointSetDifference);
+	return s_MRPointSet_Binary(self, val, IntGroupDifference);
 }
 
 /*
@@ -364,7 +364,7 @@ s_MRPointSet_Difference(VALUE self, VALUE val)
 static VALUE
 s_MRPointSet_SymDifference(VALUE self, VALUE val)
 {
-	return s_MRPointSet_Binary(self, val, MDPointSetXor);
+	return s_MRPointSet_Binary(self, val, IntGroupXor);
 }
 
 /*
@@ -377,7 +377,7 @@ s_MRPointSet_SymDifference(VALUE self, VALUE val)
 static VALUE
 s_MRPointSet_Convolute(VALUE self, VALUE val)
 {
-	return s_MRPointSet_Binary(self, val, MDPointSetConvolute);
+	return s_MRPointSet_Binary(self, val, IntGroupConvolute);
 }
 
 /*
@@ -390,7 +390,7 @@ s_MRPointSet_Convolute(VALUE self, VALUE val)
 static VALUE
 s_MRPointSet_Deconvolute(VALUE self, VALUE val)
 {
-	return s_MRPointSet_Binary(self, val, MDPointSetDeconvolute);
+	return s_MRPointSet_Binary(self, val, IntGroupDeconvolute);
 }
 
 /*
@@ -402,14 +402,14 @@ s_MRPointSet_Deconvolute(VALUE self, VALUE val)
 static VALUE
 s_MRPointSet_RangeAt(VALUE self, VALUE val)
 {
-	MDPointSet *pset;
+	IntGroup *pset;
 	int n = NUM2INT(val);
 	int sp, ep;
-	Data_Get_Struct(self, MDPointSet, pset);
-	sp = MDPointSetGetStartPoint(pset, n);
+	Data_Get_Struct(self, IntGroup, pset);
+	sp = IntGroupGetStartPoint(pset, n);
 	if (sp < 0)
 		return Qnil;
-	ep = MDPointSetGetEndPoint(pset, n) - 1;
+	ep = IntGroupGetEndPoint(pset, n) - 1;
 	return rb_funcall(rb_cRange, rb_intern("new"), 2, INT2NUM(sp), INT2NUM(ep));
 }
 
@@ -417,15 +417,15 @@ s_MRPointSet_RangeAt(VALUE self, VALUE val)
 static VALUE
 s_MRPointSet_Merge(VALUE self, VALUE val)
 {
-	MDPointSet *pset1, *pset2;
+	IntGroup *pset1, *pset2;
 	int i, sp, interval;
     if (OBJ_FROZEN(self))
-		rb_error_frozen("MDPointSet");
-	Data_Get_Struct(self, MDPointSet, pset1);
-	pset2 = MDPointSetFromValue(val);
-	for (i = 0; (sp = MDPointSetGetStartPoint(pset2, i)) >= 0; i++) {
-		interval = MDPointSetGetInterval(pset2, i);
-		MRPointSet_RaiseIfError(MDPointSetAdd(pset1, sp, interval));
+		rb_error_frozen("IntGroup");
+	Data_Get_Struct(self, IntGroup, pset1);
+	pset2 = IntGroupFromValue(val);
+	for (i = 0; (sp = IntGroupGetStartPoint(pset2, i)) >= 0; i++) {
+		interval = IntGroupGetInterval(pset2, i);
+		MRPointSet_RaiseIfError(IntGroupAdd(pset1, sp, interval));
 	}
 	return self;
 }
@@ -433,15 +433,15 @@ s_MRPointSet_Merge(VALUE self, VALUE val)
 static VALUE
 s_MRPointSet_Subtract(VALUE self, VALUE val)
 {
-	MDPointSet *pset1, *pset2;
+	IntGroup *pset1, *pset2;
 	int i, sp, interval;
     if (OBJ_FROZEN(self))
-		rb_error_frozen("MDPointSet");
-	Data_Get_Struct(self, MDPointSet, pset1);
-	pset2 = MDPointSetFromValue(val);
-	for (i = 0; (sp = MDPointSetGetStartPoint(pset2, i)) >= 0; i++) {
-		interval = MDPointSetGetInterval(pset2, i);
-		MRPointSet_RaiseIfError(MDPointSetRemove(pset1, sp, interval));
+		rb_error_frozen("IntGroup");
+	Data_Get_Struct(self, IntGroup, pset1);
+	pset2 = IntGroupFromValue(val);
+	for (i = 0; (sp = IntGroupGetStartPoint(pset2, i)) >= 0; i++) {
+		interval = IntGroupGetInterval(pset2, i);
+		MRPointSet_RaiseIfError(IntGroupRemove(pset1, sp, interval));
 	}
 	return self;
 }
@@ -457,18 +457,18 @@ s_MRPointSet_Subtract(VALUE self, VALUE val)
 static VALUE
 s_MRPointSet_Offset(VALUE self, VALUE ofs)
 {
-	MDPointSet *pset1, *pset2;
+	IntGroup *pset1, *pset2;
 	int iofs;
 	VALUE val;
-	Data_Get_Struct(self, MDPointSet, pset1);
-	pset2 = MDPointSetNew();
-	if (pset2 == NULL || MDPointSetCopy(pset2, pset1) != kMDNoError)
-		rb_raise(rb_eTypeError, "Cannot duplicate MDPointSet");
+	Data_Get_Struct(self, IntGroup, pset1);
+	pset2 = IntGroupNew();
+	if (pset2 == NULL || IntGroupCopy(pset2, pset1) != kMDNoError)
+		rb_raise(rb_eTypeError, "Cannot duplicate IntGroup");
 	iofs = NUM2INT(ofs);
-	if (MDPointSetOffset(pset2, iofs) != 0)
+	if (IntGroupOffset(pset2, iofs) != 0)
 		rb_raise(rb_eRangeError, "Bad offset %d", iofs);
-	val = ValueFromMDPointSet(pset2);
-	MDPointSetRelease(pset2);
+	val = ValueFromIntGroup(pset2);
+	IntGroupRelease(pset2);
 	return val;
 }
 
@@ -490,16 +490,16 @@ static VALUE
 s_MRPointSet_Inspect(VALUE self)
 {
 	int i, sp, ep;
-	MDPointSet *pset;
+	IntGroup *pset;
 	char buf[64];
 	VALUE klass = CLASS_OF(self);
 	VALUE val = rb_funcall(klass, rb_intern("name"), 0);
-	Data_Get_Struct(self, MDPointSet, pset);
+	Data_Get_Struct(self, IntGroup, pset);
 	rb_str_cat(val, "[", 1);
-	for (i = 0; (sp = MDPointSetGetStartPoint(pset, i)) >= 0; i++) {
+	for (i = 0; (sp = IntGroupGetStartPoint(pset, i)) >= 0; i++) {
 		if (i > 0)
 			rb_str_cat(val, ", ", 2);
-		ep = MDPointSetGetEndPoint(pset, i);
+		ep = IntGroupGetEndPoint(pset, i);
 		if (ep > sp + 1)
 			snprintf(buf, sizeof buf, "%d..%d", sp, ep - 1);
 		else
@@ -542,16 +542,16 @@ s_MREventSet_Initialize(int argc, VALUE *argv, VALUE self)
 }
 
 VALUE
-MREventSetValueFromPointSetAndTrackInfo(MDPointSet *pset, MDTrack *track, void *myDocument, int isEndOfTrackSelected)
+MREventSetValueFromIntGroupAndTrackInfo(IntGroup *pset, MDTrack *track, void *myDocument, int isEndOfTrackSelected)
 {
 	VALUE val, tval;
-	MDPointSet *pset2;
+	IntGroup *pset2;
 	MyDocument *doc = (MyDocument *)myDocument;
 	tval = MRTrackValueFromTrackInfo(track, doc, -1);
 	val = MRPointSet_Alloc(rb_cMREventSet);
 	s_MREventSet_Initialize(1, &tval, val);
-	pset2 = MDPointSetFromValue(val);
-	MDPointSetCopy(pset2, pset);
+	pset2 = IntGroupFromValue(val);
+	IntGroupCopy(pset2, pset);
 	if (isEndOfTrackSelected)
 		rb_ivar_set(val, s_ID_eot_selected, Qtrue);
 	return val;
@@ -632,11 +632,11 @@ static VALUE
 s_MREventSet_Each(VALUE self)
 {
 	MDPointer *pt;
-	MDPointSet *pset;
-	long idx;
+	IntGroup *pset;
+	int idx;
 	VALUE pval = s_MREventSet_Pointer(self);
 	pt = MDPointerFromMRPointerValue(pval);
-	pset = MDPointSetFromValue(self);
+	pset = IntGroupFromValue(self);
 	idx = -1;
 	while (MDPointerForwardWithPointSet(pt, pset, &idx) != NULL) {
 		rb_yield(pval);
@@ -655,12 +655,12 @@ static VALUE
 s_MREventSet_ReverseEach(VALUE self)
 {
 	MDPointer *pt;
-	MDPointSet *pset;
-	long idx;
+	IntGroup *pset;
+	int idx;
 	VALUE pval = s_MREventSet_Pointer(self);
 	pt = MDPointerFromMRPointerValue(pval);
 	MDPointerSetPosition(pt, kMDMaxPosition);
-	pset = MDPointSetFromValue(self);
+	pset = IntGroupFromValue(self);
 	idx = -1;
 	while (MDPointerBackwardWithPointSet(pt, pset, &idx) != NULL) {
 		rb_yield(pval);
@@ -679,12 +679,12 @@ static VALUE
 s_MREventSet_EachWithIndex(VALUE self)
 {
 	MDPointer *pt;
-	MDPointSet *pset;
-	long idx;
+	IntGroup *pset;
+	int idx;
 	int n;
 	VALUE pval = s_MREventSet_Pointer(self);
 	pt = MDPointerFromMRPointerValue(pval);
-	pset = MDPointSetFromValue(self);
+	pset = IntGroupFromValue(self);
 	idx = -1;
 	n = 0;
 	while (MDPointerForwardWithPointSet(pt, pset, &idx) != NULL) {
@@ -705,15 +705,15 @@ static VALUE
 s_MREventSet_ReverseEachWithIndex(VALUE self)
 {
 	MDPointer *pt;
-	MDPointSet *pset;
-	long idx;
+	IntGroup *pset;
+	int idx;
 	int n;
 	VALUE pval = s_MREventSet_Pointer(self);
 	pt = MDPointerFromMRPointerValue(pval);
 	MDPointerSetPosition(pt, kMDMaxPosition);
-	pset = MDPointSetFromValue(self);
+	pset = IntGroupFromValue(self);
 	idx = -1;
-	n = MDPointSetGetCount(pset) - 1;
+	n = IntGroupGetCount(pset) - 1;
 	while (MDPointerBackwardWithPointSet(pt, pset, &idx) != NULL) {
 		rb_yield_values(2, pval, NUM2INT(n));
 		n--;
@@ -727,30 +727,30 @@ s_MREventSet_Select_sub(VALUE self, int reject)
 	const MyDocumentTrackInfo *ip;
 	VALUE tval, pval;
 	MDPointer *pt;
-	MDPointSet *pset, *pset2;
-	long idx;
+	IntGroup *pset, *pset2;
+	int idx;
 	tval = rb_ivar_get(self, s_ID_track);
 	if (tval == Qnil)
 		rb_raise(rb_eStandardError, "Track is not given");
 	ip = TrackInfoFromMRTrackValue(tval);
 	pval = MRPointerValueFromTrackInfo(ip->track, ip->doc, ip->num, -1);
 	pt = MDPointerFromMRPointerValue(pval);
-	pset = MDPointSetFromValue(self);
-	pset2 = MDPointSetNew();
+	pset = IntGroupFromValue(self);
+	pset2 = IntGroupNew();
 	idx = -1;
 	while (MDPointerForwardWithPointSet(pt, pset, &idx) != NULL) {
 		if (RTEST(rb_yield(pval)))
-			MDPointSetAdd(pset2, MDPointerGetPosition(pt), 1);
+			IntGroupAdd(pset2, MDPointerGetPosition(pt), 1);
 	}
 	if (reject) {
-		MDPointSetRemovePointSet(pset, pset2);
-		if (MDPointSetGetCount(pset2) == 0)
+		IntGroupRemoveIntGroup(pset, pset2);
+		if (IntGroupGetCount(pset2) == 0)
 			tval = Qnil;
 		else tval = self;
 	} else {
-		tval = MREventSetValueFromPointSetAndTrackInfo(pset2, ip->track, ip->doc, 0);
+		tval = MREventSetValueFromIntGroupAndTrackInfo(pset2, ip->track, ip->doc, 0);
 	}
-	MDPointSetRelease(pset2);
+	IntGroupRelease(pset2);
 	return tval;
 }
 
@@ -797,8 +797,8 @@ s_MREventSet_ModifyTick(int argc, VALUE *argv, VALUE self)
 {
 	const MyDocumentTrackInfo *ip;
 	VALUE tval, nval;
-	MDPointSet *pset;
-	MDPointSetObject *psobj;
+	IntGroup *pset;
+	IntGroupObject *psobj;
 	id theData;
 	int n1, n2;
 	MDTickType *tickp;
@@ -806,17 +806,17 @@ s_MREventSet_ModifyTick(int argc, VALUE *argv, VALUE self)
 	if (tval == Qnil)
 		rb_raise(rb_eStandardError, "Track is not given");
 	ip = TrackInfoFromMRTrackValue(tval);
-	pset = MDPointSetFromValue(self);
-	n2 = MDPointSetGetCount(pset);
+	pset = IntGroupFromValue(self);
+	n2 = IntGroupGetCount(pset);
 	if (n2 == 0)
 		return self;
-	psobj = [[[MDPointSetObject alloc] initWithMDPointSet: pset] autorelease];
+	psobj = [[[IntGroupObject alloc] initWithMDPointSet: pset] autorelease];
 	rb_scan_args(argc, argv, "01", &nval);
 	if (nval == Qnil) {
 		/*  The new tick values are given by the block  */
 		VALUE pval = MRPointerValueFromTrackInfo(ip->track, ip->doc, ip->num, -1);
 		MDPointer *pt = MDPointerFromMRPointerValue(pval);
-		long idx = -1;
+		int idx = -1;
 		n1 = 0;
 		theData = [NSMutableData dataWithLength: sizeof(MDTickType) * n2];
 		tickp = (MDTickType *)[theData mutableBytes];		
@@ -869,8 +869,8 @@ s_MREventSet_ModifyCode(int argc, VALUE *argv, VALUE self)
 	const MyDocumentTrackInfo *ip;
 	VALUE tval, nval;
 	int n1, n2;
-	MDPointSetObject *psobj;
-	MDPointSet *pset;
+	IntGroupObject *psobj;
+	IntGroup *pset;
 	id theData;
 	short *shortp;
 	VALUE *nvalp;
@@ -879,15 +879,15 @@ s_MREventSet_ModifyCode(int argc, VALUE *argv, VALUE self)
 		rb_raise(rb_eStandardError, "Track is not given");
 	ip = TrackInfoFromMRTrackValue(tval);
 	rb_scan_args(argc, argv, "01", &nval);
-	pset = MDPointSetFromValue(self);
-	n2 = MDPointSetGetCount(pset);
+	pset = IntGroupFromValue(self);
+	n2 = IntGroupGetCount(pset);
 	if (n2 == 0)
 		return self;
-	psobj = [[[MDPointSetObject alloc] initWithMDPointSet: pset] autorelease];
+	psobj = [[[IntGroupObject alloc] initWithMDPointSet: pset] autorelease];
 	if (nval == Qnil) {
 		VALUE pval = MRPointerValueFromTrackInfo(ip->track, ip->doc, ip->num, -1);
 		MDPointer *pt = MDPointerFromMRPointerValue(pval);
-		long idx = -1;
+		int idx = -1;
 		n1 = 0;
 		theData = [NSMutableData dataWithLength: sizeof(short) * n2];
 		shortp = (short *)[theData mutableBytes];		
@@ -928,25 +928,25 @@ s_MREventSet_ModifyDataSub(int argc, VALUE *argv, VALUE self, int kind)
 	const MyDocumentTrackInfo *ip;
 	VALUE tval, nval, pval;
 	int i, n1, n2, n3;
-	MDPointSetObject *psobj;
-	MDPointSet *pset;
+	IntGroupObject *psobj;
+	IntGroup *pset;
 	id theData;
 	float *floatp;
 	VALUE *nvalp;
 	MDPointer *pt;
 	MDEvent *ep;
-	long idx;
+	int idx;
 
 	tval = rb_ivar_get(self, s_ID_track);
 	if (tval == Qnil)
 		rb_raise(rb_eStandardError, "Track is not given");
 	ip = TrackInfoFromMRTrackValue(tval);
 	rb_scan_args(argc, argv, "01", &nval);
-	pset = MDPointSetFromValue(self);
-	n2 = MDPointSetGetCount(pset);
+	pset = IntGroupFromValue(self);
+	n2 = IntGroupGetCount(pset);
 	if (n2 == 0)
 		return self;
-	psobj = [[[MDPointSetObject alloc] initWithMDPointSet: pset] autorelease];
+	psobj = [[[IntGroupObject alloc] initWithMDPointSet: pset] autorelease];
 	
 	pval = MRPointerValueFromTrackInfo(ip->track, ip->doc, ip->num, -1);
 	pt = MDPointerFromMRPointerValue(pval);
@@ -1117,8 +1117,8 @@ s_MREventSet_ModifyDuration(int argc, VALUE *argv, VALUE self)
 	const MyDocumentTrackInfo *ip;
 	VALUE tval, nval;
 	int n1, n2;
-	MDPointSetObject *psobj;
-	MDPointSet *pset;
+	IntGroupObject *psobj;
+	IntGroup *pset;
 	id theData;
 	MDTickType *tickp;
 	VALUE *nvalp;
@@ -1127,15 +1127,15 @@ s_MREventSet_ModifyDuration(int argc, VALUE *argv, VALUE self)
 		rb_raise(rb_eStandardError, "Track is not given");
 	ip = TrackInfoFromMRTrackValue(tval);
 	rb_scan_args(argc, argv, "01", &nval);
-	pset = MDPointSetFromValue(self);
-	n2 = MDPointSetGetCount(pset);
+	pset = IntGroupFromValue(self);
+	n2 = IntGroupGetCount(pset);
 	if (n2 == 0)
 		return self;
-	psobj = [[[MDPointSetObject alloc] initWithMDPointSet: pset] autorelease];
+	psobj = [[[IntGroupObject alloc] initWithMDPointSet: pset] autorelease];
 	if (nval == Qnil) {
 		VALUE pval = MRPointerValueFromTrackInfo(ip->track, ip->doc, ip->num, -1);
 		MDPointer *pt = MDPointerFromMRPointerValue(pval);
-		long idx = -1;
+		int idx = -1;
 		n1 = 0;
 		theData = [NSMutableData dataWithLength: sizeof(MDTickType) * n2];
 		tickp = (MDTickType *)[theData mutableBytes];		
@@ -1176,43 +1176,43 @@ void
 MREventSetInitClass(void)
 {	
 	/*  class MRPointSet  */
-	rb_cMRPointSet = rb_define_class("PointSet", rb_cObject);
-	rb_include_module(rb_cMRPointSet, rb_mEnumerable);
-	rb_define_alloc_func(rb_cMRPointSet, MRPointSet_Alloc);
-	rb_define_method(rb_cMRPointSet, "clear", s_MRPointSet_Clear, 0);
-	rb_define_method(rb_cMRPointSet, "initialize", s_MRPointSet_Initialize, -1);
-	rb_define_method(rb_cMRPointSet, "initialize_copy", s_MRPointSet_InitializeCopy, 1);
-	rb_define_method(rb_cMRPointSet, "length", s_MRPointSet_Length, 0);
-	rb_define_alias(rb_cMRPointSet, "size", "length");
-	rb_define_method(rb_cMRPointSet, "member?", s_MRPointSet_MemberP, 1);
-	rb_define_alias(rb_cMRPointSet, "include?", "member?");
-	rb_define_method(rb_cMRPointSet, "each", s_MRPointSet_Each, 0);
-	rb_define_method(rb_cMRPointSet, "[]", s_MRPointSet_ElementAtIndex, 1);
-	rb_define_method(rb_cMRPointSet, "add", s_MRPointSet_Add, 1);
-	rb_define_alias(rb_cMRPointSet, "<<", "add");
-	rb_define_method(rb_cMRPointSet, "delete", s_MRPointSet_Delete, 1);
-	rb_define_method(rb_cMRPointSet, "reverse", s_MRPointSet_Reverse, 1);
-	rb_define_method(rb_cMRPointSet, "merge", s_MRPointSet_Add, 1);
-	rb_define_method(rb_cMRPointSet, "subtract", s_MRPointSet_Delete, 1);
-	rb_define_method(rb_cMRPointSet, "union", s_MRPointSet_Union, 1);
-	rb_define_method(rb_cMRPointSet, "difference", s_MRPointSet_Difference, 1);
-	rb_define_method(rb_cMRPointSet, "intersection", s_MRPointSet_Intersection, 1);
-	rb_define_method(rb_cMRPointSet, "sym_difference", s_MRPointSet_SymDifference, 1);
-	rb_define_method(rb_cMRPointSet, "convolute", s_MRPointSet_Convolute, 1);
-	rb_define_method(rb_cMRPointSet, "deconvolute", s_MRPointSet_Deconvolute, 1);
-	rb_define_method(rb_cMRPointSet, "offset", s_MRPointSet_Offset, 1);
-	rb_define_alias(rb_cMRPointSet, "+", "union");
-	rb_define_alias(rb_cMRPointSet, "|", "union");
-	rb_define_alias(rb_cMRPointSet, "-", "difference");
-	rb_define_alias(rb_cMRPointSet, "&", "intersection");
-	rb_define_alias(rb_cMRPointSet, "^", "sym_difference");
-	rb_define_method(rb_cMRPointSet, "range_at", s_MRPointSet_RangeAt, 1);
-	rb_define_method(rb_cMRPointSet, "inspect", s_MRPointSet_Inspect, 0);
-	rb_define_alias(rb_cMRPointSet, "to_s", "inspect");
-	rb_define_singleton_method(rb_cMRPointSet, "[]", s_MRPointSet_Create, -1);
+	rb_cIntGroup = rb_define_class("PointSet", rb_cObject);
+	rb_include_module(rb_cIntGroup, rb_mEnumerable);
+	rb_define_alloc_func(rb_cIntGroup, MRPointSet_Alloc);
+	rb_define_method(rb_cIntGroup, "clear", s_MRPointSet_Clear, 0);
+	rb_define_method(rb_cIntGroup, "initialize", s_MRPointSet_Initialize, -1);
+	rb_define_method(rb_cIntGroup, "initialize_copy", s_MRPointSet_InitializeCopy, 1);
+	rb_define_method(rb_cIntGroup, "length", s_MRPointSet_Length, 0);
+	rb_define_alias(rb_cIntGroup, "size", "length");
+	rb_define_method(rb_cIntGroup, "member?", s_MRPointSet_MemberP, 1);
+	rb_define_alias(rb_cIntGroup, "include?", "member?");
+	rb_define_method(rb_cIntGroup, "each", s_MRPointSet_Each, 0);
+	rb_define_method(rb_cIntGroup, "[]", s_MRPointSet_ElementAtIndex, 1);
+	rb_define_method(rb_cIntGroup, "add", s_MRPointSet_Add, 1);
+	rb_define_alias(rb_cIntGroup, "<<", "add");
+	rb_define_method(rb_cIntGroup, "delete", s_MRPointSet_Delete, 1);
+	rb_define_method(rb_cIntGroup, "reverse", s_MRPointSet_Reverse, 1);
+	rb_define_method(rb_cIntGroup, "merge", s_MRPointSet_Add, 1);
+	rb_define_method(rb_cIntGroup, "subtract", s_MRPointSet_Delete, 1);
+	rb_define_method(rb_cIntGroup, "union", s_MRPointSet_Union, 1);
+	rb_define_method(rb_cIntGroup, "difference", s_MRPointSet_Difference, 1);
+	rb_define_method(rb_cIntGroup, "intersection", s_MRPointSet_Intersection, 1);
+	rb_define_method(rb_cIntGroup, "sym_difference", s_MRPointSet_SymDifference, 1);
+	rb_define_method(rb_cIntGroup, "convolute", s_MRPointSet_Convolute, 1);
+	rb_define_method(rb_cIntGroup, "deconvolute", s_MRPointSet_Deconvolute, 1);
+	rb_define_method(rb_cIntGroup, "offset", s_MRPointSet_Offset, 1);
+	rb_define_alias(rb_cIntGroup, "+", "union");
+	rb_define_alias(rb_cIntGroup, "|", "union");
+	rb_define_alias(rb_cIntGroup, "-", "difference");
+	rb_define_alias(rb_cIntGroup, "&", "intersection");
+	rb_define_alias(rb_cIntGroup, "^", "sym_difference");
+	rb_define_method(rb_cIntGroup, "range_at", s_MRPointSet_RangeAt, 1);
+	rb_define_method(rb_cIntGroup, "inspect", s_MRPointSet_Inspect, 0);
+	rb_define_alias(rb_cIntGroup, "to_s", "inspect");
+	rb_define_singleton_method(rb_cIntGroup, "[]", s_MRPointSet_Create, -1);
 
 	/*  Class MREventSet: it is an MREventSet with an associated Track  */
-	rb_cMREventSet = rb_define_class("EventSet", rb_cMRPointSet);
+	rb_cMREventSet = rb_define_class("EventSet", rb_cIntGroup);
 	rb_define_method(rb_cMREventSet, "initialize", s_MREventSet_Initialize, -1);
 	rb_define_method(rb_cMREventSet, "track", MREventSet_Track, 0);
 	rb_define_method(rb_cMREventSet, "eot_selected", MREventSet_EOTSelected, 0);

@@ -169,6 +169,12 @@ VALUE cMRDialog = Qfalse;
 
 #pragma mark ====== Plain C Interface ======
 
+RubyValue
+RubyDialogCallback_parentModule(void)
+{
+	return RubyFalse;
+}
+
 RubyDialog *
 RubyDialogCallback_new(int style)
 {
@@ -607,8 +613,8 @@ RubyDialogCallback_createItem(RubyDialog *dref, const char *type, const char *ti
 		itemView = view;
 
 	if ([itemView respondsToSelector: @selector(setAction:)]) {
-		[itemView setAction: @selector(dialogItemAction:)];
-		[itemView setTarget: cont];
+		[(id)itemView setAction: @selector(dialogItemAction:)];
+		[(id)itemView setTarget: cont];
 	}
 	
 	if (gRubyDialogIsFlipped) {
@@ -795,7 +801,7 @@ RubyDialogCallback_setFontForItem(RDItem *item, int size, int family, int style,
 		itemView = [(NSScrollView *)itemView documentView];
 	if (![itemView respondsToSelector:@selector(font)])
 		return;
-	font = [itemView font];
+	font = [(id)itemView font];
 	desc = [font fontDescriptor];
 	if (size != 0)
 		desc = [desc fontDescriptorWithSize:size];
@@ -812,7 +818,7 @@ RubyDialogCallback_setFontForItem(RDItem *item, int size, int family, int style,
 	if (mask != 0)
 		desc = [desc fontDescriptorWithSymbolicTraits:mask];
 	font = [NSFont fontWithDescriptor:desc size:0];  //  Setting size here does not work.
-	[itemView setFont:font];
+	[(id)itemView setFont:font];
 }
 
 int
@@ -833,7 +839,7 @@ RubyDialogCallback_getFontForItem(RDItem *item, int *size, int *family, int *sty
 	
 	if (![itemView respondsToSelector:@selector(font)])
 		return 0;
-	font = [itemView font];
+	font = [(id)itemView font];
 	desc = [font fontDescriptor];
 	symbolicTrait = [desc symbolicTraits];
 	
@@ -868,7 +874,7 @@ RubyDialogCallback_setForegroundColorForItem(RDItem *item, const double *col)
 		itemView = [(NSScrollView *)itemView documentView];
 	if ([itemView respondsToSelector:@selector(setTextColor:)]) {
 		NSColor *color = [NSColor colorWithDeviceRed:col[0] green:col[1] blue:col[2] alpha:col[3]];		
-		[itemView setTextColor:color];
+		[(id)itemView setTextColor:color];
 	}
 }
 
@@ -880,7 +886,7 @@ RubyDialogCallback_setBackgroundColorForItem(RDItem *item, const double *col)
 		itemView = [(NSScrollView *)itemView documentView];
 	if ([itemView respondsToSelector:@selector(setBackgroundColor:)]) {
 		NSColor *color = [NSColor colorWithDeviceRed:col[0] green:col[1] blue:col[2] alpha:col[3]];		
-		[itemView setBackgroundColor:color];
+		[(id)itemView setBackgroundColor:color];
 	}
 }
 
@@ -925,12 +931,12 @@ RubyDialogCallback_appendString(RDItem *item, const char *str)
 	if ([itemView isKindOfClass:[NSScrollView class]])
 		itemView = [(NSScrollView *)itemView documentView];
 	if ([itemView respondsToSelector:@selector(textStorage)]) {
-		NSTextStorage *st = [itemView textStorage];
+		NSTextStorage *st = [(id)itemView textStorage];
 		[st replaceCharactersInRange:NSMakeRange([st length], 0) withString:[NSString stringWithUTF8String:str]];
 		return 1;
 	} else if ([itemView respondsToSelector:@selector(setStringValue:)]) {
-		NSString *st = [itemView stringValue];
-		[itemView setStringValue:[st stringByAppendingFormat:@"%s", str]];
+		NSString *st = [(id)itemView stringValue];
+		[(id)itemView setStringValue:[st stringByAppendingFormat:@"%s", str]];
 		return 1;
 	}
 	return 0;
@@ -1057,7 +1063,7 @@ RubyDialogCallback_sizeOfString(RDItem *item, const char *s)
 	if ([itemView isKindOfClass:[NSScrollView class]])
 		itemView = [(NSScrollView *)itemView documentView];
 	if ([itemView respondsToSelector: @selector(font)]) {
-		NSFont *font = [itemView font];
+		NSFont *font = [(id)itemView font];
 		NSString *str = [NSString stringWithUTF8String: s];
 		NSDictionary *attr = [NSDictionary dictionaryWithObjectsAndKeys: font, NSFontAttributeName, nil];
 		NSSize size = [str sizeWithAttributes: attr];
@@ -1119,13 +1125,30 @@ RubyDialogCallback_isTableRowSelected(RDItem *item, int row)
 	} else return 0;
 }
 
+IntGroup *
+RubyDialogCallback_selectedTableRows(RDItem *item)
+{
+	if ([(NSView *)item isKindOfClass:[NSTableView class]]) {
+		NSIndexSet *iset = [(NSTableView *)item selectedRowIndexes];
+		unsigned int buf[20];
+		int i, n;
+		IntGroup *ig = IntGroupNew();
+		NSRange range = NSMakeRange(0, 10000000);
+		while ((n = [iset getIndexes:buf maxCount:20 inIndexRange:&range]) > 0) {
+			for (i = 0; i < n; i++)
+				IntGroupAdd(ig, buf[i], 1);
+		}
+		return ig;
+	} else return NULL;
+}
+
 char
-RubyDialogCallback_setSelectedTableRow(RDItem *item, struct MDPointSet *rg, int extend)
+RubyDialogCallback_setSelectedTableRows(RDItem *item, struct IntGroup *rg, int extend)
 {
 	if ([(NSView *)item isKindOfClass:[NSTableView class]]) {
 		NSMutableIndexSet *iset = [NSMutableIndexSet indexSet];
 		int i, n;
-		for (i = 0; (n = MDPointSetGetNthPoint(rg, i)) >= 0; i++)
+		for (i = 0; (n = IntGroupGetNthPoint(rg, i)) >= 0; i++)
 			[iset addIndex: i];
 		[(NSTableView *)item selectRowIndexes:iset byExtendingSelection:extend];
 		return 1;

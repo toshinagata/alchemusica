@@ -437,12 +437,12 @@ getYValue(const MDEvent *ep, int eventKind)
 	maxY = -10000000.0;
 	ppt = [dataSource pixelsPerTick];
 	for (i = 0; (n = [dataSource sortedTrackNumberAtIndex: i]) >= 0; i++) {
-		long index;
+		int index;
 		MDPointer *pt;
 		MDEvent *ep;
 		float y;
 		MDTrack *track = [[document myMIDISequence] getTrackAtIndex: n];
-		MDPointSet *pset = [[document selectionOfTrack: n] pointSet];
+		IntGroup *pset = [[document selectionOfTrack: n] pointSet];
 		if (track == NULL || pset == NULL)
 			continue;
 		pt = MDPointerNew(track);
@@ -909,13 +909,13 @@ cubicReverseFunc(float x, const float *points, float tt)
 		if (MDTrackGetNumberOfEvents([trackObj track]) == 0)
 			return;
 		for (i = 0; (n = [dataSource sortedTrackNumberAtIndex: i]) >= 0; i++) {
-			MDPointSet *insertedPositionSet;
+			IntGroup *insertedPositionSet;
 			if (eventKind == kMDEventTempo && n != 0)
 				continue;
 			if (eventKind != kMDEventTempo && n == 0)
 				continue;
 			if ([dataSource isFocusTrack: n]) {
-				MDPointSetObject *psetObj = [doc eventSetInTrack: n eventKind: eventKind eventCode: eventCode fromTick: fromTick toTick: toTick fromData: kMDMinData toData: kMDMaxData inPointSet: nil];
+				IntGroupObject *psetObj = [doc eventSetInTrack: n eventKind: eventKind eventCode: eventCode fromTick: fromTick toTick: toTick fromData: kMDMinData toData: kMDMaxData inPointSet: nil];
 				[doc deleteMultipleEventsAt: psetObj fromTrack: n deletedEvents: NULL];
 				if ([doc insertMultipleEvents: trackObj at: nil toTrack: n selectInsertedEvents: YES insertedPositions: &insertedPositionSet] && insertedPositionSet != NULL) {
 					if (!shiftFlag) {
@@ -932,8 +932,9 @@ cubicReverseFunc(float x, const float *points, float tt)
 			MDEvent *ep;
 			MDTrack *track;
 			MDSelectionObject *psetObj;
-			MDPointSet *pset;
-			long idx, count, j;
+			IntGroup *pset;
+			int idx;
+			long count, j;
 			NSMutableData *theData;
 			float *fp;
 			float x, y, t, v, v0;
@@ -950,7 +951,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 			if (psetObj == nil)
 				continue;
 			pset = [psetObj pointSet];
-			count = MDPointSetGetCount(pset);
+			count = IntGroupGetCount(pset);
 			if (count == 0)
 				continue;
 			theData = [NSMutableData dataWithLength: count * sizeof(float)];
@@ -1223,7 +1224,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 		MDTrack *track;
 		MDPointer *pt;
 		MDEvent *ep;
-		MDPointSet *pset;
+		IntGroup *pset;
 		MDSelectionObject *obj;
 		if (![dataSource isFocusTrack: trackNo])
 			continue;
@@ -1233,7 +1234,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 		pt = MDPointerNew(track);
 		if (pt == NULL)
 			break;
-		pset = MDPointSetNew();
+		pset = IntGroupNew();
 		if (pset == NULL)
 			break;
 		MDPointerJumpToTick(pt, minTick);
@@ -1249,7 +1250,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 		//	point.x = floor(MDGetTick(ep) * ppt);
 		//	point.y = floor(MDGetCode(ep) * ys + 0.5) + 0.5 * ys;
 			if ([self isPointInSelectRegion: point]) {
-				if (MDPointSetAdd(pset, MDPointerGetPosition(pt), 1) != kMDNoError)
+				if (IntGroupAdd(pset, MDPointerGetPosition(pt), 1) != kMDNoError)
 					break;
 			}
 		}
@@ -1260,7 +1261,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 			[document setSelection: obj inTrack: trackNo sender: self];
 		}
 		[obj release];
-		MDPointSetRelease(pset);
+		IntGroupRelease(pset);
 		MDPointerRelease(pt);
 	}
 }

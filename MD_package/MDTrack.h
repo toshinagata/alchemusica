@@ -41,8 +41,8 @@ enum {
 #include "MDEvent.h"
 #endif
 
-#ifndef __MDPointSet__
-#include "MDPointSet.h"
+#ifndef __IntGroup_h__
+#include "IntGroup.h"
 #endif
 
 #ifdef __cplusplus
@@ -98,19 +98,19 @@ void	MDTrackSetDuration(MDTrack *inTrack, MDTickType inDuration);
 long	MDTrackAppendEvents(MDTrack *inTrack, const MDEvent *inEvent, long count);
 
 /*  ２つのトラックをマージする（inTrack1 の中に inTrack2 のイベントを挿入する）。
-    ioSet は NULL ならば無視される。ioSet != NULL で *ioSet == NULL なら、新しく MDPointSet を
+    ioSet は NULL ならば無視される。ioSet != NULL で *ioSet == NULL なら、新しく IntGroup を
     アロケートして、マージ後のトラックで inTrack2 由来のイベントが存在する位置の集合を入れて返す。
 	ioSet != NULL で *ioSet != NULL なら、*ioSet がマージ後のトラックで inTrack2 由来のイ
 	ベントが存在する位置の集合になるものと見なして挿入位置を決める（実際には、同ティックのイベントの
 	順序をどちらにするか、という場合にのみ参照される）。処理終了後には、*ioSet == NULL の
-	場合と同じく新しくアロケートされた MDPointSet が返される。もとの *ioSet は release されない。 */
-MDStatus	MDTrackMerge(MDTrack *inTrack1, const MDTrack *inTrack2, MDPointSet **ioSet);
+	場合と同じく新しくアロケートされた IntGroup が返される。もとの *ioSet は release されない。 */
+MDStatus	MDTrackMerge(MDTrack *inTrack1, const MDTrack *inTrack2, IntGroup **ioSet);
 
 /*  MDTrackMerge の逆操作。inTrack の中から、位置が inSet に含まれるイベントをすべて抜き出して
     新しいトラックに入れ、*outTrack に入れて返す。outTrack が NULL なら抜き出されたイベントは捨てられる。 */
-MDStatus	MDTrackUnmerge(MDTrack *inTrack, MDTrack **outTrack, const MDPointSet *inSet);
+MDStatus	MDTrackUnmerge(MDTrack *inTrack, MDTrack **outTrack, const IntGroup *inSet);
 
-MDStatus	MDTrackExtract(MDTrack *inTrack, MDTrack **outTrack, const MDPointSet *inSet);
+MDStatus	MDTrackExtract(MDTrack *inTrack, MDTrack **outTrack, const IntGroup *inSet);
 
 /*  inTrack を MIDI チャンネルで分けて最大16個のトラックにする。最も若い番号の MIDI チャンネルイベントと、チャンネルイベント以外のイベント（Sysex とメタイベント）は inTrack に残る。outTracks は MDTrack * を 16 個格納できる配列であること。対応するチャンネルイベントがない outTracks の要素は NULL になる。NULL でない最初の要素は inTrack に等しい。NULL でない outTracks の要素数を返す。 */
 int         MDTrackSplitByMIDIChannel(MDTrack *inTrack, MDTrack **outTracks);
@@ -131,13 +131,13 @@ MDStatus    MDTrackOffsetTick(MDTrack *inTrack, MDTickType offset);
 MDTickType  MDTrackGetLargestTick(MDTrack *inTrack);
 
 /*  duration を持っているイベントで、tick < inTick かつ tick+duration >= inTick であるものを 
-    探し、その position を MDPointSet として返す。メモリ不足の場合は NULL、該当するイベントが 
-    １つもないときは空の MDPointSet を返す。 */
-MDPointSet *MDTrackSearchEventsWithDurationCrossingTick(MDTrack *inTrack, MDTickType inTick);
+    探し、その position を IntGroup として返す。メモリ不足の場合は NULL、該当するイベントが 
+    １つもないときは空の IntGroup を返す。 */
+IntGroup *MDTrackSearchEventsWithDurationCrossingTick(MDTrack *inTrack, MDTickType inTick);
 
-/*  inSelector が non-zero を返すイベントを探し、その position を MDPointSet として返す。
-    メモリ不足の場合は NULL、該当するイベントが１つもないときは空の MDPointSet を返す。 */
-MDPointSet *MDTrackSearchEventsWithSelector(MDTrack *inTrack, MDEventSelector inSelector, void *inUserData);
+/*  inSelector が non-zero を返すイベントを探し、その position を IntGroup として返す。
+    メモリ不足の場合は NULL、該当するイベントが１つもないときは空の IntGroup を返す。 */
+IntGroup *MDTrackSearchEventsWithSelector(MDTrack *inTrack, MDEventSelector inSelector, void *inUserData);
 
 /*  MIDIチャンネルを置き換える。チャンネルchのイベントはチャンネルnewch[ch]に変更される。変更先のチャンネルが重複していてもチェックされず、そのまま置換が行われる。newch[ch]が15より大きい時は16で割った余りが新しいチャンネルになる。この関数は必ず成功するので、エラーを発生しない。 */
 void		MDTrackRemapChannel(MDTrack *inTrack, const unsigned char *newch);
@@ -256,13 +256,13 @@ MDEvent *		MDPointerForwardWithSelector(MDPointer *inPointer, MDEventSelector in
 MDEvent *		MDPointerBackwardWithSelector(MDPointer *inPointer, MDEventSelector inSelector, void *inUserData);
 
 /*  inPointSet 中の offset 番目の点の位置に移動する  */
-int				MDPointerSetPositionWithPointSet(MDPointer *inPointer, MDPointSet *inPointSet, long offset, long *outIndex);
+int				MDPointerSetPositionWithPointSet(MDPointer *inPointer, IntGroup *inPointSet, long offset, int *outIndex);
 
 /*  現在位置より１つ進み、その点が pointSet の *index 番目の区間の終端より先であれば、次の区間の始点に対応する位置に移動して (*index) を +1 する。index == NULL であるか、または *index < 0 であるなら、pointSet に含まれるところまで現在位置を進め、index != NULL ならば *index にその区間の番号を返す。もし対応する点がなければ、inPointer はトラック末尾+1 の位置になり、*index には -1 が返される。 */
-MDEvent *		MDPointerForwardWithPointSet(MDPointer *inPointer, MDPointSet *inPointSet, long *index);
+MDEvent *		MDPointerForwardWithPointSet(MDPointer *inPointer, IntGroup *inPointSet, int *index);
 
 /*  現在位置から１つ戻り、その点が pointSet の *index 番目の区間の始点より前であれば、前の区間の終点-1に対応する位置に移動して (*index) を -1 する。index == NULL であるか、または *index < 0 であるなら、pointSet に含まれるところまで現在位置を戻し、index != NULL ならば *index にその区間の番号を返す。もし対応する点がなければ、inPointer はトラック先頭-1 の位置になり、*index には -1 が返される。 */
-MDEvent *		MDPointerBackwardWithPointSet(MDPointer *inPointer, MDPointSet *inPointSet, long *index);
+MDEvent *		MDPointerBackwardWithPointSet(MDPointer *inPointer, IntGroup *inPointSet, int *index);
 
 /*  現在位置にイベントを１つ挿入する。tick が現在位置と合わない場合には、合う位置を探す。 */
 MDStatus		MDPointerInsertAnEvent(MDPointer *inPointer, const MDEvent *inEvent);

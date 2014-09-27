@@ -231,13 +231,13 @@ typedef struct TimeScalingRecord {
 		int n = MDTrackGetNumberOfEvents(track) - timeScaling->startPos[i];  /*  Number of events  */
 		MDPointer *pt = MDPointerNew(track);
 		MDEvent *ep;
-		MDPointSetObject *psobj = nil;
+		IntGroupObject *psobj = nil;
 		NSMutableData *dt = nil;
 		MDTickType *mutableBytes = NULL;
 		MDPointerSetPosition(pt, timeScaling->startPos[i]);
 		if (undoEnabled && n > 0) {
-			psobj = [[MDPointSetObject allocWithZone:[self zone]] init];
-			MDPointSetAdd([psobj pointSet], timeScaling->startPos[i], n);
+			psobj = [[IntGroupObject allocWithZone:[self zone]] init];
+			IntGroupAdd([psobj pointSet], timeScaling->startPos[i], n);
 			dt = [[NSMutableData allocWithZone:[self zone]] initWithLength:sizeof(MDTickType) * n];
 			mutableBytes = (MDTickType *)[dt mutableBytes];
 		}
@@ -463,7 +463,7 @@ typedef struct TimeScalingRecord {
 		for (i = 0; (trackNo = [dataSource sortedTrackNumberAtIndex: i]) >= 0; i++) {
 			MDTrack *track;
 			MDPointer *pt;
-			MDPointSet *pset;
+			IntGroup *pset;
 			MDSelectionObject *obj;
 			long pos1, pos2;
 			if (![dataSource isFocusTrack: trackNo])
@@ -474,7 +474,7 @@ typedef struct TimeScalingRecord {
 			pt = MDPointerNew(track);
 			if (pt == NULL)
 				break;
-			pset = MDPointSetNew();
+			pset = IntGroupNew();
 			if (pset == NULL)
 				break;
 			MDPointerJumpToTick(pt, tick1);
@@ -482,7 +482,7 @@ typedef struct TimeScalingRecord {
 			MDPointerJumpToTick(pt, tick2);
 			pos2 = MDPointerGetPosition(pt);
 			if (pos1 < pos2) {
-				if (MDPointSetAdd(pset, pos1, pos2 - pos1) != kMDNoError)
+				if (IntGroupAdd(pset, pos1, pos2 - pos1) != kMDNoError)
 					break;
 				obj = [[MDSelectionObject allocWithZone: [self zone]] initWithMDPointSet: pset];
 				if (shiftDown) {
@@ -492,7 +492,7 @@ typedef struct TimeScalingRecord {
 				}
 				[obj release];
 			}
-			MDPointSetRelease(pset);
+			IntGroupRelease(pset);
 			MDPointerRelease(pt);
 		}
 	}

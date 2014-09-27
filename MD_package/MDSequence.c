@@ -478,7 +478,7 @@ MDSequenceSingleChannelMode(MDSequence *inSequence, int separate)
 		for (n = inSequence->num - 1; n >= 0; n--) {
 			MDTrack *track, *ntrack[16];
 			MDPointer *pt;
-			MDPointSet *pset;
+			IntGroup *pset;
 			int nnch, i;
 			track = MDSequenceGetTrack(inSequence, n);
 			nnch = 0;
@@ -494,7 +494,7 @@ MDSequenceSingleChannelMode(MDSequence *inSequence, int separate)
 			if (ntrack[0] == NULL)
 				return kMDErrorOutOfMemory;
 			pt = MDPointerNew(ntrack[0]);
-			pset = MDPointSetNew();
+			pset = IntGroupNew();
 			if (pt == NULL || pset == NULL)
 				return kMDErrorOutOfMemory;
 			for (i = 15; i >= 1; i--) {
@@ -502,10 +502,10 @@ MDSequenceSingleChannelMode(MDSequence *inSequence, int separate)
 				if (nch[i] == 0)
 					continue;
 				MDPointerSetPosition(pt, -1);
-				MDPointSetClear(pset);
+				IntGroupClear(pset);
 				while ((ep = MDPointerForward(pt)) != NULL) {
 					if (MDIsChannelEvent(ep) && MDGetChannel(ep) == i) {
-						sts = MDPointSetAdd(pset, MDPointerGetPosition(pt), 1);
+						sts = IntGroupAdd(pset, MDPointerGetPosition(pt), 1);
 						if (sts != kMDNoError)
 							break;
 					}
@@ -518,7 +518,7 @@ MDSequenceSingleChannelMode(MDSequence *inSequence, int separate)
 						break;
 				} else break;
 			}
-			MDPointSetRelease(pset);
+			IntGroupRelease(pset);
 			MDPointerRelease(pt);
 			if (sts == kMDNoError) {
 				for (i = 15; i >= 0; i--) {

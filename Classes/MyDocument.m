@@ -649,7 +649,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 			dictionaryWithObjectsAndKeys: [NSNumber numberWithFloat: beat], @"position", nil]];
 }
 
-//- (void)postSelectionDidChangeNotification: (long)trackNo selectionChange: (MDPointSetObject *)set sender: (id)sender
+//- (void)postSelectionDidChangeNotification: (long)trackNo selectionChange: (IntGroupObject *)set sender: (id)sender
 //{
 //	[[NSNotificationCenter defaultCenter]
 //		postNotificationName:MyDocumentSelectionDidChangeNotification
@@ -1088,21 +1088,21 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 			if (sts == kMDNoError) {
 
 				/*  Update selection  */
-				MDPointSet *temp1 = MDPointSetNew();
-				MDPointSet *temp2 = MDPointSetNew();
+				IntGroup *temp1 = IntGroupNew();
+				IntGroup *temp2 = IntGroupNew();
 				if (temp1 == NULL || temp2 == NULL)
 					return NO;
-				sts = MDPointSetAdd(temp1, position, 1);
+				sts = IntGroupAdd(temp1, position, 1);
 				if (sts == kMDNoError)
-					sts = MDPointSetNegate(temp1, temp2);
+					sts = IntGroupNegate(temp1, temp2);
 				if (sts == kMDNoError) {
-					MDPointSetClear(temp1);
-					sts = MDPointSetConvolute([(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet], temp2, temp1);
+					IntGroupClear(temp1);
+					sts = IntGroupConvolute([(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet], temp2, temp1);
 				}
 				if (sts == kMDNoError)
 					[self setSelection: [[[MDSelectionObject allocWithZone: [self zone]] initWithMDPointSet: temp1] autorelease] inTrack: trackNo sender: self];
-				MDPointSetRelease(temp1);
-				MDPointSetRelease(temp2);
+				IntGroupRelease(temp1);
+				IntGroupRelease(temp2);
 
 				/*  Register undo action for change of track duration (if necessary)  */
 				[self registerUndoChangeTrackDuration: oduration ofTrack: trackNo];
@@ -1137,21 +1137,21 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 			if (sts == kMDNoError) {
 
 				/*  Update selection  */
-				MDPointSet *temp1 = MDPointSetNew();
-				MDPointSet *temp2 = MDPointSetNew();
+				IntGroup *temp1 = IntGroupNew();
+				IntGroup *temp2 = IntGroupNew();
 				if (temp1 == NULL || temp2 == NULL)
 					return NO;
-				sts = MDPointSetAdd(temp1, position, 1);
+				sts = IntGroupAdd(temp1, position, 1);
 				if (sts == kMDNoError)
-					sts = MDPointSetNegate(temp1, temp2);
+					sts = IntGroupNegate(temp1, temp2);
 				if (sts == kMDNoError) {
-					MDPointSetClear(temp1);
-					sts = MDPointSetDeconvolute([(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet], temp2, temp1);
+					IntGroupClear(temp1);
+					sts = IntGroupDeconvolute([(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet], temp2, temp1);
 				}
 				if (sts == kMDNoError)
 					[self setSelection: [[[MDSelectionObject allocWithZone: [self zone]] initWithMDPointSet: temp1] autorelease] inTrack: trackNo sender: self];
-				MDPointSetRelease(temp1);
-				MDPointSetRelease(temp2);
+				IntGroupRelease(temp1);
+				IntGroupRelease(temp2);
 
 				/*  Register undo action  */
 				[[[self undoManager] prepareWithInvocationTarget: self]
@@ -1187,31 +1187,31 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 
 				if (eventObj->position != orgEventObj->position) {
 					/*  Update selection  */
-					MDPointSet *temp1 = MDPointSetNew();
-					MDPointSet *temp2 = MDPointSetNew();
-					MDPointSet *temp3 = MDPointSetNew();
+					IntGroup *temp1 = IntGroupNew();
+					IntGroup *temp2 = IntGroupNew();
+					IntGroup *temp3 = IntGroupNew();
 					if (temp1 == NULL || temp2 == NULL || temp3 == NULL)
 						return NO;
-					sts = MDPointSetAdd(temp1, eventObj->position, 1);
+					sts = IntGroupAdd(temp1, eventObj->position, 1);
 					if (sts == kMDNoError)
-						sts = MDPointSetNegate(temp1, temp2);
+						sts = IntGroupNegate(temp1, temp2);
 					if (sts == kMDNoError) {
-						MDPointSetClear(temp1);
-						sts = MDPointSetDeconvolute([(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet], temp2, temp1);
+						IntGroupClear(temp1);
+						sts = IntGroupDeconvolute([(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet], temp2, temp1);
 					}
-					MDPointSetClear(temp2);
-					sts = MDPointSetAdd(temp2, orgEventObj->position, 1);
+					IntGroupClear(temp2);
+					sts = IntGroupAdd(temp2, orgEventObj->position, 1);
 					if (sts == kMDNoError)
-						sts = MDPointSetNegate(temp2, temp3);
+						sts = IntGroupNegate(temp2, temp3);
 					if (sts == kMDNoError) {
-						MDPointSetClear(temp2);
-						sts = MDPointSetConvolute(temp1, temp3, temp2);
+						IntGroupClear(temp2);
+						sts = IntGroupConvolute(temp1, temp3, temp2);
 					}
 					if (sts == kMDNoError)
 						[self setSelection: [[[MDSelectionObject allocWithZone: [self zone]] initWithMDPointSet: temp2] autorelease] inTrack: trackNo sender: self];
-					MDPointSetRelease(temp1);
-					MDPointSetRelease(temp2);
-					MDPointSetRelease(temp3);
+					IntGroupRelease(temp1);
+					IntGroupRelease(temp2);
+					IntGroupRelease(temp3);
 				}
 
 				/*  Register undo action for change of track duration (if necessary)  */
@@ -1228,10 +1228,10 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	return NO;			
 }
 
-- (BOOL)insertMultipleEvents: (MDTrackObject *)trackObj at: (MDPointSetObject *)pointSet toTrack: (long)trackNo selectInsertedEvents: (BOOL)flag insertedPositions: (MDPointSet **)outPtr
+- (BOOL)insertMultipleEvents: (MDTrackObject *)trackObj at: (IntGroupObject *)pointSet toTrack: (long)trackNo selectInsertedEvents: (BOOL)flag insertedPositions: (IntGroup **)outPtr
 {
 	MDTrack *track;
-	MDPointSet *pset;
+	IntGroup *pset;
 	MDStatus sts;
 	MDTickType oduration;
 	track = [[self myMIDISequence] getTrackAtIndex: trackNo];
@@ -1253,19 +1253,19 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 		if (flag) {
 			[self setSelection: [[[MDSelectionObject allocWithZone: [self zone]] initWithMDPointSet: pset] autorelease] inTrack: trackNo sender: self];
 		} else {
-			MDPointSet *temp = MDPointSetNew();
-			MDPointSet *newSelection = MDPointSetNew();
+			IntGroup *temp = IntGroupNew();
+			IntGroup *newSelection = IntGroupNew();
 			if (temp == NULL || newSelection == NULL)
 				return NO;
-			sts = MDPointSetNegate(pset, temp);
+			sts = IntGroupNegate(pset, temp);
 			if (sts == kMDNoError)
-				sts = MDPointSetConvolute([(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet], temp, newSelection);
+				sts = IntGroupConvolute([(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet], temp, newSelection);
 			if (sts == kMDNoError)
 				[self setSelection: [[[MDSelectionObject allocWithZone: [self zone]] initWithMDPointSet: newSelection] autorelease] inTrack: trackNo sender: self];
 		}
 		
 		/*  Register undo action for change of track duration (if necessary)  */
-		pointSet = [[[MDPointSetObject allocWithZone: [self zone]] initWithMDPointSet: pset] autorelease];
+		pointSet = [[[IntGroupObject allocWithZone: [self zone]] initWithMDPointSet: pset] autorelease];
 		[self registerUndoChangeTrackDuration: oduration ofTrack: trackNo];
 		/*  Register undo action  */
 		[[[self undoManager] prepareWithInvocationTarget: self]
@@ -1281,11 +1281,11 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	}
 }
 
-- (BOOL)deleteMultipleEventsAt: (MDPointSetObject *)pointSet fromTrack: (long)trackNo deletedEvents: (MDTrack **)outPtr
+- (BOOL)deleteMultipleEventsAt: (IntGroupObject *)pointSet fromTrack: (long)trackNo deletedEvents: (MDTrack **)outPtr
 {
 	MDTrack *track, *newTrack;
 	MDTrackObject *trackObj;
-    MDPointSet *pset;
+    IntGroup *pset;
 	MDStatus sts;
 	MDTickType oduration;
 	track = [[self myMIDISequence] getTrackAtIndex: trackNo];
@@ -1300,14 +1300,14 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 		return NO;
 	if (sts == kMDNoError) {
         /*  Update selection  */
-		MDPointSet *newSelection = MDPointSetNew();
+		IntGroup *newSelection = IntGroupNew();
 		if (0) {
-			MDPointSet *temp = MDPointSetNew();
+			IntGroup *temp = IntGroupNew();
 			if (temp == NULL || newSelection == NULL)
 				return NO;
-			sts = MDPointSetNegate(pset, temp);
+			sts = IntGroupNegate(pset, temp);
 			if (sts == kMDNoError)
-				sts = MDPointSetDeconvolute([(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet], temp, newSelection);
+				sts = IntGroupDeconvolute([(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet], temp, newSelection);
 		}
 		if (sts == kMDNoError)
 			[self setSelection: [[[MDSelectionObject allocWithZone: [self zone]] initWithMDPointSet: newSelection] autorelease] inTrack: trackNo sender: self];
@@ -1332,12 +1332,12 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	return NO;
 }
 
-- (BOOL)duplicateMultipleEventsAt: (MDPointSetObject *)pointSet ofTrack: (long)trackNo selectInsertedEvents: (BOOL)flag
+- (BOOL)duplicateMultipleEventsAt: (IntGroupObject *)pointSet ofTrack: (long)trackNo selectInsertedEvents: (BOOL)flag
 {
 	MDTrack *track, *newTrack;
 	MDTrackObject *newTrackObj;
 	MDPointer *pt;
-    MDPointSet *pset;
+    IntGroup *pset;
 	MDEvent *ep;
 //	MDStatus sts;
 	track = [[self myMIDISequence] getTrackAtIndex: trackNo];
@@ -1385,7 +1385,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	else return 1;
 }
 
-- (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (MDPointSetObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions
+- (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions
 {
 	MDTrack *track = [[self myMIDISequence] getTrackAtIndex: trackNo];
     if (track == NULL)
@@ -1395,12 +1395,12 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 }
 
 /*  Implemented as a class method, because in some cases it is necessary to perform this operation for non-document tracks. */
-+ (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (MDPointSetObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (id)doc mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions
++ (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (id)doc mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions
 {
     MDTrack *tempTrack;
 	long trackNo;
     MDEvent *ep;
-    MDPointSet *pset, *destPset;
+    IntGroup *pset, *destPset;
     MDSelectionObject *newDestPointSet;
     long index, length;
     MDTickType dataValue;
@@ -1425,7 +1425,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     pset = [pointSet pointSet];
     if (pset == NULL)
         return NO;
-    length = MDPointSetGetCount(pset);
+    length = IntGroupGetCount(pset);
 	if (destPositions == nil)
 		destPositionsPtr = NULL;
 	else destPositionsPtr = (const long *)[destPositions bytes];
@@ -1503,8 +1503,8 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	{
 		long i, pt, endPt;
 		index = 0;
-		for (i = 0; (pt = MDPointSetGetStartPoint(pset, i)) >= 0; i++) {
-			endPt = MDPointSetGetEndPoint(pset, i);
+		for (i = 0; (pt = IntGroupGetStartPoint(pset, i)) >= 0; i++) {
+			endPt = IntGroupGetEndPoint(pset, i);
 			while (pt < endPt) {
 				undoPositionsPtr[index++] = pt++;
 			}
@@ -1567,9 +1567,9 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	if (destPositionsPtr == NULL)
 		destPset = NULL;
 	else {
-		destPset = MDPointSetNew();
+		destPset = IntGroupNew();
 		for (index = 0; index < length; index++)
-			MDPointSetAdd(destPset, destPositionsPtr[index], 1);
+			IntGroupAdd(destPset, destPositionsPtr[index], 1);
 	}
 
 	/*  Merge the modified events back to the target track  */
@@ -1606,12 +1606,12 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 		[doc enqueueTrackModifiedNotification: trackNo];
 	}
 	
-	MDPointSetRelease(destPset);
+	IntGroupRelease(destPset);
 
     return YES;
 }
 
-- (BOOL)modifyCodes: (id)theData ofMultipleEventsAt: (MDPointSetObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode
+- (BOOL)modifyCodes: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode
 {
 	MDTrack *track = [[self myMIDISequence] getTrackAtIndex: trackNo];
     if (track == NULL)
@@ -1620,13 +1620,14 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	return [MyDocument modifyCodes: theData ofMultipleEventsAt: pointSet forMDTrack: track inDocument: self mode: mode];
 }
 
-+ (BOOL)modifyCodes: (id)theData ofMultipleEventsAt: (MDPointSetObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (MyDocument *)doc mode: (MyDocumentModifyMode)mode
++ (BOOL)modifyCodes: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (MyDocument *)doc mode: (MyDocumentModifyMode)mode
 {
 	long trackNo;
     MDPointer *ptr;
     MDEvent *ep;
-    MDPointSet *pset;
-    long index, psetIndex, length;
+    IntGroup *pset;
+    long index, length;
+	int psetIndex;
     short dataValue, oldValue, newValue;
     short *dataPtr;
     float floatDataValue;
@@ -1644,7 +1645,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     pset = [pointSet pointSet];
     if (pset == NULL)
         return NO;
-    length = MDPointSetGetCount(pset);
+    length = IntGroupGetCount(pset);
     if ([theData isKindOfClass: [NSNumber class]]) {
         dataMode = 0;
         if (mode == MyDocumentModifyMultiply) {
@@ -1717,7 +1718,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     return YES;
 }
 
-- (BOOL)modifyDurations: (id)theData ofMultipleEventsAt: (MDPointSetObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode
+- (BOOL)modifyDurations: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode
 {
 	MDTrack *track = [[self myMIDISequence] getTrackAtIndex: trackNo];
     if (track == NULL)
@@ -1726,13 +1727,14 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	return [MyDocument modifyDurations: theData ofMultipleEventsAt: pointSet forMDTrack: track inDocument: self mode: mode];
 }
 
-+ (BOOL)modifyDurations: (id)theData ofMultipleEventsAt: (MDPointSetObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (MyDocument *)doc mode: (MyDocumentModifyMode)mode
++ (BOOL)modifyDurations: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (MyDocument *)doc mode: (MyDocumentModifyMode)mode
 {
 	long trackNo;
     MDPointer *ptr;
     MDEvent *ep;
-    MDPointSet *pset;
-    long index, psetIndex, length;
+    IntGroup *pset;
+    long index, length;
+	int psetIndex;
     MDTickType dataValue, oldValue, newValue;
     MDTickType *dataPtr;
     MDTickType maxTick;
@@ -1754,7 +1756,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     pset = [pointSet pointSet];
     if (pset == NULL)
         return NO;
-    length = MDPointSetGetCount(pset);
+    length = IntGroupGetCount(pset);
     if ([theData isKindOfClass: [NSNumber class]]) {
         dataMode = 0;
         if (mode == MyDocumentModifyMultiply) {
@@ -1840,7 +1842,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     return YES;
 }
 
-- (BOOL)modifyData: (id)theData forEventKind: (unsigned char)eventKind ofMultipleEventsAt: (MDPointSetObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode
+- (BOOL)modifyData: (id)theData forEventKind: (unsigned char)eventKind ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode
 {
 	MDTrack *track = [[self myMIDISequence] getTrackAtIndex: trackNo];
     if (track == NULL)
@@ -1849,13 +1851,14 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	return [MyDocument modifyData: theData forEventKind: eventKind ofMultipleEventsAt: pointSet forMDTrack: track inDocument: self mode: mode];
 }
 
-+ (BOOL)modifyData: (id)theData forEventKind: (unsigned char)eventKind ofMultipleEventsAt: (MDPointSetObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (MyDocument *)doc mode: (MyDocumentModifyMode)mode
++ (BOOL)modifyData: (id)theData forEventKind: (unsigned char)eventKind ofMultipleEventsAt: (IntGroupObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (MyDocument *)doc mode: (MyDocumentModifyMode)mode
 {
 	long trackNo;
     MDPointer *ptr;
     MDEvent *ep;
-    MDPointSet *pset;
-    long index, psetIndex, length;
+    IntGroup *pset;
+    long index, length;
+	int psetIndex;
     float dataValue, oldValue, newValue;
     float dataMin, dataMax;
     short *dataPtr;
@@ -1875,7 +1878,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     pset = [pointSet pointSet];
     if (pset == NULL)
         return NO;
-    length = MDPointSetGetCount(pset);
+    length = IntGroupGetCount(pset);
     if ([theData isKindOfClass: [NSNumber class]]) {
         dataMode = 0;
         dataValue = [theData floatValue];
@@ -2302,12 +2305,12 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	[selections replaceObjectAtIndex: trackNo withObject: set];
 	[self enqueueSelectionUndoerWithKey: [NSNumber numberWithInt: (int)trackNo] value: oldSet];
 	return YES;
-/*    MDStatus sts = MDPointSetXor([oldSet pointSet], [set pointSet], [diffSet pointSet]);
+/*    MDStatus sts = IntGroupXor([oldSet pointSet], [set pointSet], [diffSet pointSet]);
     if (sts == kMDNoError) {
         [selections replaceObjectAtIndex: trackNo withObject: set];
 #if DEBUG
         if (gMDVerbose > 0)
-            MDPointSetDump([set pointSet]);
+            IntGroupDump([set pointSet]);
 #endif
 		[self setNeedsUpdateEditingRange: YES];
         [self postSelectionDidChangeNotification: trackNo selectionChange: diffSet sender: sender];
@@ -2320,7 +2323,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 {
     MDSelectionObject *newSet = [[[MDSelectionObject allocWithZone: [self zone]] init] autorelease];
     MDSelectionObject *oldSet = (MDSelectionObject *)[[[selections objectAtIndex: trackNo] retain] autorelease];
-    MDStatus sts = MDPointSetXor([oldSet pointSet], [pointSet pointSet], [newSet pointSet]);
+    MDStatus sts = IntGroupXor([oldSet pointSet], [pointSet pointSet], [newSet pointSet]);
     if (sts == kMDNoError) {
         /*  Register undo action  */
    /*     [[[self undoManager] prepareWithInvocationTarget: self]
@@ -2330,7 +2333,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
         /*  For debug  */
 #if DEBUG
         if (gMDVerbose > 0)
-            MDPointSetDump([newSet pointSet]);
+            IntGroupDump([newSet pointSet]);
 #endif
 		[self enqueueSelectionUndoerWithKey: [NSNumber numberWithInt: (int)trackNo] value: oldSet];
 
@@ -2345,9 +2348,9 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 
 - (BOOL)selectEventAtPosition: (long)position inTrack: (long)trackNo sender: (id)sender
 {
-    if (!MDPointSetLookup([(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet], position, NULL)) {
+    if (!IntGroupLookup([(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet], position, NULL)) {
         MDSelectionObject *pointSet = [[[MDSelectionObject allocWithZone: [self zone]] init] autorelease];
-        MDPointSetAdd([pointSet pointSet], position, 1);
+        IntGroupAdd([pointSet pointSet], position, 1);
         [self toggleSelection: pointSet inTrack: trackNo sender: sender];
         return YES;
     } else return NO;
@@ -2355,9 +2358,9 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 
 - (BOOL)unselectEventAtPosition: (long)position inTrack: (long)trackNo sender: (id)sender
 {
-    if (MDPointSetLookup([(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet], position, NULL)) {
+    if (IntGroupLookup([(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet], position, NULL)) {
         MDSelectionObject *pointSet = [[[MDSelectionObject allocWithZone: [self zone]] init] autorelease];
-        MDPointSetAdd([pointSet pointSet], position, 1);
+        IntGroupAdd([pointSet pointSet], position, 1);
         [self toggleSelection: pointSet inTrack: trackNo sender: sender];
         return YES;
     } else return NO;
@@ -2367,7 +2370,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 {
     MDStatus sts;
     MDSelectionObject *pointSet = [[[MDSelectionObject allocWithZone: [self zone]] init] autorelease];
-    sts = MDPointSetAdd([pointSet pointSet], 0, MDTrackGetNumberOfEvents([[self myMIDISequence] getTrackAtIndex: trackNo]));
+    sts = IntGroupAdd([pointSet pointSet], 0, MDTrackGetNumberOfEvents([[self myMIDISequence] getTrackAtIndex: trackNo]));
     if (sts == kMDNoError) {
         return [self setSelection: pointSet inTrack: trackNo sender: sender];
     } else return NO;
@@ -2377,7 +2380,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 {
 	MDSelectionObject *sel;
 	sel = [self selectionOfTrack: trackNo];
-	if (sel != nil && (MDPointSetGetIntervalCount([sel pointSet]) > 0 || sel->isEndOfTrackSelected)) {
+	if (sel != nil && (IntGroupGetIntervalCount([sel pointSet]) > 0 || sel->isEndOfTrackSelected)) {
 		sel = [[[MDSelectionObject allocWithZone: [self zone]] init] autorelease];
 		return [self setSelection: sel inTrack: trackNo sender: sender];
 	} else return NO;  /* No need to change */
@@ -2392,11 +2395,11 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	return YES;
 }
 
-- (BOOL)addSelection: (MDPointSetObject *)set inTrack: (long)trackNo sender: (id)sender
+- (BOOL)addSelection: (IntGroupObject *)set inTrack: (long)trackNo sender: (id)sender
 {
     MDSelectionObject *pointSet = [[[MDSelectionObject allocWithZone: [self zone]] init] autorelease];
     MDSelectionObject *oldSet = (MDSelectionObject *)[selections objectAtIndex: trackNo];
-    MDStatus sts = MDPointSetUnion([oldSet pointSet], [set pointSet], [pointSet pointSet]);
+    MDStatus sts = IntGroupUnion([oldSet pointSet], [set pointSet], [pointSet pointSet]);
     if (sts == kMDNoError)
         return [self setSelection: pointSet inTrack: trackNo sender: sender];
     else return NO;
@@ -2404,10 +2407,10 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 
 - (BOOL)isSelectedAtPosition: (long)position inTrack: (long)trackNo
 {
-    MDPointSet *selection;
+    IntGroup *selection;
     selection = [(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet];
     if (selection != NULL) {
-        return (MDPointSetLookup(selection, position, NULL) != 0);
+        return (IntGroupLookup(selection, position, NULL) != 0);
     } else return NO;
 }
 
@@ -2416,14 +2419,15 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     return [[(MDSelectionObject *)[selections objectAtIndex: trackNo] retain] autorelease];
 }
 
-- (MDSelectionObject *)eventSetInTrack: (long)trackNo eventKind: (int)eventKind eventCode: (int)eventCode fromTick: (MDTickType)fromTick toTick: (MDTickType)toTick fromData: (float)fromData toData: (float)toData inPointSet: (MDPointSetObject *)pointSet
+- (MDSelectionObject *)eventSetInTrack: (long)trackNo eventKind: (int)eventKind eventCode: (int)eventCode fromTick: (MDTickType)fromTick toTick: (MDTickType)toTick fromData: (float)fromData toData: (float)toData inPointSet: (IntGroupObject *)pointSet
 {
 	MDEvent *ep;
 	MDPointer *pointer = MDPointerNew(MDSequenceGetTrack([[self myMIDISequence] mySequence], trackNo));
-	MDPointSet *pset;
-	MDPointSet *resultSet;
+	IntGroup *pset;
+	IntGroup *resultSet;
 	MDSelectionObject *retObj;
-	long psetIndex, pos;
+	int psetIndex;
+	long pos;
 	int i;
 
 	if (pointer == NULL)
@@ -2438,10 +2442,10 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 		pset = [pointSet pointSet];
 	else pset = NULL;
 	if (pset != NULL) {
-		if (!MDPointSetLookup(pset, pos, &psetIndex)) {
+		if (!IntGroupLookup(pset, pos, &psetIndex)) {
 			//  Move forward until the position is included in pset
 			long pos1;
-			for (i = 0; (pos1 = MDPointSetGetStartPoint(pset, i)) >= 0; i++) {
+			for (i = 0; (pos1 = IntGroupGetStartPoint(pset, i)) >= 0; i++) {
 				if (pos1 >= pos)
 					break;
 			}
@@ -2456,7 +2460,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	}
 	
 	//  Create an empty set
-	resultSet = MDPointSetNew();
+	resultSet = IntGroupNew();
 	if (resultSet == NULL) {
 		MDPointerRelease(pointer);
 		return nil;
@@ -2484,7 +2488,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 			}
 		}
 		if (ok)
-			MDPointSetAdd(resultSet, MDPointerGetPosition(pointer), 1);
+			IntGroupAdd(resultSet, MDPointerGetPosition(pointer), 1);
 		if (pset != NULL)
 			ep = MDPointerForwardWithPointSet(pointer, pset, &psetIndex);
 		else
@@ -2493,7 +2497,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	
 	retObj = [[[MDSelectionObject allocWithZone: [self zone]] initWithMDPointSet: resultSet] autorelease]; 
 	MDPointerRelease(pointer);
-	MDPointSetRelease(resultSet);
+	IntGroupRelease(resultSet);
 	return retObj;
 }
 
@@ -2502,9 +2506,9 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	MDEvent *ep;
 	MDTrack *track = [[self myMIDISequence] getTrackAtIndex: index];
 	MDPointer *pt = MDPointerNew(track);
-	MDPointSet *pset = [sel pointSet];
+	IntGroup *pset = [sel pointSet];
 	long count = 0;
-	long n = -1;
+	int n = -1;
 	while ((ep = MDPointerForwardWithPointSet(pt, pset, &n)) != NULL) {
 		if (!MDIsMetaEvent(ep))
 			count++;
@@ -2522,7 +2526,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 		if (editableOnly && ([self trackAttributeForTrack: i] & kMDTrackAttributeEditable) == 0)
 			continue;
 		selection = (MDSelectionObject *)[selections objectAtIndex: i];
-		if (MDPointSetGetCount([selection pointSet]) > 0)
+		if (IntGroupGetCount([selection pointSet]) > 0)
 			return NO;
 	}
 	return YES;
@@ -2595,8 +2599,8 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 		n1 = MDPointerGetPosition(pt);
 		n2 = MDTrackGetNumberOfEvents(track) - n1;
 		if (n2 > 0) {
-			psobj = [[MDPointSetObject allocWithZone:[self zone]] init];
-			MDPointSetAdd([psobj pointSet], n1, n2);
+			psobj = [[IntGroupObject allocWithZone:[self zone]] init];
+			IntGroupAdd([psobj pointSet], n1, n2);
 			[self modifyTick:[NSNumber numberWithLong:deltaTick] ofMultipleEventsAt:psobj inTrack:trackNo mode:MyDocumentModifyAdd destinationPositions:nil];
 			[psobj release];
 		}
@@ -2644,17 +2648,17 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 		if (MDPointerJumpToTick(pt, startTick) && (n1 = MDPointerGetPosition(pt)) >= 0) {
 			MDPointerJumpToTick(pt, endTick);
 			n2 = MDPointerGetPosition(pt) - n1;
-			psobj = [[MDPointSetObject allocWithZone:[self zone]] init];
+			psobj = [[IntGroupObject allocWithZone:[self zone]] init];
 			if (n2 > 0) {
-				MDPointSetAdd([psobj pointSet], n1, n2);
+				IntGroupAdd([psobj pointSet], n1, n2);
 				[self deleteMultipleEventsAt:psobj fromTrack:trackNo deletedEvents:NULL];
 			}
 			
 			/*  Shift events after endTick  */
 			n2 = MDTrackGetNumberOfEvents(track) - n1;
 			if (n2 > 0) {
-				MDPointSetClear([psobj pointSet]);
-				MDPointSetAdd([psobj pointSet], n1, n2);
+				IntGroupClear([psobj pointSet]);
+				IntGroupAdd([psobj pointSet], n1, n2);
 				[self modifyTick:[NSNumber numberWithLong:-deltaTick] ofMultipleEventsAt:psobj inTrack:trackNo mode:MyDocumentModifyAdd destinationPositions:nil];
 			}
 			[psobj release];
@@ -2724,13 +2728,13 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 		track = [[self myMIDISequence] getTrackAtIndex:0];
 		pt = MDPointerNew(track);
 		MDPointerJumpToTick(pt, startTick);
-		psobj = [[MDPointSetObject allocWithZone:[self zone]] init];
+		psobj = [[IntGroupObject allocWithZone:[self zone]] init];
 		for (ep = MDPointerCurrent(pt); ep != NULL; ep = MDPointerForward(pt)) {
 			if (MDGetTick(ep) >= endTick)
 				break;
 			if (MDGetKind(ep) != kMDEventTempo)
 				continue;
-			MDPointSetAdd([psobj pointSet], MDPointerGetPosition(pt), 1);
+			IntGroupAdd([psobj pointSet], MDPointerGetPosition(pt), 1);
 		}
 		[self modifyData:[NSNumber numberWithDouble:(double)deltaTick/newDuration] forEventKind:kMDEventTempo ofMultipleEventsAt:psobj inTrack:0 mode:MyDocumentModifyMultiply];
 		MDPointerRelease(pt);
@@ -2765,7 +2769,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 			MDTickType *mp;
 			/*  MDSelectionObject is allocated because it will be used also for setting selection */
 			psobj = [[MDSelectionObject allocWithZone:[self zone]] init];
-			MDPointSetAdd([psobj pointSet], n1, n2);
+			IntGroupAdd([psobj pointSet], n1, n2);
 			dt = [[NSMutableData allocWithZone:[self zone]] initWithLength:sizeof(MDTickType) * n2];
 			mp = (MDTickType *)[dt mutableBytes];
 			for (ep = MDPointerCurrent(pt); ep != NULL; ep = MDPointerForward(pt)) {
@@ -2780,8 +2784,8 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 			/*  Select events in the scaled time region  */
 			MDPointerJumpToTick(pt, startTick + newDuration);
 			n2 = MDPointerGetPosition(pt) - n1;
-			MDPointSetClear([psobj pointSet]);
-			MDPointSetAdd([psobj pointSet], n1, n2);
+			IntGroupClear([psobj pointSet]);
+			IntGroupAdd([psobj pointSet], n1, n2);
 			[self setSelection:psobj inTrack:trackNo sender:self];
 			[dt release];
 			[psobj release];
@@ -2835,19 +2839,20 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 		swing = (obj ? [obj floatValue] : 0.5);
 		for (trackNo = [[self myMIDISequence] trackCount] - 1; trackNo >= 1; trackNo--) {
 			MDTickType *tptr;
-			long n1, n2, index;
+			long n1, n2;
+			int index;
 			MDTrack *track;
 			MDTickType baseTick, nextBaseTick;
 			long baseMeasure;
-			MDPointSetObject *psobj;
-			MDPointSet *pset;
+			IntGroupObject *psobj;
+			IntGroup *pset;
 			MDPointer *pt;
 			MDEvent *ep;
 			if (![mainCont isFocusTrack:trackNo])
 				continue;
 			track = [[self myMIDISequence] getTrackAtIndex:trackNo];
 			psobj = [self selectionOfTrack:trackNo];
-			if (psobj == nil || (pset = [psobj pointSet]) == NULL || (n1 = MDPointSetGetCount(pset)) == 0)
+			if (psobj == nil || (pset = [psobj pointSet]) == NULL || (n1 = IntGroupGetCount(pset)) == 0)
 				continue;
 			[dt setLength:sizeof(MDTickType) * n1];
 			tptr = (MDTickType *)[dt mutableBytes];
@@ -2927,7 +2932,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 
 - (BOOL)copyWithSelections: (MDSelectionObject **)selArray rangeStart: (MDTickType)startTick rangeEnd: (MDTickType)endTick
 {
-	MDPointSet **psetArray;
+	IntGroup **psetArray;
 	char *eotSelectFlags;
 	MDCatalog *catalog;
 	MDSelectionObject *sel;
@@ -2940,7 +2945,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	MyMIDISequence *seq = [self myMIDISequence];
 	int numberOfTracks = [seq trackCount];
 
-	psetArray = (MDPointSet **)calloc(sizeof(MDPointSet *), numberOfTracks);
+	psetArray = (IntGroup **)calloc(sizeof(IntGroup *), numberOfTracks);
 	if (psetArray == NULL)
 		return NO;
 	eotSelectFlags = (char *)calloc(sizeof(char), numberOfTracks);
@@ -2957,7 +2962,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 			continue;
 		numberOfSelectedTracks++;
 		if (sel == (MDSelectionObject *)(-1)) {
-			psetArray[i] = (MDPointSet *)(-1);
+			psetArray[i] = (IntGroup *)(-1);
 			eotSelectFlags[i] = 1;
 		} else {
 			psetArray[i] = [sel pointSet];
@@ -2998,11 +3003,11 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 		cat->originalTrackNo = i;
 		track = [seq getTrackAtIndex: i];
 		MDTrackGetName(track, cat->name, sizeof(cat->name));
-		if (psetArray[i] == (MDPointSet *)(-1)) {
+		if (psetArray[i] == (IntGroup *)(-1)) {
 			cat->numEvents = MDTrackGetNumberOfEvents(track);
 			cat->numMIDIEvents = cat->numEvents - MDTrackGetNumberOfNonMIDIEvents(track);
 		} else {
-			cat->numEvents = MDPointSetGetCount(psetArray[i]);
+			cat->numEvents = IntGroupGetCount(psetArray[i]);
 			cat->numMIDIEvents = [self countMIDIEventsForTrack: i inSelection: selArray[i]];
 		}
 		j++;
@@ -3143,17 +3148,17 @@ isConductorEvent(const MDEvent *ep, long position, void *inUserData)
 			return 1;  /*  Try to insert non-MIDI events to the conductor track  */
 	} else {
 		/*  The first target track is the non-conductor track  */
-		MDPointSet *pset;
+		IntGroup *pset;
 		track = MDSequenceGetTrack(seq, 0);
 		pset = MDTrackSearchEventsWithSelector(track, isConductorEvent, NULL);
 		if (pset == NULL)
 			return -1;  /*  Out of memory  */
-		if (MDPointSetGetCount(pset) > 0) {
+		if (IntGroupGetCount(pset) > 0) {
 			/*  The conductor-only events must go into the conductor track  */
 			if (MDTrackUnmerge(track, &conductorTrack, pset) != kMDNoError)
 				return -1;  /*  Out of memory  */
 		}
-		MDPointSetRelease(pset);
+		IntGroupRelease(pset);
 	}
 	
 	/*  Delete existing events in the 'editing range'  */

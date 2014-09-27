@@ -84,12 +84,12 @@
 }
 @end
 
-@implementation MDPointSetObject
+@implementation IntGroupObject
 
 - (id)init
 {
 	self = [super init];
-	pointSet = MDPointSetNew();
+	pointSet = IntGroupNew();
 	if (pointSet == NULL) {
 		[self release];
 		return nil;
@@ -97,21 +97,21 @@
 	return self;
 }
 
-- (id)initWithMDPointSet: (MDPointSet *)inPointSet
+- (id)initWithMDPointSet: (IntGroup *)inPointSet
 {
 	self = [super init];
 	pointSet = inPointSet;
-	MDPointSetRetain(pointSet);
+	IntGroupRetain(pointSet);
 	return self;
 }
 
 - (void)dealloc
 {
-	MDPointSetRelease(pointSet);
+	IntGroupRelease(pointSet);
 	[super dealloc];
 }
 
-- (MDPointSet *)pointSet
+- (IntGroup *)pointSet
 {
     return pointSet;
 }
@@ -130,7 +130,7 @@
 	return self;
 }
 
-- (id)initWithMDPointSet: (MDPointSet *)inPointSet
+- (id)initWithMDPointSet: (IntGroup *)inPointSet
 {
 	self = [super initWithMDPointSet: inPointSet];
 	if (self != nil) {
@@ -144,7 +144,7 @@
 - (BOOL)getStartTick: (MDTickType *)startTickPtr andEndTick: (MDTickType *)endTickPtr withMDTrack: (MDTrack *)inTrack
 {
 	if (startTick < 0 || endTick < 0 || track != inTrack) {
-		long idx = -1;
+		int idx = -1;
 		MDEvent *ep;
 		MDPointer *ptr = MDPointerNew(inTrack);
 		if (ptr == NULL)
