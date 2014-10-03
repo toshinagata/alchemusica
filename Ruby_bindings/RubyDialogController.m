@@ -210,7 +210,7 @@ sResizeSubViews(RubyValue dval, NSView *view, int dx, int dy)
 				frame.size.width += d2;
 				ddx = d2;
 			} else {
-				frame.origin.y += (gRubyDialogIsFlipped ? d1 : d3);
+				frame.origin.y += (gRubyDialogIsFlipped ? d3 : d1);
 				frame.size.height += d2;
 				ddy = d2;
 			}

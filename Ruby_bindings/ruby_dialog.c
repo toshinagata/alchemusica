@@ -16,9 +16,8 @@
 */
 
 #include <ruby.h>
-#include <math.h>
+#include <math.h>   /*  For floor()  */
 #include "ruby_dialog.h"
-#include "IntGroup.h"
 
 static VALUE
 	sTextSymbol, sTextFieldSymbol, sRadioSymbol, sButtonSymbol,
