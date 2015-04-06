@@ -236,21 +236,21 @@ sResizeSubViews(RubyValue dval, NSView *view, int dx, int dy)
 
 - (int)numberOfRowsInTableView:(NSTableView *)aTableView
 {
-	return RubyDialog_GetTableItemCount((RubyValue)dval, (RDItem *)aTableView);
+	return RubyDialog_GetTableItemCount((RubyValue)dval, (RDItem *)[aTableView enclosingScrollView]);
 }
 
 - (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
 {
 	char buf[1024];
 	int column = [[aTableView tableColumns] indexOfObject:aTableColumn];
-	RubyDialog_GetTableItemText((RubyValue)dval, (RDItem *)aTableView, rowIndex, column, buf, sizeof buf);
+	RubyDialog_GetTableItemText((RubyValue)dval, (RDItem *)[aTableView enclosingScrollView], rowIndex, column, buf, sizeof buf);
 	return [NSString stringWithUTF8String:buf];
 }
 
 - (void)tableView:(NSTableView *)aTableView setObjectValue:(id)anObject forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
 {
 	int column = [[aTableView tableColumns] indexOfObject:aTableColumn];
-	RubyDialog_SetTableItemText((RubyValue)dval, (RDItem *)aTableView, rowIndex, column, [anObject UTF8String]);
+	RubyDialog_SetTableItemText((RubyValue)dval, (RDItem *)[aTableView enclosingScrollView], rowIndex, column, [anObject UTF8String]);
 }
 
 @end
@@ -667,8 +667,23 @@ RubyDialogCallback_createItem(RubyDialog *dref, const char *type, const char *ti
 		[bn sizeToFit];
 		view = bn;
 	} else if (strcmp(type, "table") == 0) {
-		/*  TODO implement table  */
-		return NULL;
+		NSTableView *tv;
+		NSScrollView *sv;
+		NSSize contentSize;
+		sv = [[[NSScrollView alloc] initWithFrame: rect] autorelease];
+		[sv setHasVerticalScroller: YES];
+		[sv setHasHorizontalScroller: YES];
+		[sv setAutoresizingMask: NSViewWidthSizable | NSViewHeightSizable];
+		[sv setBorderType: NSBezelBorder];
+		[[sv verticalScroller] setControlSize: NSSmallControlSize];
+		[[sv horizontalScroller] setControlSize: NSSmallControlSize];
+		contentSize = [sv contentSize];		
+		tv = [[[NSTableView alloc] initWithFrame: NSMakeRect(0, 0, contentSize.width, contentSize.height)] autorelease];
+		[tv setDataSource:cont];
+		[tv setDelegate:cont];
+		[sv setDocumentView: tv];
+		view = sv;
+		itemView = tv;
 	} else return NULL;
 	
 	{  /*  Resize the frame rect  */
@@ -1194,11 +1209,15 @@ RubyDialogCallback_resizeToBest(RDItem *item)
 char
 RubyDialogCallback_deleteTableColumn(RDItem *item, int col)
 {
-	if ([(NSView *)item isKindOfClass:[NSTableView class]]) {
-		id column = [(NSTableView *)item tableColumnWithIdentifier:[NSNumber numberWithInt:col]];
-		if (column != nil) {
-			[(NSTableView *)item removeTableColumn:column];
-			return 1;
+	NSView *itemView = (NSView *)item;
+	if ([itemView isKindOfClass:[NSScrollView class]]) {
+		itemView = [(NSScrollView *)itemView documentView];
+		if ([itemView isKindOfClass:[NSTableView class]]) {
+			id column = [(NSTableView *)itemView tableColumnWithIdentifier:[NSNumber numberWithInt:col]];
+			if (column != nil) {
+				[(NSTableView *)itemView removeTableColumn:column];
+				return 1;
+			}
 		}
 	}
 	return 0;
@@ -1207,65 +1226,94 @@ RubyDialogCallback_deleteTableColumn(RDItem *item, int col)
 char
 RubyDialogCallback_insertTableColumn(RDItem *item, int col, const char *heading, int format, int width)
 {
-	if ([(NSView *)item isKindOfClass:[NSTableView class]]) {
-		NSTableColumn *column = [[[NSTableColumn alloc] initWithIdentifier:[NSNumber numberWithInt:col]] autorelease];
-		[[column headerCell] setStringValue:[NSString stringWithUTF8String:heading]];
-		[(NSTableView *)item addTableColumn:column];
-		return 1;
-	} else return 0;
+	NSView *itemView = (NSView *)item;
+	if ([itemView isKindOfClass:[NSScrollView class]]) {
+		itemView = [(NSScrollView *)itemView documentView];
+		if ([itemView isKindOfClass:[NSTableView class]]) {
+			NSTableColumn *column = [[[NSTableColumn alloc] initWithIdentifier:[NSNumber numberWithInt:col]] autorelease];
+			[[column headerCell] setStringValue:[NSString stringWithUTF8String:heading]];
+			[(NSTableView *)itemView addTableColumn:column];
+			return 1;
+		}
+	}
+	return 0;
 }
 
 int
 RubyDialogCallback_countTableColumn(RDItem *item)
 {
-	if ([(NSView *)item isKindOfClass:[NSTableView class]]) {
-		return [(NSTableView *)item numberOfColumns];
-	} else return -1;
+	NSView *itemView = (NSView *)item;
+	if ([itemView isKindOfClass:[NSScrollView class]]) {
+		itemView = [(NSScrollView *)itemView documentView];	
+		if ([itemView isKindOfClass:[NSTableView class]]) {
+			return [(NSTableView *)itemView numberOfColumns];
+		}
+	}
+	return -1;
 }
 
 char
 RubyDialogCallback_isTableRowSelected(RDItem *item, int row)
 {
-	if ([(NSView *)item isKindOfClass:[NSTableView class]]) {
-		return [(NSTableView *)item isRowSelected:row];
-	} else return 0;
+	NSView *itemView = (NSView *)item;
+	if ([itemView isKindOfClass:[NSScrollView class]]) {
+		itemView = [(NSScrollView *)itemView documentView];
+		if ([itemView isKindOfClass:[NSTableView class]]) {
+			return [(NSTableView *)itemView isRowSelected:row];
+		}
+	}
+	return 0;
 }
 
 IntGroup *
 RubyDialogCallback_selectedTableRows(RDItem *item)
 {
-	if ([(NSView *)item isKindOfClass:[NSTableView class]]) {
-		NSIndexSet *iset = [(NSTableView *)item selectedRowIndexes];
-		unsigned int buf[20];
-		int i, n;
-		IntGroup *ig = IntGroupNew();
-		NSRange range = NSMakeRange(0, 10000000);
-		while ((n = [iset getIndexes:buf maxCount:20 inIndexRange:&range]) > 0) {
-			for (i = 0; i < n; i++)
-				IntGroupAdd(ig, buf[i], 1);
+	NSView *itemView = (NSView *)item;
+	if ([itemView isKindOfClass:[NSScrollView class]]) {
+		itemView = [(NSScrollView *)itemView documentView];
+		if ([itemView isKindOfClass:[NSTableView class]]) {
+			NSIndexSet *iset = [(NSTableView *)itemView selectedRowIndexes];
+			unsigned int buf[20];
+			int i, n;
+			IntGroup *ig = IntGroupNew();
+			NSRange range = NSMakeRange(0, 10000000);
+			while ((n = [iset getIndexes:buf maxCount:20 inIndexRange:&range]) > 0) {
+				for (i = 0; i < n; i++)
+					IntGroupAdd(ig, buf[i], 1);
+			}
+			return ig;
 		}
-		return ig;
-	} else return NULL;
+	}
+	return NULL;
 }
 
 char
 RubyDialogCallback_setSelectedTableRows(RDItem *item, struct IntGroup *rg, int extend)
 {
-	if ([(NSView *)item isKindOfClass:[NSTableView class]]) {
-		NSMutableIndexSet *iset = [NSMutableIndexSet indexSet];
-		int i, n;
-		for (i = 0; (n = IntGroupGetNthPoint(rg, i)) >= 0; i++)
-			[iset addIndex: i];
-		[(NSTableView *)item selectRowIndexes:iset byExtendingSelection:extend];
-		return 1;
-	} else return 0;
+	NSView *itemView = (NSView *)item;
+	if ([itemView isKindOfClass:[NSScrollView class]]) {
+		itemView = [(NSScrollView *)itemView documentView];
+		if ([itemView isKindOfClass:[NSTableView class]]) {
+			NSMutableIndexSet *iset = [NSMutableIndexSet indexSet];
+			int i, n;
+			for (i = 0; (n = IntGroupGetNthPoint(rg, i)) >= 0; i++)
+				[iset addIndex: i];
+			[(NSTableView *)itemView selectRowIndexes:iset byExtendingSelection:extend];
+			return 1;
+		}
+	}
+	return 0;
 }
 
 void
 RubyDialogCallback_refreshTable(RDItem *item)
 {
-	if ([(NSView *)item isKindOfClass:[NSTableView class]]) {
-		[(NSTableView *)item reloadData];
+	NSView *itemView = (NSView *)item;
+	if ([itemView isKindOfClass:[NSScrollView class]]) {
+		itemView = [(NSScrollView *)itemView documentView];
+		if ([itemView isKindOfClass:[NSTableView class]]) {
+			[(NSTableView *)itemView reloadData];
+		}
 	}
 }
 
