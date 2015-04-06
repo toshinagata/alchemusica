@@ -336,10 +336,14 @@ int
 RubyDialogCallback_runModal(RubyDialog *dref)
 {
 	RubyDialogController *cont = (RubyDialogController *)dref;
+	int status;
 	if (cont->style & rd_HasCloseBox)
 		return -1;  /*  Cannot run  */
 	[[cont window] makeKeyAndOrderFront: nil];
-	if ([NSApp runModalForWindow: [cont window]] == NSRunStoppedResponse)
+	cont->isModal = YES;
+	status = [NSApp runModalForWindow: [cont window]];
+	cont->isModal = NO;
+	if (status == NSRunStoppedResponse)
 		return 0;  /*  OK  */
 	else return 1;  /*  Cancel  */
 }
@@ -348,6 +352,12 @@ void
 RubyDialogCallback_endModal(RubyDialog *dref, int status)
 {
 	[NSApp stopModalWithCode: (status == 0 ? NSRunStoppedResponse : NSRunAbortedResponse)];
+}
+
+int
+RubyDialogCallback_isModal(RubyDialog *dref)
+{
+	return ((RubyDialogController *)dref)->isModal;
 }
 
 void
@@ -1312,6 +1322,46 @@ RubyDialogCallback_openPanel(const char *title, const char *dirname, const char 
 	} else result = 0;
 	[panel close];
 	return result;
+}
+
+int
+RubyDialogCallback_setSelectionInTextView(RDItem *item, int fromPos, int toPos)
+{
+	NSView *itemView = (NSView *)item;
+	if ([itemView isKindOfClass:[NSScrollView class]]) {
+		itemView = [(NSScrollView *)itemView documentView];
+	} else if ([itemView isKindOfClass:[NSTextField class]]) {
+		itemView = [(id)itemView currentEditor];
+	}
+	if (itemView != nil && [itemView respondsToSelector:@selector(setSelectedRange:)]) {
+		[(id)itemView setSelectedRange:NSMakeRange(fromPos, toPos - fromPos)];
+		return 1;
+	} else return 0;
+}
+
+int
+RubyDialogCallback_getSelectionInTextView(RDItem *item, int *fromPos, int *toPos)
+{
+	NSView *itemView = (NSView *)item;
+	if ([itemView isKindOfClass:[NSScrollView class]]) {
+		itemView = [(NSScrollView *)itemView documentView];
+	} else if ([itemView isKindOfClass:[NSTextField class]]) {
+		itemView = [(id)itemView currentEditor];
+	}
+	if (itemView != nil && [itemView respondsToSelector:@selector(selectedRanges)]) {
+		NSRange range = [[[(id)itemView selectedRanges] objectAtIndex:0] rangeValue];
+		if (fromPos != NULL)
+			*fromPos = range.location;
+		if (toPos != NULL)
+			*toPos = range.location + range.length;
+		return 1;
+	} else {
+		if (fromPos != NULL)
+			*fromPos = -1;
+		if (toPos != NULL)
+			*toPos = -1;
+		return 0;
+	}
 }
 
 #pragma mark ====== Plain C Interface (Device Context) ======

@@ -173,6 +173,9 @@ def scale_selected_time_dialog
   end
 end
 
+#
+#  Not used at present
+#
 def edit_sysex_dialog(track_no, event_no)
   seq = self
   tracks = (0...seq.ntracks).map { |i| seq.track(i).name }
@@ -185,11 +188,48 @@ def edit_sysex_dialog(track_no, event_no)
     data = seq.track(track_no).event(event_no).data
 	sysex_data = ""
 	data.each_with_index { |d, i|
-	  sysex_data += sprintf("%02X", d) + (i % 8 == 7 ? "\n" : " ")
+	  next if i == 0 || i == data.length - 1  #  Remove f0 and f7
+	  sysex_data += sprintf("%02X", d) + (i % 8 == 0 ? "\n" : " ")
 	}
-	sysex_desc = sysex_data
+	sysex_data.strip!
+	sysex_desc = sysex_data.dup
   end
-  hash = Dialog.run("Edit Sysex", "OK", "Cancel", :resizable=>true) {
+  def check_data(data, old_data, pos)
+    data = data.upcase
+	#  Find 'bad character'; if present, remove all bad charaters, and
+	#  set the selection at the position of the first bad character.
+	idx = (data =~ /[^ \n0-9A-F]/)
+	if idx
+	  data.gsub!(/[^ \n0-9A-F]/, "")
+	  pos = idx
+	end
+	#  Insert blanks after every two characters of alphanumeric
+	i = 0
+	x = 0
+	d = data.dup
+	data.each_byte { |n|
+	  if (n >= 48 && n < 58) || (n >= 65 && n < 71)
+	    if i == 2
+		  d[x, 0] = " "
+		  if pos >= x
+		    pos += 1
+		  end
+		  i = 0
+		  x += 1
+		end
+		i += 1
+	  else
+	    i = 0
+	  end
+	  x += 1
+	}
+	return d, pos
+  end
+  def data_to_desc(data)
+    return data
+  end
+  hash = Dialog.run("Edit Sysex: " + seq.name, "OK", "Cancel", :resizable=>true) {
+    old_data = sysex_data
     layout(1,
 	  layout(2,
 	    item(:text, :title=>"Track"),
@@ -197,8 +237,28 @@ def edit_sysex_dialog(track_no, event_no)
 	    item(:text, :title=>"Sysex"),
 		item(:popup, :subitems=>sysex_names, :value=>sysex_idx),
 		:flex=>[0,0,1,1,0,0]),
-	  item(:textview, :value=>sysex_data, :width=>200, :height=>100, :flex=>[0,0,0,0,1,1]),
-	  item(:textview, :value=>sysex_desc, :width=>200, :height=>80, :flex=>[0,1,0,0,1,0]),
+	  layout(1,
+	    layout(1, item(:text, :title=>"F0 ->")),
+	    item(:textview, :value=>sysex_data, :width=>200, :height=>100, :flex=>[0,0,0,0,1,1],
+	      :tag=>"sysex_data",
+	      :action=>lambda { |it|
+		    data = it[:value]
+		    sel = it[:selected_range]
+		    data2, pos = seq.check_data(data, old_data, sel[0])
+		    it[:value] = data2
+		    if pos
+		  	it[:selected_range] = [pos, pos]
+		    else
+		      it[:selected_range] = sel
+		    end
+		    old_data = data2
+		    desc = seq.data_to_desc(data2)
+		    set_value("sysex_desc", desc)
+	      }),
+		  item(:text, :title=>"-> F7", :align=>:right), :padding=>0),
+	  item(:line),
+	  item(:textview, :value=>sysex_desc, :width=>200, :height=>80, :flex=>[0,1,0,0,1,0],
+	    :tag=>"sysex_desc"),
 	  :flex=>[0,0,0,0,1,1])
   }
 end

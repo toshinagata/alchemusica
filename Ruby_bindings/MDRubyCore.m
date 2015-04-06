@@ -26,6 +26,10 @@
 
 #include <pthread.h>  /*  for pthread implementation of interval timer  */
 
+//  Global variables
+int gRubyRunLevel = 0;
+int gRubyIsCheckingInterrupt = 0;
+
 #pragma mark ====== Utility function ======
 
 /*
@@ -79,13 +83,17 @@ Ruby_NewFileStringValue(const char *fstr)
 char *
 Ruby_EncodedStringValuePtr(VALUE *valp)
 {
-	return StringValuePtr(*valp);
+	rb_string_value(valp);
+	*valp = rb_str_encode(*valp, rb_enc_from_encoding(rb_default_external_encoding()), 0, Qnil);
+	return RSTRING_PTR(*valp);
 }
 
 VALUE
 Ruby_NewEncodedStringValue(const char *str, int len)
 {
-	return rb_str_new(str, len);
+	if (len <= 0)
+		len = strlen(str);
+	return rb_enc_str_new(str, len, rb_default_external_encoding());
 }
 
 VALUE
@@ -341,18 +349,22 @@ s_SetIntervalTimer(int n)
 }
 	
 static void
-s_Event_Callback(rb_event_t event, NODE *node, VALUE self, ID rid, VALUE klass)
+s_Event_Callback(rb_event_flag_t evflag, VALUE data, VALUE self, ID mid, VALUE klass)
 {
 	if (s_interrupt_flag != Qfalse) {
 		static unsigned long sLastTime = 0;
 		unsigned long currentTime;
+		int flag;
 		currentTime = sITimerCount;
 		if (currentTime != sLastTime) {
-			if (MyAppCallback_checkInterrupt()) {
+			sLastTime = currentTime;
+			gRubyIsCheckingInterrupt = 1;
+			flag = MyAppCallback_checkInterrupt();
+			gRubyIsCheckingInterrupt = 0;
+			if (flag) {
 				s_SetInterruptFlag(Qnil, Qfalse);
 				rb_interrupt();
 			}
-			sLastTime = currentTime;
 		}
 	}
 }
@@ -669,11 +681,38 @@ s_executeRubyOnDocument(VALUE vinfo)
 RubyValue
 Ruby_evalRubyScriptOnDocument(const char *script, void *doc, int *status)
 {
+	RubyValue retval;
 	RubyArgsRecord rec;
+	VALUE save_interrupt_flag;
+	/*	char *save_ruby_sourcefile;
+	 int save_ruby_sourceline; */
+	if (gRubyIsCheckingInterrupt) {
+		//  TODO: Show alert
+		// MolActionAlertRubyIsRunning();
+		*status = -1;
+		return (RubyValue)Qnil;
+	}
+	gRubyRunLevel++;
 	rec.doc = doc;
 	rec.script = script;
 	rec.type = 0;
-	return (RubyValue)rb_protect(s_executeRubyOnDocument, (VALUE)&rec, status);
+	//  TODO: support fname?
+	// args[2] = (void *)fname;
+	save_interrupt_flag = s_SetInterruptFlag(Qnil, Qtrue);
+	retval = (RubyValue)rb_protect(s_executeRubyOnDocument, (VALUE)&rec, status);
+	if (*status != 0) {
+		/*  Is this 'exit' exception?  */
+		VALUE last_exception = rb_gv_get("$!");
+		if (rb_obj_is_kind_of(last_exception, rb_eSystemExit)) {
+			/*  Capture exit and return the status value  */
+			retval = (RubyValue)rb_funcall(last_exception, rb_intern("status"), 0);
+			*status = 0;
+			rb_set_errinfo(Qnil);
+		}
+	}
+	s_SetInterruptFlag(Qnil, save_interrupt_flag);
+	gRubyRunLevel--;
+	return retval;	
 }
 
 /*  argfmt: characters representing the arguments
@@ -699,14 +738,31 @@ Ruby_callMethodOfDocument(const char *name, void *document, int isSingleton, con
 	return status;
 }
 
-void
-Ruby_showRubyValue(RubyValue value)
+int
+Ruby_showValue(RubyValue value, char **outValueString)
 {
 	VALUE val = (VALUE)value;
-	if (val != Qnil) {
-		val = rb_inspect(val);
-		MyAppCallback_showScriptMessage("%s", StringValuePtr(val));
+	if (gRubyIsCheckingInterrupt) {
+		//  TODO: show error message
+		return 0;
 	}
+	if (val != Qnil) {
+		int status;
+		char *str;
+		gRubyRunLevel++;
+		val = rb_protect(rb_inspect, val, &status);
+		gRubyRunLevel--;
+		if (status != 0)
+			return status;
+		str = StringValuePtr(val);
+		if (outValueString != NULL)
+			*outValueString = strdup(str);
+		MyAppCallback_showScriptMessage("%s", str);
+	} else {
+		if (outValueString != NULL)
+			*outValueString = NULL;
+	}
+	return 0;
 }
 
 void
@@ -717,11 +773,14 @@ Ruby_showError(int status)
 	VALUE val, backtrace;
 	int interrupted = 0;
 	if (status == tag_raise) {
-		if (rb_obj_is_kind_of(ruby_errinfo, rb_eInterrupt)) {
+		VALUE errinfo = rb_errinfo();
+		VALUE eclass = CLASS_OF(errinfo);
+		if (eclass == rb_eInterrupt) {
 			msg = "Interrupt";
 			interrupted = 1;
 		}
 	}
+	gRubyRunLevel++;
 	backtrace = rb_eval_string_protect("$backtrace = $!.backtrace.join(\"\\n\")", &status);
 	if (msg == NULL) {
 		val = rb_eval_string_protect("$!.to_s", &status);
@@ -731,9 +790,8 @@ Ruby_showError(int status)
 	}
 	asprintf(&msg2, "%s\n%s", msg, RSTRING_PTR(backtrace));
 	MyAppCallback_messageBox(msg2, (interrupted == 0 ? "Ruby script error" : "Ruby script interrupted"), 0, 3);
-	MyAppCallback_setConsoleColor(4);
-	MyAppCallback_showScriptMessage(msg2);
 	free(msg2);
+	gRubyRunLevel--;
 }
 
 void
@@ -761,7 +819,7 @@ Ruby_startup(void)
 	rb_gv_set("$stderr", val);
 	
 	/*  Register interrupt check code  */
-	rb_add_event_hook(s_Event_Callback, RUBY_EVENT_ALL);
+	rb_add_event_hook(s_Event_Callback, RUBY_EVENT_ALL, Qnil);
 	
 	/*  Start interval timer  */
 	s_SetIntervalTimer(0);

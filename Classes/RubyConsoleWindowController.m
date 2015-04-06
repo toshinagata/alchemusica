@@ -167,8 +167,16 @@ static RubyConsoleWindowController *shared;
 	if (status != 0)
 		Ruby_showError(status);
 	else {
+		char *valueString;
 		[self appendMessage: @"-->"];
-		Ruby_showRubyValue(val);
+		status = Ruby_showValue(val, &valueString);
+		if (status != 0) {
+			Ruby_showError(status);
+		} else {
+			AssignArray(&valueHistory, &nValueHistory, sizeof(char *), nValueHistory, &valueString);
+			if (nValueHistory >= MAX_HISTORY_LINES)
+				DeleteArray(&valueHistory, &nValueHistory, sizeof(char *), 0, 1, NULL);
+		}
 	}
 	[defaultColor release];
 	defaultColor = nil;

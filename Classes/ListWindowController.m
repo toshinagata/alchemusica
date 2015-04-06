@@ -756,7 +756,12 @@ row:(int)rowIndex
 				}
 			} else if ([@"data" isEqualToString: identifier]) {
 				code = MDEventDataStringToEvent(ep, buf, &ed);
-				if (code == kMDEventFieldBinaryData) {
+				if (code == kMDEventFieldInvalid) {
+					char *msg;
+					asprintf(&msg, "%.*s<?>%s", buf, (int)ed.longValue, buf + ed.longValue);
+					[[NSAlert alertWithMessageText: @"Bad Event Data" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@"The data string cannot be converted to an event data: %s", msg] runModal];
+					free(msg);
+				} else if (code == kMDEventFieldBinaryData) {
 					NSData *data;
 					if (ed.binaryData != NULL)
 						data = [NSData dataWithBytes: ed.binaryData + sizeof(long) length: *((long *)ed.binaryData)];
@@ -870,13 +875,13 @@ row:(int)rowIndex
 		int count = [self eventPositionForTableRow:row];
 		if (ep == NULL)
 			return NO;
-		if (MDGetKind(ep) == kMDEventSysex) {
+	/*	if (MDGetKind(ep) == kMDEventSysex) {
 			//  Special editing feature
 			int n = Ruby_callMethodOfDocument("edit_sysex_dialog", [self document], 0, "ii", (int)myTrackNumber, count);
 			if (n != 0)
 				Ruby_showError(n);
 			return NO;
-		}
+		} */
 	}
 	return YES;
 }

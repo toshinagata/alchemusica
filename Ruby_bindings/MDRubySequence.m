@@ -407,6 +407,58 @@ s_MRSequence_DeleteTrack(VALUE self, VALUE nval)
 
 /*
  *  call-seq:
+ *     sequence.name -> String
+ *
+ *  Get the name of the sequence.
+ */
+static VALUE
+s_MRSequence_Name(VALUE self)
+{
+	int n;
+	MyDocument *doc = MyDocumentFromMRSequenceValue(self);
+	NSString *name = [doc tuneName];
+	return rb_str_new2([name UTF8String]);
+}
+
+/*
+ *  call-seq:
+ *     sequence.path -> String
+ *
+ *  Get the path of the sequence, if it is associated with a file.
+ */
+static VALUE
+s_MRSequence_Path(VALUE self)
+{
+	int n;
+	MyDocument *doc = MyDocumentFromMRSequenceValue(self);
+	NSURL *url = [doc fileURL];
+	NSString *path;
+	if (url != nil && (path = [url path]) != nil)
+		return rb_str_new2([path UTF8String]);
+	else return Qnil;
+}
+
+/*
+ *  call-seq:
+ *     sequence.dir -> String
+ *
+ *  Get the directory of the sequence, if it is associated with a file.
+ */
+static VALUE
+s_MRSequence_Dir(VALUE self)
+{
+	int n;
+	MyDocument *doc = MyDocumentFromMRSequenceValue(self);
+	NSURL *url = [doc fileURL];
+	NSString *path;
+	if (url != nil && (path = [url path]) != nil) {
+		path = [path stringByDeletingLastPathComponent];
+		return rb_str_new2([path UTF8String]);
+	} else return Qnil;
+}
+
+/*
+ *  call-seq:
  *     Sequence.current
  *
  *  Get the sequence corresponding to the current document.
@@ -693,6 +745,10 @@ MRSequenceInitClass(void)
 	rb_define_method(rb_cMRSequence, "each_selected_track", s_MRSequence_EachSelectedTrack, 0);
 	rb_define_method(rb_cMRSequence, "insert_track", s_MRSequence_InsertTrack, -1);
 	rb_define_method(rb_cMRSequence, "delete_track", s_MRSequence_DeleteTrack, 1);
+	rb_define_method(rb_cMRSequence, "name", s_MRSequence_Name, 0);
+	rb_define_method(rb_cMRSequence, "path", s_MRSequence_Path, 0);
+	rb_define_method(rb_cMRSequence, "dir", s_MRSequence_Dir, 0);
+	
 /*    rb_define_method(rb_cMRSequence, "pointer", s_MRSequence_Pointer, 1); */
     rb_define_singleton_method(rb_cMRSequence, "current", MRSequence_Current, 0);
 

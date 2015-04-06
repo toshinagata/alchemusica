@@ -21,6 +21,8 @@
 #include "MDHeaders.h"
 
 #include <ruby.h>
+#include "ruby/version.h"  /*  for RUBY_BIRTH_YEAR etc.  */
+#include "ruby/encoding.h" /*  for rb_str_encode() etc. */
 
 #ifndef RSTRING_PTR
 #define RSTRING_PTR(_s) (RSTRING(_s)->ptr)

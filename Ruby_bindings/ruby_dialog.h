@@ -99,6 +99,7 @@ STUB void RubyDialogCallback_release(RubyDialog *dref);
 STUB void RubyDialogCallback_setRubyObject(RubyDialog *dref, RubyValue val);
 STUB void RubyDialogCallback_setWindowTitle(RubyDialog *dref, const char *title);
 STUB int RubyDialogCallback_runModal(RubyDialog *dref);
+STUB int RubyDialogCallback_isModal(RubyDialog *dref);
 STUB void RubyDialogCallback_endModal(RubyDialog *dref, int status);
 STUB void RubyDialogCallback_destroy(RubyDialog *dref);
 STUB void RubyDialogCallback_close(RubyDialog *dref);
@@ -175,6 +176,9 @@ STUB void RubyDialogCallback_refreshTable(RDItem *item);
 
 STUB int RubyDialogCallback_savePanel(const char *title, const char *dirname, const char *wildcard, char *buf, int bufsize);
 STUB int RubyDialogCallback_openPanel(const char *title, const char *dirname, const char *wildcard, char ***array, int for_directories, int multiple_selection);
+
+STUB int RubyDialogCallback_setSelectionInTextView(RDItem *item, int fromPos, int toPos);
+STUB int RubyDialogCallback_getSelectionInTextView(RDItem *item, int *fromPos, int *toPos);
 
 STUB RDDeviceContext *RubyDialogCallback_getDeviceContextForRubyDialog(RubyDialog *dref);
 STUB void RubyDialogCallback_clear(RDDeviceContext *dc);

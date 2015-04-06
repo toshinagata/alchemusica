@@ -925,31 +925,44 @@ MDEventDataStringToEvent(const MDEvent *epin, const char *buf, MDEventFieldData 
 		case kMDEventMetaMessage:
 		case kMDEventSysex:
 		case kMDEventSysexCont:
-			ptr = (unsigned char *)buf;		/*  keep the start pointer (for Pass 1) */
-			for (d1 = 0; d1 < 2; d1++) {
-				/*  Pass 1: get the length, Pass 2: set the message  */
-				n = 0;
-				while (*buf != 0) {
-					while (isspace(*buf))
-						buf++;
-					if (sscanf(buf, "%x%n", &d2, &d3) == 1) {
-						buf += d3;	/*  Next position  */
-						if (d1 == 1)
-							ptr[n] = d2;
-						n++;
-					} else break;
-				}
-				if (d1 == 0) {
-					buf = (const char *)ptr;	/*  restore  */
-					ptr = (unsigned char *)malloc(n + sizeof(long));
-					if (ptr == NULL)
-						return kMDEventFieldNone;
-					*((long *)ptr) = n;
-					epout->binaryData = ptr;
-					ptr += sizeof(long);
+			d0 = 16;
+			epout->binaryData = (unsigned char *)malloc(d0);
+			ptr = (unsigned char *)buf;  /*  Save the initial pointer  */
+			d1 = sizeof(long);
+			while (*buf != 0) {
+				while (*buf != 0 && isspace(*buf))
+					buf++;
+				if (*buf == 0)
+					break;
+				if (*buf == 'c' && buf[1] == 's') {
+					/*  Roland check-sum  */
+					d2 = 0;
+					for (d3 = 5 + sizeof(long); d3 < d1; d3++)
+						d2 += epout->binaryData[d3];
+					d2 = (0x80 - (d2 & 0x7f)) & 0x7f;
+					buf += 2;
+				} else if (sscanf(buf, "%2x%n", &d2, &d3) == 1) {
+					buf += d3;  /*  Next position  */
+				} else if (*buf == '#') {
+					buf++;
+					if (sscanf(buf, "%d%n", &d2, &d3) == 1) {
+						buf += d3;
+					} else goto bad_sysex;
+				} else goto bad_sysex;
+				epout->binaryData[d1] = d2;
+				d1++;
+				if (d1 == d0) {
+					d0 *= 2;
+					epout->binaryData = (unsigned char *)realloc(epout->binaryData, d0);
 				}
 			}
+			*((long *)(epout->binaryData)) = d1 - sizeof(long);
 			return kMDEventFieldBinaryData;
+		bad_sysex:
+			free(epout->binaryData);
+			epout->longValue = (long)(buf - (char *)ptr);
+			return kMDEventFieldInvalid;
+		
 		case kMDEventNote:
 			d0 = sscanf(buf, "%d / %d", &d1, &d2);
 			if (d0 >= 1) {

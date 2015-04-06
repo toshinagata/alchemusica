@@ -32,6 +32,7 @@
 	BOOL onKeyHandlerEnabled;
 	BOOL autoResizeEnabled;
 	NSSize mySize;
+	BOOL isModal;
 }
 - (void)dialogItemAction: (id)sender;
 - (void)setRubyObject: (RubyValue)val;

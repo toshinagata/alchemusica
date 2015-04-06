@@ -346,7 +346,8 @@ enum {
 	kMDEventFieldMetaData,
 	kMDEventFieldTempo,
 	kMDEventFieldBinaryData,		/* Meta event/sysex data (including text)  */
-	kMDEventFieldPointer
+	kMDEventFieldPointer,
+	kMDEventFieldInvalid
 };
 
 typedef long MDEventFieldDataWhole; /*  MDEventFieldData と少なくとも同じサイズの整数型  */

@@ -1127,16 +1127,20 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
-				GCC_VERSION = 4.0;
-				HEADER_SEARCH_PATHS = "$HOME/Development/ruby-1.8.7-static";
+				GCC_VERSION = 4.2;
+				HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/../ruby-2.0.0-p353",
+					"$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/include/ruby-2.0.0",
+					"$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/include/ruby-2.0.0/universal-darwin10.8.0",
+				);
 				INFOPLIST_FILE = "Alchemusica-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = "$HOME/Development/ruby-1.8.7-static";
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/lib";
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				OTHER_LDFLAGS = "-lruby-static";
 				PREBINDING = NO;
 				PRODUCT_NAME = Alchemusica;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
@@ -1155,15 +1159,20 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
-				GCC_VERSION = 4.0;
-				HEADER_SEARCH_PATHS = "$HOME/Development/ruby-1.8.7-static";
+				GCC_VERSION = 4.2;
+				HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/../ruby-2.0.0-p353",
+					"$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/include/ruby-2.0.0",
+					"$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/include/ruby-2.0.0/universal-darwin10.8.0",
+				);
 				INFOPLIST_FILE = "Alchemusica-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = "$HOME/Development/ruby-1.8.7-static";
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/lib";
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				OTHER_LDFLAGS = "-lruby-static";
 				PREBINDING = NO;
 				PRODUCT_NAME = Alchemusica;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
@@ -1183,15 +1192,20 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
-				GCC_VERSION = 4.0;
-				HEADER_SEARCH_PATHS = "$HOME/Development/ruby-1.8.7-static";
+				GCC_VERSION = 4.2;
+				HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/../ruby-2.0.0-p353",
+					"$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/include/ruby-2.0.0",
+					"$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/include/ruby-2.0.0/universal-darwin10.8.0",
+				);
 				INFOPLIST_FILE = "Alchemusica-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = "$HOME/Development/ruby-1.8.7-static";
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/lib";
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				OTHER_LDFLAGS = "-lruby-static";
 				PREBINDING = NO;
 				PRODUCT_NAME = Alchemusica;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",

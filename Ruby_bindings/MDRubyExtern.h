@@ -34,13 +34,16 @@ typedef void *RubyValue;
 #define RubyFalse (RubyValue)0
 #endif
 
+extern int gRubyRunLevel;
+extern int gRubyIsCheckingInterrupt;
+
 extern void Ruby_startup(void);
 extern void Ruby_showError(int status);
 //extern RubyValue MDRuby_evalRubyScript(const char *script, int *status);
 //extern RubyValue MDRuby_evalRubyScriptOnActiveDocumentWithInterrupt(const char *script, int *status);
 extern int Ruby_callMethodOfDocument(const char *name, void *doc, int isSingleton, const char *argfmt,...);
 extern RubyValue Ruby_evalRubyScriptOnDocument(const char *script, void *doc, int *status);
-extern void Ruby_showRubyValue(RubyValue value);
+extern int Ruby_showValue(RubyValue value, char **outValueString);
 extern int Ruby_methodType(const char *className, const char *methodName);
 
 /*  Housekeeping "Document" type Ruby values  */

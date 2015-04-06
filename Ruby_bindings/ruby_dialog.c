@@ -42,6 +42,7 @@ static VALUE
 	sDefaultSymbol, sRomanSymbol, sSwissSymbol, sFixedSymbol,
 	sNormalSymbol, sSlantSymbol, sItalicSymbol,
 	sMediumSymbol, sBoldSymbol, sLightSymbol,
+	sSelectedRangeSymbol,
 	sOnPaintSymbol,
 	/*  Data source for Table (= MyListCtrl)  */
 	sOnCountSymbol, sOnGetValueSymbol, sOnSetValueSymbol, sOnSelectionChangedSymbol,
@@ -324,6 +325,11 @@ s_RubyDialogItem_SetAttr(VALUE self, VALUE key, VALUE val)
 			}
 		}
 		RubyDialogCallback_setFontForItem(view, size, family, style, weight);
+	} else if (key == sSelectedRangeSymbol) {
+		VALUE fromval, toval;
+		fromval = Ruby_ObjectAtIndex(val, 0);
+		toval = Ruby_ObjectAtIndex(val, 1);
+		RubyDialogCallback_setSelectionInTextView((RDItem *)view, NUM2INT(rb_Integer(fromval)), NUM2INT(rb_Integer(toval)));
 	} else if (key == sSelectionSymbol) {
 		/*  Selection (for Table == MyListCtrl item)  */
 		if (type == sTableSymbol) {
@@ -536,6 +542,11 @@ s_RubyDialogItem_Attr(VALUE self, VALUE key)
 				  Qnil)));
 		val = rb_ary_new3(4, INT2NUM(size), fval, sval, wval);
 		rb_obj_freeze(val);
+	} else if (key == sSelectedRangeSymbol) {
+		int frompos, topos;
+		RubyDialogCallback_getSelectionInTextView(view, &frompos, &topos);
+		if (frompos >= 0 && topos >= 0)
+			val = rb_ary_new3(2, INT2NUM(frompos), INT2NUM(topos));
 	} else if (key == sSelectionSymbol) {
 		/*  Selection (for Table == MyTextCtrl item)  */
 		if (type == sTableSymbol) {
@@ -2101,14 +2112,18 @@ s_RubyDialog_doItemAction(VALUE val)
 		rb_funcall(itval, SYM2ID(aval), 0);
 	} else if (aval == sReturnActionSym || aval == sEscapeActionSym) {
 		/*  Enter or escape is pressed on text field  */
-		rb_ivar_set(itval, SYM2ID(sIsProcessingActionSymbol), Qfalse);
-		itval = s_RubyDialog_ItemAtIndex(self, (aval == sReturnActionSym ? INT2FIX(0) : INT2FIX(1)));
-		s_RubyDialog_EndModal(1, &itval, self);		
+		if (RubyDialogCallback_isModal(dref)) {
+			rb_ivar_set(itval, SYM2ID(sIsProcessingActionSymbol), Qfalse);
+			itval = s_RubyDialog_ItemAtIndex(self, (aval == sReturnActionSym ? INT2FIX(0) : INT2FIX(1)));
+			s_RubyDialog_EndModal(1, &itval, self);		
+		}
 	} else {
 		/*  Default action (only for default buttons)  */
-		if (idx == 0 || idx == 1) {
-			rb_ivar_set(itval, SYM2ID(sIsProcessingActionSymbol), Qfalse);
-			s_RubyDialog_EndModal(1, &itval, self);
+		if (RubyDialogCallback_isModal(dref)) {
+			if (idx == 0 || idx == 1) {
+				rb_ivar_set(itval, SYM2ID(sIsProcessingActionSymbol), Qfalse);
+				s_RubyDialog_EndModal(1, &itval, self);
+			}
 		}
 	}
 
@@ -2838,6 +2853,7 @@ RubyDialogInitClass(void)
 			&sDefaultSymbol, &sRomanSymbol, &sSwissSymbol,
 			&sFixedSymbol, &sNormalSymbol, &sSlantSymbol, &sItalicSymbol,
 			&sMediumSymbol, &sBoldSymbol, &sLightSymbol,
+			&sSelectedRangeSymbol,
 			&sOnPaintSymbol,
 			&sOnCountSymbol, &sOnGetValueSymbol, &sOnSetValueSymbol, &sOnSelectionChangedSymbol,
 			&sOnSetColorSymbol, &sIsItemEditableSymbol, &sIsDragAndDropEnabledSymbol, &sOnDragSelectionToRowSymbol,
@@ -2864,6 +2880,7 @@ RubyDialogInitClass(void)
 			"default", "roman", "swiss",
 			"fixed", "normal", "slant", "italic",
 			"medium", "bold", "light",
+			"selected_range",
 			"on_paint",
 			"on_count", "on_get_value", "on_set_value", "on_selection_changed",
 			"on_set_color", "is_item_editable", "is_drag_and_drop_enabled", "on_drag_selection_to_row",
