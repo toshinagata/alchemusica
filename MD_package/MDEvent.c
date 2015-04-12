@@ -646,10 +646,20 @@ MDEventToDataString(const MDEvent *eref, char *buf, long length)
 		case kMDEventMetaMessage:
 		case kMDEventSysex:
 		case kMDEventSysexCont:
-			n = 0;
 			ptr = MDGetMessageConstPtr(eref, &n1);
+			if (MDGetKind(eref) == kMDEventSysex && n1 >= 8 && ptr[1] == 0x41) {
+				/*  Does have Roland check-sum?  */
+				d1 = 0;
+				for (n = 5; n < n1 - 1; n++)
+					d1 += ptr[n];
+				d1 = ((d1 & 0x7f) == 0);
+			} else d1 = 0;
+			n = 0;
 			while (n < length - 3 && n1 > 0) {
-				n += sprintf(buf + n, "%02X ", (int)(*ptr));
+				if (d1 && n1 == 2)
+					n += sprintf(buf + n, "cs ");
+				else
+					n += sprintf(buf + n, "%02X ", (int)(*ptr));
 				ptr++;
 				n1--;
 			}

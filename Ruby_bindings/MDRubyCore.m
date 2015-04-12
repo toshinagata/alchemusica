@@ -582,7 +582,11 @@ s_executeRubyOnDocument(VALUE vinfo)
 					aval = rb_float_new(va_arg(ap, double)); break;
 				case 's':
 					aval = rb_str_new2(va_arg(ap, const char *)); break;
-				case 'B': case 'I': case 'L': case 'Q': case 'D': case 'S': {
+				case 'a':  /*  ASCII characters (can contain NUL)  */
+					n = va_arg(ap, int);
+					aval = rb_str_new(va_arg(ap, const char *), n);
+					break;
+				case 'B': case 'I': case 'L': case 'Q': case 'D': case 'S': case 'A': {
 					VALUE aaval;
 					void *pp;
 					n = va_arg(ap, int);
@@ -612,7 +616,7 @@ s_executeRubyOnDocument(VALUE vinfo)
 				case ';':
 					retfmt = *++p;
 					retp1 = va_arg(ap, void *);
-					if (retfmt >= 'A' && retfmt <= 'Z')
+					if (retfmt == 'a' || (retfmt >= 'A' && retfmt <= 'Z'))
 						retp2 = va_arg(ap, void *);
 					break;
 			} /* end switch */
@@ -640,6 +644,15 @@ s_executeRubyOnDocument(VALUE vinfo)
 			*((double *)retp1) = NUM2DBL(rb_Float(retval)); break;
 		case 's':
 			*((char **)retp1) = strdup(StringValuePtr(retval)); break;
+		case 'a':
+			retval = rb_str_to_str(retval);
+			n = RSTRING_LEN(retval);
+			*((int *)retp1) = n;
+			retp3 = malloc(n + 1);
+			memmove(retp3, RSTRING_PTR(retval), n);
+			((char *)retp3)[n] = 0;
+			*((void **)retp2) = retp3;
+			break;
 		case 'B': case 'I': case 'L': case 'Q': case 'D': case 'S':
 			switch (retfmt) {
 				case 'B': case 'I': i = sizeof(int); break;

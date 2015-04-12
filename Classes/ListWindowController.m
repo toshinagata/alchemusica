@@ -648,6 +648,7 @@ forTableColumn:(NSTableColumn *)aTableColumn
 row:(int)rowIndex
 {
 	id identifier = [aTableColumn identifier];
+	const char *descStr = [[anObject description] UTF8String];
 	MDEvent *ep;
 	MDTickType tick;
 	MDTimeType time;
@@ -755,17 +756,18 @@ row:(int)rowIndex
 					mod = [document changeDuration: tick atPosition: position inTrack: trackNo];
 				}
 			} else if ([@"data" isEqualToString: identifier]) {
+				NSData *data = nil;  //  Will be used for kMDEventFieldBinaryData
 				code = MDEventDataStringToEvent(ep, buf, &ed);
 				if (code == kMDEventFieldInvalid) {
 					char *msg;
-					asprintf(&msg, "%.*s<?>%s", buf, (int)ed.longValue, buf + ed.longValue);
+					asprintf(&msg, "%.*s<?>%s", (int)ed.longValue, buf, buf + ed.longValue);
 					[[NSAlert alertWithMessageText: @"Bad Event Data" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@"The data string cannot be converted to an event data: %s", msg] runModal];
 					free(msg);
 				} else if (code == kMDEventFieldBinaryData) {
-					NSData *data;
-					if (ed.binaryData != NULL)
-						data = [NSData dataWithBytes: ed.binaryData + sizeof(long) length: *((long *)ed.binaryData)];
-					else data = nil;
+					if (data == nil) {
+						if (ed.binaryData != NULL)
+							data = [NSData dataWithBytes: ed.binaryData + sizeof(long) length: *((long *)ed.binaryData)];
+					}
 					mod = [document changeMessage: data atPosition: position inTrack: trackNo];
 					if (ed.binaryData != NULL) {
 						free(ed.binaryData);
