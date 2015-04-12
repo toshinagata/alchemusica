@@ -737,6 +737,7 @@
 				E400BBBA11D627550032B969 /* Sources */,
 				E400BBBB11D627550032B969 /* Frameworks */,
 				E400BE2511D627C40032B969 /* CopyFiles */,
+				E41081A51ADAB1CE004D6482 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -866,6 +867,19 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		E41081A51ADAB1CE004D6482 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"$BUILD_STYLE\" = \"Deployment\" ]; then\n  cd $PROJECT_DIR\n  sh make_release_package.sh\nfi\n";
+		};
 		E4C3848414111D93006F2661 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
