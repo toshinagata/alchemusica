@@ -325,7 +325,16 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 	
 	//  Try to create carbon view first
 	[self findUIViewComponentDescription: forceGeneric];
-	if ((aWindow = [self createCarbonWindow]) != nil) {
+	@try {
+		aWindow = [self createCarbonWindow];
+	}
+	@catch (NSException * e) {
+		NSLog(@"ERROR: name %@ reason %@ userInfo %@", [e name], [e reason], [e userInfo]);
+		aWindow = nil;
+	}
+	@finally {
+	}
+	if (aWindow != nil) {
 		[self setWindow: aWindow];
 		if ([aWindow delegate] == nil)
 			[aWindow setDelegate: self];
