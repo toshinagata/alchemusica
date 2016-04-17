@@ -631,14 +631,14 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	long track;
 	long pos;
 	MDEvent *ep;
-	int n, tool;
-	NSPoint pt = [theEvent locationInWindow];
-	pt = [self convertPoint: pt fromView: nil];
+	int n;
+	NSPoint pt;
+	localGraphicTool = [self modifyLocalGraphicTool:[[self dataSource] graphicTool]];
+	pt = [self convertPoint:[theEvent locationInWindow] fromView: nil];
 	n = [self findNoteUnderPoint: pt track: &track position: &pos mdEvent: &ep];
-	tool = [[self dataSource] graphicTool];
 	if (n > 0)
 		[self setDraggingCursor: n];
-	else if (tool == kGraphicPencilTool || (tool == kGraphicRectangleSelectTool && ([theEvent modifierFlags] & NSCommandKeyMask) != 0))
+	else if (localGraphicTool == kGraphicPencilTool)
 		[[NSCursor pencilCursor] set];
 	else [super doMouseMoved: theEvent];
 }
@@ -667,6 +667,20 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	}
 }
 
+- (int)modifyLocalGraphicTool:(int)originalGraphicTool
+{
+	NSEvent *event = [NSApp currentEvent];
+	unsigned int flags = [event modifierFlags];
+	int tool = originalGraphicTool;
+	if ((flags & NSCommandKeyMask) != 0) {
+		if (tool == kGraphicPencilTool)
+			tool = kGraphicRectangleSelectTool;
+		else if (tool == kGraphicRectangleSelectTool)
+			tool = kGraphicPencilTool;
+	}
+	return tool;
+}
+
 - (void)doMouseDown: (NSEvent *)theEvent
 {
 //	int track;
@@ -679,9 +693,6 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	NSPoint pt = [self convertPoint: [theEvent locationInWindow] fromView: nil];
 //	shiftDown = (([theEvent modifierFlags] & NSShiftKeyMask) != 0);
 	
-	if (localGraphicTool == kGraphicRectangleSelectTool && ([theEvent modifierFlags] & NSCommandKeyMask) != 0)
-		localGraphicTool = kGraphicPencilTool;
-
 	draggingMode = [self findNoteUnderPoint: pt track: &mouseDownTrack position: &mouseDownPos mdEvent: &ep];
 	pt.x = [dataSource quantizedPixelFromPixel: pt.x];
 	draggingStartPoint = draggingPoint = pt;

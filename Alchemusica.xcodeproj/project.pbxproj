@@ -1154,7 +1154,7 @@
 				OTHER_LDFLAGS = "-lruby-static";
 				PREBINDING = NO;
 				PRODUCT_NAME = Alchemusica;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				SDKROOT = macosx;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
@@ -1186,7 +1186,7 @@
 				OTHER_LDFLAGS = "-lruby-static";
 				PREBINDING = NO;
 				PRODUCT_NAME = Alchemusica;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				SDKROOT = macosx;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
@@ -1219,7 +1219,7 @@
 				OTHER_LDFLAGS = "-lruby-static";
 				PREBINDING = NO;
 				PRODUCT_NAME = Alchemusica;
-				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
+				SDKROOT = macosx;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",

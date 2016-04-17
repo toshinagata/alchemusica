@@ -27,7 +27,13 @@ enum {
     id dataSource;				//  The data source
     float minValue, maxValue;
 	float visibleRangeMin, visibleRangeMax;  //  To be used in save/restoreVisibleRange
-    int localGraphicTool;     // Get value from -[GraphicWindowController graphicTool] in mouseDown handler and keep value. Some client (like TimeChartView) may want to override the selection mode.
+
+	// The current graphic tool is taken from -[GraphicWindowController graphicTool] 
+	// within mouseDown/mouseMoved/flagsChanged handler. 
+	// Some client (like TimeChartView) may want to override the selection mode;
+	// this is implemented in -[GraphicClientView modifyLocalGraphicTool:];
+    int localGraphicTool;
+
     BOOL isDragging;
     BOOL isLoupeDragging;
 	BOOL autoScaleOnResizing;
@@ -85,6 +91,8 @@ enum {
 
 //  Will be called from GraphicBackgroundView's flagsChanged: handler
 - (void)doFlagsChanged: (NSEvent *)theEvent;
+
+- (int)modifyLocalGraphicTool:(int)originalGraphicTool;
 
 - (void)convertFromPoint:(NSPoint)pt toY:(float *)y andTick:(long *)tick;
 - (NSPoint)convertToPointFromY:(float)y andTick:(long)tick;

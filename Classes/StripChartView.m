@@ -721,6 +721,20 @@ cubicReverseFunc(float x, const float *points, float tt)
 	}
 }
 
+- (int)modifyLocalGraphicTool:(int)originalGraphicTool
+{
+	NSEvent *event = [NSApp currentEvent];
+	unsigned int flags = [event modifierFlags];
+	int tool = originalGraphicTool;
+	if ((flags & NSCommandKeyMask) != 0) {
+		if (tool == kGraphicPencilTool)
+			tool = kGraphicRectangleSelectTool;
+		else if (tool == kGraphicRectangleSelectTool)
+			tool = kGraphicPencilTool;
+	}
+	return tool;
+}
+
 //  Edit in the pencil mode, i.e. edit the strip chart values according to 
 //  the graphicLineShape and graphicEditingMode.
 - (void)doPencilEdit
@@ -1036,11 +1050,11 @@ cubicReverseFunc(float x, const float *points, float tt)
 	int track;
 	long pos;
 	MDEvent *ep;
-	int n, tool;
+	int n;
 	NSPoint pt = [NSEvent mouseLocation]; /*  Use mouseLocation in case this is called from flagsChanged: handler (not implemented yet)  */
 	pt = [self convertPoint: [[self window] convertScreenToBase:pt] fromView: nil];
-	tool = [[self dataSource] graphicTool];
-	if (tool == kGraphicPencilTool || (tool == kGraphicRectangleSelectTool && ([theEvent modifierFlags] & NSCommandKeyMask) != 0)) {
+	localGraphicTool = [self modifyLocalGraphicTool:[[self dataSource] graphicTool]];
+	if (localGraphicTool == kGraphicPencilTool) {
 		[[NSCursor pencilCursor] set];
 		return;
 	}
@@ -1067,8 +1081,6 @@ cubicReverseFunc(float x, const float *points, float tt)
 	NSRect bounds;
 	NSPoint pt;
 
-	if (localGraphicTool == kGraphicRectangleSelectTool && ([theEvent modifierFlags] & NSCommandKeyMask) != 0)
-		localGraphicTool = kGraphicPencilTool;
 	if (localGraphicTool == kGraphicPencilTool) {
 		//  Invoke the common dragging procedure without checking mouse hitting on the existing chart
 		//  The overridden method drawSelectRegion: implements the specific treatment

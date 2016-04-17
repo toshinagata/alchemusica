@@ -134,6 +134,12 @@ enum {
 	
 	//  Selected tracks when the selection changed last
 	NSIndexSet *lastSelectedTracks;
+	
+	//  This flag is asserted in windowDidLoad and negated on first call to windowDidResize.
+	//  On newer version of Mac OS X, the document window may be silently resized by system
+	//  during startup, which may causes inconsistency of the layout of the subviews. This 
+	//  flag avoid such inconsistency.
+	BOOL waitingForFirstWindowResize;
 }
 
 //+ (NSCursor *)horizontalMoveCursor;

@@ -345,6 +345,11 @@
     [self mouseDragged: event];
 }
 
+- (int)modifyLocalGraphicTool:(int)originalGraphicTool
+{
+	return originalGraphicTool;
+}
+
 - (void)doMouseDown: (NSEvent *)theEvent
 {
     if (initialModifierFlags & NSAlternateKeyMask) {
@@ -374,7 +379,7 @@
     initialModifierFlags = [theEvent modifierFlags];
     currentModifierFlags = initialModifierFlags;
     isDragging = isLoupeDragging = NO;
-	localGraphicTool = [dataSource graphicTool];  // May be overridden in doMouseDown:
+	localGraphicTool = [self modifyLocalGraphicTool:[dataSource graphicTool]];
     [self doMouseDown: theEvent];
 }
 
@@ -511,16 +516,31 @@
 
 - (void)doMouseMoved: (NSEvent *)theEvent
 {
+	localGraphicTool = [self modifyLocalGraphicTool:[[self dataSource] graphicTool]];
     if ([theEvent modifierFlags] & NSAlternateKeyMask)
         [[NSCursor loupeCursor] set];
-    else [[NSCursor arrowCursor] set];
+    else if (localGraphicTool == kGraphicPencilTool)
+		[[NSCursor pencilCursor] set];
+	else if (localGraphicTool == kGraphicRectangleSelectTool)
+		[[NSCursor crosshairCursor] set];
+	else if (localGraphicTool == kGraphicIbeamSelectTool)
+		[[NSCursor IBeamCursor] set];
+	else [[NSCursor arrowCursor] set];
 }
 
 - (void)doFlagsChanged: (NSEvent *)theEvent
 {
+	localGraphicTool = [self modifyLocalGraphicTool:[[self dataSource] graphicTool]];
     if ([theEvent modifierFlags] & NSAlternateKeyMask)
         [[NSCursor loupeCursor] set];
-    else [[NSCursor arrowCursor] set];
+    else if (localGraphicTool == kGraphicPencilTool)
+		[[NSCursor pencilCursor] set];
+	else if (localGraphicTool == kGraphicRectangleSelectTool)
+		[[NSCursor crosshairCursor] set];
+	else if (localGraphicTool == kGraphicIbeamSelectTool)
+		[[NSCursor IBeamCursor] set];
+	else
+		[[NSCursor arrowCursor] set];
 }
 
 - (void)viewWillStartLiveResize

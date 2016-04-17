@@ -332,8 +332,13 @@ typedef struct TimeScalingRecord {
 	} else {
 		[super doMouseDown: theEvent];
 	}
-	if (localGraphicTool == kGraphicRectangleSelectTool)
-		localGraphicTool = kGraphicIbeamSelectTool;
+}
+
+- (int)modifyLocalGraphicTool:(int)originalGraphicTool
+{
+	if (originalGraphicTool == kGraphicRectangleSelectTool || originalGraphicTool == kGraphicPencilTool)
+		originalGraphicTool = kGraphicIbeamSelectTool;
+	return originalGraphicTool;
 }
 
 - (void)doMouseDragged: (NSEvent *)theEvent
@@ -516,6 +521,7 @@ typedef struct TimeScalingRecord {
 	NSPoint pt;
 	int n;
 	unsigned modifierFlags;
+	localGraphicTool = [self modifyLocalGraphicTool:[[self dataSource] graphicTool]];
 	if ([theEvent type] == NSFlagsChanged) {
 		pt = [self convertPoint:[[self window] convertScreenToBase:[NSEvent mouseLocation]] fromView:nil];
 	} else {		

@@ -1661,6 +1661,18 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 	sUpdateDeviceMenu(cell);
 }
 
+/*  Catch window resize operation  */
+- (void)windowDidResize:(NSNotification *)aNotification
+{
+	if (waitingForFirstWindowResize) {
+		int i;
+		for (i = 2; i < myClientViewsCount; i++) {
+			[records[i].client restoreVisibleRange];
+		}
+		waitingForFirstWindowResize = NO;
+	}
+}
+
 - (void)windowDidLoad
 {
 	NSTableColumn *tableColumn;
@@ -1719,6 +1731,11 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 		name:MyDocumentEditingRangeDidChangeNotification
 		object:[self document]];
 
+	[[NSNotificationCenter defaultCenter]
+		addObserver:self
+		selector:@selector(windowDidResize:)
+		name:NSWindowDidResizeNotification object:[self window]];
+
 //	[[NSNotificationCenter defaultCenter]
 //		addObserver: self
 //		selector: @selector(myMainViewFrameDidChange:)
@@ -1736,8 +1753,19 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 	[[NSNotificationCenter defaultCenter]
 	 addObserver:self
 	 selector:@selector(midiSetupDidChange:)
-	 name:MyAppControllerMIDISetupDidChangeNotification
+	 name:NSWindowDidResizeNotification
 	 object:[NSApp delegate]];
+
+	//  Post a dummy resize notification when idle
+	//  (If the system silently resizes this window, then a 'real' resize notification is posted.
+	//  Otherwise, this 'dummy' notification is processed. In either case, the flag waitingForFirstWindowResize
+	//  is negated upon first invocation to windowDidResize.)
+	[[NSNotificationQueue defaultQueue]
+	 enqueueNotification:[NSNotification notificationWithName:NSWindowDidResizeNotification object:[self window]]
+	 postingStyle:NSPostWhenIdle];
+	
+	//  This flag will be negated on first invocation to windowDidResize
+	waitingForFirstWindowResize = YES;
 	
     calib = MDCalibratorNew([[[self document] myMIDISequence] mySequence], NULL, kMDEventTimeSignature, -1);
 
@@ -1961,6 +1989,10 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 	
 	[self reloadClientViews];
     [self updateTrackingRect];
+	
+	[[NSNotificationCenter defaultCenter]
+	 postNotificationName: MyAppControllerMIDISetupDidChangeNotification
+	 object: [NSApp delegate] userInfo: nil];	
 }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName
