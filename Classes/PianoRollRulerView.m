@@ -80,6 +80,8 @@
 		//	[cell drawInteriorWithFrame: rect inView: self];
 		} */
 	}
+	[super drawRect:aRect];
+
 /*	[[[self clientView] dataSource] setInfoText:
 		[NSString stringWithFormat: @"frame %@, bounds %@, client: frame %@, bounds %@",
 			NSStringFromRect([[self superview] frame]),

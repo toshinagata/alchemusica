@@ -19,6 +19,7 @@
 
 @interface GraphicRulerView : NSView {
 	NSView *clientView;
+	NSPoint dragStartPoint, dragEndPoint;
 }
 - (void)releaseClientView;
 - (void)setClientView: (NSView *)aView;

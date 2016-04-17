@@ -67,10 +67,12 @@ static float sValueResolution = 1.0;
 	[super dealloc];
 }
 
+/*
 - (BOOL)hasVerticalScroller
 {
 	return NO;
 }
+*/
 
 static float
 getYValue(const MDEvent *ep, int eventKind)

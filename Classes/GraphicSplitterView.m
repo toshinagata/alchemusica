@@ -171,6 +171,7 @@ searchMenuItemWithTag(NSMenu *menu, int tag)
 	GraphicWindowController *controller = (GraphicWindowController *)[[self window] windowController];
 	startPt = [theEvent locationInWindow];
 	origin = [self frame].origin;
+	[controller splitterViewStartedDragging:self];
 	do {
 		theEvent = [[self window] nextEventMatchingMask: NSLeftMouseUpMask | NSLeftMouseDraggedMask];
 		mousePt = [theEvent locationInWindow];

@@ -26,12 +26,13 @@ enum {
 @interface GraphicClientView : NSView {
     id dataSource;				//  The data source
     float minValue, maxValue;
+	float visibleRangeMin, visibleRangeMax;  //  To be used in save/restoreVisibleRange
     int localGraphicTool;     // Get value from -[GraphicWindowController graphicTool] in mouseDown handler and keep value. Some client (like TimeChartView) may want to override the selection mode.
     BOOL isDragging;
     BOOL isLoupeDragging;
+	BOOL autoScaleOnResizing;
     unsigned int initialModifierFlags;
     unsigned int currentModifierFlags;
-
     NSMutableArray *selectPoints;
     NSBezierPath *selectionPath;
 	NSRect initialSelectionRect;
@@ -84,5 +85,13 @@ enum {
 
 //  Will be called from GraphicBackgroundView's flagsChanged: handler
 - (void)doFlagsChanged: (NSEvent *)theEvent;
+
+- (void)convertFromPoint:(NSPoint)pt toY:(float *)y andTick:(long *)tick;
+- (NSPoint)convertToPointFromY:(float)y andTick:(long)tick;
+
+- (void)setVisibleRangeMin:(float)min max:(float)max;
+- (void)getVisibleRangeMin:(float *)min max:(float *)max;
+- (void)saveVisibleRange;
+- (void)restoreVisibleRange;
 
 @end

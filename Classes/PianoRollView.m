@@ -31,6 +31,20 @@ static float sLineDash1[] = {6.0, 2.0};
 static float sLineDash2[] = {2.0, 6.0};
 static float sDashWidth = 8.0;
 
+- (id)initWithFrame: (NSRect)rect
+{
+    self = [super initWithFrame: rect];
+	if (self) {
+		autoScaleOnResizing = NO;
+	}
+    return self;
+}
+
+- (void)dealloc
+{
+	[super dealloc];
+}
+
 - (int)clientViewType
 {
 	return kGraphicPianoRollViewType;

@@ -29,7 +29,6 @@ enum {
 {
 	unsigned char mode;
 	int eventKind, eventCode;
-//	float minValue, maxValue;
     MDCalibrator *calib;
     int stripDraggingMode;
 	int lineShape;  // 0: no drawing, >0: drawing with line shapes defined as kGraphic****Shape (cf. GraphicWindowController.h)

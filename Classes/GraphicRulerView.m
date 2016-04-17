@@ -15,6 +15,9 @@
  */
 
 #import "GraphicRulerView.h"
+#import "GraphicClientView.h"
+#import "NSCursorAdditions.h"
+#import "MyDocument.h"
 
 static NSFont *sRulerLabelFont;
 
@@ -45,6 +48,7 @@ static NSFont *sRulerLabelFont;
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code here.
+		dragStartPoint = NSMakePoint(-10000, -10000);
     }
     return self;
 }
@@ -55,7 +59,35 @@ static NSFont *sRulerLabelFont;
 	[super dealloc];
 }
 
-- (void)drawRect:(NSRect)rect {
+- (NSRect)loupeRect
+{
+	if (dragStartPoint.x > -10000) {
+		NSRect rect = [self bounds];
+		if (dragStartPoint.y > dragEndPoint.y) {
+			rect.origin.y = dragEndPoint.y;
+			rect.size.height = dragStartPoint.y - dragEndPoint.y;
+		} else {
+			rect.origin.y = dragStartPoint.y;
+			rect.size.height = dragEndPoint.y - dragStartPoint.y;
+		}
+		return rect;
+	} else return NSZeroRect;
+}
+
+- (void)drawRect:(NSRect)rect
+{
+	float x, y;
+	NSRect lrect = [self loupeRect];
+	if (lrect.size.width > 0) {
+		[[[MyDocument colorForSelectingRange] colorWithAlphaComponent: 0.1] set];
+		[NSBezierPath fillRect:lrect];
+		x = lrect.origin.x;
+		y = lrect.origin.y;
+		[[NSColor blackColor] set];
+		[NSBezierPath strokeLineFromPoint: NSMakePoint(x, y) toPoint:NSMakePoint(x + lrect.size.width, y)];
+		y += lrect.size.height;
+		[NSBezierPath strokeLineFromPoint: NSMakePoint(x, y) toPoint:NSMakePoint(x + lrect.size.width, y)];
+	}
 }
 
 - (void)releaseClientView
@@ -133,6 +165,66 @@ static NSFont *sRulerLabelFont;
 - (NSView *)clientView
 {
 	return clientView;
+}
+
+
+- (void)invalidateLoupeRect
+{
+	NSRect lrect = [self loupeRect];
+	lrect = NSInsetRect(lrect, -1, -1);
+	[self setNeedsDisplayInRect:lrect];
+}
+
+- (void)mouseUp: (NSEvent *)theEvent
+{
+	GraphicClientView *cv = (GraphicClientView *)clientView;
+	if ([theEvent clickCount] == 2 && ([theEvent modifierFlags] & NSAlternateKeyMask) != 0) {
+		[cv setVisibleRangeMin:0.0 max:1.0];
+	} else if (dragStartPoint.x != -10000) {
+		float y1, y2, miny, maxy;
+		long tick;  //  Dummy
+		[self invalidateLoupeRect];
+		[cv convertFromPoint:dragStartPoint toY:&y1 andTick:&tick];
+		[cv convertFromPoint:[cv convertPoint:[theEvent locationInWindow] fromView:nil] toY:&y2 andTick:&tick];
+		if (y1 > y2) {
+			float yw = y1;
+			y1 = y2;
+			y2 = yw;
+		}
+		miny = [cv minValue];
+		maxy = [cv maxValue];
+		y1 = (y1 - miny) / (maxy - miny);
+		y2 = (y2 - miny) / (maxy - miny);
+		[cv setVisibleRangeMin:y1 max:y2];
+	}
+	dragStartPoint = NSMakePoint(-10000, -10000);
+}
+
+- (void)mouseDragged: (NSEvent *)theEvent
+{
+    NSPoint pt;
+    NSRect bounds;
+    NSValue *val;
+	pt = [self convertPoint: [theEvent locationInWindow] fromView: nil];
+	if (dragStartPoint.x == -10000) {
+		if ([theEvent modifierFlags] & NSAlternateKeyMask) {
+			/*  Start option-dragging  */
+			dragStartPoint = pt;
+		}
+		return;
+	} else {
+		[self invalidateLoupeRect];
+		dragEndPoint = pt;
+		[self invalidateLoupeRect];
+	}
+	[self displayIfNeeded];
+}
+
+- (void)doMouseMoved: (NSEvent *)theEvent
+{
+    if ([theEvent modifierFlags] & NSAlternateKeyMask)
+        [[NSCursor loupeCursor] set];
+    else [[NSCursor arrowCursor] set];
 }
 
 @end

@@ -78,6 +78,7 @@
 		x = frame.size.width - 4.0 - [font widthOfString: str];
 		[str drawAtPoint: NSMakePoint(x, y) withAttributes: attr];
 	}
+	[super drawRect:aRect];
 }
 
 @end

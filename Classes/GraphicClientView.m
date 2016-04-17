@@ -43,6 +43,9 @@
         minValue = 0.0;
         maxValue = 128.0;
 		dataSource = nil;
+		visibleRangeMin = 0.0;
+		visibleRangeMax = 1.0;
+		autoScaleOnResizing = YES;
     }
     return self;
 }
@@ -124,9 +127,11 @@
 
 - (float)yScale
 {
+	float ys;
     if (maxValue > minValue)
-        return [self frame].size.height / (maxValue - minValue);
-    else return 0.0;
+        ys = [self frame].size.height / (maxValue - minValue);
+    else ys = 0.0;
+	return ys;
 }
 
 - (void)setMinValue: (float)value
@@ -156,6 +161,76 @@
 - (void)removeTrack: (int)track
 {
 }
+
+- (void)convertFromPoint:(NSPoint)pt toY:(float *)y andTick:(long *)tick
+{
+	NSRect frame = [self frame];
+	float pixelsPerTick = [[self dataSource] pixelsPerTick];
+	*y = (pt.y - frame.origin.y) * (maxValue - minValue) / frame.size.height + minValue;
+	*tick = (pt.x - frame.origin.x) / pixelsPerTick;
+}
+
+- (NSPoint)convertToPointFromY:(float)y andTick:(long)tick
+{
+	NSPoint pt;
+	NSRect frame = [self frame];
+	float pixelsPerTick = [[self dataSource] pixelsPerTick];
+	pt.x = tick * pixelsPerTick + frame.origin.x;
+	pt.y = (y - minValue) * frame.size.height / (maxValue - minValue) + frame.origin.y;
+	return pt;
+}
+
+- (void)setVisibleRangeMin:(float)min max:(float)max
+{
+	visibleRangeMin = min;
+	visibleRangeMax = max;
+	[self restoreVisibleRange];
+}
+
+- (void)getVisibleRangeMin:(float *)min max:(float *)max
+{
+	[self saveVisibleRange];
+	*min = visibleRangeMin;
+	*max = visibleRangeMax;
+}
+
+- (void)saveVisibleRange
+{
+	NSRect frame = [self frame];
+	NSRect clipBounds = [[self superview] bounds];
+	visibleRangeMin = clipBounds.origin.y / frame.size.height;
+	visibleRangeMax = (clipBounds.origin.y + clipBounds.size.height) / frame.size.height;
+}
+
+- (void)restoreVisibleRange
+{
+	NSRect clipBounds = [[self superview] bounds];
+	NSRect frame = [self frame];
+	frame.size.height = floor(clipBounds.size.height / (visibleRangeMax - visibleRangeMin) + 0.5);
+	[self setFrame:frame];
+	clipBounds.origin.y = visibleRangeMin * frame.size.height;
+	[self scrollPoint:clipBounds.origin];
+}
+
+/*
+- (void)getScrollPositionWithRangeMin:(float *)rangeMin max:(float *)rangeMax
+{
+	NSRect frame = [self frame];
+	NSRect clipBounds = [[self superview] bounds];
+	*rangeMin = clipBounds.origin.y / frame.size.height;
+	*rangeMax = (clipBounds.origin.y + clipBounds.size.height) / frame.size.height;
+}
+
+- (void)rescaleToShowRangeMin:(float)rangeMin max:(float)rangeMax
+{
+	NSRect clipBounds = [[self superview] bounds];
+	NSRect frame = [self frame];
+	frame.size.height = floor(clipBounds.size.height / (rangeMax - rangeMin) + 0.5);
+	[self setFrame:frame];
+	clipBounds.origin.y = rangeMin * frame.size.height;
+	[self scrollPoint:clipBounds.origin];
+}
+*/
 
 /*  Modify rectangle for redrawing selection region  */
 - (NSRect)willInvalidateSelectRect: (NSRect)rect
@@ -446,6 +521,19 @@
     if ([theEvent modifierFlags] & NSAlternateKeyMask)
         [[NSCursor loupeCursor] set];
     else [[NSCursor arrowCursor] set];
+}
+
+- (void)viewWillStartLiveResize
+{
+	[self saveVisibleRange];
+	[super viewWillStartLiveResize];
+}
+
+- (void)viewDidEndLiveResize
+{
+	if (autoScaleOnResizing)
+		[self restoreVisibleRange];
+	[super viewDidEndLiveResize];
 }
 
 @end

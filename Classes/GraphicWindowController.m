@@ -1375,6 +1375,19 @@ sTableColumnIDToInt(id identifier)
 	[self limitWindowSize];
 }
 
+- (void)splitterViewStartedDragging: (GraphicSplitterView *)theView
+{
+	//  Save the visible range of the client views
+	int index;
+	for (index = 1; index < myClientViewsCount; index++) {
+		if (records[index].splitter == theView)
+			break;
+	}
+	[records[index].client saveVisibleRange];
+	if (index < myClientViewsCount - 1)
+		[records[index + 1].client saveVisibleRange];
+}
+
 - (void)splitterView: (GraphicSplitterView *)theView isDraggedTo: (float)y confirm: (BOOL)confirm
 {
 	int index;
@@ -1403,6 +1416,8 @@ sTableColumnIDToInt(id identifier)
 		if (confirm) {
 			//  Collapse this client
 			[self collapseClientViewAtIndex: index];
+			//  Restore the visible range of the next client view
+			[records[index].client restoreVisibleRange];
 			return;
 		}
 	}
@@ -1423,6 +1438,9 @@ sTableColumnIDToInt(id identifier)
 		if (confirm && index < myClientViewsCount - 1) {
 			//  Collapse the lowest client
 			[self collapseClientViewAtIndex: index + 1];
+			//  Restore the visible range of this client
+			if (index > 1)
+				[records[index].client restoreVisibleRange];
 			return;
 		}
 	}
@@ -1453,9 +1471,14 @@ sTableColumnIDToInt(id identifier)
 	//			object: [records[0].client superview]]];
 			//  Simulate scroll to force recalculation of the scroll position
 	}
-	if (confirm)
+	if (confirm) {
+		//  Restore the visible range of this and the next clients
+		if (index > 1)
+			[records[index].client restoreVisibleRange];
+		if (index < myClientViewsCount - 1)
+			[records[index + 1].client restoreVisibleRange];
 		[myMainView display];
-	else {
+	} else {
         if (scrollView == nil) {
             NSRect theRect = [myMainView bounds];
             theRect.size.height = y - ymin;
@@ -1730,7 +1753,8 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 	/*  Create the strip chart view  */
 	[self adjustClientViewsInHeight: floor([myMainView bounds].size.height * 0.75)];
 	[self createClientViewWithClasses: [StripChartView class] : [StripChartRulerView class]];
-
+	[records[2].client setVisibleRangeMin:0.0 max:1.0];
+	
 	/*  Set the default scale factor for the piano-roll view  */
 	[records[1].client setYScale: 7.0];        /*  7 pixels per half-tone */
 //	[records[1].client reloadData];

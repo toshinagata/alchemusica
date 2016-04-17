@@ -206,6 +206,7 @@ enum {
 - (void)convertTick: (MDTickType)aTick toMeasure: (long *)measure beat: (long *)beat andTick: (long *)tick;
 
 //  Action method for GraphicSplitterView
+- (void)splitterViewStartedDragging: (GraphicSplitterView *)theView;
 - (void)splitterView: (GraphicSplitterView *)theView isDraggedTo: (float)y confirm: (BOOL)confirm;
 
 //  Customized autoresizing for client views
