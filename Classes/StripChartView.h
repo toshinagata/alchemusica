@@ -47,6 +47,9 @@ enum {
 - (void)endExternalDragging;
 - (void)setExternalDraggingPoint:(NSPoint)aPoint;
 
+//  Interval of the horizontal grid lines (measured in chart values; also used in StripChartRulerView)
+- (float)horizontalGridInterval;
+
 //  Accessor methods for StripChartRulerView
 //- (float)minValue;
 //- (float)maxValue;

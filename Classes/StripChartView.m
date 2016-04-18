@@ -283,10 +283,24 @@ getYValue(const MDEvent *ep, int eventKind)
 	}
 }
 
+- (float)horizontalGridInterval
+{
+	NSRect frame, visibleRect;
+	float visibleRange, aRange;
+	frame = [self frame];
+	visibleRect = [(NSClipView *)[self superview] documentVisibleRect];
+	aRange = maxValue - minValue + 1.0;
+	visibleRange = aRange / frame.size.height * visibleRect.size.height;
+	while (aRange > visibleRange * 0.7)
+		aRange *= 0.5;
+	return aRange;
+}
+
 - (void)drawRect: (NSRect)aRect
 {
 	NSPoint pt;
 	NSRect bounds;
+	float y, grid;
 	NSEraseRect(aRect);
 	[self paintEditingRange: aRect startX: NULL endX: NULL];
 	if (eventKind == kMDEventNote || eventKind == kMDEventInternalNoteOff)
@@ -294,13 +308,15 @@ getYValue(const MDEvent *ep, int eventKind)
 	else
 		[self drawBoxStripInRect: aRect];
 
-	/*  Draw a line at the vertical center  */
+	/*  Draw grid lines  */
 	bounds = [self bounds];
 	pt.x = bounds.origin.x;
-	pt.y = floor(bounds.origin.x + bounds.size.height / 2) + 0.5;
+	grid = [self horizontalGridInterval];
 	[[NSColor lightGrayColor] set];
-	[NSBezierPath strokeLineFromPoint: pt toPoint: NSMakePoint(pt.x + bounds.size.width, pt.y)];
-	
+	for (y = minValue + grid; y < maxValue; y += grid) {
+		pt.y = floor(bounds.origin.x + y * (bounds.size.height / (maxValue - minValue + 1.0))) + 0.5;
+		[NSBezierPath strokeLineFromPoint: pt toPoint: NSMakePoint(pt.x + bounds.size.width, pt.y)];
+	}
 	if ([self isDragging])
 		[self drawSelectRegion];
 }

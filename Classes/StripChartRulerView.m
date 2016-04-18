@@ -35,46 +35,40 @@
 
 - (void)drawRect:(NSRect)aRect
 {
-	NSRect frame, bounds;
+	NSRect frame, bounds, visibleRect;
 	NSFont *font;
 	NSDictionary *attr;
-	float minValue, maxValue, visibleRange, aRange;
+	float grid;
+	float minValue, maxValue, visibleMinValue, visibleMaxValue, visibleRange, aRange;
 	int i, min, max;
-	float ascender, descender, x, y;
+	float ascender, descender, x, y, yval;
 	NSString *str;
 	frame = [self frame];
 	bounds = [self bounds];
+	visibleRect = [(NSClipView *)[self superview] documentVisibleRect];
 	x = frame.size.width - 0.5;
-	[NSBezierPath strokeLineFromPoint: NSMakePoint(x, 0) toPoint: NSMakePoint(x, frame.size.height)];
+	[NSBezierPath strokeLineFromPoint: NSMakePoint(x, 0) toPoint: NSMakePoint(x, bounds.size.height)];
 	minValue = [(StripChartView *)[self clientView] minValue];
 	maxValue = [(StripChartView *)[self clientView] maxValue];
-	visibleRange = (maxValue - minValue) / frame.size.height * bounds.size.height;
-	aRange = maxValue - minValue;
-	while (aRange > visibleRange * 0.7)
-		aRange *= 0.5;
-	minValue += (maxValue - minValue) / frame.size.height * bounds.origin.y;
-	maxValue = minValue + visibleRange;
-	min = minValue / aRange - 1;
-	max = maxValue / aRange + 1;
+	grid = [(StripChartView *)[self clientView] horizontalGridInterval];
 	font = [[self class] rulerLabelFont];
 	ascender = [font ascender];
 	descender = [font descender];
 	attr = [NSDictionary dictionaryWithObjectsAndKeys: font, NSFontAttributeName, nil];
-	for (i = min; i <= max; i++) {
-		y = floor((i * aRange - minValue) * bounds.size.height / visibleRange);
+	for (yval = minValue; yval <= maxValue + 1.00001; yval += grid) {
+		y = floor(yval * bounds.size.height / (maxValue - minValue + 1.0));
 		x = frame.size.width - 4.0;
-		if (y > 0.0 && y < frame.size.height)
+		if (y > 0.0 && y < bounds.size.height)
 			[NSBezierPath strokeLineFromPoint: NSMakePoint(x, y + 0.5) toPoint: NSMakePoint(x + 4.0, y + 0.5)];
 		y -= floor((ascender - descender) / 2);
-		if (y > bounds.origin.y + bounds.size.height + 1
-		|| y < bounds.origin.y - (ascender - descender) - 1)
+		if (y > aRect.origin.y + aRect.size.height + 1
+		|| y < aRect.origin.y - (ascender - descender) - 1)
 			continue;
-		if (y > frame.size.height - (ascender - descender))
-			y = frame.size.height - (ascender - descender);
+		if (y > bounds.size.height - (ascender - descender))
+			y = bounds.size.height - (ascender - descender);
 		if (y < 0)
 			y = 0;
-	//	y += (ascender + descender) / 2;
-		str = [NSString stringWithFormat: @"%g", (float)floor(i * aRange + 0.5)];
+		str = [NSString stringWithFormat: @"%g", (yval > maxValue ? maxValue : yval)];
 		x = frame.size.width - 4.0 - [font widthOfString: str];
 		[str drawAtPoint: NSMakePoint(x, y) withAttributes: attr];
 	}
