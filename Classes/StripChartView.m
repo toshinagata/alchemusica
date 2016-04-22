@@ -314,7 +314,7 @@ getYValue(const MDEvent *ep, int eventKind)
 	grid = [self horizontalGridInterval];
 	[[NSColor lightGrayColor] set];
 	for (y = minValue + grid; y < maxValue; y += grid) {
-		pt.y = floor(bounds.origin.x + y * (bounds.size.height / (maxValue - minValue + 1.0))) + 0.5;
+		pt.y = floor(bounds.origin.x + y * (bounds.size.height / (maxValue - minValue))) + 0.5;
 		[NSBezierPath strokeLineFromPoint: pt toPoint: NSMakePoint(pt.x + bounds.size.width, pt.y)];
 	}
 	if ([self isDragging])
@@ -600,7 +600,7 @@ getYValue(const MDEvent *ep, int eventKind)
 	NSRect r;
 	NSBezierPath *path;
 
-	n = [[self dataSource] graphicTool];
+	n = [self modifyLocalGraphicTool:[[self dataSource] graphicTool]];
 	if (lineShape == 0 && (n == kGraphicIbeamSelectTool || n == kGraphicRectangleSelectTool)) {
 		[super drawSelectRegion];
 		return;
@@ -780,8 +780,8 @@ cubicReverseFunc(float x, const float *points, float tt)
 	height = [self bounds].size.height;
 	t1 = floor(pt1.x / pixelsPerTick + 0.5);
 	t2 = floor(pt2.x / pixelsPerTick + 0.5);
-	v1 = floor(pt1.y * (maxValue - minValue) / height + 0.5);
-	v2 = floor(pt2.y * (maxValue - minValue) / height + 0.5);
+	v1 = floor(pt1.y * (maxValue - minValue) / height + 0.5 + minValue);
+	v2 = floor(pt2.y * (maxValue - minValue) / height + 0.5 + minValue);
 	if (t1 < t2) {
 		fromTick = t1;
 		toTick = t2;
@@ -1061,6 +1061,13 @@ cubicReverseFunc(float x, const float *points, float tt)
 	}
 }
 
+- (NSString *)infoTextForMousePoint:(NSPoint)pt dragging:(BOOL)flag
+{
+	int yval;
+	yval = floor((maxValue - minValue) * pt.y / [self frame].size.height + minValue + 0.5);
+	return [[NSString stringWithFormat:@"%d, ", yval] stringByAppendingString:[super infoTextForMousePoint:pt dragging:flag]];
+}
+
 - (void)doMouseMoved: (NSEvent *)theEvent
 {
 	int track;
@@ -1233,7 +1240,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 		pt.x = draggingPoint.x - draggingStartPoint.x;
 		pt.y = draggingPoint.y - draggingStartPoint.y;
 		deltaTick = floor(pt.x / [dataSource pixelsPerTick] + 0.5);
-		deltaValue = pt.y * (maxValue - minValue) / [self bounds].size.height;
+		deltaValue = floor(pt.y * (maxValue - minValue) / [self bounds].size.height + 0.5);
 		[dataSource dragEventsOfKind: eventKind andCode: eventCode byTick: deltaTick andValue: deltaValue sender: self optionFlag: optionDown];
 		stripDraggingMode = 0;
 		[self displayIfNeeded];

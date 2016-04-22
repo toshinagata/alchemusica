@@ -86,6 +86,9 @@ enum {
 - (void)mouseDragged: (NSEvent *)theEvent;
 - (void)mouseUp: (NSEvent *)theEvent;
 
+//  Info text during mouse move and dragging
+- (NSString *)infoTextForMousePoint:(NSPoint)pt dragging:(BOOL)flag;
+
 //  Will be called from GraphicWindowController's mouseMoved: handler
 - (void)doMouseMoved: (NSEvent *)theEvent;
 

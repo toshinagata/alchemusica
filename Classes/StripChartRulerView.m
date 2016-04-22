@@ -55,8 +55,8 @@
 	ascender = [font ascender];
 	descender = [font descender];
 	attr = [NSDictionary dictionaryWithObjectsAndKeys: font, NSFontAttributeName, nil];
-	for (yval = minValue; yval <= maxValue + 1.00001; yval += grid) {
-		y = floor(yval * bounds.size.height / (maxValue - minValue + 1.0));
+	for (yval = minValue; yval <= maxValue + 1.01; yval += grid) {
+		y = floor(yval * bounds.size.height / (maxValue - minValue));
 		x = frame.size.width - 4.0;
 		if (y > 0.0 && y < bounds.size.height)
 			[NSBezierPath strokeLineFromPoint: NSMakePoint(x, y + 0.5) toPoint: NSMakePoint(x + 4.0, y + 0.5)];
@@ -68,7 +68,7 @@
 			y = bounds.size.height - (ascender - descender);
 		if (y < 0)
 			y = 0;
-		str = [NSString stringWithFormat: @"%g", (yval > maxValue ? maxValue : yval)];
+		str = [NSString stringWithFormat: @"%g", (yval >= maxValue - 0.01 ? maxValue : yval)];
 		x = frame.size.width - 4.0 - [font widthOfString: str];
 		[str drawAtPoint: NSMakePoint(x, y) withAttributes: attr];
 	}

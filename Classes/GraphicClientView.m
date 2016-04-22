@@ -345,6 +345,15 @@
     [self mouseDragged: event];
 }
 
+- (NSString *)infoTextForMousePoint:(NSPoint)pt dragging:(BOOL)flag
+{
+	MDTickType theTick;
+	long measure, beat, tick;
+	theTick = [dataSource quantizedTickFromPixel:pt.x];
+	[dataSource convertTick:theTick toMeasure:&measure beat:&beat andTick:&tick];
+	return [NSString stringWithFormat:@"%ld.%ld.%ld", measure, beat, tick];
+}
+
 - (int)modifyLocalGraphicTool:(int)originalGraphicTool
 {
 	return originalGraphicTool;
@@ -417,6 +426,7 @@
     currentModifierFlags = [theEvent modifierFlags];
     pt = [self convertPoint: [theEvent locationInWindow] fromView: nil];
 	pt.x = [dataSource quantizedPixelFromPixel: pt.x];
+	[dataSource setInfoText:[self infoTextForMousePoint:pt dragging:YES]];
     bounds = [self bounds];
     if (pt.x < bounds.origin.x)
         pt.x = bounds.origin.x;

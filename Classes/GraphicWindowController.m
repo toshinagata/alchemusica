@@ -50,12 +50,12 @@ enum {
 	kInfoTextTag = 3005,
 	kEditingRangeStartTextTag = 3006,
 	kEditingRangeEndTextTag = 3007,
-	kQuantizePopUpTag = 3008,
-	kLinearMenuTag = 3010,
-	kParabolaMenuTag = 3011,
-	kArcMenuTag = 3012,
-	kSigmoidMenuTag = 3013,
-	kRandomMenuTag = 3014,
+	kQuantizePopUpTag = 3020,
+	kLinearMenuTag = 3021,
+	kParabolaMenuTag = 3022,
+	kArcMenuTag = 3023,
+	kSigmoidMenuTag = 3024,
+	kRandomMenuTag = 3025,
 	kSetMenuTag = 3050,
 	kAddMenuTag = 3051,
 	kScaleMenuTag = 3052,
@@ -2276,8 +2276,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 	return graphicEditingMode;
 }
 
-static BOOL
-mouseMovedInView(NSView *view, NSEvent *theEvent)
+- (BOOL)mouseMoved:(NSEvent *)theEvent inView:(NSView *)view
 {
     NSPoint pt;
     NSRect rect;
@@ -2286,9 +2285,14 @@ mouseMovedInView(NSView *view, NSEvent *theEvent)
     pt = [theEvent locationInWindow];
     rect = [view convertRect: [view visibleRect] toView: nil];
     if (NSMouseInRect(pt, rect, [view isFlipped])) {
-        if ([view respondsToSelector: @selector(doMouseMoved:)])
+        if ([view respondsToSelector: @selector(doMouseMoved:)]) {
+			if ([view isKindOfClass:[GraphicClientView class]]) {
+				NSPoint pt2 = [view convertPoint: pt fromView: nil];
+				pt.x = [self quantizedPixelFromPixel: pt.x];
+				[self setInfoText:[(id)view infoTextForMousePoint:pt dragging:NO]];
+			}
             [(id)view doMouseMoved: theEvent];
-		else [[NSCursor arrowCursor] set];
+		} else [[NSCursor arrowCursor] set];
         return YES;
     } else return NO;
 }
@@ -2297,16 +2301,18 @@ mouseMovedInView(NSView *view, NSEvent *theEvent)
 {
     int i;
 //    NSLog(@"GraphicWindowController.mouseMoved");
+	[self setInfoText:@""];
     for (i = 0; i < myClientViewsCount; i++) {
-        if (mouseMovedInView(records[i].client, theEvent)) {
+        if ([self mouseMoved:theEvent inView:records[i].client]) {
 			[self mouseEvent:theEvent receivedByClientView:records[i].client];
 			break;
 		}
-        if (mouseMovedInView(records[i].splitter, theEvent) || mouseMovedInView(records[i].ruler, theEvent))
+        if ([self mouseMoved:theEvent inView:records[i].splitter] || [self mouseMoved:theEvent inView:records[i].ruler])
             break;
     }
-	if (i == myClientViewsCount)
+	if (i == myClientViewsCount) {
 		[[NSCursor arrowCursor] set];
+	}
 }
 
 - (void)mouseEntered: (NSEvent *)theEvent

@@ -193,6 +193,14 @@ static NSFont *sRulerLabelFont;
 		}
 		miny = [cv minValue];
 		maxy = [cv maxValue];
+		if (y2 - y1 < 2.0) {
+			if (y1 > maxy - 2.0) {
+				y2 = maxy;
+				y1 = maxy - 2.0;
+			} else {
+				y2 = y1 + 2.0;
+			}
+		}
 		y1 = (y1 - miny) / (maxy - miny);
 		y2 = (y2 - miny) / (maxy - miny);
 		[cv setVisibleRangeMin:y1 max:y2];

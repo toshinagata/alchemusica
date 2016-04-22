@@ -63,7 +63,7 @@
 		if (n < 0 || n >= 128)
 			continue;
         pt = [self convertPoint: NSMakePoint(0, n * scale) fromView: clientView];
-        rect.origin.y = pt.y - rect.size.height * 0.5;
+        rect.origin.y = pt.y - rect.size.height * 0.2;
         if (NSIntersectsRect(rect, aRect)) {
             [[labels objectAtIndex: index + 17] drawAtPoint: rect.origin withAttributes: nil];
         }

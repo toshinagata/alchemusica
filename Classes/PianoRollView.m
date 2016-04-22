@@ -626,6 +626,31 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	[self setNeedsDisplayInRect: rect];
 }
 
+- (NSString *)infoTextForMousePoint:(NSPoint)pt dragging:(BOOL)flag
+{
+	int theNote;
+	char buf[8];
+	float ys = [self yScale];
+	theNote = floor(pt.y / ys);
+	MDEventNoteNumberToNoteName(theNote, buf);
+	return [NSString stringWithFormat:@"%s, %@", buf, [super infoTextForMousePoint:pt dragging:flag]];
+}
+
+- (void)updateInfoTextForPoint:(NSPoint)pt
+{
+	//  Show the cursor info
+	MDTickType theTick;
+	int theNote;
+	char buf[8];
+	float ys = [self yScale];
+	long measure, beat, tick;
+	theTick = [dataSource quantizedTickFromPixel:pt.x];
+	[dataSource convertTick:theTick toMeasure:&measure beat:&beat andTick:&tick];
+	theNote = floor(pt.y / ys);
+	MDEventNoteNumberToNoteName(theNote, buf);
+	[dataSource setInfoText:[NSString stringWithFormat:@"%s, %ld.%ld.%ld", buf, measure, beat, tick]];
+}
+
 - (void)doMouseMoved: (NSEvent *)theEvent
 {
 	long track;
@@ -633,6 +658,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	MDEvent *ep;
 	int n;
 	NSPoint pt;
+
 	localGraphicTool = [self modifyLocalGraphicTool:[[self dataSource] graphicTool]];
 	pt = [self convertPoint:[theEvent locationInWindow] fromView: nil];
 	n = [self findNoteUnderPoint: pt track: &track position: &pos mdEvent: &ep];
