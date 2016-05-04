@@ -891,7 +891,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd $PROJECT_DIR\necho \"last_build = \\\"`date '+%Y-%m-%d %H:%M:%S %Z'`\\\"\" > lastBuild.txt\necho 'svn_revision =' `svn status -v . --depth=empty | awk '{print $1}'` >> lastBuild.txt\n";
+			shellScript = "cd $PROJECT_DIR\necho \"last_build = \\\"`date '+%Y-%m-%d %H:%M:%S %Z'`\\\"\" > lastBuild.txt\necho 'svn_revision =' `svn status -v . --depth=empty | awk '{print $1}'` >> lastBuild.txt\nif [ \"$BUILD_STYLE\" = \"Deployment\" ]; then\n  ruby update_version.rb\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */

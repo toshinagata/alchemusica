@@ -2,7 +2,7 @@
 //  GraphicRulerView.m
 //
 /*
-    Copyright (c) 2000-2011 Toshi Nagata. All rights reserved.
+    Copyright (c) 2000-2016 Toshi Nagata. All rights reserved.
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by

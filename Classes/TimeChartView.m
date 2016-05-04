@@ -3,7 +3,7 @@
 //  Created by Toshi Nagata on Sat Jan 25 2003.
 //
 /*
-    Copyright (c) 2003-2012 Toshi Nagata. All rights reserved.
+    Copyright (c) 2003-2016 Toshi Nagata. All rights reserved.
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
