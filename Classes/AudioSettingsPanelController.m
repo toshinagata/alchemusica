@@ -29,7 +29,8 @@ enum {
 	kVolumeSliderBase = 300,
 	kLeftLevelIndicatorBase = 400,
 	kRightLevelIndicatorBase = 500,
-	kCustomViewButtonBase = 600
+	kCustomViewButtonBase = 600,
+	kBusIndexTextBase = 700
 };
 #define kOutputTagOffset 50
 
@@ -235,9 +236,49 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 - (void)windowDidLoad
 {
 	[super windowDidLoad];
+	
+	//  Create bus controller list
+	{
+		static int sTagsToCopy[] = {
+			kDevicePopUpBase, kPanKnobBase, kVolumeSliderBase,
+			kLeftLevelIndicatorBase, kRightLevelIndicatorBase, kCustomViewButtonBase,
+			kBusIndexTextBase,
+			0  /*  This is dummy to copy the horizontal line  */
+		};
+		int i, count;
+		NSPoint pt = [separatorLine frame].origin;
+		NSRect frame = [busListView frame];
+		float busHeight = frame.size.height - pt.y;
+		NSLog(@"(x,y)=(%g,%g), height = %g", pt.x, pt.y, busHeight);
+		frame.size.height = busHeight * kMDAudioNumberOfInputStreams;
+		[busListView setFrame:frame];
+		for (count = 1; count < kMDAudioNumberOfInputStreams; count++) {
+			for (i = 0; i < sizeof(sTagsToCopy) / sizeof(sTagsToCopy[0]); i++) {
+				NSView *view, *newview;
+				NSData *data;
+				NSRect vframe;
+				int tag = sTagsToCopy[i];
+				if (tag == 0)
+					view = separatorLine;
+				else
+					view = [self viewWithTag:tag];
+				data = [NSKeyedArchiver archivedDataWithRootObject:view];
+				newview = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+				if (tag != 0)
+					[(id)newview setTag:tag + count];
+				if (tag == kBusIndexTextBase)
+					[(id)newview setStringValue:[NSString stringWithFormat:@"Bus %d", count + 1]];
+				vframe = [view frame];
+				vframe.origin.y -= count * busHeight;
+				[newview setFrame:vframe];
+				[busListView addSubview:newview];
+			}
+		}
+	}
+	
 	if (timer == nil) {
-	 timer = [[NSTimer scheduledTimerWithTimeInterval: 0.1 target: self selector:@selector(timerCallback:) userInfo:nil repeats:YES] retain];
-	 }
+		timer = [[NSTimer scheduledTimerWithTimeInterval: 0.1 target: self selector:@selector(timerCallback:) userInfo:nil repeats:YES] retain];
+	}
 	[self updateDisplay];
 }
 

@@ -61,7 +61,7 @@ typedef struct MDAudioMusicDeviceInfo {
 	unsigned char hasCustomView;
 } MDAudioMusicDeviceInfo;
 
-#define kMDAudioNumberOfInputStreams 8
+#define kMDAudioNumberOfInputStreams 40
 #define kMDAudioNumberOfOutputStreams 1
 #define kMDAudioNumberOfStreams (kMDAudioNumberOfInputStreams + kMDAudioNumberOfOutputStreams)
 #define kMDAudioFirstIndexForOutputStream kMDAudioNumberOfInputStreams

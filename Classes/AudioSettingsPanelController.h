@@ -19,8 +19,10 @@
 #import <Cocoa/Cocoa.h>
 
 @interface AudioSettingsPanelController : NSWindowController {
-	NSTimer *timer;				/*  Refresh the display periodically during playing  */
-	NSMutableArray *knobValues; /*  The current knob values  */
+	NSTimer *timer;				   /*  Refresh the display periodically during playing  */
+	IBOutlet NSView *busListView;  /*  The bus list is inside an NSScrollView  */
+	IBOutlet NSBox *separatorLine; /*  The horizontal line separating the input buses  */
+	NSMutableArray *knobValues;    /*  The current knob values  */
 }
 + (void)openAudioSettingsPanel;
 - (void)updateDisplay;
