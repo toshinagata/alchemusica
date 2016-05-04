@@ -2288,8 +2288,8 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
         if ([view respondsToSelector: @selector(doMouseMoved:)]) {
 			if ([view isKindOfClass:[GraphicClientView class]]) {
 				NSPoint pt2 = [view convertPoint: pt fromView: nil];
-				pt.x = [self quantizedPixelFromPixel: pt.x];
-				[self setInfoText:[(id)view infoTextForMousePoint:pt dragging:NO]];
+				pt2.x = [self quantizedPixelFromPixel: pt2.x];
+				[self setInfoText:[(id)view infoTextForMousePoint:pt2 dragging:NO]];
 			}
             [(id)view doMouseMoved: theEvent];
 		} else [[NSCursor arrowCursor] set];
