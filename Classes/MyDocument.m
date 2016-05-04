@@ -192,7 +192,7 @@ callback(float progress, void *data)
 /*  ファイルを読み込み、そのあと Remap device ダイアログをシートとして表示する。  */
 - (BOOL)readFromFile:(NSString *)fileName ofType:(NSString *)docType
 {
-    int i;
+    int i, n;
 	MDStatus result;
 	LoadingPanelController *controller;
 	RemapDevicePanelController *remapController;
@@ -221,7 +221,8 @@ callback(float progress, void *data)
         NSMutableArray *array = [NSMutableArray array];
 
         //  Set destination numbers for each track
-        for (i = [myMIDISequence trackCount] - 1; i >= 1; i--) {
+		n = [myMIDISequence trackCount];
+        for (i = 0; i < n; i++) {
             char name[256];
             MDTrack *track = [myMIDISequence getTrackAtIndex: i];
             MDTrackGetDeviceName(track, name, sizeof name);
@@ -808,6 +809,43 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
     return NO;
 }
 
+//  Get names of all destinations and the currently used device names.
+//  Duplicates are removed. Existing destinations (regardless they are used or not) are stored first.
+- (NSArray *)getDestinationNames
+{
+	int i, n;
+	char name[256];
+	MDTrack *track;
+	NSMutableArray *array = [NSMutableArray array];
+	id aname;
+	n = MDPlayerGetNumberOfDestinations();
+	[array addObject:@""];  //  The first object is always an empty string
+	for (i = 0; i < n; i++) {
+		MDPlayerGetDestinationName(i, name, sizeof name);
+		aname = [NSString localizedStringWithFormat:@"%s", name];
+		if (![array containsObject:aname])
+			[array addObject:aname];
+	}
+	n = [myMIDISequence trackCount];
+	for (i = 0; i < n; i++) {
+		track = [myMIDISequence getTrackAtIndex: i];
+        MDTrackGetDeviceName(track, name, sizeof name);
+		aname = [NSString localizedStringWithFormat:@"%s", name];
+		if (![array containsObject:aname])
+			[array addObject:aname];
+	}
+	if (destinationNames != nil) {
+		n = [destinationNames count];
+		for (i = 0; i < n; i++) {
+			aname = [destinationNames objectAtIndex:i];
+			if (![array containsObject:aname])
+				[array addObject:aname];
+		}
+	}
+	destinationNames = [array retain];
+	return array;
+}
+
 - (NSData *)getTrackAttributes
 {
     MDTrack *track;
@@ -961,13 +999,13 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	MDTrack *track = [myMIDISequence getTrackAtIndex: trackNo];
 	if (track != NULL && deviceName != nil) {
         MDTrackGetDeviceName(track, oldname, sizeof oldname);
-		strncpy(name, [deviceName cString], 255);
+		strncpy(name, [deviceName UTF8String], 255);
 		name[255] = 0;
 		if (strcmp(name, oldname) == 0)
 			return NO;  /*  Do nothing  */
         MDTrackSetDeviceName(track, name);
         [[[self undoManager] prepareWithInvocationTarget: self]
-            changeDevice: [NSString stringWithCString: oldname] forTrack: trackNo];
+            changeDevice: [NSString stringWithUTF8String: oldname] forTrack: trackNo];
         [self updateDeviceNumberForTrack: trackNo];
 		[self enqueueTrackModifiedNotification: trackNo];
         return YES;
@@ -1031,13 +1069,13 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	MDTrack *track;
 	if (trackName != nil && (track = [myMIDISequence getTrackAtIndex: trackNo]) != NULL) {
         MDTrackGetName(track, oldname, sizeof oldname);
-        strncpy(name, [trackName cString], 255);
+        strncpy(name, [trackName UTF8String], 255);
         name[255] = 0;
         if (strcmp(name, oldname) == 0)
             return NO;
         MDTrackSetName(track, name);
         [[[self undoManager] prepareWithInvocationTarget: self]
-            changeTrackName: [NSString stringWithCString: oldname] forTrack: trackNo];
+            changeTrackName: [NSString stringWithUTF8String: oldname] forTrack: trackNo];
 		[self enqueueTrackModifiedNotification: trackNo];
         return YES;
 	}

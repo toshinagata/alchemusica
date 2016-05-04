@@ -40,10 +40,52 @@
 	[super dealloc];
 }
 
+- (void)updateComboBoxContent
+{
+    id cell;
+    int i, j, n1, n2;
+    id aname;
+    NSArray *array = [myDocument getDestinationNames];
+    NSTableColumn *tableColumn = [myTableView tableColumnWithIdentifier:@"new"];
+    cell = [tableColumn dataCell];
+    if (cell == nil || ![cell isKindOfClass:[NSComboBoxCell class]]) {
+        cell = [[[NSComboBoxCell alloc] init] autorelease];
+        [cell setEditable: YES];
+        [cell setCompletes: YES];
+        [tableColumn setDataCell:cell];
+    }
+	n1 = MDPlayerGetNumberOfDestinations();
+    n2 = [array count];
+	for (i = 0; i < n2; i++) {
+        aname = [array objectAtIndex:i];
+        if (i > n1) {
+            aname = [[[NSAttributedString alloc] initWithString:aname attributes:
+                     [NSDictionary dictionaryWithObjectsAndKeys:
+                      [NSColor redColor], NSForegroundColorAttributeName, nil]] autorelease];
+        }
+		[cell addItemWithObjectValue:aname];
+    }
+    n1 = [currentValues count];
+    for (i = 0; i < n1; i++) {
+        aname = [currentValues objectAtIndex:i];
+        if ([aname isKindOfClass:[NSAttributedString class]])
+            aname = [aname string];
+        for (j = 0; j < n2; j++) {
+            id bname = [cell itemObjectValueAtIndex:j];
+            NSString *cname;
+            if ([bname isKindOfClass:[NSAttributedString class]])
+                cname = [bname string];
+            else cname = bname;
+            if ([aname isEqualToString:cname]) {
+                [currentValues replaceObjectAtIndex:i withObject:bname];
+                break;
+            }
+        }
+    }
+}
+
 - (void)windowDidLoad
 {
-	NSTableColumn *tableColumn;
-    NSComboBoxCell *cell;
 	int i, j, n;
     NSEnumerator *en;
     id obj;
@@ -83,21 +125,7 @@
     }
 	currentValues = [[NSMutableArray allocWithZone: [self zone]] initWithArray: initialValues];
 	
-    tableColumn = [myTableView tableColumnWithIdentifier:@"new"];
-    cell = [[NSComboBoxCell alloc] init];
-    [cell setEditable: YES];
-//    [cell setBordered: NO];
-    [cell setCompletes: YES];
-
-	n = MDPlayerGetNumberOfDestinations();
-	for (i = 0; i < n; i++) {
-		char name[64];
-		MDPlayerGetDestinationName(i, name, sizeof name);
-		[cell addItemWithObjectValue: [NSString localizedStringWithFormat: @"%s", name]];
-    }
-
-	[tableColumn setDataCell: cell];
-	[cell release];
+    [self updateComboBoxContent];
 }
 
 - (void)beginSheetForWindow: (NSWindow *)parentWindow invokeStopModalWhenDone: (BOOL)flag
@@ -129,7 +157,9 @@
     while ((obj = [en nextObject]) != nil) {
 		j = [[deviceNumbers objectAtIndex: i] intValue];
 		if (j >= 0 && j < [currentValues count]) {
-            NSString *str = [currentValues objectAtIndex: j];
+            id str = [currentValues objectAtIndex: j];
+            if ([str isKindOfClass:[NSAttributedString class]])
+                str = [str string];
         //    long deviceNumber = MDPlayerGetDestinationNumberFromName([str cString]);
 		//	[myDocument changeDeviceNumber: deviceNumber forTrack: [obj intValue]];
             [myDocument changeDevice: str forTrack: [obj intValue]];
@@ -169,6 +199,28 @@ forTableColumn:(NSTableColumn *)aTableColumn
 row:(int)rowIndex
 {
 	if ([@"new" isEqualToString: [aTableColumn identifier]]) {
+        NSComboBoxCell *cell = [aTableColumn dataCell];
+        int i, n = [cell numberOfItems];
+        if ([anObject isKindOfClass:[NSAttributedString class]])
+            anObject = [anObject string];
+        for (i = 0; i < n; i++) {
+            id obj = [cell itemObjectValueAtIndex:i];
+            NSString *sobj;
+            if ([obj isKindOfClass:[NSAttributedString class]])
+                sobj = [obj string];
+            else sobj = obj;
+            if ([sobj isEqualToString:anObject]) {
+                anObject = obj;
+                break;
+            }
+        }
+        if (i >= n) {
+            //  No match: we need to add a new item
+            anObject = [[[NSAttributedString alloc] initWithString:anObject attributes:
+                        [NSDictionary dictionaryWithObjectsAndKeys:
+                         [NSColor redColor], NSForegroundColorAttributeName, nil]] autorelease];
+            [cell addItemWithObjectValue:anObject];
+        }
 		if (rowIndex >= 0 && rowIndex < [currentValues count])
 			[currentValues replaceObjectAtIndex: rowIndex withObject: anObject];
 	}

@@ -1571,7 +1571,7 @@ MDTrackGuessDeviceName(MDTrack *inTrack, char *outName, long length)
 	}
 	if (name[0] == 0) {
 		/*  No clue  */
-		strcpy(name, "(Device 1)");
+	/*	strcpy(name, "(Device 1)");  */
 	}
 
 	strncpy(outName, name, length - 1);

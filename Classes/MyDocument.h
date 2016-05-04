@@ -78,6 +78,12 @@ typedef enum MyDocumentModifyMode {
 	//  An array of NSNumbers (representing the track numbers)
 	NSMutableArray *modifiedTracks;
 
+	//  Destination List
+	//  The devices that have once been used in this document is remembered
+	//  until this document is closed
+	//  Updated in getDestinationNames (and only there)
+	NSArray *destinationNames;
+	
 	//  Script menu
 //	NSMutableArray *scriptMenuInfos;
 }
@@ -89,6 +95,8 @@ typedef enum MyDocumentModifyMode {
 - (void)unlockMIDISequence;
 
 - (void)createWindowForTracks: (NSArray *)tracks ofType: (NSString *)windowType;
+
+- (NSArray *)getDestinationNames;
 
 - (void)enqueueTrackModifiedNotification: (long)trackNo;
 - (void)postTrackModifiedNotification: (NSNotification *)notification;

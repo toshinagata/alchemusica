@@ -2458,6 +2458,8 @@ row:(int)rowIndex
 			break;
 		}
 		case kDeviceNameID:
+			if ([anObject isKindOfClass:[NSAttributedString class]])
+				anObject = [anObject string];
 			[doc changeDevice: anObject forTrack: rowIndex];
 			break;
     }
@@ -2733,20 +2735,25 @@ row:(int)rowIndex
 	[self setNeedsReloadClientViews];
 }
 
-- (BOOL)tableView:(NSTableView *)aTableView shouldEditTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
+
+- (BOOL)tableView:(NSTableView *)aTableView shouldTrackCell:(NSCell *)cell forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
 {
 	int idnum = sTableColumnIDToInt([aTableColumn identifier]);
 	if (idnum == kDeviceNameID) {
 		/*  Rebuild the ComboBox item lists  */
-		int i, n;
-		id cell = [aTableColumn dataCell];
-		[cell removeAllItems];
-		[cell addItemWithObjectValue: @""];
-		n = MDPlayerGetNumberOfDestinations();
-		for (i = 0; i < n; i++) {
-			char name[64];
-			MDPlayerGetDestinationName(i, name, sizeof name);
-			[cell addItemWithObjectValue: [NSString stringWithUTF8String: name]];
+		int i, n1, n2;
+		NSArray *array = [(MyDocument *)[self document] getDestinationNames];
+//		id cell = [aTableColumn dataCell];
+		[(id)cell removeAllItems];
+		n1 = MDPlayerGetNumberOfDestinations();
+		n2 = [array count];
+		for (i = 0; i < n2; i++) {
+			id obj = [array objectAtIndex:i];
+			if (i > n1)
+				obj = [[[NSAttributedString alloc] initWithString:obj attributes:
+						[NSDictionary dictionaryWithObjectsAndKeys:
+						 [NSColor redColor], NSForegroundColorAttributeName, nil]] autorelease];
+			[(id)cell addItemWithObjectValue:obj];
 		}
 	}
 	return YES;
