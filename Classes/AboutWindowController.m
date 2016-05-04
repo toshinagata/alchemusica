@@ -70,10 +70,12 @@ static id sSharedAboutWindowController;
 - (void)windowDidLoad
 {
 	NSString *str1, *str2, *str3, *str4;
+	int revision;
+	
 	[super windowDidLoad];
 	
 	//  Read version and last build info
-	[[NSApp delegate] getVersion:&str1 copyright:&str2 lastBuild:&str3];
+	[[NSApp delegate] getVersion:&str1 copyright:&str2 lastBuild:&str3 revision:&revision];
 	str4 = [versionText stringValue];
 	str4 = [NSString stringWithFormat:str4, str1];
 	[versionText setStringValue:str4];
@@ -83,6 +85,9 @@ static id sSharedAboutWindowController;
 	str4 = [lastBuildText stringValue];
 	str4 = [NSString stringWithFormat:str4, str3];
 	[lastBuildText setStringValue:str4];
+	str4 = [revisionText stringValue];
+	str4 = [NSString stringWithFormat:str4, revision];
+	[revisionText setStringValue:str4];
 	[[NSApp delegate] getRubyVersion:&str1 copyright:&str2];
 	str3 = [rubyCopyrightText stringValue];
 	str3 = [NSString stringWithFormat:str3, str1, str2];

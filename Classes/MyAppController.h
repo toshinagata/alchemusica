@@ -38,7 +38,7 @@ extern NSString *MyAppControllerModalPanelTimerNotification;
 - (id)documentAtIndex: (int)idx;
 
 - (void)getRubyVersion:(NSString **)outVersion copyright:(NSString **)outCopyright;
-- (void)getVersion:(NSString **)outVersion copyright:(NSString **)outCopyright lastBuild:(NSString **)outLastBuild;
+- (void)getVersion:(NSString **)outVersion copyright:(NSString **)outCopyright lastBuild:(NSString **)outLastBuild revision:(int *)outRevision;
 
 @end
 

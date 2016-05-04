@@ -21,6 +21,7 @@
 @interface AboutWindowController : NSWindowController {
 	IBOutlet NSTextField *versionText;
 	IBOutlet NSTextField *lastBuildText;
+	IBOutlet NSTextField *revisionText;
 	IBOutlet NSTextField *myCopyrightText;
 	IBOutlet NSTextField *rubyCopyrightText;
 	IBOutlet NSButton *okButton;

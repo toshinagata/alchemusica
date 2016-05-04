@@ -372,7 +372,7 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 		*outCopyright = [NSString stringWithUTF8String:copyright];
 }
 
-- (void)getVersion:(NSString **)outVersion copyright:(NSString **)outCopyright lastBuild:(NSString **)outLastBuild
+- (void)getVersion:(NSString **)outVersion copyright:(NSString **)outCopyright lastBuild:(NSString **)outLastBuild revision:(int *)outRevision
 {
 	NSMutableData *data = [NSMutableData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource: @"Version" ofType: nil]];
 	char *p1, *p2;
@@ -424,6 +424,11 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 				}
 			}
 		}
+		if ((p1 = strstr(p, "svn_revision =")) != NULL) {
+			p1 = p1 + 14;
+			if (outRevision != NULL)
+				*outRevision = strtol(p1, NULL, 0);
+		}		
 	}
 	if (outVersion != NULL)
 		*outVersion = version;
@@ -432,7 +437,6 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 	if (outLastBuild != NULL)
 		*outLastBuild = lastBuild;
 }
-
 
 @end
 
