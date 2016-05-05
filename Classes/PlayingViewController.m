@@ -383,23 +383,23 @@
 		if (status == kMDPlayer_playing || status == kMDPlayer_exhausted) {
 			currentTime = MDPlayerGetTime(player);  /*  Update the current time  */
 			[self refreshTimeDisplay];
-			if (isRecording) {
+			if (isRecording || isAudioRecording) {
 				NSDictionary *info = [seq recordingInfo];
-			//	if (isPlayerRecording) {
-					//  Check for automatic stop recording
-					if ([[info valueForKey: MyRecordingInfoStopFlagKey] boolValue]) {
-						MDTickType currentTick = MDCalibratorTimeToTick(calibrator, currentTime);
-						if (currentTick > [[info valueForKey: MyRecordingInfoStopTickKey] doubleValue]) {
-							//  Stop recording (but continue to play)
-							if (isAudioRecording)
-								[myDocument finishAudioRecording];
-							else
-								[myDocument finishRecording];
-							isRecording = NO;
-							[recordButton setState:NSOffState];
+				//  Check for automatic stop recording
+				if ([[info valueForKey: MyRecordingInfoStopFlagKey] boolValue]) {
+					MDTickType currentTick = MDCalibratorTimeToTick(calibrator, currentTime);
+					if (currentTick > [[info valueForKey: MyRecordingInfoStopTickKey] doubleValue]) {
+						//  Stop recording (but continue to play)
+						if (isAudioRecording) {
+							[myDocument finishAudioRecording];
+							isAudioRecording = NO;
+						} else {
+							[myDocument finishRecording];
 						}
+						isRecording = NO;
+						[recordButton setState:NSOffState];
 					}
-			//	}
+				}
 			}
 		}
 //		if (status != kMDPlayer_playing && !(status == kMDPlayer_exhausted && isRecording && !isAudioRecording)) {
