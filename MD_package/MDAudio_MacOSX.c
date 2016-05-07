@@ -464,6 +464,10 @@ sMDAudioUpdateSoftwareDeviceInfo(void)
 			err = AudioUnitGetPropertyInfo(ci, kAudioUnitProperty_GetUIComponentList, kAudioUnitScope_Global, 0, &propSize, NULL);
 			if (err == noErr && propSize > 0)
 				info.hasCustomView = 1;
+			else {
+				info.hasCustomView = 0;
+				err = noErr;
+			}
 		}
 		if (err == noErr) {
 			status = MDArrayInsert(gAudio->musicDeviceInfos, MDArrayCount(gAudio->musicDeviceInfos), 1, &info);
@@ -476,6 +480,7 @@ sMDAudioUpdateSoftwareDeviceInfo(void)
 			n++;
 		else {
 			free(info.name);
+			info.name = NULL;
 			break;
 		}
 	}
