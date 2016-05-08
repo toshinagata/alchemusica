@@ -177,6 +177,7 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 		idx += (kMDAudioFirstIndexForOutputStream - kOutputTagOffset);
 	MDAudioSetMixerVolume(idx, [sender floatValue] * 0.01);
 }
+
 - (IBAction)panKnobMoved:(id)sender
 {
 	float pan, opan;
@@ -249,7 +250,6 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 		NSPoint pt = [separatorLine frame].origin;
 		NSRect frame = [busListView frame];
 		float busHeight = frame.size.height - pt.y;
-		NSLog(@"(x,y)=(%g,%g), height = %g", pt.x, pt.y, busHeight);
 		frame.size.height = busHeight * kMDAudioNumberOfInputStreams;
 		[busListView setFrame:frame];
 		for (count = 1; count < kMDAudioNumberOfInputStreams; count++) {
@@ -274,6 +274,7 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 				[busListView addSubview:newview];
 			}
 		}
+		[busListView scrollPoint:NSMakePoint(0, frame.size.height - [[busListView superview] frame].size.height)];
 	}
 	
 	if (timer == nil) {
