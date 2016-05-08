@@ -420,6 +420,7 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 				if (p2 != NULL) {
 					*p2 = 0;
 					lastBuild = [NSString stringWithUTF8String:p1];
+					copyright = [NSString stringWithFormat:@"2000-%.4s", p1];
 					*p2 = '\"';
 				}
 			}
