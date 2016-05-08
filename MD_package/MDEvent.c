@@ -86,7 +86,7 @@ MDMessageReallocate(MDMessage *msgRef, long length)
 	else {
 		newMsg = (MDMessage *)malloc(newLength);
 		if (newMsg != NULL) {
-			long minLength = (newMsg->length > length ? length : newMsg->length);
+			long minLength = (msgRef->length > length ? length : msgRef->length);
 			msgRef->refCount--;
 			memmove(newMsg->msg, msgRef->msg, minLength + 1);
 		}
