@@ -1068,8 +1068,18 @@ cubicReverseFunc(float x, const float *points, float tt)
 - (NSString *)infoTextForMousePoint:(NSPoint)pt dragging:(BOOL)flag
 {
 	int yval;
+	NSString *s;
 	yval = floor((maxValue - minValue) * pt.y / [self frame].size.height + minValue + 0.5);
-	return [[NSString stringWithFormat:@"%d, ", yval] stringByAppendingString:[super infoTextForMousePoint:pt dragging:flag]];
+	s = [[NSString stringWithFormat:@"%d, ", yval] stringByAppendingString:[super infoTextForMousePoint:pt dragging:flag]];
+	if (!flag) {
+		return s;
+	} else {
+		NSPoint pt0;
+		if (selectPoints != nil && [selectPoints count] > 0) {
+			pt0 = [[selectPoints objectAtIndex:0] pointValue];
+			return [NSString stringWithFormat:@"%@-%@", [self infoTextForMousePoint:pt0 dragging:NO], s];
+		} else return s;
+	}
 }
 
 - (void)doMouseMoved: (NSEvent *)theEvent
