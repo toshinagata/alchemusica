@@ -36,7 +36,7 @@ static const float sSigmoidPoints[] = {0, 0, 0.45, 0, 0.55, 1, 1, 1, -1};
 /*  The resolutions for pencil drawing  */
 /*  New events are generated so that the time/tick/value intervals are no less than
     these values. */
-static MDTimeType sTimeResolution = 100;
+static MDTimeType sTimeResolution = 5000;
 static MDTickType sTickResolution = 1;
 static float sValueResolution = 1.0;
 
@@ -828,9 +828,10 @@ cubicReverseFunc(float x, const float *points, float tt)
 		MDSetCode(&event, eventCode);
 		if (t1 == t2 || v1 == v2 || lineShape == kGraphicLinearShape || lineShape == kGraphicRandomShape) {
 			MDTickType tick;
+			float v, v0;
 			tick = fromTick;
+			v0 = -100000;
 			while (1) {
-				float v;
 				MDTickType tick2;
 				if (t1 == t2)
 					v = 1.0;
@@ -845,7 +846,10 @@ cubicReverseFunc(float x, const float *points, float tt)
 					MDSetTempo(&event, floor(v));
 				else
 					MDSetData1(&event, (int)floor(v));
-				MDPointerInsertAnEvent(mdptr, &event);
+				if (v != v0 || tick >= toTick) {
+					MDPointerInsertAnEvent(mdptr, &event);
+					v0 = v;
+				}
 			//	NSLog(@"tick=%ld value=%d", tick, (int)floor(v));
 				if (tick >= toTick)
 					break;
