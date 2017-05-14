@@ -781,15 +781,18 @@ s_MREventSet_Reject(VALUE self)
 
 /*
  *  call-seq:
- *     MREventSet.modify_tick(num)
+ *     MREventSet.modify_tick(op, num)  #  op is either "=", "+", or "*"
+ *     MREventSet.modify_tick(num)      #  same as ("+", num)
  *     MREventSet.modify_tick(array)
  *     MREventSet.modify_tick { |pt| }
  *
- *  Modify the tick of the specified events. In the first form, the ticks are shifted 
- *  by the given number. In the second form, the new tick values are taken from the array.
+ *  Modify the tick of the specified events.
+ *  In the first form, the ticks are set, shift, or multiplied by the argument.
+ *  The second form is equivalent to modify_tick("+", num) (i.e. shifted by the argument)
+ *  In the third form, the new tick values are taken from the array.
  *  (If the number of objects in the array is less than the number of events in the given set,
  *  then the last value is repeated)
- *  In the third form, the new tick values are given by the block. The block arguments
+ *  In the fourth form, the new tick values are given by the block. The block arguments
  *  are the event pointer (note: the same pointer will be reused for every iteration).
  */
 static VALUE
@@ -800,7 +803,7 @@ s_MREventSet_ModifyTick(int argc, VALUE *argv, VALUE self)
 	IntGroup *pset;
 	IntGroupObject *psobj;
 	id theData;
-	int n1, n2;
+	int n1, n2, mode;
 	MDTickType *tickp;
 	tval = rb_ivar_get(self, s_ID_track);
 	if (tval == Qnil)
@@ -811,7 +814,24 @@ s_MREventSet_ModifyTick(int argc, VALUE *argv, VALUE self)
 	if (n2 == 0)
 		return self;
 	psobj = [[[IntGroupObject alloc] initWithMDPointSet: pset] autorelease];
-	rb_scan_args(argc, argv, "01", &nval);
+	mode = MyDocumentModifyAdd;
+	if (argc >= 1) {
+		nval = argv[0];
+		if (rb_obj_is_kind_of(nval, rb_cString)) {
+			if (argc == 1)
+				rb_raise(rb_eStandardError, "Modify operation requires a single numeric argument");
+			n1 = RSTRING_PTR(nval)[0];
+			if (n1 == '=')
+				mode = MyDocumentModifyAdd;
+			else if (n1 == '*')
+				mode = MyDocumentModifyMultiply;
+			else if (n1 != '+')
+				rb_raise(rb_eStandardError, "Modify operation should be either '=', '+' or '*'");
+			nval = argv[1];
+			if (mode != MyDocumentModifySet && !rb_obj_is_kind_of(nval, rb_cNumeric))
+				rb_raise(rb_eStandardError, "Add or multiply operation requires a single numeric argument");
+		}
+	} else nval = Qnil;
 	if (nval == Qnil) {
 		/*  The new tick values are given by the block  */
 		VALUE pval = MRPointerValueFromTrackInfo(ip->track, ip->doc, ip->num, -1);
@@ -827,8 +847,11 @@ s_MREventSet_ModifyTick(int argc, VALUE *argv, VALUE self)
 		[MyDocument modifyTick: theData ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: MyDocumentModifySet destinationPositions: nil];
 		return self;
 	} else if (rb_obj_is_kind_of(nval, rb_cNumeric)) {
-		theData = [NSNumber numberWithInt: NUM2INT(rb_Integer(nval))];
-		[MyDocument modifyTick: theData ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: MyDocumentModifyAdd destinationPositions: nil];
+		if (mode == MyDocumentModifyMultiply)
+			theData = [NSNumber numberWithFloat: NUM2DBL(rb_Float(nval))];
+		else
+			theData = [NSNumber numberWithInt: NUM2INT(rb_Integer(nval))];
+		[MyDocument modifyTick: theData ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: mode destinationPositions: nil];
 		return self;
 	} else {
 		VALUE *nvalp;
@@ -854,13 +877,18 @@ s_MREventSet_ModifyTick(int argc, VALUE *argv, VALUE self)
 
 /*
  *  call-seq:
- *     MREventSet.modify_code(num)
+ *     MREventSet.modify_code(op, num)  #  op is either "=", "+", or "*"
+ *     MREventSet.modify_code(num)      #  same as ("+", num)
  *     MREventSet.modify_code(array)
  *     MREventSet.modify_code { |pt| }
  *
- *  Modify the code of the specified events. In the first form, the codes are shifted by num
- *  for all specified events. In the second form, the new code values are taken from the array.
- *  In the third form, the new code values are given by the block. The block arguments
+ *  Modify the code of the specified events.
+ *  In the first form, the codes are set, shift, or multiplied by the argument.
+ *  The second form is equivalent to modify_code("+", num) (i.e. shifted by the argument)
+ *  In the third form, the new code values are taken from the array.
+ *  (If the number of objects in the array is less than the number of events in the given set,
+ *  then the last value is repeated)
+ *  In the fourth form, the new code values are given by the block. The block arguments
  *  are the event pointer (note: the same pointer will be reused for every iteration).
  */
 static VALUE
@@ -868,7 +896,7 @@ s_MREventSet_ModifyCode(int argc, VALUE *argv, VALUE self)
 {
 	const MyDocumentTrackInfo *ip;
 	VALUE tval, nval;
-	int n1, n2;
+	int n1, n2, mode;
 	IntGroupObject *psobj;
 	IntGroup *pset;
 	id theData;
@@ -878,12 +906,29 @@ s_MREventSet_ModifyCode(int argc, VALUE *argv, VALUE self)
 	if (tval == Qnil)
 		rb_raise(rb_eStandardError, "Track is not given");
 	ip = TrackInfoFromMRTrackValue(tval);
-	rb_scan_args(argc, argv, "01", &nval);
 	pset = IntGroupFromValue(self);
 	n2 = IntGroupGetCount(pset);
 	if (n2 == 0)
 		return self;
 	psobj = [[[IntGroupObject alloc] initWithMDPointSet: pset] autorelease];
+	mode = MyDocumentModifyAdd;
+	if (argc >= 1) {
+		nval = argv[0];
+		if (rb_obj_is_kind_of(nval, rb_cString)) {
+			if (argc == 1)
+				rb_raise(rb_eStandardError, "Modify operation requires a single numeric argument");
+			n1 = RSTRING_PTR(nval)[0];
+			if (n1 == '=')
+				mode = MyDocumentModifySet;
+			else if (n1 == '*')
+				mode = MyDocumentModifyMultiply;
+			else if (n1 != '+')
+				rb_raise(rb_eStandardError, "Modify operation should be either '=', '+' or '*'");
+			nval = argv[1];
+			if (mode != MyDocumentModifySet && !rb_obj_is_kind_of(nval, rb_cNumeric))
+				rb_raise(rb_eStandardError, "Add or multiply operation requires a single numeric argument");
+		}
+	} else nval = Qnil;
 	if (nval == Qnil) {
 		VALUE pval = MRPointerValueFromTrackInfo(ip->track, ip->doc, ip->num, -1);
 		MDPointer *pt = MDPointerFromMRPointerValue(pval);
@@ -898,8 +943,11 @@ s_MREventSet_ModifyCode(int argc, VALUE *argv, VALUE self)
 		[MyDocument modifyCodes: theData ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: MyDocumentModifySet];
 		return self;
 	} else if (rb_obj_is_kind_of(nval, rb_cNumeric)) {
-		theData = [NSNumber numberWithInt: NUM2INT(rb_Integer(nval))];
-		[MyDocument modifyCodes: theData ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: MyDocumentModifyAdd];
+		if (mode == MyDocumentModifyMultiply)
+			theData = [NSNumber numberWithFloat: NUM2DBL(rb_Float(nval))];
+		else
+			theData = [NSNumber numberWithInt: NUM2INT(rb_Integer(nval))];
+		[MyDocument modifyCodes: theData ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: mode];
 		return self;
 	} else {
 		int i;
@@ -927,7 +975,7 @@ s_MREventSet_ModifyDataSub(int argc, VALUE *argv, VALUE self, int kind)
 {
 	const MyDocumentTrackInfo *ip;
 	VALUE tval, nval, pval;
-	int i, n1, n2, n3;
+	int i, n1, n2, n3, mode;
 	IntGroupObject *psobj;
 	IntGroup *pset;
 	id theData;
@@ -941,12 +989,29 @@ s_MREventSet_ModifyDataSub(int argc, VALUE *argv, VALUE self, int kind)
 	if (tval == Qnil)
 		rb_raise(rb_eStandardError, "Track is not given");
 	ip = TrackInfoFromMRTrackValue(tval);
-	rb_scan_args(argc, argv, "01", &nval);
 	pset = IntGroupFromValue(self);
 	n2 = IntGroupGetCount(pset);
 	if (n2 == 0)
 		return self;
 	psobj = [[[IntGroupObject alloc] initWithMDPointSet: pset] autorelease];
+	mode = MyDocumentModifyAdd;
+	if (argc >= 1) {
+		nval = argv[0];
+		if (rb_obj_is_kind_of(nval, rb_cString)) {
+			if (argc == 1)
+				rb_raise(rb_eStandardError, "Modify operation requires a single numeric argument");
+			n1 = RSTRING_PTR(nval)[0];
+			if (n1 == '=')
+				mode = MyDocumentModifySet;
+			else if (n1 == '*')
+				mode = MyDocumentModifyMultiply;
+			else if (n1 != '+')
+				rb_raise(rb_eStandardError, "Modify operation should be either '=', '+' or '*'");
+			nval = argv[1];
+			if (mode != MyDocumentModifySet && !rb_obj_is_kind_of(nval, rb_cNumeric))
+				rb_raise(rb_eStandardError, "Add or multiply operation requires a single numeric argument");
+		}
+	} else nval = Qnil;
 	
 	pval = MRPointerValueFromTrackInfo(ip->track, ip->doc, ip->num, -1);
 	pt = MDPointerFromMRPointerValue(pval);
@@ -1027,7 +1092,7 @@ s_MREventSet_ModifyDataSub(int argc, VALUE *argv, VALUE self, int kind)
 		return self;
 	} else if (n3 == 1) {
 		theData = [NSNumber numberWithFloat: NUM2DBL(rb_Float(nval))];
-		[MyDocument modifyData: theData forEventKind: kind ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: MyDocumentModifyAdd];
+		[MyDocument modifyData: theData forEventKind: kind ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: mode];
 		return self;
 	} else {
 		theData = [NSMutableData dataWithLength: sizeof(float) * n2];
@@ -1045,16 +1110,19 @@ s_MREventSet_ModifyDataSub(int argc, VALUE *argv, VALUE self, int kind)
 
 /*
  *  call-seq:
- *     MREventSet.modify_data(dat)
- *     MREventSet.modify_data(val)
+ *     MREventSet.modify_data(op, num)  #  op is either "=", "+", or "*"
+ *     MREventSet.modify_data(num)      #  same as ("+", num)
+ *     MREventSet.modify_data(array)
  *     MREventSet.modify_data { |pt| }
  *
- *  Modify the "data" of the specified events. All specified events must be of the same
- *  kind. In the first form, the data of the events are set to dat.
- *  In the second form, the new data values are taken from the array.
- *  In the third form, the new data values are given by the block. The block arguments
+ *  Modify the code of the specified events.
+ *  In the first form, the data are set, shift, or multiplied by the argument.
+ *  The second form is equivalent to modify_data("+", num) (i.e. shifted by the argument)
+ *  In the third form, the new data values are taken from the array.
+ *  (If the number of objects in the array is less than the number of events in the given set,
+ *  then the last value is repeated)
+ *  In the fourth form, the new data values are given by the block. The block arguments
  *  are the event pointer (note: the same pointer will be reused for every iteration).
- *  If pointset is nil, the current selection is used.
  */
 static VALUE
 s_MREventSet_ModifyData(int argc, VALUE *argv, VALUE self)
@@ -1064,15 +1132,19 @@ s_MREventSet_ModifyData(int argc, VALUE *argv, VALUE self)
 
 /*
  *  call-seq:
- *     MREventSet.modify_velocity(num)
- *     MREventSet.modify_velocity(val)
- *     MREventSet.modify_velocity { |pt, i| }
+ *     MREventSet.modify_velocity(op, num)  #  op is either "=", "+", or "*"
+ *     MREventSet.modify_velocity(num)      #  same as ("+", num)
+ *     MREventSet.modify_velocity(array)
+ *     MREventSet.modify_velocity { |pt| }
  *
  *  Modify the velocities of the specified events. All specified events must be note events.
- *  In the first form, the velocity of the events are set to num.
- *  In the second form, the new velocity values are taken from the array.
- *  In the third form, the new velocity values are given by the block. The block arguments
- *  are the event pointer and the index within the pointset.
+ *  In the first form, the velocities are set, shift, or multiplied by the argument.
+ *  The second form is equivalent to modify_velocity("+", num) (i.e. shifted by the argument)
+ *  In the third form, the new velocity values are taken from the array.
+ *  (If the number of objects in the array is less than the number of events in the given set,
+ *  then the last value is repeated)
+ *  In the fourth form, the new velocity values are given by the block. The block arguments
+ *  are the event pointer (note: the same pointer will be reused for every iteration).
  */
 static VALUE
 s_MREventSet_ModifyVelocity(int argc, VALUE *argv, VALUE self)
@@ -1082,15 +1154,19 @@ s_MREventSet_ModifyVelocity(int argc, VALUE *argv, VALUE self)
 
 /*
  *  call-seq:
- *     MREventSet.modify_release_velocity(num)
- *     MREventSet.modify_release_velocity(val)
- *     MREventSet.modify_release_velocity { |pt, i| }
+ *     MREventSet.modify_release_velocity(op, num)  #  op is either "=", "+", or "*"
+ *     MREventSet.modify_release_velocity(num)      #  same as ("+", num)
+ *     MREventSet.modify_release_velocity(array)
+ *     MREventSet.modify_release_velocity { |pt| }
  *
  *  Modify the release velocities of the specified events. All specified events must be note events.
- *  In the first form, the release velocity of the events are set to num.
- *  In the second form, the new release velocity values are taken from the array.
- *  In the third form, the new release velocity values are given by the block. The block arguments
- *  are the event pointer and the index within the pointset.
+ *  In the first form, the release velocities are set, shift, or multiplied by the argument.
+ *  The second form is equivalent to modify_release_velocity("+", num) (i.e. shifted by the argument)
+ *  In the third form, the new release velocity values are taken from the array.
+ *  (If the number of objects in the array is less than the number of events in the given set,
+ *  then the last value is repeated)
+ *  In the fourth form, the new release velocity values are given by the block. The block arguments
+ *  are the event pointer (note: the same pointer will be reused for every iteration).
  */
 static VALUE
 s_MREventSet_ModifyReleaseVelocity(int argc, VALUE *argv, VALUE self)
@@ -1100,23 +1176,26 @@ s_MREventSet_ModifyReleaseVelocity(int argc, VALUE *argv, VALUE self)
 
 /*
  *  call-seq:
- *     MREventSet.modify_duration(num)
+ *     MREventSet.modify_duration(op, num)  #  op is either "=", "+", or "*"
+ *     MREventSet.modify_duration(num)      #  same as ("+", num)
  *     MREventSet.modify_duration(array)
- *     MREventSet.modify_duration { |pt, i| }
+ *     MREventSet.modify_duration { |pt| }
  *
- *  Modify the durations of the specified events. In the first form, the durations are 
- *  incremented/decremented by num for all specified events. In the second form, the 
- *  new duration values are taken from the array.
- *  In the third form, the new duration values are given by the block. The block arguments
+ *  Modify the duration of the specified events.
+ *  In the first form, the durations are set, shift, or multiplied by the argument.
+ *  The second form is equivalent to modify_duration("+", num) (i.e. shifted by the argument)
+ *  In the third form, the new duration values are taken from the array.
+ *  (If the number of objects in the array is less than the number of events in the given set,
+ *  then the last value is repeated)
+ *  In the fourth form, the new duration values are given by the block. The block arguments
  *  are the event pointer (note: the same pointer will be reused for every iteration).
- *  If pointset is nil, the current selection is used.
  */
 static VALUE
 s_MREventSet_ModifyDuration(int argc, VALUE *argv, VALUE self)
 {
 	const MyDocumentTrackInfo *ip;
 	VALUE tval, nval;
-	int n1, n2;
+	int n1, n2, mode;
 	IntGroupObject *psobj;
 	IntGroup *pset;
 	id theData;
@@ -1126,12 +1205,29 @@ s_MREventSet_ModifyDuration(int argc, VALUE *argv, VALUE self)
 	if (tval == Qnil)
 		rb_raise(rb_eStandardError, "Track is not given");
 	ip = TrackInfoFromMRTrackValue(tval);
-	rb_scan_args(argc, argv, "01", &nval);
 	pset = IntGroupFromValue(self);
 	n2 = IntGroupGetCount(pset);
 	if (n2 == 0)
 		return self;
 	psobj = [[[IntGroupObject alloc] initWithMDPointSet: pset] autorelease];
+	mode = MyDocumentModifyAdd;
+	if (argc >= 1) {
+		nval = argv[0];
+		if (rb_obj_is_kind_of(nval, rb_cString)) {
+			if (argc == 1)
+				rb_raise(rb_eStandardError, "Modify operation requires a single numeric argument");
+			n1 = RSTRING_PTR(nval)[0];
+			if (n1 == '=')
+				mode = MyDocumentModifySet;
+			else if (n1 == '*')
+				mode = MyDocumentModifyMultiply;
+			else if (n1 != '+')
+				rb_raise(rb_eStandardError, "Modify operation should be either '=', '+' or '*'");
+			nval = argv[1];
+			if (mode != MyDocumentModifySet && !rb_obj_is_kind_of(nval, rb_cNumeric))
+				rb_raise(rb_eStandardError, "Add or multiply operation requires a single numeric argument");
+		}
+	} else nval = Qnil;
 	if (nval == Qnil) {
 		VALUE pval = MRPointerValueFromTrackInfo(ip->track, ip->doc, ip->num, -1);
 		MDPointer *pt = MDPointerFromMRPointerValue(pval);
@@ -1146,8 +1242,11 @@ s_MREventSet_ModifyDuration(int argc, VALUE *argv, VALUE self)
 		[MyDocument modifyDurations: theData ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: MyDocumentModifySet];
 		return self;
 	} else if (rb_obj_is_kind_of(nval, rb_cNumeric)) {
-		theData = [NSNumber numberWithLong: (long)(NUM2INT(rb_Integer(nval)))];
-		[MyDocument modifyDurations: theData ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: MyDocumentModifyAdd];
+		if (mode == MyDocumentModifyMultiply)
+			theData = [NSNumber numberWithFloat: NUM2DBL(rb_Float(nval))];
+		else
+			theData = [NSNumber numberWithLong: (long)(NUM2INT(rb_Integer(nval)))];
+		[MyDocument modifyDurations: theData ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: mode];
 		return self;
 	} else {
 		int i;
