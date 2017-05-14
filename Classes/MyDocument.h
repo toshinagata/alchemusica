@@ -166,6 +166,7 @@ typedef enum MyDocumentModifyMode {
 - (BOOL)isSelectionEmptyInEditableTracks:(BOOL)editableOnly;
 
 - (float)timebase;
+- (void)setTimebase:(float)timebase;
 
 //  Color management
 - (NSColor *)colorForTrack: (int)track enabled: (BOOL)flag;

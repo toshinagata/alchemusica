@@ -413,7 +413,19 @@ callback(float progress, void *data)
 	MDSequence *sequence = [[self myMIDISequence] mySequence];
 	if (sequence == NULL)
 		return 480.0;
-	else return MDSequenceGetTimebase(sequence);
+	else return (float)MDSequenceGetTimebase(sequence);
+}
+
+- (void)setTimebase:(float)timebase
+{
+	MDSequence *sequence = [[self myMIDISequence] mySequence];
+	if (sequence == NULL)
+		return;
+	
+	//  Register undo action
+	[[[self undoManager] prepareWithInvocationTarget: self]
+	 setTimebase: (float)MDSequenceGetTimebase(sequence)];
+	MDSequenceSetTimebase(sequence, (long)timebase);
 }
 
 - (void)lockMIDISequence

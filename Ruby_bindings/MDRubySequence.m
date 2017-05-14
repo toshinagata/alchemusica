@@ -251,6 +251,21 @@ s_MRSequence_Timebase(VALUE self)
 
 /*
  *  call-seq:
+ *     sequence.set_timebase(timebase)
+ *
+ *  Set the timebase of the sequence.
+ */
+static VALUE
+s_MRSequence_SetTimebase(VALUE self, VALUE tval)
+{
+	MyDocument *doc = MyDocumentFromMRSequenceValue(self);
+	float timebase = NUM2DBL(rb_Float(tval));
+	[doc setTimebase:timebase];
+	return self;
+}
+
+/*
+ *  call-seq:
  *     sequence.duration
  *
  *  Get the duration of the sequence in tick.
@@ -736,6 +751,7 @@ MRSequenceInitClass(void)
     rb_define_method(rb_cMRSequence, "tick_for_selection", s_MRSequence_TickForSelection, -1);
     rb_define_method(rb_cMRSequence, "editing_range", s_MRSequence_EditingRange, 0);
 	rb_define_method(rb_cMRSequence, "timebase", s_MRSequence_Timebase, 0);
+	rb_define_method(rb_cMRSequence, "set_timebase", s_MRSequence_SetTimebase, 1);
     rb_define_method(rb_cMRSequence, "duration", s_MRSequence_Duration, 0);
     rb_define_method(rb_cMRSequence, "track", s_MRSequence_Track, 1);
     rb_define_method(rb_cMRSequence, "number_of_tracks", s_MRSequence_NumberOfTracks, 0);
