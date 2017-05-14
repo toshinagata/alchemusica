@@ -3,7 +3,7 @@
  *  Alchemusica
  *
  *  Created by Toshi Nagata on 08/03/19.
- *  Copyright 2008-2016 Toshi Nagata. All rights reserved.
+ *  Copyright 2008-2017 Toshi Nagata. All rights reserved.
  *
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -618,13 +618,14 @@ s_executeRubyOnDocument(VALUE vinfo)
 					retp1 = va_arg(ap, void *);
 					if (retfmt == 'a' || (retfmt >= 'A' && retfmt <= 'Z'))
 						retp2 = va_arg(ap, void *);
-					break;
+					goto out_of_loop;
 			} /* end switch */
 			rb_ary_push(args, aval);
 			p++;
 		} /* end while */
 	} /* end if */
 	
+out_of_loop:
 	if (rp->type == 2) {
 		rb_ary_unshift(args, mval);
 		retval = rb_apply(rb_cMRSequence, mid, args);

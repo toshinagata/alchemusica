@@ -3,7 +3,7 @@
 //
 //  Created by Toshi Nagata.
 /*
-    Copyright (c) 2000-2016 Toshi Nagata. All rights reserved.
+    Copyright (c) 2000-2017 Toshi Nagata. All rights reserved.
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -2786,7 +2786,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 				continue;
 			IntGroupAdd([psobj pointSet], MDPointerGetPosition(pt), 1);
 		}
-		[self modifyData:[NSNumber numberWithDouble:(double)deltaTick/newDuration] forEventKind:kMDEventTempo ofMultipleEventsAt:psobj inTrack:0 mode:MyDocumentModifyMultiply];
+		[self modifyData:[NSNumber numberWithDouble:(double)newDuration/deltaTick] forEventKind:kMDEventTempo ofMultipleEventsAt:psobj inTrack:0 mode:MyDocumentModifyMultiply];
 		MDPointerRelease(pt);
 		[psobj release];
 	}
