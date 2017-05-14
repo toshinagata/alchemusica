@@ -3,7 +3,7 @@
 //
 //  Created by Toshi Nagata.
 /*
-    Copyright (c) 2000-2016 Toshi Nagata. All rights reserved.
+    Copyright (c) 2000-2017 Toshi Nagata. All rights reserved.
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -115,7 +115,7 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 	n = [infos count];
 	for (i = 0; i < n; i++) {
 		id obj = [infos objectAtIndex: i];
-		id item = [menu insertItemWithTitle: @"X" action: action keyEquivalent: @"" atIndex: i];
+		id item = [menu insertItemWithTitle: @"X" action: action keyEquivalent: @"" atIndex: i + sScriptMenuCount + 1];
 		[item setTitle: [obj valueForKey: @"title"]];
 		[item setTag: i];
 		[item setTarget: target];

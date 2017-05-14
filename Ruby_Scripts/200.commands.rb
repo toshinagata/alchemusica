@@ -15,7 +15,7 @@ def change_control_number_ext
   hash = Dialog.run {
     layout(1,
 	  layout(2,
-	    item(:text, :title=>"Old control number"),
+	    item(:text, :title=>"Old control Number"),
 	    item(:textfield, :width=>40, :range=>[0, 127], :tag=>"old"),
 	    item(:text, :title=>"New control number"),
 	    item(:textfield, :width=>40, :range=>[0, 127], :tag=>"new")),
@@ -39,6 +39,31 @@ def change_control_number_ext
   end
 end
 
+def change_timebase
+  timebase = self.timebase
+  hash = Dialog.run {
+    layout(1,
+	  layout(2,
+	    item(:text, :title=>"Current timebase = #{timebase}"),
+		nil,
+	    item(:text, :title=>"New timebase"),
+	    item(:textfield, :width=>40, :range=>[24, 960], :tag=>"new")))
+  }
+    p hash
+  if hash[:status] == 0
+	new = hash["new"].to_f
+	mult = new / timebase
+	each_track { |tr|
+	  set1 = tr.all_events
+	  set2 = tr.eventset { |p| p.kind == :note }
+	  set2.modify_duration("*", mult)
+	  set1.modify_tick("*", mult)
+	}
+	self.set_timebase(new)
+  end
 end
 
+end
+
+register_menu("Change timebase...", :change_timebase)
 # register_menu("Change control number...", :change_control_number_ext)
