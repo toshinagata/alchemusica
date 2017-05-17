@@ -2,7 +2,7 @@
 //  GraphicRulerView.m
 //
 /*
-    Copyright (c) 2000-2016 Toshi Nagata. All rights reserved.
+    Copyright (c) 2000-2017 Toshi Nagata. All rights reserved.
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 #import "GraphicClientView.h"
 #import "NSCursorAdditions.h"
 #import "MyDocument.h"
+#import "MyAppController.h"  //  for getOSXVersion
 
 static NSFont *sRulerLabelFont;
 
@@ -233,6 +234,26 @@ static NSFont *sRulerLabelFont;
     if ([theEvent modifierFlags] & NSAlternateKeyMask)
         [[NSCursor loupeCursor] set];
     else [[NSCursor arrowCursor] set];
+}
+
+- (void)scrollWheel:(NSEvent *)theEvent
+{
+	float dy, newpos;
+	static int scroll_direction = 0;
+	
+	if (scroll_direction == 0) {
+		//  Scroll wheel behavior was changed in 10.7
+		if ([[NSApp delegate] getOSXVersion] < 10700)
+			scroll_direction = -1;
+		else scroll_direction = 1;
+	}
+	dy = [theEvent deltaY];
+	if (dy != 0.0) {
+		//  Implement vertical scroll by ourselves
+		GraphicClientView *cview = (GraphicClientView *)[self clientView];
+		newpos = [cview scrollVerticalPosition] + dy * (4 * scroll_direction);
+		[cview scrollToVerticalPosition:newpos];
+	}
 }
 
 @end

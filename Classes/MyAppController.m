@@ -439,6 +439,20 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 		*outLastBuild = lastBuild;
 }
 
+- (int)getOSXVersion
+{
+	static BOOL s_first_call = YES;
+	static int s_version;
+	if (s_first_call) {
+		int i[3];
+		NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:@"/System/Library/CoreServices/SystemVersion.plist"];
+		NSString *version = [dict objectForKey:@"ProductVersion"];
+		sscanf([version UTF8String], "%d.%d.%d", i, i + 1, i + 2);
+		s_version = i[0] * 10000 + i[1] * 100 + i[2];
+	}
+	return s_version;
+}
+
 @end
 
 #pragma mark ====== Plain-C interface ======

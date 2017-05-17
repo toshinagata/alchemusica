@@ -2,7 +2,7 @@
 //  GraphicClientView.m
 //
 /*
-    Copyright (c) 2000-2016 Toshi Nagata. All rights reserved.
+    Copyright (c) 2000-2017 Toshi Nagata. All rights reserved.
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 #import "GraphicWindowController.h"	//  for trackDuration
 #import "MyDocument.h"
 #import "NSCursorAdditions.h"
+#import "MyAppController.h"  //  for getOSXVersion
 
 @implementation GraphicClientView
 
@@ -551,6 +552,53 @@
 		[[NSCursor IBeamCursor] set];
 	else
 		[[NSCursor arrowCursor] set];
+}
+
+- (float)scrollVerticalPosition
+{
+	NSRect visibleRect = [[self superview] bounds];
+	return visibleRect.origin.y;
+}
+
+- (void)scrollToVerticalPosition:(float)pos
+{
+	NSRect visibleRect = [[self superview] bounds];
+	NSRect documentRect = [self frame];
+	float y1;
+	y1 = documentRect.origin.y;
+	if (pos < y1)
+		pos = y1;
+	y1 = documentRect.origin.y + documentRect.size.height - visibleRect.size.height;
+	if (pos > y1)
+		pos = y1;
+	visibleRect.origin.y = pos;
+	[self scrollPoint: visibleRect.origin];
+	[self setNeedsDisplay:YES];
+}
+
+- (void)scrollWheel:(NSEvent *)theEvent
+{
+	static int scroll_direction = 0;
+	float dx, dy, newpos;
+
+	if (scroll_direction == 0) {
+		//  Scroll wheel behavior was changed in 10.7
+		if ([[NSApp delegate] getOSXVersion] < 10700)
+			scroll_direction = -1;
+		else scroll_direction = 1;
+	}
+	
+	dx = [theEvent deltaX];
+	dy = [theEvent deltaY];
+	if (dx != 0.0) {
+		newpos = [[self dataSource] scrollPositionOfClientViews] - dx * (8 * scroll_direction);
+		[[self dataSource] scrollClientViewsToPosition:newpos];
+	}
+	if (dy != 0.0) {
+		//  Implement vertical scroll by ourselves
+		newpos = [self scrollVerticalPosition] + dy * (4 * scroll_direction);
+		[self scrollToVerticalPosition:newpos];
+	}
 }
 
 - (void)viewWillStartLiveResize

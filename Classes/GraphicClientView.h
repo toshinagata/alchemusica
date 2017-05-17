@@ -2,7 +2,7 @@
 //  GraphicClientView.h
 //
 /*
-    Copyright (c) 2000-2016 Toshi Nagata. All rights reserved.
+    Copyright (c) 2000-2017 Toshi Nagata. All rights reserved.
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -104,5 +104,8 @@ enum {
 - (void)getVisibleRangeMin:(float *)min max:(float *)max;
 - (void)saveVisibleRange;
 - (void)restoreVisibleRange;
+
+- (float)scrollVerticalPosition;
+- (void)scrollToVerticalPosition:(float)pos;
 
 @end

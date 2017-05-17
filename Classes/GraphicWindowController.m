@@ -2,7 +2,7 @@
    GraphicWindowController.m
 */
 /*
-    Copyright (c) 2000-2016 Toshi Nagata. All rights reserved.
+    Copyright (c) 2000-2017 Toshi Nagata. All rights reserved.
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -892,6 +892,11 @@ sTableColumnIDToInt(id identifier)
 			[records[i].client scrollPoint: visibleRect.origin];
 			[records[i].client setNeedsDisplay:YES];
 		}
+		if (i == 0) {
+			float width = documentRect.size.width - visibleRect.size.width;
+			[myScroller setFloatValue: pos / width];
+			[myScroller setKnobProportion: visibleRect.size.width / documentRect.size.width];
+		}
 	}
 }
 
@@ -930,7 +935,7 @@ sTableColumnIDToInt(id identifier)
 		pos = 0.0;
 	if (pos > width)
 		pos = width;
-	[myScroller setFloatValue: pos / width];
+//	[myScroller setFloatValue: pos / width];
 	pos = floor(pos);
 	[self scrollClientViewsToPosition: pos];
 //	visibleRect.origin.x = pos + documentRect.origin.x;
