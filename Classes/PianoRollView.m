@@ -2,7 +2,7 @@
     PianoRollView.m
 */
 /*
-    Copyright (c) 2000-2016 Toshi Nagata. All rights reserved.
+    Copyright (c) 2000-2017 Toshi Nagata. All rights reserved.
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -500,7 +500,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 			}
 			if (ep == NULL) {
 				if (pset == NULL && cacheArray != nil && (pset = [[cacheArray objectAtIndex: i] pointSet]) != NULL) {
-					MDPointerSetPositionWithPointSet(pt, pset, -1, &n);
+					n = -1;  //  The next MDPointerBackwardWithPointSet() will give the last event in pset
 					continue;
 				}
 				else break;  // not found in this track
