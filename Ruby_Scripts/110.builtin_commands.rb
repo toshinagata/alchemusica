@@ -26,10 +26,11 @@ def change_control_number
 	  item(:checkbox, :title=>"Change only selected events", :tag=>"selection_only"))
   }
   if hash[:status] == 0
+    p hash
 	old = Integer(hash["old"])
 	new = Integer(hash["new"])
-	editable_only = hash["editable_only"]
-	selection_only = hash["selection_only"]
+	editable_only = (hash["editable_only"] != 0)
+	selection_only = (hash["selection_only"] != 0)
 	each_track { |tr|
 	  next if editable_only && !tr.editable?
 	  sel = (selection_only ? tr.selection : tr.all_events)
