@@ -250,7 +250,7 @@
 		E4335F910472902100A80006 /* ColorCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ColorCell.m; path = Classes/ColorCell.m; sourceTree = "<group>"; };
 		E43D1E0F10418C0F00B0104C /* MDRubyExtern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDRubyExtern.h; path = Ruby_bindings/MDRubyExtern.h; sourceTree = "<group>"; };
 		E43E5F200D92AD49002FDD1E /* MDRuby.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MDRuby.h; path = Ruby_bindings/MDRuby.h; sourceTree = "<group>"; };
-		E43E5F210D92AD49002FDD1E /* MDRubyCore.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = MDRubyCore.m; path = Ruby_bindings/MDRubyCore.m; sourceTree = "<group>"; };
+		E43E5F210D92AD49002FDD1E /* MDRubyCore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MDRubyCore.m; path = Ruby_bindings/MDRubyCore.m; sourceTree = "<group>"; };
 		E43E5F220D92AD49002FDD1E /* MDRubyCore.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MDRubyCore.h; path = Ruby_bindings/MDRubyCore.h; sourceTree = "<group>"; };
 		E4402B790BF592170076972C /* ibeam.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ibeam.png; path = icons/ibeam.png; sourceTree = "<group>"; };
 		E44590C81413C1C400F5C20D /* mute.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = mute.png; path = icons/mute.png; sourceTree = "<group>"; };

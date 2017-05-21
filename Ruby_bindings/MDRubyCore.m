@@ -30,6 +30,9 @@
 int gRubyRunLevel = 0;
 int gRubyIsCheckingInterrupt = 0;
 
+VALUE gRubyBacktrace;
+VALUE gRubyErrorHistory;
+
 #pragma mark ====== Utility function ======
 
 /*
@@ -56,7 +59,7 @@ Ruby_FileStringValuePtr(VALUE *valp)
 {
 #if WINDOWS
 	char *p = strdup(StringValuePtr(*valp));
-	translate_char(p, '/', '\\');
+	translate_char(p, '/', '¥¥');
 	*valp = rb_str_new2(p);
 	free(p);
 	return StringValuePtr(*valp);
@@ -71,7 +74,7 @@ Ruby_NewFileStringValue(const char *fstr)
 #if WINDOWS
 	VALUE retval;
 	char *p = strdup(fstr);
-	translate_char(p, '\\', '/');
+	translate_char(p, '¥¥', '/');
 	retval = rb_str_new2(p);
 	free(p);
 	return retval;
@@ -319,7 +322,7 @@ s_SetIntervalTimer(int n)
 		if (sTimerFlag == -1) {
 			int status = pthread_create(&sTimerThread, NULL, s_TimerThreadEntry, NULL);
 			if (status != 0) {
-				fprintf(stderr, "pthread_create failed while setting Ruby interval timer: status = %d\n", status);
+				fprintf(stderr, "pthread_create failed while setting Ruby interval timer: status = %d¥n", status);
 			}
 		}
 		sTimerFlag = 0;  /*  Active  */
@@ -549,9 +552,119 @@ typedef struct RubyArgsRecord {
 	const char *script; /*  A method name or a script  */
 	int type;           /*  0: script, 1: ordinary method, 2: singleton method  */
 	const char *argfmt; /*  Argument format string  */
+	const char *fname;  /*  Not used yet  */
 	va_list ap;			/*  Argument list  */
 } RubyArgsRecord;
- 
+
+static VALUE s_ruby_top_self = Qfalse;
+static VALUE s_ruby_get_binding_for_document = Qfalse;
+static VALUE s_ruby_export_local_variables = Qfalse;
+
+static VALUE
+s_evalRubyScriptOnDocumentSub(VALUE val)
+{
+	RubyArgsRecord *arec = (RubyArgsRecord *)val;
+	VALUE sval, fnval, lnval, retval;
+	VALUE binding;
+	
+	/*  Clear the error information (store in the history array if necessary)  */
+	sval = rb_errinfo();
+	if (sval != Qnil) {
+		rb_eval_string("$error_history.push([$!.to_s, $!.backtrace])");
+		rb_set_errinfo(Qnil);
+	}
+	
+	if (s_ruby_top_self == Qfalse) {
+		s_ruby_top_self = rb_eval_string("eval(\"self\",TOPLEVEL_BINDING)");
+	}
+	if (s_ruby_get_binding_for_document == Qfalse) {
+		const char *s1 =
+		"lambda { |_doc_, _bind_| \n"
+		"  _proc_ = eval(\"lambda { |__doc__| __doc__.instance_eval { binding } } \", _bind_) \n"
+		"  _proc_.call(_doc_) } ";
+		s_ruby_get_binding_for_document = rb_eval_string(s1);
+		rb_define_variable("_get_binding_for_document", &s_ruby_get_binding_for_document);
+	}
+	if (s_ruby_export_local_variables == Qfalse) {
+		const char *s2 =
+		"lambda { |_bind_| \n"
+		"   # find local variables newly defined in _bind_ \n"
+		" _a_ = _bind_.eval(\"local_variables\") - TOPLEVEL_BINDING.eval(\"local_variables\"); \n"
+		" _a_.each { |_vsym_| \n"
+		"   _vname_ = _vsym_.to_s \n"
+		"   _vval_ = _bind_.eval(_vname_) \n"
+		"   #  Define local variable \n"
+		"   TOPLEVEL_BINDING.eval(_vname_ + \" = nil\") \n"
+		"   #  Then set value  \n"
+		"   TOPLEVEL_BINDING.eval(\"lambda { |_m_| \" + _vname_ + \" = _m_ }\").call(_vval_) \n"
+		" } \n"
+		"}";
+		s_ruby_export_local_variables = rb_eval_string(s2);
+		rb_define_variable("_export_local_variables", &s_ruby_export_local_variables);
+	}
+	if (arec->fname == NULL) {
+		char *scr;
+		/*  String literal: we need to specify string encoding  */
+		asprintf(&scr, "#coding:utf-8\n%s", arec->script);
+		sval = rb_str_new2(scr);
+		free(scr);
+		fnval = rb_str_new2("(eval)");
+		lnval = INT2FIX(0);
+	} else {
+		sval = rb_str_new2(arec->script);
+		fnval = Ruby_NewFileStringValue(arec->fname);
+		lnval = INT2FIX(1);
+	}
+	binding = rb_const_get(rb_cObject, rb_intern("TOPLEVEL_BINDING"));
+	if (arec->doc != NULL) {
+		VALUE mval = MRSequenceFromMyDocument(arec->doc);
+		binding = rb_funcall(s_ruby_get_binding_for_document, rb_intern("call"), 2, mval, binding);
+	}
+	retval = rb_funcall(binding, rb_intern("eval"), 3, sval, fnval, lnval);
+	if (arec->doc != NULL) {
+		rb_funcall(s_ruby_export_local_variables, rb_intern("call"), 1, binding);
+	}
+	return retval;
+}
+
+RubyValue
+Ruby_evalRubyScriptOnDocument(const char *script, void *doc, int *status)
+{
+	RubyValue retval;
+	RubyArgsRecord rec;
+	VALUE save_interrupt_flag;
+	/*	char *save_ruby_sourcefile;
+	 int save_ruby_sourceline; */
+	if (gRubyIsCheckingInterrupt) {
+		//  TODO: Show alert
+		// MolActionAlertRubyIsRunning();
+		*status = -1;
+		return (RubyValue)Qnil;
+	}
+	gRubyRunLevel++;
+	memset(&rec, 0, sizeof(rec));
+	rec.doc = doc;
+	rec.script = script;
+	rec.type = 0;
+	//  TODO: support fname?
+	// args[2] = (void *)fname;
+	save_interrupt_flag = s_SetInterruptFlag(Qnil, Qtrue);
+	retval = (RubyValue)rb_protect(s_evalRubyScriptOnDocumentSub, (VALUE)&rec, status);
+	if (*status != 0) {
+		/*  Is this 'exit' exception?  */
+		VALUE last_exception = rb_gv_get("$!");
+		if (rb_obj_is_kind_of(last_exception, rb_eSystemExit)) {
+			/*  Capture exit and return the status value  */
+			retval = (RubyValue)rb_funcall(last_exception, rb_intern("status"), 0);
+			*status = 0;
+			rb_set_errinfo(Qnil);
+		}
+	}
+	s_SetInterruptFlag(Qnil, save_interrupt_flag);
+	gRubyRunLevel--;
+	return retval;	
+}
+
 static VALUE
 s_executeRubyOnDocument(VALUE vinfo)
 {
@@ -713,43 +826,6 @@ out_of_loop:
 	return retval;
 }
 
-RubyValue
-Ruby_evalRubyScriptOnDocument(const char *script, void *doc, int *status)
-{
-	RubyValue retval;
-	RubyArgsRecord rec;
-	VALUE save_interrupt_flag;
-	/*	char *save_ruby_sourcefile;
-	 int save_ruby_sourceline; */
-	if (gRubyIsCheckingInterrupt) {
-		//  TODO: Show alert
-		// MolActionAlertRubyIsRunning();
-		*status = -1;
-		return (RubyValue)Qnil;
-	}
-	gRubyRunLevel++;
-	rec.doc = doc;
-	rec.script = script;
-	rec.type = 0;
-	//  TODO: support fname?
-	// args[2] = (void *)fname;
-	save_interrupt_flag = s_SetInterruptFlag(Qnil, Qtrue);
-	retval = (RubyValue)rb_protect(s_executeRubyOnDocument, (VALUE)&rec, status);
-	if (*status != 0) {
-		/*  Is this 'exit' exception?  */
-		VALUE last_exception = rb_gv_get("$!");
-		if (rb_obj_is_kind_of(last_exception, rb_eSystemExit)) {
-			/*  Capture exit and return the status value  */
-			retval = (RubyValue)rb_funcall(last_exception, rb_intern("status"), 0);
-			*status = 0;
-			rb_set_errinfo(Qnil);
-		}
-	}
-	s_SetInterruptFlag(Qnil, save_interrupt_flag);
-	gRubyRunLevel--;
-	return retval;	
-}
-
 /*  argfmt: characters representing the arguments
     b: boolean (int), i: integer, l: long integer, q: long long integer,
     d: double, s: string (const char *),
@@ -823,7 +899,7 @@ Ruby_showError(int status)
 			msg = RSTRING_PTR(val);
 		else msg = "(message not available)";
 	}
-	asprintf(&msg2, "%s\n%s", msg, RSTRING_PTR(backtrace));
+	asprintf(&msg2, "%s¥n%s", msg, RSTRING_PTR(backtrace));
 	MyAppCallback_messageBox(msg2, (interrupted == 0 ? "Ruby script error" : "Ruby script interrupted"), 0, 3);
 	free(msg2);
 	gRubyRunLevel--;
@@ -852,6 +928,12 @@ Ruby_startup(void)
 	rb_define_singleton_method(val, "write", s_MessageOutput_Write, 1);
 	rb_gv_set("$stdout", val);
 	rb_gv_set("$stderr", val);
+	
+	/*  Global variable to hold error information  */
+	rb_define_variable("$backtrace", &gRubyBacktrace);
+	rb_define_variable("$error_history", &gRubyErrorHistory);
+	gRubyErrorHistory = rb_ary_new();
+	gRubyBacktrace = Qnil;
 	
 	/*  Register interrupt check code  */
 	rb_add_event_hook(s_Event_Callback, RUBY_EVENT_ALL, Qnil);
