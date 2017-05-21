@@ -45,6 +45,7 @@ extern int Ruby_callMethodOfDocument(const char *name, void *doc, int isSingleto
 extern RubyValue Ruby_evalRubyScriptOnDocument(const char *script, void *doc, int *status);
 extern int Ruby_showValue(RubyValue value, char **outValueString);
 extern int Ruby_methodType(const char *className, const char *methodName);
+extern int Ruby_callValidatorForDocument(long validator, void *doc);
 
 /*  Housekeeping "Document" type Ruby values  */
 extern int MRSequenceRegister(void *myDocument);
@@ -63,7 +64,7 @@ STUB int MyAppCallback_showProgressPanel(const char *msg);
 STUB void MyAppCallback_hideProgressPanel(void);
 STUB void MyAppCallback_setProgressValue(double dval);
 STUB void MyAppCallback_setProgressMessage(const char *msg);
-STUB void MyAppCallback_registerScriptMenu(const char *cmd, const char *title);
+STUB void MyAppCallback_registerScriptMenu(const char *cmd, const char *title, long validator);
 STUB RubyValue MyAppCallback_executeScriptFromFile(const char *path, int *status);
 STUB int MyAppCallback_messageBox(const char *message, const char *title, int flags, int icon);
 

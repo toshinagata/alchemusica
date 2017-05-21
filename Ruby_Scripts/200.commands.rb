@@ -41,7 +41,7 @@ end
 
 def change_timebase
   timebase = self.timebase
-  hash = Dialog.run {
+  hash = Dialog.run("Change Timebase") {
     layout(1,
 	  layout(2,
 	    item(:text, :title=>"Current timebase = #{timebase}"),
@@ -49,7 +49,7 @@ def change_timebase
 	    item(:text, :title=>"New timebase"),
 	    item(:textfield, :width=>40, :range=>[24, 960], :tag=>"new")))
   }
-    p hash
+#    p hash
   if hash[:status] == 0
 	new = hash["new"].to_f
 	mult = new / timebase
@@ -63,21 +63,36 @@ def change_timebase
   end
 end
 
-def randomize
-  wd = 10.0
-  each_track { |tr|
-    s = tr.selection
-	t = []
-	s.each { |p|
-	  t1 = self.tick_to_time(p.tick)
-	  t2 = t1 + (rand() - 0.5) * wd / 1000.0
-	  t.push(Integer(self.time_to_tick(t2)))
-	}
-    s.modify_tick(t)
+def randomize_ticks
+  wd = (get_global_settings("randomize_tick_width") || "10").to_f
+  if !self.has_selection
+    message_box("No events are selected.", "Error", :ok);
+    return
+  end
+  hash = Dialog.run("Randomize Ticks") {
+    layout(1,
+	  layout(1,
+	    item(:text, :title=>"Randomize width (in milliseconds, 10-1000)"),
+	    item(:textfield, :width=>40, :value=>wd.to_s, :range=>[10, 1000], :tag=>"width")))
   }
+  if hash[:status] == 0
+    wd = hash["width"].to_f
+	set_global_settings("randomize_tick_width", wd.to_s)
+    each_track { |tr|
+      s = tr.selection
+  	  t = []
+  	  s.each { |p|
+	    t1 = self.tick_to_time(p.tick)
+	    t2 = t1 + (rand() - 0.5) * wd / 1000.0
+	    t.push(Integer(self.time_to_tick(t2)))
+	  }
+      s.modify_tick(t)
+    }
+  end
 end
 
 end
 
 register_menu("Change timebase...", :change_timebase)
+register_menu("Randomize ticks...", :randomize_ticks, 1)
 # register_menu("Change control number...", :change_control_number_ext)

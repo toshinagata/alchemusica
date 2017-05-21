@@ -28,7 +28,7 @@ extern NSString *MyAppControllerModalPanelTimerNotification;
 	id rubyProgressPanelController;
 }
 - (void)updateScriptMenu: (NSNotification *)aNotification;
-- (void)registerScriptMenu: (NSString *)commandName withTitle: (NSString *)menuTitle;
+- (void)registerScriptMenu: (NSString *)commandName withTitle: (NSString *)menuTitle validator:(long)rubyValue;
 - (void)performScriptCommand: (NSString *)command forDocument: (MyDocument *)document;
 - (void)doScriptCommand: (id)sender;
 - (IBAction)openAudioSettingsPanel: (id)sender;

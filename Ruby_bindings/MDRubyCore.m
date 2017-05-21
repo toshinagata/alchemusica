@@ -18,6 +18,10 @@
 #import <Cocoa/Cocoa.h>
 #include "MDRuby.h"
 
+#import "MyDocument.h"
+#import "MyMIDISequence.h"
+#import "MDObjects.h"
+
 #include <version.h>  /*  for Ruby version  */
 #include <node.h>     /*  for rb_add_event_hook()  */
 #include <sys/time.h> /*  for gettimeofday()  */
@@ -123,7 +127,7 @@ Ruby_getVersionStrings(const char **version, const char **copyright)
 }
 
 
-#pragma mark ====== Message output class ======
+#pragma mark ====== Message output ======
 
 /*
  *  call-seq:
@@ -136,6 +140,49 @@ s_MessageOutput_Write(VALUE self, VALUE str)
 {
 	int n = MyAppCallback_showScriptMessage("%s", StringValuePtr(str));
 	return INT2NUM(n);
+}
+
+/*
+ *  call-seq:
+ *     message_box(str, title, button = nil, icon = :info)
+ *
+ *  Show a message box.
+ *  Buttons: nil (ok and cancel), :ok (ok only), :cancel (cancel only)
+ *  Icon: :info, :warning, :error
+ */
+static VALUE
+s_Kernel_MessageBox(int argc, VALUE *argv, VALUE self)
+{
+	char *str, *title, *s;
+	int buttons, icon;
+	VALUE sval, tval, bval, ival;
+	rb_scan_args(argc, argv, "22", &sval, &tval, &bval, &ival);
+	str = StringValuePtr(sval);
+	title = StringValuePtr(tval);
+	if (bval != Qnil) {
+		bval = Ruby_ObjToStringObj(bval);
+		s = RSTRING_PTR(bval);
+		if (strncmp(s, "ok", 2) == 0)
+			buttons = 1;
+		else if (strncmp(s, "cancel", 6) == 0)
+			buttons = 2;
+		else
+			rb_raise(rb_eStandardError, "the button specification should be either nil, :ok or :cancel");
+	} else buttons = 3;
+	if (ival != Qnil) {
+		ival = Ruby_ObjToStringObj(ival);
+		s = RSTRING_PTR(ival);
+		if (strncmp(s, "info", 4) == 0)
+			icon = 1;
+		else if (strncmp(s, "warn", 4) == 0)
+			icon = 2;
+		else if (strncmp(s, "err", 3) == 0)
+			icon = 3;
+		else
+			rb_raise(rb_eStandardError, "the icon specification should be either :info, :warning or :error");
+	} else icon = 1;
+	MyAppCallback_messageBox(str, title, buttons, icon);
+	return Qnil;
 }
 
 #pragma mark ====== Track key events ======
@@ -376,7 +423,7 @@ s_Event_Callback(rb_event_flag_t evflag, VALUE data, VALUE self, ID mid, VALUE k
 
 /*
  *  call-seq:
- *     register_menu(title, method)
+ *     register_menu(title, method, validator = nil)
  *
  *  Register the method (specified as a symbol) in the script menu.
  *  The method must be either an instance method of Sequence with no argument,
@@ -385,14 +432,23 @@ s_Event_Callback(rb_event_flag_t evflag, VALUE data, VALUE self, ID mid, VALUE k
  *  is open (the argument is set to Qnil in this case). On the other hand, the
  *  menu associated with the instance method can only be invoked when at least one 
  *  document is active.
+ *  Validator controls how the menu item is activated. If it is nil, then
+ *  the menu is either 'always activated' (when method is a class method) or 'activated
+ *  if there is an open document' (when method is an instance method). If it is a numeric
+ *  1 (one), then the menu is activated when there is an open document and at least one
+ *  event is selected (in any track). Otherwise, the validator should be a callable
+ *  object with one MRSequence argument, and if it returns 'true' (in Ruby sense)
+ *  then the menu is activated.
  */
 static VALUE
-s_Kernel_RegisterMenu(VALUE self, VALUE title, VALUE method)
+s_Kernel_RegisterMenu(int argc, VALUE *argv, VALUE self)
 {
+	VALUE title, method, validator;
+	rb_scan_args(argc, argv, "21", &title, &method, &validator);
 	if (TYPE(method) == T_SYMBOL) {
 		method = rb_funcall(method, rb_intern("to_s"), 0);
 	}
-	MyAppCallback_registerScriptMenu(StringValuePtr(method), StringValuePtr(title));
+	MyAppCallback_registerScriptMenu(StringValuePtr(method), StringValuePtr(title), (long)validator);
 	return self;
 }
 
@@ -424,6 +480,47 @@ Ruby_methodType(const char *className, const char *methodName)
 	retval = rb_protect(s_MDRuby_methodType_sub, (VALUE)p, &status);
 	if (status == 0)
 		return FIX2INT(retval);
+	else return 0;
+}
+
+static VALUE
+s_Ruby_callValidatorForDocument(VALUE data)
+{
+	VALUE *v = (VALUE *)data;
+	MyDocument *doc = (MyDocument *)v[1];
+	if (v[0] == Qnil) {
+		/*  No validator: default behavior (it is already handled by MyDocument)  */
+		return Qtrue;
+	} else if (v[0] == INT2FIX(0)) {
+		/*  Valid if document is open  */
+		return (doc != NULL ? Qtrue : Qfalse);
+	} else if (v[0] == INT2FIX(1)) {
+		/*  Valid if document is open and some events are selected  */
+		long n, c;
+		if (doc == NULL)
+			return Qfalse;
+		c = [[doc myMIDISequence] trackCount];
+		for (n = 0; n < c; n++) {
+			IntGroup *pset = [[doc selectionOfTrack:n] pointSet];
+			if (IntGroupGetCount(pset) > 0)
+				break;
+		}
+		return (n < c ? Qtrue : Qfalse);
+	}
+	return rb_funcall(v[0], rb_intern("call"), 1, (doc == NULL ? Qnil : MRSequenceFromMyDocument(doc)));
+}
+
+int
+Ruby_callValidatorForDocument(long validator, void *doc)
+{
+	VALUE v[3];
+	VALUE retval;
+	int status;
+	v[0] = (VALUE)validator;
+	v[1] = (VALUE)doc;
+	retval = rb_protect(s_Ruby_callValidatorForDocument, (VALUE)&v, &status);
+	if (status == 0 && RTEST(retval))
+		return 1;
 	else return 0;
 }
 
@@ -538,11 +635,12 @@ MRCoreInitClass(void)
 	rb_define_method(rb_mKernel, "hide_progress_panel", s_HideProgressPanel, 0);
 	rb_define_method(rb_mKernel, "set_progress_value", s_SetProgressValue, 1);
 	rb_define_method(rb_mKernel, "set_progress_message", s_SetProgressMessage, 1);
-	rb_define_method(rb_mKernel, "register_menu", s_Kernel_RegisterMenu, 2);
+	rb_define_method(rb_mKernel, "register_menu", s_Kernel_RegisterMenu, -1);
 	rb_define_method(rb_mKernel, "get_global_settings", s_Kernel_GetGlobalSettings, 1);
 	rb_define_method(rb_mKernel, "set_global_settings", s_Kernel_SetGlobalSettings, 2);
 	rb_define_method(rb_mKernel, "execute_script", s_Kernel_ExecuteScript, 1);
 	rb_define_method(rb_mKernel, "sanity_check", s_Kernel_SanityCheck, -1);
+	rb_define_method(rb_mKernel, "message_box", s_Kernel_MessageBox, -1);
 }
 
 #pragma mark ====== External functions ======

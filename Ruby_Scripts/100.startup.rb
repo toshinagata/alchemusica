@@ -41,3 +41,16 @@ class Dialog
   end
 
 end
+
+class Sequence
+
+  def has_selection
+    each_track { |tr|
+	  if tr.selection.length > 0
+	    return true
+	  end
+	}
+	return false
+  end
+
+end

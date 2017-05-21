@@ -122,7 +122,7 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 	}
 }
 
-- (void)registerScriptMenu: (NSString *)commandName withTitle: (NSString *)menuTitle
+- (void)registerScriptMenu: (NSString *)commandName withTitle: (NSString *)menuTitle validator:(long)rubyValue
 {
 	int i, n;
 	n = [scriptMenuInfos count];
@@ -138,7 +138,8 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 	}
 	if (i >= n) {
 		[scriptMenuInfos addObject: [NSMutableDictionary dictionaryWithObjectsAndKeys:
-			commandName, @"command", menuTitle, @"title",
+									 commandName, @"command", menuTitle, @"title",
+									 [NSNumber numberWithLong:rubyValue], @"validator",
 			nil]];
 	}
 	
@@ -217,29 +218,27 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 }
 
 //  Check if the command is valid as the script menu command.
-//  If "validate_..." method is defined, that method is called (with the same arguments 
-//  as the menu command), and the menu is validated if the return value is true.
+//  If the validator object is supplied, then the validator is called with the active document
+//  as the single argument. The menu is validated if the return value is 'true' as a Ruby value.
 //  Otherwise, if the method is a Sequence class method, the menu is always validated.
 //  Otherwise, the menu is validated if there is an active document.
-- (BOOL)validateScriptCommand: (NSString *)command forDocument: (MyDocument *)document
+- (BOOL)validateScriptCommand: (id)menuInfo forDocument: (MyDocument *)document
 {
-	int kind, status;
-	const char *cmd = [[NSString stringWithFormat: @"validate_%@", command] UTF8String];
-	kind = Ruby_methodType("Sequence", cmd);
-	if (kind == 1 || kind == 2) {
-		unsigned char bval;
-		status = Ruby_callMethodOfDocument(cmd, document, kind == 2, ";b", &bval);
-		if (status == 0 && bval)
+	int kind;
+	long validator = [[menuInfo valueForKey:@"validator"] longValue];
+	if (validator != (long)RubyNil) {
+		return Ruby_callValidatorForDocument(validator, document);
+	} else {
+		const char *cmd;
+		id command = [menuInfo valueForKey:@"command"];
+		cmd = [command UTF8String];
+		kind = Ruby_methodType("Sequence", cmd);
+		if (kind == 2)
 			return YES;
-		else return NO;
+		if (kind == 1 && document != nil)
+			return YES;
+		return NO;
 	}
-	cmd = [command UTF8String];
-	kind = Ruby_methodType("Sequence", cmd);
-	if (kind == 2)
-		return YES;
-	if (kind == 1 && document != nil)
-		return YES;
-	return NO;
 }
 
 - (void)doScriptCommand: (id)sender
@@ -289,7 +288,7 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 			id obj = [scriptMenuInfos objectAtIndex: i];
 			if ([title isEqualToString: [obj valueForKey: @"title"]]) {
 				//  Menu command found
-				return [self validateScriptCommand: [obj valueForKey: @"command"] forDocument: (MyDocument *)[self documentAtIndex: 0]];
+				return [self validateScriptCommand: obj forDocument: (MyDocument *)[self documentAtIndex: 0]];
 			}
 		}
 		return NO;
@@ -540,10 +539,12 @@ MyAppCallback_setGlobalSettings(const char *key, const char *value)
 }
 
 void
-MyAppCallback_registerScriptMenu(const char *cmd, const char *title)
+MyAppCallback_registerScriptMenu(const char *cmd, const char *title, long validator)
 {
 	MyAppController *cont = (MyAppController *)[NSApp delegate];
-	[cont registerScriptMenu: [NSString stringWithUTF8String: cmd] withTitle: [NSString stringWithUTF8String: title]];
+	[cont registerScriptMenu: [NSString stringWithUTF8String: cmd]
+				   withTitle: [NSString stringWithUTF8String: title]
+				   validator: validator];
 }
 
 RubyValue
