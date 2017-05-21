@@ -936,7 +936,7 @@ s_MRPointer_SetDuration(VALUE self, VALUE val)
 	if (ip->trackInfo.doc != nil) {
 		[ip->trackInfo.doc changeDuration: du atPosition: MDPointerGetPosition(pt) inTrack: ip->trackInfo.num];
 	} else {
-		MDSetDuration(ep, du);
+		MDPointerSetDuration(pt, du);
 	}
 	return val;
 }

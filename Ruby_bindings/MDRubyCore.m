@@ -475,6 +475,26 @@ s_Kernel_SetGlobalSettings(VALUE self, VALUE key, VALUE value)
 	return value;
 }
 
+/*
+ *  call-seq:
+ *     Kernel.sanity_check(boolean = current value)
+ *
+ *  Set whether track data check is done after every editing operation
+ */
+static VALUE
+s_Kernel_SanityCheck(int argc, VALUE *argv, VALUE self)
+{
+	extern int gMyDocumentSanityCheck;
+	VALUE fval = Qnil;
+	if (argc > 0)
+		fval = argv[0];
+	if (fval != Qnil) {
+		gMyDocumentSanityCheck = (RTEST(fval) ? 1 : 0);
+	}
+	return gMyDocumentSanityCheck ? Qtrue :Qfalse;
+}
+
+
 #pragma mark ====== Utility functions (protected funcall) ======
 
 struct Ruby_funcall2_record {
@@ -519,6 +539,7 @@ MRCoreInitClass(void)
 	rb_define_method(rb_mKernel, "get_global_settings", s_Kernel_GetGlobalSettings, 1);
 	rb_define_method(rb_mKernel, "set_global_settings", s_Kernel_SetGlobalSettings, 2);
 	rb_define_method(rb_mKernel, "execute_script", s_Kernel_ExecuteScript, 1);
+	rb_define_method(rb_mKernel, "sanity_check", s_Kernel_SanityCheck, -1);
 }
 
 #pragma mark ====== External functions ======

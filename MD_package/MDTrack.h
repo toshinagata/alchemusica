@@ -183,7 +183,7 @@ void		MDTrackDump(const MDTrack *inTrack);
 /* MDStatus	MDTrackCheck(const MDTrack *inTrack); */
 
 /*  Track の内部情報を正しく更新する。check が non-zero ならば、内部情報が矛盾していれば stderr にメッセージを出力する。 */
-MDStatus		MDTrackRecache(MDTrack *inTrack, int check);
+int		MDTrackRecache(MDTrack *inTrack, int check);
 
 /* -------------------------------------------------------------------
     MDPointer functions
@@ -276,6 +276,9 @@ MDStatus		MDPointerReplaceAnEvent(MDPointer *inPointer, const MDEvent *inEvent, 
 /*  現在位置のイベントの tick を変更する。inPosition に変更後の位置を指定することができる。inPosition に動かすと
     tick 順に矛盾を生じる場合は、inTick の値に合わせて適当な位置を探す。inPointer は移動後のイベントの位置に移る。 */
 MDStatus		MDPointerChangeTick(MDPointer *inPointer, MDTickType inTick, long inPosition);
+
+/*  Change the duration value, with clearing the largestTick cache in the MDBlock  */
+MDStatus		MDPointerSetDuration(MDPointer *inPointer, MDTickType inDuration);
 
 /*  Sanity check  */
 MDStatus		MDPointerCheck(const MDPointer *inPointer);

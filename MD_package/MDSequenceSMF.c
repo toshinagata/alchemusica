@@ -433,8 +433,10 @@ MDSequenceReadSMFTrack(MDSMFConvert *cref)
 				MDSetDuration(&event, metaDuration);
 		} else if (MDGetKind(&event) == kMDEventInternalNoteOff) {
 			result = MDTrackMatchNoteOff(cref->temptrk, &event);
-			if (result != kMDNoError)
-				break;
+			if (result != kMDNoError) {
+				fprintf(stderr, "Corrupsed file? orphaned note off at %ld\n", (long)MDGetTick(&event));
+				// break;
+			}
 			skipFlag = 1;
 			/*  Register note-off into the separate track  */
         /*    dprintf(2, "Note-off event encountered: tick %ld code %d vel %d\n", MDGetTick(&event), MDGetCode(&event), MDGetNoteOffVelocity(&event));
@@ -862,6 +864,11 @@ MDSequenceWriteSMFTrackWithSelection(MDSMFConvert *cref, IntGroup *pset, char eo
 			)
 		) != NULL && MDGetKind(eref) != kMDEventStop) {
 
+		if (MDGetKind(eref) == kMDEventNull) {
+			/*  We should not have it, but sometimes we get it because of bugs  */
+			continue;
+		}
+			
 		if (++count >= 1000) {
 			if (cref->callback != NULL) {
 				n = (*cref->callback)(100.0 * (cref->track_index + ((double)MDPointerGetPosition(ptr) / nevents)) / cref->trkno, cref->cbdata);
@@ -1075,13 +1082,16 @@ MDSequenceWriteSMFWithSelection(MDSequence *inSequence, IntGroup **psetArray, ch
 				result = kMDNoError;
 			else */
 			result = MDSequenceWriteSMFTrackWithSelection(&conv, pset, eotSelected);
-			if (result == kMDNoError) {
-				pos = FTELL(conv.stream);
-				size = pos - conv.pos - 4;
-				FSEEK(conv.stream, conv.pos, SEEK_SET);
-				MDWriteStreamFormat(conv.stream, "N", size);
-				FSEEK(conv.stream, pos, SEEK_SET);
+			if (result != kMDNoError) {
+				dprintf(0, "Error %d occurred during write of SMF track\n", result);
 			}
+			pos = FTELL(conv.stream);
+			size = pos - conv.pos - 4;
+			FSEEK(conv.stream, conv.pos, SEEK_SET);
+			MDWriteStreamFormat(conv.stream, "N", size);
+			FSEEK(conv.stream, pos, SEEK_SET);
+			if (result != kMDNoError)
+				break;
 		} else {
 			result = kMDErrorCannotWriteToStream;
 			break;

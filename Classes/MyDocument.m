@@ -46,6 +46,14 @@ NSString *MySeqCatalogPBoardType = @"Alchemusica MIDI sequence info";
 static NSString *sSelectionWillChangeNotification = @"My Selection Will Change Notification";
 static NSString *sPostTrackModifiedNotification = @"TrackModifiedNotification needs posted later";
 
+/*  Do runtime sanity check after every edit operations (slow)  */
+#if defined(DEBUG)
+#define DEFAULT_SANITY_CHECK 1
+#else
+#define DEFAULT_SANITY_CHECK 0
+#endif
+int gMyDocumentSanityCheck = DEFAULT_SANITY_CHECK;
+
 @implementation MyDocument
 
 #pragma mark ====== Keeping the document/track correspondence ======
@@ -105,7 +113,12 @@ static int sNumTrackInfo, sMaxTrackInfo;
 			selector: @selector(postTrackModifiedNotification:)
 			name: sPostTrackModifiedNotification
 			object: self];
-
+		[[NSNotificationCenter defaultCenter]
+		 addObserver:self
+		 selector:@selector(trackModified:)
+		 name:MyDocumentTrackModifiedNotification
+		 object:self];
+		
 		//  Create a Ruby object for this document
 		MRSequenceRegister(self);
 		
@@ -660,6 +673,16 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 		object: self
 		userInfo: [NSDictionary
 			dictionaryWithObjectsAndKeys: [NSNumber numberWithFloat: beat], @"position", nil]];
+}
+
+- (void)trackModified: (NSNotification *)notification {
+	if (gMyDocumentSanityCheck) {
+		long trackNo = [[[notification userInfo] objectForKey: @"track"] longValue];
+		MDTrack *track = [[self myMIDISequence] getTrackAtIndex:trackNo];
+		if (MDTrackRecache(track, 1) > 0) {
+			MyAppCallback_messageBox("Track data has some inconsistency", "Internal Error", 0, 0);
+		}
+	}
 }
 
 //- (void)postSelectionDidChangeNotification: (long)trackNo selectionChange: (IntGroupObject *)set sender: (id)sender
@@ -1857,7 +1880,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
                 newValue = 1;
             else newValue = kMDMaxTick / 2;
         }
-        MDSetDuration(ep, newValue);
+		MDPointerSetDuration(ptr, newValue);
         if (MDGetTick(ep) + newValue > maxTick)
             maxTick = MDGetTick(ep) + newValue;
         undoDataPtr[index] = oldValue;
@@ -2140,7 +2163,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 					MDTickType newTrackDuration = MDGetTick(ep1) + duration + 1;
 					[self changeTrackDuration: newTrackDuration ofTrack: trackNo];
 				}
-				MDSetDuration(ep1, duration);
+				MDPointerSetDuration(pt1, duration);
 				[self unlockMIDISequence];
 				/*  Register undo action for change of track duration (if necessary)  */
 				[self registerUndoChangeTrackDuration: oldTrackDuration ofTrack: trackNo];

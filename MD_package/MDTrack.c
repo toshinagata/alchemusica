@@ -235,6 +235,9 @@ MDTrackInsertBlanks(MDTrack *inTrack, MDPointer *inPointer, long count)
 				MDEventMove(block2->last->events + block2->last->size - (tail - num2), block1->events + index, tail - num2);
 			}
 		}
+		/*  Invalidate the largestTick field  */
+		if (block1 != NULL)
+			block1->largestTick = kMDNegativeTick;
 		/*  update the num fields of modified blocks  */
 		block2->num = num2;		/*  the last allocated block  */
 		/*  other blocks  */
@@ -1621,7 +1624,7 @@ MDTrackDump(const MDTrack *inTrack)
 		fclose(fp);
 }
 
-MDStatus
+int
 MDTrackRecache(MDTrack *inTrack, int check)
 {
 	MDPointer *pt1, *pt2;
@@ -1630,6 +1633,7 @@ MDTrackRecache(MDTrack *inTrack, int check)
 	long i, pos;
 	MDTickType tick, lastTick;
     MDBlock *block;
+	int errcnt = 0;
 
 	pt1 = MDPointerNew((MDTrack *)inTrack);
 	pt2 = MDPointerNew((MDTrack *)inTrack);
@@ -1642,31 +1646,41 @@ MDTrackRecache(MDTrack *inTrack, int check)
 	pos = -1;
 	while ((ev1 = MDPointerForward(pt1)) != NULL) {
 		pos = MDPointerGetPosition(pt1);
-		if (check && (MDGetKind(ev1) < 1 || MDGetKind(ev1) > kMDEventStop))
+		if (check && (MDGetKind(ev1) < 1 || MDGetKind(ev1) > kMDEventStop)) {
 			fprintf(stderr, "#%ld: invalid event kind %d\n", pos, (int)MDGetKind(ev1));
+			errcnt++;
+		}
 		tick = MDGetTick(ev1);
-		if (check && tick < lastTick)
+		if (check && tick < lastTick) {
 			fprintf(stderr, "#%ld: tick disorder %qd (last tick = %qd)\n", pos, (long long)tick, (long long)lastTick);
+			errcnt++;
+		}
 		lastTick = tick;
 		if (MDIsChannelEvent(ev1)) {
-			if (check && (unsigned)(MDGetChannel(ev1)) >= 16)
+			if (check && (unsigned)(MDGetChannel(ev1)) >= 16) {
 				fprintf(stderr, "#%ld: channel number (%ud) >= 16\n", pos, (unsigned)MDGetChannel(ev1));
-			else
+				errcnt++;
+			} else
 				nch[MDGetChannel(ev1)]++;
 		} else if (MDIsSysexEvent(ev1)) {
 			nch[16]++;
 		} else nch[17]++;
 	}
 	++pos;
-	if (check && pos != inTrack->num)
+	if (check && pos != inTrack->num) {
 		fprintf(stderr, "The track->num (%ld) does not match the number of events (%ld)\n", pos, inTrack->num);
+		errcnt++;
+	}
 	inTrack->num = pos;
-	if (check && lastTick >= inTrack->duration)
+	if (check && lastTick >= inTrack->duration) {
 		fprintf(stderr, "The tick of the last event (%qd) exceeds the track duration (%qd)\n",
 			(long long)lastTick, (long long)inTrack->duration);
+		errcnt++;
+	}
 	for (i = 0; i < 18; i++) {
 		if (check && nch[i] != inTrack->nch[i]) {
 			fprintf(stderr, "The track->nch[%d] (%ld) does not seem correct (%ld)\n", (int)i, inTrack->nch[i], nch[i]);
+			errcnt++;
 		}
 		inTrack->nch[i] = nch[i];
 	}
@@ -1683,22 +1697,25 @@ MDTrackRecache(MDTrack *inTrack, int check)
             if (tick2 > tick)
                 tick = tick2;
         }
-        if (check && tick != block->largestTick) {
+        if (check && (block->largestTick >= 0 && tick != block->largestTick)) {
             fprintf(stderr, "The largestTick(%qd) does not match the largest tick(%qd) in block %p\n", (long long)block->largestTick, (long long)tick, block);
+			errcnt++;
         }
 		block->largestTick = tick;
 		if (tick > lastTick)
 			lastTick = tick;
     }
 	if (lastTick >= inTrack->duration) {
-		if (check)
+		if (check) {
             fprintf(stderr, "The track duration (%qd) is not greater than the largest tick (%qd)\n", (long long)inTrack->duration, (long long)lastTick);
+			errcnt++;
+		}
 		inTrack->duration = lastTick + 1;
 	}
 	
 	MDPointerRelease(pt1);
 	MDPointerRelease(pt2);
-	return kMDNoError;
+	return errcnt;
 }
 
 
@@ -2577,6 +2594,25 @@ MDPointerChangeTick(MDPointer *inPointer, MDTickType inTick, long inPosition)
             inPointer->block->largestTick = inTick;
     }
 	return sts;
+}
+
+/* --------------------------------------
+ ･ MDPointerSetDuration
+ -------------------------------------- */
+MDStatus
+MDPointerSetDuration(MDPointer *inPointer, MDTickType inDuration)
+{
+	MDEvent *ep;
+	if (inPointer == NULL || (ep = MDPointerCurrent(inPointer)) == NULL)
+		return kMDNoError;
+	
+	/*  We do not check here the validity of the event type  */
+	MDSetDuration(ep, inDuration);
+	
+	/*  Invalidate largestTick and request recalculation later  */
+	inPointer->block->largestTick = kMDNegativeTick;
+	
+	return kMDNoError;
 }
 
 /* --------------------------------------

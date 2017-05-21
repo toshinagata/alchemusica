@@ -63,6 +63,20 @@ def change_timebase
   end
 end
 
+def randomize
+  wd = 10.0
+  each_track { |tr|
+    s = tr.selection
+	t = []
+	s.each { |p|
+	  t1 = self.tick_to_time(p.tick)
+	  t2 = t1 + (rand() - 0.5) * wd / 1000.0
+	  t.push(Integer(self.time_to_tick(t2)))
+	}
+    s.modify_tick(t)
+  }
+end
+
 end
 
 register_menu("Change timebase...", :change_timebase)
