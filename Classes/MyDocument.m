@@ -1,5 +1,5 @@
 //
-//  MyDocuments.m
+//  MyDocument.m
 //
 //  Created by Toshi Nagata.
 /*
@@ -2970,6 +2970,16 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	}
 }
 
+- (IBAction)getEditingRangeFromPasteboard:(id)sender
+{
+	MDCatalog *catalog;
+	
+	if (![self getPasteboardSequence: NULL catalog: &catalog])
+		return;
+	[self setEditingRangeStart:catalog->startTick end:catalog->endTick];
+	free(catalog);
+}
+
 - (BOOL)validateUserInterfaceItem: (id)anItem
 {
 	SEL sel = [anItem action];
@@ -2983,6 +2993,8 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 		return (startTick < endTick);
 	} else if (sel == @selector(quantizeSelectedEvents:)) {
 		return [self isSelectionEmptyInEditableTracks:YES] == NO;
+	} else if (sel == @selector(getEditingRangeFromPasteboard:)) {
+		return [self isSequenceInPasteboard];
 	}
 	return [super validateUserInterfaceItem:anItem];
 }
@@ -3134,19 +3146,20 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	catData = [pb dataForType: MySeqCatalogPBoardType];
 	seqData = [pb dataForType: MySequencePBoardType];
 	
-	sp = MDStreamOpenData((void *)[seqData bytes], [seqData length]);
-	if (sp == NULL)
-		return NO;
-	seq = MDSequenceNew();
-	if (seq == NULL)
-		return NO;
-	sts = MDSequenceReadSMF(seq, sp, NULL, NULL);
-	FCLOSE(sp);
-	if (sts != kMDNoError)
-		return NO;
-
-	/*  Make it single channel (without separating the multi-channel track)  */
-	MDSequenceSingleChannelMode(seq, 0);
+	if (outSequence != NULL) {
+		sp = MDStreamOpenData((void *)[seqData bytes], [seqData length]);
+		if (sp == NULL)
+			return NO;
+		seq = MDSequenceNew();
+		if (seq == NULL)
+			return NO;
+		sts = MDSequenceReadSMF(seq, sp, NULL, NULL);
+		FCLOSE(sp);
+		if (sts != kMDNoError)
+			return NO;
+		/*  Make it single channel (without separating the multi-channel track)  */
+		MDSequenceSingleChannelMode(seq, 0);
+	} else seq = NULL;
 
 	sp = MDStreamOpenData((void *)[catData bytes], [catData length]);
 	if (sp == NULL)
@@ -3154,13 +3167,14 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	catalog = MDSequenceReadCatalog(sp);
 	FCLOSE(sp);
 	if (catalog == NULL) {
-		MDSequenceRelease(seq);
+		if (seq != NULL)
+			MDSequenceRelease(seq);
 		return NO;
 	}
 	
 	if (outSequence != NULL)
 		*outSequence = seq;
-	else MDSequenceRelease(seq);
+
 	if (outCatalog != NULL)
 		*outCatalog = catalog;
 	else free(catalog);

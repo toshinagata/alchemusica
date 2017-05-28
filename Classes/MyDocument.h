@@ -199,6 +199,7 @@ typedef enum MyDocumentModifyMode {
 - (IBAction)deleteSelectedTime:(id)sender;
 - (IBAction)scaleSelectedTime:(id)sender;
 - (IBAction)quantizeSelectedEvents:(id)sender;
+- (IBAction)getEditingRangeFromPasteboard:(id)sender;
 
 //  Recording
 - (BOOL)startRecording;
