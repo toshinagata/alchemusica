@@ -125,6 +125,22 @@ MRTrackValueFromTrackInfo(MDTrack *track, void *myDocument, int num)
 
 /*
  *  call-seq:
+ *     track.index
+ *
+ *  Index of the track in the parent Sequence. If the track is not
+ *  associated with any Sequence, returns nil.
+ */
+static VALUE
+s_MRTrack_Index(VALUE self)
+{
+	MyDocumentTrackInfo *ip = TrackInfoFromMRTrackValue(self);
+	if (ip->doc == nil)
+		return Qnil;
+	else return FIX2INT(ip->num);
+}
+
+/*
+ *  call-seq:
  *     track.duration
  *
  *  Get the duration of the track in tick.
@@ -967,6 +983,7 @@ MRTrackInitClass(void)
 	rb_cMRTrack = rb_define_class("Track", rb_cObject);
 	rb_define_alloc_func(rb_cMRTrack, s_MRTrack_Alloc);
 	rb_define_private_method(rb_cMRTrack, "initialize", s_MRTrack_Initialize, -1);
+	rb_define_method(rb_cMRTrack, "index", s_MRTrack_Index, 0);
 	rb_define_method(rb_cMRTrack, "duration", s_MRTrack_Duration, 0);
 	rb_define_method(rb_cMRTrack, "duration=", s_MRTrack_SetDuration, 1);
 	rb_define_method(rb_cMRTrack, "count", s_MRTrack_Count, 0);
