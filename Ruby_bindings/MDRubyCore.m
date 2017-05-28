@@ -421,6 +421,9 @@ s_Event_Callback(rb_event_flag_t evflag, VALUE data, VALUE self, ID mid, VALUE k
 
 #pragma mark ====== Menu handling ======
 
+/*  Array of menu validators (to avoid garbage collection)  */
+static VALUE sValidatorList = Qnil;
+
 /*
  *  call-seq:
  *     register_menu(title, method, validator = nil)
@@ -447,6 +450,13 @@ s_Kernel_RegisterMenu(int argc, VALUE *argv, VALUE self)
 	rb_scan_args(argc, argv, "21", &title, &method, &validator);
 	if (TYPE(method) == T_SYMBOL) {
 		method = rb_funcall(method, rb_intern("to_s"), 0);
+	}
+	if (validator != Qnil && !FIXNUM_P(validator)) {
+		if (sValidatorList == Qnil) {
+			sValidatorList = rb_ary_new();
+			rb_define_variable("_validator_list", &sValidatorList);
+		}
+		rb_ary_push(sValidatorList, validator);
 	}
 	MyAppCallback_registerScriptMenu(StringValuePtr(method), StringValuePtr(title), (long)validator);
 	return self;

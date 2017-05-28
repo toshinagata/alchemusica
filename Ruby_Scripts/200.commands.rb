@@ -91,8 +91,123 @@ def randomize_ticks
   end
 end
 
+def thin_events
+  info = []
+  nev = 0
+  interval = (get_global_settings("thin_event_interval") || "10").to_f
+  self.each_editable_track { |tr|
+    sel = tr.selection
+    if sel == nil || sel.count == 0
+      next
+    end
+    pt = tr.pointer(sel[0])
+    info.push([tr, pt, 0, sel, nil])
+    nev += sel.count
+  }
+  if info.count == 0
+    message_box("No events are selected", "Cannot process events", :ok, :error)
+    return
+  end
+  #  Check the event kind
+  typ = nil   #  Control: 0 to 127, Pitch bend: 128
+  info.each { |ip|
+    ip[3].each { |pt|
+      if pt.kind == :control
+        t = pt.code
+      elsif pt.kind == :pitch_bend
+        t = 128
+      else
+        message_box("Only control and pitch bend events can be processed.", "Cannot process events", :ok, :error)
+        return
+      end
+      if typ == nil
+        typ = t
+      elsif typ != t
+        message_box("All events must be the same type", "Cannot process events", :ok, :error)
+        return
+      end
+    }
+  }
+  msg = "#{nev} events (" + (typ == 128 ? "Pitch bend" : "Control #{typ}") + ") found in #{info.count} track#{info.count > 1 ? "s" : ""}."
+  hash = Dialog.run("Thin Events") {
+    layout(1,
+      item(:text, :title=>msg),
+      layout(1,
+        item(:text, :title=>"Minimum event interval (in milliseconds, 10-1000)"),
+        item(:textfield, :width=>40, :value=>interval.to_s, :range=>[10, 1000], :tag=>"interval")))
+  }
+  return if hash[:status] != 0
+  interval = hash["interval"].to_f
+  set_global_settings("thin_event_interval", interval.to_s)
+  next_tick = nil
+  while true
+    #  Look for the earliest event
+    ip = info.min_by { |ip0| ip0[1].selected? ? ip0[1].tick : 0x7fffffff }
+    pt = ip[1]
+    break if !pt.selected?   #  All events are processed
+    next_tick ||= pt.tick
+    if ip[4] == nil || pt.tick >= next_tick
+      ip[4] ||= []
+      new_tick = pt.tick
+      new_data = pt.data
+      pt.next_in_selection
+    else
+      while pt.next_in_selection && pt.tick < next_tick
+      end
+      if pt.selected?
+        if pt.tick == next_tick
+          new_tick = pt.tick
+          new_data = pt.data
+          pt.next_in_selection
+        else
+          #  ip[4] is not empty, so we should have ip[4][-2]
+          #  Interpolate the data value
+          old_tick = ip[4][-2]
+          old_data = ip[4][-1]
+          val = Float(pt.data - old_data) / (pt.tick - old_tick) * (next_tick - old_tick) + old_data
+          new_tick = next_tick
+          new_data = val   #  val is left as float
+        end
+      else
+        pt.last_in_selection
+        new_tick = pt.tick
+        new_data = pt.data
+        pt.next_in_selection
+      end
+    end
+    if ip[4].count > 0
+      old_data = ip[4][-1]
+      if old_data.to_i == new_data.to_i
+        new_tick = nil  #  Skip this event
+      end
+    end
+    if new_tick
+      ip[4].push(new_tick, new_data)
+    end
+    next_tick = self.time_to_tick(self.tick_to_time(next_tick) + interval / 1000.0)
+  end
+  nev_new = 0
+  info.each { |ip|
+    ntr = Track.new
+    (ip[4].count / 2).times { |i|
+      tick = ip[4][i * 2]
+      val = ip[4][i * 2 + 1].to_i
+      if typ == 128
+        ntr.add(tick, :pitch_bend, val)
+      else
+        ntr.add(tick, :control, typ, val)
+      end
+    }
+    ip[0].cut(ip[3])
+    ip[0].merge(ntr)
+    nev_new += ntr.nevents
+  }
+  message_box("#{nev} events were replaced with #{nev_new} events.", "", :ok)
+end
+
 end
 
 register_menu("Change timebase...", :change_timebase)
 register_menu("Randomize ticks...", :randomize_ticks, 1)
+register_menu("Thin selected events...", :thin_events, 1)
 # register_menu("Change control number...", :change_control_number_ext)
