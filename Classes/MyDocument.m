@@ -3259,6 +3259,9 @@ isConductorEvent(const MDEvent *ep, long position, void *inUserData)
 		
 		}
 	}
+	
+	/*  Deselect all events  */
+	[self unselectAllEventsInAllTracks:self];
 
 	/*  Merge new events  */
 	for (i = 0; i < numberOfTracks; i++) {
