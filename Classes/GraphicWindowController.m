@@ -3064,6 +3064,11 @@ row:(int)rowIndex
 
 - (IBAction)paste: (id)sender
 {
+	[self doPasteWithMergeFlag: YES];
+}
+
+- (IBAction)pasteWithReplace: (id)sender
+{
 	[self doPasteWithMergeFlag: NO];
 }
 
@@ -3080,7 +3085,7 @@ row:(int)rowIndex
 		if ([self countTracksToCopyWithSelectionList: NULL rangeStart: NULL rangeEnd: NULL] > 0)
 			return YES;
 		else return NO;
-	} else if (sel == @selector(paste:)) {
+	} else if (sel == @selector(paste:) || sel == @selector(pasteWithReplace:) || sel == @selector(merge:)) {
 		firstResponder = [[self window] firstResponder];
 		if (firstResponder == myMainView || firstResponder == myTableView) {
 			if ([[self document] isSequenceInPasteboard])

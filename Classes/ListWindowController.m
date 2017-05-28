@@ -1491,6 +1491,11 @@ row:(int)rowIndex
 
 - (IBAction)paste: (id)sender
 {
+	[self doPasteWithMergeFlag: YES];
+}
+
+- (IBAction)pasteWithReplace: (id)sender
+{
 	[self doPasteWithMergeFlag: NO];
 }
 
@@ -1506,7 +1511,7 @@ row:(int)rowIndex
 		if ([myEventTrackView numberOfSelectedRows] > 0)
 			return YES;
 		else return NO;
-	} else if (sel == @selector(paste:)) {
+	} else if (sel == @selector(paste:) || sel == @selector(pasteWithReplace:) || sel == @selector(merge:)) {
 		if ([[self document] isSequenceInPasteboard])
 			return YES;
 		else return NO;
