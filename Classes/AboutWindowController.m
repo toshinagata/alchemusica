@@ -100,4 +100,10 @@ static id sSharedAboutWindowController;
 	[NSApp stopModal];
 }
 
+- (BOOL)windowShouldClose:(NSWindow *)sender
+{
+    [NSApp stopModal];
+    return YES;
+}
+
 @end
