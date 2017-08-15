@@ -33,6 +33,7 @@ extern NSString *gListWindowType;
 - (void)setFocusFlag: (BOOL) flag onTrack: (int)trackNum extending: (BOOL)extendFlag;
 - (BOOL)isFocusTrack: (int)trackNum;
 - (void)reloadSelection;
++ (NSLayoutManager *)sharedLayoutManager;
 @end
 
 @interface NSWindowController (viewWithTag)

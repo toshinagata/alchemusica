@@ -594,7 +594,7 @@ RubyDialogCallback_createItem(RubyDialog *dref, const char *type, const char *ti
 		[[tv textContainer] setContainerSize: NSMakeSize(contentSize.width, FLT_MAX)];
 		[[tv textContainer] setWidthTracksTextView: YES];
 		[[tv textContainer] setHeightTracksTextView: NO];
-		font = [NSFont userFixedPitchFontOfSize: 0];
+		font = [NSFont userFixedPitchFontOfSize: 10.0];
 		[tv setFont: font];
 		[tv setDelegate: cont];
 		[tv setRichText: NO];

@@ -88,7 +88,7 @@
 //	[tunePopup removeAllItems];
 	[markerPopup setEnabled: NO];
 //	[tunePopup setEnabled: NO];
-	font = [NSFont userFixedPitchFontOfSize: -1.0];
+	font = [NSFont userFixedPitchFontOfSize: 10.0];
 	[timeField setFont: font];
 	[countField setFont: font];
 	[[NSNotificationCenter defaultCenter]

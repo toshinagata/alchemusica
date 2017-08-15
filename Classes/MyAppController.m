@@ -632,7 +632,7 @@ MyAppCallback_messageBox(const char *message, const char *title, int flags, int 
 	}
 	alert = [NSAlert alertWithMessageText:[NSString stringWithUTF8String:title] defaultButton:btn1 alternateButton:btn2 otherButton:nil informativeTextWithFormat:@"%s", message];
 	retval = [alert runModal];
-	if (flags & 3 == 3)
+	if ((flags & 3) == 3)
 		return (retval == NSAlertDefaultReturn);
 	else return 1;  /*  Always OK, even if the message is "Cancel"  */
 }

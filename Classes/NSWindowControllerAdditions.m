@@ -25,6 +25,8 @@
 NSString *gGraphicWindowType = @"graphic window";
 NSString *gListWindowType = @"list window";
 
+NSLayoutManager *gSharedLayoutManager = nil;
+
 @implementation NSWindowController (MyWindowControllerAddition)
 
 + (BOOL)canContainMultipleTracks
@@ -85,6 +87,14 @@ NSString *gListWindowType = @"list window";
 
 - (void)reloadSelection
 {
+}
+
++ (NSLayoutManager *)sharedLayoutManager
+{
+    if (gSharedLayoutManager == nil) {
+        gSharedLayoutManager = [[NSLayoutManager alloc] init];
+    }
+    return gSharedLayoutManager;
 }
 
 @end

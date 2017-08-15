@@ -84,8 +84,9 @@ static NSColor *sMiscColor = nil;
 
 	array = [myEventTrackView tableColumns];
 	n = [array count];
-	font = [NSFont userFixedPitchFontOfSize: -1.0];
-	[myEventTrackView setRowHeight: [font defaultLineHeightForFont]];
+	font = [NSFont userFixedPitchFontOfSize: 10];
+    
+    [myEventTrackView setRowHeight: [[NSWindowController sharedLayoutManager] defaultLineHeightForFont:font]];
 	while (--n >= 0) {
 		column = (NSTableColumn *)[array objectAtIndex: n];
 		[[column dataCell] setFont: font];
