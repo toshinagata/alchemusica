@@ -116,6 +116,7 @@ sTableColumnIDToInt(id identifier)
 //	trackInfo = [[NSMutableArray allocWithZone: [self zone]] init];
 //	editFlags = nil;
 	lastMouseClientViewIndex = -1;
+    lastTimeIndicator = -1;
     return self;
 }
 
@@ -526,60 +527,78 @@ sTableColumnIDToInt(id identifier)
 
 - (void)showTimeIndicatorAtBeat: (float)beat
 {
-	NSBezierPath *path, *bpath;
+    NSBezierPath *path, *bpath;
 //	float beat;
-	NSWindow *theWindow = [self window];
-	
+//	NSWindow *theWindow = [self window];
+    NSView *contentView = [[self window] contentView];
 //	beat = [[[self document] myMIDISequence] playingBeat];
-	timeIndicatorPos = beat;
+//	timeIndicatorPos = beat;
 	if (beat < 0)
 		return;
 	path = [self timeIndicatorPathAtBeat: beat];
 	if (path) {
-		NSRect bounds;
-		bounds = [path bounds];
+        NSRect bounds = [path bounds];
 		bpath = [self bouncingBallPathAtBeat: beat];
 		if (bpath)
 			bounds = NSUnionRect(bounds, [bpath bounds]);
-		bounds = NSInsetRect(bounds, -1, -1);
-		bounds = [myFloatingView convertRect: bounds toView: nil];	//  window base coordinate
-	//	NSLog(@"bounds = %@", NSStringFromRect(bounds));
-		timeIndicatorRect = bounds;
-		[theWindow restoreCachedImage];
-		[theWindow discardCachedImage];
-		[theWindow cacheImageInRect: bounds];
-		[myFloatingView lockFocus];
-		[path stroke];
-		if (bpath)
-			[bpath fill];
-		[myFloatingView unlockFocus];
-		[theWindow flushWindowIfNeeded];
+        bounds = NSInsetRect(bounds, -1, -1);
+        bounds = [contentView convertRect: bounds fromView: myFloatingView];
+        [self hideTimeIndicator];
+        cachedImage = [[contentView bitmapImageRepForCachingDisplayInRect:bounds] retain];
+        [contentView cacheDisplayInRect:bounds toBitmapImageRep:cachedImage];
+        if ([myFloatingView canDraw]) {
+            [myFloatingView lockFocus];
+            [path stroke];
+            if (bpath)
+                [bpath fill];
+            [myFloatingView unlockFocus];
+        }
+//        bounds = [myFloatingView convertRect: bounds toView: nil];	//  window base coordinate
+        timeIndicatorRect = bounds;
 	}
+    timeIndicatorPos = beat;
 }
 
 - (void)hideTimeIndicator
 {
-	NSWindow *theWindow = [self window];
-	[theWindow restoreCachedImage];
-	[theWindow discardCachedImage];
-	[theWindow flushWindowIfNeeded];
-	timeIndicatorPos = -1.0;
-	timeIndicatorRect = NSMakeRect(0, 0, 0, 0);
+//	NSWindow *theWindow = [self window];
+//	[theWindow restoreCachedImage];
+//	[theWindow discardCachedImage];
+//	[theWindow flushWindowIfNeeded];
+    if (!NSIsEmptyRect(timeIndicatorRect)) {
+        NSImage *image = [[[NSImage alloc] init] autorelease];
+        NSView *contentView = [[self window] contentView];
+        if ([myFloatingView canDraw]) {
+            [myFloatingView lockFocus];
+            NSEraseRect([myFloatingView convertRect:timeIndicatorRect fromView:contentView]);
+            [myFloatingView unlockFocus];
+        }
+        [image addRepresentation:cachedImage];
+        [contentView lockFocus];
+        [image drawInRect:timeIndicatorRect];
+        [contentView unlockFocus];
+        [cachedImage release];
+        cachedImage = nil;
+    }
+    timeIndicatorRect = NSZeroRect;
 }
 
-- (void)invalidateTimeIndicatorCachedImage
+- (void)invalidateTimeIndicatorRect
 {
 	NSRect bounds;
 	NSBezierPath *path;
 	int n;
 	NSView *view;
-	if (timeIndicatorPos >= 0) {
+	if (!NSIsEmptyRect(timeIndicatorRect)) {
 		/*  Redraw the 'timeIndicatorRect' portion of each splitter view  */
 		for (n = 0; n < myClientViewsCount; n++) {
-			view = records[n].splitter;
+			view = records[n].client;
 			[view setNeedsDisplayInRect: [view convertRect: timeIndicatorRect fromView: nil]];
+            view = records[n].splitter;
+            [view setNeedsDisplayInRect: [view convertRect: timeIndicatorRect fromView: nil]];
 		}
-		/*  Calculate the 'current' position of the time indicator  */
+#if 0
+        /*  Calculate the 'current' position of the time indicator  */
 		path = [self timeIndicatorPathAtBeat: timeIndicatorPos];
 		if (path != nil)
 			bounds = [path bounds];
@@ -596,6 +615,7 @@ sTableColumnIDToInt(id identifier)
 		[[self window] discardCachedImage];
 		timeIndicatorPos = -1.0;
 		timeIndicatorRect = NSMakeRect(0, 0, 0, 0);
+#endif
 	}
 }
 
@@ -606,6 +626,9 @@ sTableColumnIDToInt(id identifier)
 	float pos = beat * [self pixelsPerQuarter];
 	float width;
 
+    if ([myMainView isHiddenOrHasHiddenAncestor]) {
+        return;
+    }
 	{
 		/*  If dragging in some client view, then don't autoscroll to play position  */
 		GraphicClientView *lastView = [self lastMouseClientView];

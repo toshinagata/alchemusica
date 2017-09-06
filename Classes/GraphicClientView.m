@@ -69,8 +69,14 @@
 	return dataSource;
 }
 
+//  Should be overridden in subclasses
+- (void)drawContentsInRect: (NSRect)aRect
+{
+}
+
 - (void)drawRect: (NSRect)aRect
 {
+    [self drawContentsInRect:aRect];
 }
 
 - (void)paintEditingRange: (NSRect)aRect startX: (float *)startp endX: (float *)endp

@@ -296,7 +296,7 @@ getYValue(const MDEvent *ep, int eventKind)
 	return aRange;
 }
 
-- (void)drawRect: (NSRect)aRect
+- (void)drawContentsInRect: (NSRect)aRect
 {
 	NSPoint pt;
 	NSRect bounds;

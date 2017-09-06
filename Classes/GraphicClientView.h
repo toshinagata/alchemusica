@@ -63,6 +63,9 @@ enum {
 - (void)addTrack: (int)track;
 - (void)removeTrack: (int)track;
 
+//  Drawing
+- (void)drawContentsInRect:(NSRect)aRect;
+
 //- (int)selectMode;
 - (BOOL)isDragging;
 //- (BOOL)shiftDown;

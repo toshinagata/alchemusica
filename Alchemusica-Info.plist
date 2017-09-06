@@ -49,7 +49,7 @@
 	<key>CFBundleIconFile</key>
 	<string>G-clef.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>jp.sourceforge.${PRODUCT_NAME:identifier}</string>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>

@@ -62,7 +62,7 @@ typedef struct TimeScalingRecord {
 //    return self;
 //}
 
-- (void)drawRect: (NSRect)aRect
+- (void)drawContentsInRect: (NSRect)aRect
 {
 	float ppt;
 	MDTickType beginTick, endTick;

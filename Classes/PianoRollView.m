@@ -398,7 +398,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	[normalPath release];
 }
 
-- (void)drawRect: (NSRect)aRect
+- (void)drawContentsInRect: (NSRect)aRect
 {
 	MDTickType deltaDuration;
 	if (draggingMode == 3)

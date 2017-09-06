@@ -114,8 +114,9 @@ enum {
 
 	//  The position of the time indicator during playing
 	float timeIndicatorPos;		//  In tick
-	NSRect timeIndicatorRect;	//  In window coordinates
-    
+	NSRect timeIndicatorRect;	//  In MyFloatingView coordinates
+    NSBitmapImageRep *cachedImage;  //  Image
+
     //  Tracking rect
     NSTrackingRectTag trackingRectTag;
 	
@@ -125,6 +126,8 @@ enum {
 	int graphicEditingMode;
 //	int graphicSelectionMode;
 	
+    float lastTimeIndicator;
+    
 	//  Client view that received the last mouse event
 	int lastMouseClientViewIndex;
 	
