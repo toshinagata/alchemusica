@@ -530,29 +530,32 @@ sTableColumnIDToInt(id identifier)
     NSBezierPath *path, *bpath;
 //	float beat;
 //	NSWindow *theWindow = [self window];
-    NSView *contentView = [[self window] contentView];
 //	beat = [[[self document] myMIDISequence] playingBeat];
 //	timeIndicatorPos = beat;
-	if (beat < 0)
+	if (beat < 0 || ![myMainView canDraw] || ![myFloatingView canDraw])
 		return;
 	path = [self timeIndicatorPathAtBeat: beat];
 	if (path) {
         NSRect bounds = [path bounds];
+        NSPoint origin;
+        [self hideTimeIndicator];
 		bpath = [self bouncingBallPathAtBeat: beat];
 		if (bpath)
 			bounds = NSUnionRect(bounds, [bpath bounds]);
         bounds = NSInsetRect(bounds, -1, -1);
-        bounds = [contentView convertRect: bounds fromView: myFloatingView];
-        [self hideTimeIndicator];
-        cachedImage = [[contentView bitmapImageRepForCachingDisplayInRect:bounds] retain];
-        [contentView cacheDisplayInRect:bounds toBitmapImageRep:cachedImage];
-        if ([myFloatingView canDraw]) {
-            [myFloatingView lockFocus];
-            [path stroke];
-            if (bpath)
-                [bpath fill];
-            [myFloatingView unlockFocus];
-        }
+        bounds = [myMainView convertRect: bounds fromView: myFloatingView];
+        origin.x = floor(bounds.origin.x);
+        origin.y = floor(bounds.origin.y);
+        bounds.size.width = ceil(bounds.origin.x + bounds.size.width - origin.x);
+        bounds.size.height = ceil(bounds.origin.y + bounds.size.height - origin.y);
+        bounds.origin = origin;
+        cachedImage = [[myMainView bitmapImageRepForCachingDisplayInRect:bounds] retain];
+        [myMainView cacheDisplayInRect:bounds toBitmapImageRep:cachedImage];
+        [myFloatingView lockFocus];
+        [path stroke];
+        if (bpath)
+            [bpath fill];
+        [myFloatingView unlockFocus];
 //        bounds = [myFloatingView convertRect: bounds toView: nil];	//  window base coordinate
         timeIndicatorRect = bounds;
 	}
@@ -566,17 +569,18 @@ sTableColumnIDToInt(id identifier)
 //	[theWindow discardCachedImage];
 //	[theWindow flushWindowIfNeeded];
     if (!NSIsEmptyRect(timeIndicatorRect)) {
-        NSImage *image = [[[NSImage alloc] init] autorelease];
-        NSView *contentView = [[self window] contentView];
         if ([myFloatingView canDraw]) {
             [myFloatingView lockFocus];
-            NSEraseRect([myFloatingView convertRect:timeIndicatorRect fromView:contentView]);
+            NSEraseRect([myFloatingView convertRect:timeIndicatorRect fromView:myMainView]);
             [myFloatingView unlockFocus];
         }
-        [image addRepresentation:cachedImage];
-        [contentView lockFocus];
-        [image drawInRect:timeIndicatorRect];
-        [contentView unlockFocus];
+        if ([myMainView canDraw] && cachedImage != nil) {
+            NSImage *image = [[[NSImage alloc] init] autorelease];
+            [image addRepresentation:cachedImage];
+            [myMainView lockFocus];
+            [image drawInRect:timeIndicatorRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+            [myMainView unlockFocus];
+        }
         [cachedImage release];
         cachedImage = nil;
     }

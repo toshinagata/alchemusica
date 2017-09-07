@@ -791,7 +791,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 						sTrackInfos[i]->doc = NULL;
 				}
 				if (sTrackInfos[i]->doc == self) {
-					if (sTrackInfos[i]->num > index)
+					if (sTrackInfos[i]->num > trackNo)
 						sTrackInfos[i]->num--;
 				}
 			}
@@ -812,7 +812,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
         [[[self undoManager] prepareWithInvocationTarget: self]
             setTrackAttributes: attr];
 		[[[self undoManager] prepareWithInvocationTarget: self]
-			insertTrack: trackObj atIndex: index];
+			insertTrack: trackObj atIndex: trackNo];
         /*  Update selections  */
         [selections removeObjectAtIndex: trackNo];
 		/*  Post pending notifications for track modification  */
@@ -2110,7 +2110,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 				changeTick: otick atPosition: npos inTrack: trackNo originalPosition: opos1];
 			/*  Post the notification that any track has been modified  */
 			[self enqueueTrackModifiedNotification: trackNo];
-		}
+        } else npos = -1;
 		MDPointerRelease(pt1);
 		return npos;
 	}

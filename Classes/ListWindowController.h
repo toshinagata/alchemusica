@@ -116,7 +116,6 @@ typedef struct ListWindowFilterRecord {
 //- (IBAction)myDoubleAction:(id)sender;
 - (IBAction)eventKindMenuSelected:(id)sender;
 
-- (void)editingRangeChanged: (NSNotification *)notification;
 - (IBAction)deleteSelectedEvents:(id)sender;
 
 - (IBAction)insertNewEvent: (id)sender;

@@ -198,8 +198,6 @@ enum {
 
 - (IBAction)quantizeSelected: (id)sender;
 
-- (void)scrollClientViewsToPosition: (float)pos;
-- (void)scrollClientViewsToTick: (MDTickType)tick;
 - (void)zoomClientViewsWithPixelsPerQuarter:(float)ppq startingPos:(float)pos;
 - (void)unzoomClientViews;
 - (void)rezoomClientViews;
