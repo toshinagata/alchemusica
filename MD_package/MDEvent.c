@@ -138,11 +138,11 @@ MDEventClear(MDEvent *eventRef)
 void
 MDEventDefault(MDEvent *eventRef, int kind)
 {
+    int n;
+    unsigned char *ucp;
 	MDEventInit(eventRef);
 	MDSetKind(eventRef, kind);
 	switch (kind) {
-		int n;
-		unsigned char *ucp;
 		case kMDEventTempo:
 			MDSetTempo(eventRef, 120.0); break;
 		case kMDEventTimeSignature:
