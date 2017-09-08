@@ -79,8 +79,11 @@
 	sequence = [[myDocument myMIDISequence] mySequence];
 	track = MDSequenceGetTrack(sequence, 0);	/*  the conductor track  */
 	calibrator = MDCalibratorNew(sequence, track, kMDEventTempo, -1);	/*  create a new calibrator  */
-	if (calibrator != NULL)
-		sts = MDCalibratorAppend(calibrator, track, kMDEventTimeSignature, -1);
+    if (calibrator == NULL) {
+        NSLog(@"Internal error: cannot allocate calibrator for PlayingViewController");
+        return;
+    }
+    sts = MDCalibratorAppend(calibrator, track, kMDEventTimeSignature, -1);
 	if (sts == kMDNoError)
 		sts = MDCalibratorAppend(calibrator, track, kMDEventMetaText, kMDMetaMarker);
 
@@ -267,7 +270,7 @@
         }
         while (--n >= 0) {
             /*  Remove the serial numbers from the menu titles, and set tag  */
-            NSMenuItem *item = [markerPopup itemAtIndex: n];
+            NSMenuItem *item = [(NSPopUpButton *)markerPopup itemAtIndex: n];
             if (item) {
                 [item setTitle: [[item title] substringFromIndex: 11]];
                 [item setTag: n];

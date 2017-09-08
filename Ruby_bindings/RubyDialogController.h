@@ -23,7 +23,7 @@
 
 #include "ruby_dialog.h"
 
-@interface RubyDialogController : NSWindowController {
+@interface RubyDialogController : NSWindowController <NSTextFieldDelegate, NSWindowDelegate, NSTextViewDelegate, NSTableViewDataSource, NSTableViewDelegate> {
 	RubyValue dval;  /*  Ruby object representing this object  */
 	NSMutableArray *ditems;  /*  Array of dialog items  */
 @public

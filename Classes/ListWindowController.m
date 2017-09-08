@@ -649,7 +649,7 @@ forTableColumn:(NSTableColumn *)aTableColumn
 row:(int)rowIndex
 {
 	id identifier = [aTableColumn identifier];
-	const char *descStr = [[anObject description] UTF8String];
+//	const char *descStr = [[anObject description] UTF8String];
 	MDEvent *ep;
 	MDTickType tick;
 	MDTimeType time;
@@ -875,7 +875,7 @@ row:(int)rowIndex
 {
 	if (tableView == myEventTrackView) {
 		MDEvent *ep = [self eventPointerForTableRow:row];
-		int count = [self eventPositionForTableRow:row];
+	//	int count = [self eventPositionForTableRow:row];
 		if (ep == NULL)
 			return NO;
 	/*	if (MDGetKind(ep) == kMDEventSysex) {
@@ -1055,7 +1055,7 @@ row:(int)rowIndex
 			default:
 				return;
 		}
-	}
+    } else return;
 
 	/*  Replace the event with the new event  */
 	newEventFromKindAndCode(&newEvent->event, ed);

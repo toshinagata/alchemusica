@@ -39,7 +39,7 @@
 	//  If the delegate implements special editing feature, call it.
 	id delegate = [self delegate];
 	if ([delegate respondsToSelector:@selector(myTableView:shouldEditColumn:row:)]) {
-		if (![[self delegate] myTableView:self shouldEditColumn:columnIndex row:rowIndex])
+		if (![(MyTableView *)delegate myTableView:self shouldEditColumn:columnIndex row:rowIndex])
 			return;
 	}
 	//  If it does not, then do the usual thing

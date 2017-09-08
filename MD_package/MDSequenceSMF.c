@@ -524,10 +524,10 @@ MDSequenceReadSMF(MDSequence *inSequence, STREAM stream, MDSequenceCallback call
 	conv.stream = stream;
 	conv.sequence = inSequence;
 	conv.callback = callback;
-	pos = FTELL(stream);
+	pos = (long)FTELL(stream);
 	FSEEK(stream, 0, SEEK_END);
     conv.track_channel = 0;  /*  Not to be used  */
-	conv.filesize = FTELL(stream) - pos;
+	conv.filesize = (long)FTELL(stream) - pos;
 	conv.cbdata = cbdata;
 	FSEEK(stream, pos, SEEK_SET);
 	
@@ -1077,7 +1077,7 @@ MDSequenceWriteSMFWithSelection(MDSequence *inSequence, IntGroup **psetArray, ch
         else
             conv.track_channel = 16;
 		if (MDWriteStreamFormat(conv.stream, "A4N", "MTrk", 0L) == 2) {
-			conv.pos = FTELL(conv.stream) - 4;
+			conv.pos = (long)FTELL(conv.stream) - 4;
 		/*	if (pset == (IntGroup *)(-1))
 				result = kMDNoError;
 			else */
@@ -1085,7 +1085,7 @@ MDSequenceWriteSMFWithSelection(MDSequence *inSequence, IntGroup **psetArray, ch
 			if (result != kMDNoError) {
 				dprintf(0, "Error %d occurred during write of SMF track\n", result);
 			}
-			pos = FTELL(conv.stream);
+			pos = (long)FTELL(conv.stream);
 			size = pos - conv.pos - 4;
 			FSEEK(conv.stream, conv.pos, SEEK_SET);
 			MDWriteStreamFormat(conv.stream, "N", size);

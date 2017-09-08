@@ -334,7 +334,7 @@ MDDataStreamPutc(STREAM stream, int c)
 	}
 	dp->ptr[dp->offset++] = c;
 	if (dp->offset > dp->size)
-		dp->size = dp->offset;
+		dp->size = (size_t)dp->offset;
 	return c;
 }
 
@@ -347,7 +347,7 @@ MDDataStreamFread(STREAM stream, void *ptr, size_t size)
 	if (dp->offset >= dp->size)
 		return -1;
 	if (dp->offset + size > dp->size)
-		size = dp->size - dp->offset;
+		size = dp->size - (size_t)dp->offset;
 	memmove(ptr, dp->ptr + dp->offset, size);
 	dp->offset += size;
 	return size;
@@ -364,7 +364,7 @@ MDDataStreamFwrite(STREAM stream, const void *ptr, size_t size)
 	memmove(dp->ptr + dp->offset, ptr, size);
 	dp->offset += size;
 	if (dp->offset > dp->size)
-		dp->size = dp->offset;
+		dp->size = (size_t)dp->offset;
 	return size;
 }
 

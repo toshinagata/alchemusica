@@ -20,7 +20,7 @@
 #import <AudioUnit/AudioUnit.h>
 #import <AudioUnit/AudioUnitCarbonView.h>
 
-@interface AUViewWindowController : NSWindowController {
+@interface AUViewWindowController : NSWindowController <NSWindowDelegate> {
 @public
 	BOOL isProcessingCarbonEventHandler;  //  True while processing carbon event
 @protected

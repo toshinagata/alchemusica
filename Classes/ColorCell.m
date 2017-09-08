@@ -35,7 +35,7 @@
 	id image, rep;
 	rep = [self representedObject];
 	if (rep != nil && [rep isKindOfClass: [NSColor class]]) {
-		[rep set];
+		[(NSColor *)rep set];
 		if (!noFillsColor)
 			NSRectFill(cellFrame);
 		else if (!noStrokesColor)

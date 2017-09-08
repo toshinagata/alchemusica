@@ -449,8 +449,10 @@ sTableColumnIDToInt(id identifier)
         pos *= newPixelsPerQuarter / pixelsPerQuarter;
     }
     pixelsPerQuarter = newPixelsPerQuarter;
-	[self reloadClientViews];
-	[self scrollClientViewsToPosition: pos];
+    if (myClientViewsCount > 0) {
+        [self reloadClientViews];
+        [self scrollClientViewsToPosition: pos];
+    }
 }
 
 - (float)pixelsPerTick
@@ -589,8 +591,8 @@ sTableColumnIDToInt(id identifier)
 
 - (void)invalidateTimeIndicatorRect
 {
-	NSRect bounds;
-	NSBezierPath *path;
+//	NSRect bounds;
+//	NSBezierPath *path;
 	int n;
 	NSView *view;
 	if (!NSIsEmptyRect(timeIndicatorRect)) {
@@ -2401,12 +2403,12 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 
 - (IBAction)changeControlNumber:(id)sender
 {
-	[[NSApp delegate] performScriptCommand:@"change_control_number" forDocument:[self document]];
+	[(MyAppController *)[NSApp delegate] performScriptCommand:@"change_control_number" forDocument:[self document]];
 }
 
 - (IBAction)shiftSelectedEvents:(id)sender
 {
-	[[NSApp delegate] performScriptCommand:@"shift_selected_events" forDocument:[self document]];
+	[(MyAppController *)[NSApp delegate] performScriptCommand:@"shift_selected_events" forDocument:[self document]];
 }
 
 #pragma mark ==== Track list ====

@@ -84,10 +84,12 @@ static void MDPlayerReleaseDestinationInfo(MDDestinationInfo *info);
 
 static MDDeviceInfo sDeviceInfo = { 0, 0, NULL, 0, NULL };
 
+#define MIDIObjectNull ((MIDIObjectRef)0)
+
 /*  CoreMIDI (Mac OS X) specific static variables  */
-static MIDIClientRef	sMIDIClientRef = NULL;
-static MIDIPortRef		sMIDIInputPortRef = NULL;
-static MIDIPortRef		sMIDIOutputPortRef = NULL;
+static MIDIClientRef	sMIDIClientRef = MIDIObjectNull;
+static MIDIPortRef		sMIDIInputPortRef = MIDIObjectNull;
+static MIDIPortRef		sMIDIOutputPortRef = MIDIObjectNull;
 
 /*  Forward declaration of the MIDI read callback  */
 static void MyMIDIReadProc(const MIDIPacketList *pktlist, void *refCon, void *connRefCon);
@@ -321,11 +323,11 @@ MDPlayerInitCoreMIDI(void)
 	if (sDeviceInfo.initialized)
 		return;
 
-	if (sMIDIClientRef == NULL)
+	if (sMIDIClientRef == MIDIObjectNull)
 		MIDIClientCreate(CFSTR("Alchemusica"), sCoreMIDINotifyProc, NULL, &sMIDIClientRef);
-	if (sMIDIOutputPortRef == NULL)
+	if (sMIDIOutputPortRef == MIDIObjectNull)
 		MIDIOutputPortCreate(sMIDIClientRef, CFSTR("Output port"), &sMIDIOutputPortRef);
-	if (sMIDIInputPortRef == NULL)
+	if (sMIDIInputPortRef == MIDIObjectNull)
 		MIDIInputPortCreate(sMIDIClientRef, CFSTR("Input port"), MyMIDIReadProc, NULL, &sMIDIInputPortRef);
 	/*  Start receiving incoming MIDI messages  */
 	for (n = MIDIGetNumberOfSources() - 1; n >= 0; n--) {
@@ -714,7 +716,7 @@ MDPlayerPutRecordingData(MDPlayer *inPlayer, MDTimeType timeStamp, long size, co
     long nsize, n;
 
 	#if DEBUG
-	if (0) {
+/*	if (0) {
 		if (sMIDIInputDump != NULL) {
 			int i;
 			fprintf(sMIDIInputDump, "%qd ", (long long)timeStamp);
@@ -722,7 +724,7 @@ MDPlayerPutRecordingData(MDPlayer *inPlayer, MDTimeType timeStamp, long size, co
 				fprintf(sMIDIInputDump, "%02x%c", buf[i], (i == size - 1 ? '\n' : ' '));
 			}
 		}
-	}
+	} */
 	#endif
 	
     if (inPlayer == NULL)
@@ -914,7 +916,7 @@ MyMIDIReadProc(const MIDIPacketList *pktlist, void *refCon, void *connRefCon)
     }
 
     /*  Echo back  */
-    if (sMIDIThruDeviceRef != NULL)
+    if (sMIDIThruDeviceRef != MIDIObjectNull)
         MIDISend(sMIDIOutputPortRef, sMIDIThruDeviceRef, pktlist);
 }
 
@@ -1316,7 +1318,7 @@ StopSoundInAllTracks(MDPlayer *inPlayer)
 	/*  Dispose the already scheduled MIDI events  */
 	for (n = inPlayer->destNum - 1; n >= 0; n--) {
 		info = inPlayer->destInfo[n];
-		if (info != NULL && info->eref != NULL) {
+		if (info != NULL && info->eref != MIDIObjectNull) {
 			MIDIFlushOutput(info->eref);
 		}
 	}

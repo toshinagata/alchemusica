@@ -262,10 +262,10 @@ NSString
 	MDStatus sts;
 	STREAM stream;
 	sequence = MDSequenceNew();
-    if (sequence == NULL)
+    
+    if (sequence == NULL) {
         return kMDErrorOutOfMemory;
-
-	if (sequence != NULL) {
+    } else {
 		stream = MDStreamOpenFile([fileName fileSystemRepresentation], "rb");
 		if (stream != NULL) {
 			sts = MDSequenceReadSMF(sequence, stream, callback, data);

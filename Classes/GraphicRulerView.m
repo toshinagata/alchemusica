@@ -212,8 +212,8 @@ static NSFont *sRulerLabelFont;
 - (void)mouseDragged: (NSEvent *)theEvent
 {
     NSPoint pt;
-    NSRect bounds;
-    NSValue *val;
+//    NSRect bounds;
+//    NSValue *val;
 	pt = [self convertPoint: [theEvent locationInWindow] fromView: nil];
 	if (dragStartPoint.x == -10000) {
 		if ([theEvent modifierFlags] & NSAlternateKeyMask) {
@@ -243,7 +243,7 @@ static NSFont *sRulerLabelFont;
 	
 	if (scroll_direction == 0) {
 		//  Scroll wheel behavior was changed in 10.7
-		if ([[NSApp delegate] getOSXVersion] < 10700)
+		if ([(MyAppController *)[NSApp delegate] getOSXVersion] < 10700)
 			scroll_direction = -1;
 		else scroll_direction = 1;
 	}

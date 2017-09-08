@@ -440,6 +440,7 @@ RDSizeFromNSSize(NSSize size)
 	return rsize;
 }
 
+#if 0
 static inline NSRect
 sConvertForViewFromRDRect(RDItem *item, RDRect rframe)
 {
@@ -455,6 +456,7 @@ sConvertForViewFromRDRect(RDItem *item, RDRect rframe)
 	rect.size.height = rframe.size.height;
 	return rect;
 }
+#endif
 
 RDSize
 RubyDialogCallback_windowMinSize(RubyDialog *dref)
@@ -830,7 +832,7 @@ RubyDialogCallback_getStringFromItem(RDItem *item, char *buf, int bufsize)
 	NSString *str;
 	if ([view isKindOfClass: [NSScrollView class]]) {
 		str = [[(NSScrollView *)view documentView] string];
-	} else if ([view respondsToSelector: @selector(stringValue:)]) {
+	} else if ([view respondsToSelector: @selector(stringValue)]) {
 		str = [(id)view stringValue];
 	} else {
 		buf[0] = 0;
@@ -1213,7 +1215,7 @@ RubyDialogCallback_deleteTableColumn(RDItem *item, int col)
 	if ([itemView isKindOfClass:[NSScrollView class]]) {
 		itemView = [(NSScrollView *)itemView documentView];
 		if ([itemView isKindOfClass:[NSTableView class]]) {
-			id column = [(NSTableView *)itemView tableColumnWithIdentifier:[NSNumber numberWithInt:col]];
+            id column = [(NSTableView *)itemView tableColumnWithIdentifier:[NSString stringWithFormat:@"%d", col]];
 			if (column != nil) {
 				[(NSTableView *)itemView removeTableColumn:column];
 				return 1;
@@ -1230,7 +1232,7 @@ RubyDialogCallback_insertTableColumn(RDItem *item, int col, const char *heading,
 	if ([itemView isKindOfClass:[NSScrollView class]]) {
 		itemView = [(NSScrollView *)itemView documentView];
 		if ([itemView isKindOfClass:[NSTableView class]]) {
-			NSTableColumn *column = [[[NSTableColumn alloc] initWithIdentifier:[NSNumber numberWithInt:col]] autorelease];
+			NSTableColumn *column = [[[NSTableColumn alloc] initWithIdentifier:[NSString stringWithFormat:@"%d", col]] autorelease];
 			[[column headerCell] setStringValue:[NSString stringWithUTF8String:heading]];
 			[(NSTableView *)itemView addTableColumn:column];
 			return 1;

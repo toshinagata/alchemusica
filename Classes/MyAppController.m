@@ -570,7 +570,7 @@ MyAppCallback_executeScriptFromFile(const char *cpath, int *status)
 	contents = [NSString stringWithContentsOfFile: fullpath encoding: NSUTF8StringEncoding error: NULL];
 
 	/*  Execute as a ruby script  */
-	retval = Ruby_evalRubyScriptOnDocument([contents UTF8String], [[NSApp delegate] documentAtIndex: 0], status);
+	retval = Ruby_evalRubyScriptOnDocument([contents UTF8String], [(MyAppController *)[NSApp delegate] documentAtIndex: 0], status);
 
 	/*  Restore the current directory  */
 	[manager changeCurrentDirectoryPath: cwd];

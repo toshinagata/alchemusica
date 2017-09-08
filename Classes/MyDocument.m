@@ -1374,14 +1374,14 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	if (sts == kMDNoError) {
         /*  Update selection  */
 		IntGroup *newSelection = IntGroupNew();
-		if (0) {
+	/*	if (0) {
 			IntGroup *temp = IntGroupNew();
 			if (temp == NULL || newSelection == NULL)
 				return NO;
 			sts = IntGroupNegate(pset, temp);
 			if (sts == kMDNoError)
 				sts = IntGroupDeconvolute([(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet], temp, newSelection);
-		}
+		} */
 		if (sts == kMDNoError)
 			[self setSelection: [[[MDSelectionObject allocWithZone: [self zone]] initWithMDPointSet: newSelection] autorelease] inTrack: trackNo sender: self];
 		trackObj = [[[MDTrackObject allocWithZone: [self zone]] initWithMDTrack: newTrack] autorelease];
@@ -2983,7 +2983,8 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 - (BOOL)validateUserInterfaceItem: (id)anItem
 {
 	SEL sel = [anItem action];
-	if (sel == @selector(performStartPlay:) || sel == @selector(performStartMIDIRecording:) || sel == @selector(performStopMIDIRecording:)) {
+	if (sel == @selector(performStartPlay:) || sel == @selector(performStartMIDIRecording:)
+        /* || sel == @selector(performStopMIDIRecording:) */ ) {
 		return ![[self myMIDISequence] isPlaying];
 	} else if (sel == @selector(performStopPlay:) || sel == @selector(performPausePlay:)) {
 		return [[self myMIDISequence] isPlaying];

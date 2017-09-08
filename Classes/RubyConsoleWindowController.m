@@ -158,7 +158,7 @@ static RubyConsoleWindowController *shared;
 	//  Invoke ruby interpreter
 	int status;
 	char *cscript = strdup([script UTF8String]);
-	RubyValue val = Ruby_evalRubyScriptOnDocument(cscript, [[NSApp delegate] documentAtIndex: 0], &status);
+	RubyValue val = Ruby_evalRubyScriptOnDocument(cscript, [(MyAppController *)[NSApp delegate] documentAtIndex: 0], &status);
 	cscript[strlen(cscript) - 1] = 0;  /*  Remove the last newline  */
 	AssignArray(&commandHistory, &nCommandHistory, sizeof(char *), nCommandHistory, &cscript);
 	if (nCommandHistory >= MAX_HISTORY_LINES)

@@ -589,7 +589,7 @@
 
 	if (scroll_direction == 0) {
 		//  Scroll wheel behavior was changed in 10.7
-		if ([[NSApp delegate] getOSXVersion] < 10700)
+		if ([(MyAppController *)[NSApp delegate] getOSXVersion] < 10700)
 			scroll_direction = -1;
 		else scroll_direction = 1;
 	}

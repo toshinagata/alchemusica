@@ -103,9 +103,9 @@ typedef struct TimeScalingRecord {
 			nextSigTick = endTick;
 		startx = sigTick * ppt;
         sigDenominator = (sig1 == NULL ? 4 : (1 << (int)(MDGetMetaDataPtr(sig1)[1])));
+        sigNumerator = (sig1 == NULL ? 4 : MDGetMetaDataPtr(sig1)[0]);
         if (sigNumerator == 0)
             sigNumerator = 4;
-        sigNumerator = (sig1 == NULL ? 4 : MDGetMetaDataPtr(sig1)[0]);
         [[NSString stringWithFormat: @"%d/%d", sigNumerator, sigDenominator] drawAtPoint: NSMakePoint(startx, basey + 22.0) withAttributes: nil clippingRect: aRect];
 		numLines = floor((nextSigTick - sigTick) * ppt / interval) + 1;
 		i = (startx >= originx ? 0 : floor((originx - startx) / interval));

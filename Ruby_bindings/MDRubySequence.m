@@ -429,7 +429,7 @@ s_MRSequence_DeleteTrack(VALUE self, VALUE nval)
 static VALUE
 s_MRSequence_Name(VALUE self)
 {
-	int n;
+//	int n;
 	MyDocument *doc = MyDocumentFromMRSequenceValue(self);
 	NSString *name = [doc tuneName];
 	return rb_str_new2([name UTF8String]);
@@ -444,7 +444,7 @@ s_MRSequence_Name(VALUE self)
 static VALUE
 s_MRSequence_Path(VALUE self)
 {
-	int n;
+//	int n;
 	MyDocument *doc = MyDocumentFromMRSequenceValue(self);
 	NSURL *url = [doc fileURL];
 	NSString *path;
@@ -462,7 +462,7 @@ s_MRSequence_Path(VALUE self)
 static VALUE
 s_MRSequence_Dir(VALUE self)
 {
-	int n;
+//	int n;
 	MyDocument *doc = MyDocumentFromMRSequenceValue(self);
 	NSURL *url = [doc fileURL];
 	NSString *path;
@@ -487,7 +487,8 @@ MRSequence_Current(VALUE self)
 	return MRSequenceFromMyDocument([docs objectAtIndex: 0]);
 }
 
-static id
+#if 0
+ static id
 s_ObjCFromValue(VALUE val)
 {
 	switch (TYPE(val)) {
@@ -567,6 +568,7 @@ s_ValueFromObjC(id obj)
 		return Qnil;  /*  Not reached  */
 	}
 }
+#endif
 
 #if 0
 #pragma mark ------ Unused ------

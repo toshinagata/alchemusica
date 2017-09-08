@@ -160,7 +160,7 @@ getYValue(const MDEvent *ep, int eventKind)
 		n = [array count];
 		while (i < n) {
 		//	NSLog(@"color: %@ path (%d)", [array objectAtIndex: i], [[array objectAtIndex: i + 1] elementCount]);
-			[[array objectAtIndex: i++] set];
+			[(NSColor *)[array objectAtIndex: i++] set];
 			[[array objectAtIndex: i++] stroke];
 		}
 	}
@@ -277,7 +277,7 @@ getYValue(const MDEvent *ep, int eventKind)
 		int i = 0;
 		n = [array count];
 		while (i < n) {
-			[[array objectAtIndex: i++] set];
+			[(NSColor *)[array objectAtIndex: i++] set];
 			[[array objectAtIndex: i++] stroke];
 		}
 	}
@@ -915,7 +915,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 					} else if (xb < p[6]) {
 						tb = cubicReverseFunc(xb, p, t);
 					} else tb = 1.0;
-					if (fabs(v2 - v1) < 1.0 || p[1] == p[7]) {
+					if (v1 == v2 || p[1] == p[7]) {
 						tc = 1.0;
 					} else {
 						yc = (double)sValueResolution / (v2 - v1);

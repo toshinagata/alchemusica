@@ -188,6 +188,7 @@ static id sharedMetronomeSettingsPanelController;
 		key = MetronomeVelocity1Key;
 	else if (sender == metronomeVelocity2Text)
 		key = MetronomeVelocity2Key;
+    else return;
 	MyAppCallback_setObjectGlobalSettings(key, [NSNumber numberWithInt:ival]);
 	MyAppCallback_saveGlobalSettings();
 	[self updateDisplay];
@@ -207,6 +208,7 @@ static id sharedMetronomeSettingsPanelController;
 		key = MetronomeVelocity1Key;
 	else if (sender == metronomeVelocity2Stepper)
 		key = MetronomeVelocity2Key;
+    else return;
 	MyAppCallback_setObjectGlobalSettings(key, [NSNumber numberWithInt:ival]);
 	MyAppCallback_saveGlobalSettings();
 	[self updateDisplay];

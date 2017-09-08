@@ -39,8 +39,10 @@
 	NSFont *font;
 	NSDictionary *attr;
 	float grid;
-	float minValue, maxValue, visibleMinValue, visibleMaxValue, visibleRange, aRange;
-	int i, min, max;
+    float minValue, maxValue;
+//    float visibleMinValue, visibleMaxValue, visibleRange, aRange;
+//    int i;
+//    int min, max;
 	float ascender, descender, x, y, yval;
 	NSString *str;
 	frame = [self frame];

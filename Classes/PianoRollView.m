@@ -622,7 +622,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 		rect.origin.y = draggingPoint.y - size.height / 2;
 		rect.size = size;
 		rect = NSIntersectionRect(rect, [self visibleRect]);
-	}
+	} else return;
 	[self setNeedsDisplayInRect: rect];
 }
 
