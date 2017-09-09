@@ -32,7 +32,7 @@ static NSImage *sTriangleImage;
 
 - (void)drawRect: (NSRect)aRect
 {
-	NSRect theRect;
+    NSRect theRect, r;
 	NSPoint center;
 	NSSize size;
 	NSImage *theImage;
@@ -52,10 +52,17 @@ static NSImage *sTriangleImage;
 	else fraction = 0.5;
 	if (theImage != nil) {
 		size = [theImage size];
-        [theImage drawAtPoint: NSMakePoint(center.x - size.width / 2, center.y + size.height / 2) fromRect: NSZeroRect operation: NSCompositeSourceAtop fraction: fraction];
+        r.origin.x = center.x - size.width / 2;
+        r.origin.y = center.y - size.height / 2;
+        r.size = size;
+        [theImage drawInRect:r fromRect:NSZeroRect operation:NSCompositeSourceAtop fraction:fraction respectFlipped:YES hints:nil];
 	}
 //	theRect = NSMakeRect(theRect.origin.x + theRect.size.width - 7, theRect.origin.y + theRect.size.height - 7, 5, 5);
-    [[MyPopUpButton triangleImage] drawAtPoint: NSMakePoint(theRect.origin.x + theRect.size.width - 7, theRect.origin.y + theRect.size.height - 2) fromRect: NSZeroRect operation: NSCompositeSourceAtop fraction: fraction];
+    r.origin.x = theRect.origin.x + theRect.size.width - 7;
+    r.origin.y = theRect.origin.y + theRect.size.height - 7;
+    r.size.width = 5;
+    r.size.height = 5;
+    [[MyPopUpButton triangleImage] drawInRect:r fromRect:NSZeroRect operation:NSCompositeSourceAtop fraction:fraction respectFlipped:YES hints:nil];
 }
 
 

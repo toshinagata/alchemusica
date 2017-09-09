@@ -279,16 +279,27 @@ sMDAudioDeviceCountChannels(MDAudioDeviceID deviceID, int isInput)
 	UInt32 propSize, i;
 	int result;
 	AudioBufferList *buflist;
-	
-	err = AudioDeviceGetPropertyInfo(deviceID, 0, isInput, kAudioDevicePropertyStreamConfiguration, &propSize, NULL);
+    AudioObjectPropertyAddress address;
+
+    address.mSelector = kAudioDevicePropertyStreamConfiguration;
+    address.mScope = (isInput ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput);
+    address.mElement = kAudioObjectPropertyElementMaster;
+
+    err = AudioObjectGetPropertyDataSize(deviceID, &address, 0, NULL, &propSize);
+
+//	err = AudioDeviceGetPropertyInfo(deviceID, 0, isInput, kAudioDevicePropertyStreamConfiguration, &propSize, NULL);
 	if (err != noErr)
 		return 0;
 	
+    if (propSize == 0)
+        return 0;
+
 	buflist = (AudioBufferList *)malloc(propSize);
 	if (buflist == NULL)
 		return 0;
 	
-	err = AudioDeviceGetProperty(deviceID, 0, isInput, kAudioDevicePropertyStreamConfiguration, &propSize, buflist);
+    err = AudioObjectGetPropertyData(deviceID, &address, 0, NULL, &propSize, buflist);
+//	err = AudioDeviceGetProperty(deviceID, 0, isInput, kAudioDevicePropertyStreamConfiguration, &propSize, buflist);
 	result = 0;
 	if (err == noErr) {
 		for (i = 0; i < buflist->mNumberBuffers; ++i) {
