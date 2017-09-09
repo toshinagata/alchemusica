@@ -67,7 +67,7 @@ typedef struct MDDestinationInfo {
 
 	/*  CoreMIDI (Mac OS X) specfic fields  */
 	long	bytesToSend;
-	MIDIEndpointRef	eref;
+	MIDIEndpointRef	eref;         /*  MIDI device  */
 	MIDIPacketList	packetList;
 	MIDIPacket *	packetPtr;
 	MDTimeType		timeOfLastEvent;
