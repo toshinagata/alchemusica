@@ -31,6 +31,7 @@ NSString *MyAppControllerMIDISetupDidChangeNotification = @"MIDI setup changed";
 NSString *MyAppControllerModalPanelTimerNotification = @"Modal Panel timer fired";
 
 static int sScriptMenuCount = 0;
+static BOOL sStartupCompleted = NO;  //  If NO, then Ruby interrupt check is disabled
 
 @implementation MyAppController
 
@@ -100,6 +101,7 @@ static int sScriptMenuCount = 0;
 
 	[AboutWindowController hideSplashWindow];
 
+    sStartupCompleted = YES;
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification
@@ -341,6 +343,8 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 	NSEvent *event;
 	NSString *s;
 	unsigned int flags;
+    if (!sStartupCompleted)
+        return NO;
 	if (rubyProgressPanelController != nil) {
 		if (![rubyProgressPanelController runSession] || [rubyProgressPanelController canceled])
 			return YES;
