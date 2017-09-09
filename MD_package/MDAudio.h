@@ -101,6 +101,7 @@ typedef struct MDAudioIOStreamInfo {
     int32_t midiBufferReadOffset;
     int32_t sysexLength;
     unsigned char *sysexData;
+    int32_t requestFlush;
 } MDAudioIOStreamInfo;
 
 MDStatus MDAudioInitialize(void);

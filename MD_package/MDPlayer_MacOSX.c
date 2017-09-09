@@ -1387,6 +1387,7 @@ StopSoundInAllTracks(MDPlayer *inPlayer)
 {
 	int n, track, num;
 	MDDestinationInfo *info;
+    MDAudioIOStreamInfo *ip;
 	unsigned char buf[6];
 
 	if (inPlayer == NULL)
@@ -1395,11 +1396,30 @@ StopSoundInAllTracks(MDPlayer *inPlayer)
 	/*  Dispose the already scheduled MIDI events  */
 	for (n = inPlayer->destNum - 1; n >= 0; n--) {
 		info = inPlayer->destInfo[n];
-		if (info != NULL && info->eref != MIDIObjectNull) {
-			MIDIFlushOutput(info->eref);
+        if (info != NULL) {
+            if (info->eref != MIDIObjectNull) {
+                MIDIFlushOutput(info->eref);
+            } else if (info->streamIndex >= 0) {
+                ip = MDAudioGetIOStreamInfoAtIndex(info->streamIndex);
+                ip->requestFlush = 1;
+            }
 		}
 	}
 	
+    /*  Wait until all requestFlush are processed  */
+    while (1) {
+        for (n = inPlayer->destNum - 1; n >= 0; n--) {
+            info = inPlayer->destInfo[n];
+            if (info != NULL && info->eref == MIDIObjectNull && info->streamIndex >= 0) {
+                ip = MDAudioGetIOStreamInfoAtIndex(info->streamIndex);
+                if (ip->requestFlush)
+                    break;
+            }
+        }
+        if (n < 0)
+            break;
+    }
+    
 	/*  Dispose the pending note-offs  */
 	if (inPlayer->noteOff != NULL) {
 		MDTrackClear(inPlayer->noteOff);
@@ -1412,15 +1432,21 @@ StopSoundInAllTracks(MDPlayer *inPlayer)
 		n = inPlayer->destIndex[track];
 		if (n < 0 || (info = inPlayer->destInfo[n]) == NULL)
 			continue;
-		info->packetPtr = MIDIPacketListInit(&info->packetList);
         buf[0] = 0xB0 + inPlayer->destChannel[track];
-		buf[1] = 0x7B;
-		buf[2] = 0;
-		buf[3] = 0xB0 + inPlayer->destChannel[track];
-		buf[4] = 0x78;
-		buf[5] = 0;
-		info->packetPtr = MIDIPacketListAdd(&info->packetList, sizeof(info->packetList), info->packetPtr, 0, 6, (Byte *)buf);
-		MIDISend(sMIDIOutputPortRef, info->eref, &info->packetList);
+        buf[1] = 0x7B;
+        buf[2] = 0;
+        buf[3] = 0xB0 + inPlayer->destChannel[track];
+        buf[4] = 0x78;
+        buf[5] = 0;
+        if (info->eref != MIDIObjectNull) {
+            info->packetPtr = MIDIPacketListInit(&info->packetList);
+            info->packetPtr = MIDIPacketListAdd(&info->packetList, sizeof(info->packetList), info->packetPtr, 0, 3, (Byte *)buf);
+            info->packetPtr = MIDIPacketListAdd(&info->packetList, sizeof(info->packetList), info->packetPtr, 0, 3, (Byte *)buf + 3);
+            MIDISend(sMIDIOutputPortRef, info->eref, &info->packetList);
+        } else if (info->streamIndex >= 0) {
+            ScheduleMIDIEventToMusicDevice(info, 0, 3, buf);
+            ScheduleMIDIEventToMusicDevice(info, 0, 3, buf + 3);
+        }
 	}
 }
 

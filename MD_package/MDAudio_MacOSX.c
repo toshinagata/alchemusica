@@ -272,6 +272,12 @@ sMDAudioSendMIDIProc(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, 
     int dataSize = (writeOffset + kMDAudioMaxMIDIBytesToSendPerDevice - readOffset) % kMDAudioMaxMIDIBytesToSendPerDevice;
     int numChannelEvents = 0;
     int readPos = readOffset;
+    if (ip->requestFlush) {
+        /*  Flush is requested: skip all unread bytes  */
+        ip->requestFlush = 0;
+        ip->midiBufferReadOffset = ip->midiBufferWriteOffset;
+        return noErr;
+    }
     while (readPos - readOffset < dataSize) {
         UInt64 timeStamp = 0;
         int i, len;
