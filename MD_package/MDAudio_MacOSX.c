@@ -262,6 +262,74 @@ sMDAudioRecordProc(void* inRefCon, AudioUnitRenderActionFlags* ioActionFlags, co
 	return noErr;
 }
 
+/*  Callback to send MIDI events to Music Device  */
+static OSStatus
+sMDAudioSendMIDIProc(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, const AudioTimeStamp *inTimeStamp, UInt32 inBusNumber, UInt32 inNumberFrames, AudioBufferList *ioData)
+{
+    MDAudioIOStreamInfo *ip = (MDAudioIOStreamInfo *)inRefCon;
+    int readOffset = ip->midiBufferReadOffset;
+    int writeOffset = ip->midiBufferWriteOffset;
+    int dataSize = (writeOffset + kMDAudioMaxMIDIBytesToSendPerDevice - readOffset) % kMDAudioMaxMIDIBytesToSendPerDevice;
+    int numChannelEvents = 0;
+    int readPos = readOffset;
+    while (readPos - readOffset < dataSize) {
+        UInt64 timeStamp = 0;
+        int i, len;
+        unsigned char c;
+        for (i = 0; i < 8; i++) {
+            c = ip->midiBuffer[(readPos + i) % kMDAudioMaxMIDIBytesToSendPerDevice];
+            timeStamp += (((UInt64)c) << (i * 8));
+        }
+        len = ip->midiBuffer[(readPos + 8) % kMDAudioMaxMIDIBytesToSendPerDevice];
+        c = ip->midiBuffer[(readPos + 9) % kMDAudioMaxMIDIBytesToSendPerDevice];
+        if (c == 0xff || c == 0xf0) {
+            /*  System Exclusive: in this case, no channel events should be scheduled
+              in this callback session; otherwise, the scheduled channel events will be
+              sent _after_ sending sysex. (There is no mechanism to schedule a sysex
+              event to MusicDevice.)
+                So, if we already scheduled any channel events, then we stop processing
+             here and try to send sysex in the next session.  */
+            if (numChannelEvents > 0)
+                break;
+            if (c == 0xff) {
+                MusicDeviceSysEx(ip->unit, ip->sysexData, ip->sysexLength);
+                readPos += 10; /* 8 (timeStamp) + 1 (length) + 1 (0xff) */
+            } else {
+                static unsigned char tempBuffer[256];
+                for (i = 0; i < len; i++) {
+                    tempBuffer[i] = ip->midiBuffer[(readPos + 9 + i) % kMDAudioMaxMIDIBytesToSendPerDevice];
+                }
+                MusicDeviceSysEx(ip->unit, tempBuffer, len);
+                readPos += 9 + len;
+            }
+        } else {
+            unsigned char c2, c3;
+            UInt32 offset;
+            c2 = c3 = 0;
+            if (len >= 2) {
+                c2 = ip->midiBuffer[(readPos + 10) % kMDAudioMaxMIDIBytesToSendPerDevice];
+                if (len >= 3) {
+                    c3 = ip->midiBuffer[(readPos + 11) % kMDAudioMaxMIDIBytesToSendPerDevice];
+                }
+            }
+            if (timeStamp > inTimeStamp->mHostTime) {
+                offset = (UInt32)((double)(timeStamp - inTimeStamp->mHostTime) * (1.0 / ip->format.mSampleRate));
+            } else offset = 0;
+            if (offset >= inNumberFrames) {
+                /*  This event is scheduled in the next or later frame, so it
+                 should be processed in later callback  */
+                break;
+            }
+            MusicDeviceMIDIEvent(ip->unit, c, c2, c3, offset);
+        //    printf("%08x %02x %02x %02x %d\n", (UInt32)ip->unit, c, c2, c3, offset);
+            readPos += 9 + len;
+            numChannelEvents++;
+        }
+    }
+    ip->midiBufferReadOffset = readPos % kMDAudioMaxMIDIBytesToSendPerDevice;
+    return noErr;
+}
+
 #pragma mark ====== Device information ======
 
 static void
@@ -674,17 +742,23 @@ MDAudioSelectIOStreamDevice(int idx, int deviceIndex)
 		/*  Input stream  */
 		UInt64 newDeviceID;
 		AudioComponentDescription desc;
+        MDAudioFormat format = {0};
 		if (deviceIndex >= kMDAudioMusicDeviceIndexOffset) {
 			mp = MDAudioMusicDeviceInfoAtIndex(deviceIndex - kMDAudioMusicDeviceIndexOffset);
 			newDeviceID = (mp != NULL ? mp->code : kMDAudioMusicDeviceUnknown);
+            if (mp != NULL)
+                format = mp->format;
 		} else {
 			dp = MDAudioDeviceInfoAtIndex(deviceIndex, 1);
 			newDeviceID = (dp != NULL ? (UInt64)(dp->deviceID) : kMDAudioMusicDeviceUnknown);
+            if (dp != NULL)
+                format = dp->format;
 		}
 		/*  Disable the current input  */
 		if (ip->deviceID != kMDAudioMusicDeviceUnknown) {
 			if (ip->deviceIndex >= kMDAudioMusicDeviceIndexOffset) {
 				/*  Music Device  */
+                CHECK_ERR(result, AudioUnitRemoveRenderNotify(ip->unit, sMDAudioSendMIDIProc, ip));
 				CHECK_ERR(result, AUGraphDisconnectNodeInput(gAudio->graph, ip->converterNode, 0));
 				CHECK_ERR(result, AUGraphDisconnectNodeInput(gAudio->graph, gAudio->mixer, idx));
 				CHECK_ERR(result, AUGraphRemoveNode(gAudio->graph, ip->converterNode));
@@ -697,10 +771,14 @@ MDAudioSelectIOStreamDevice(int idx, int deviceIndex)
 					free(ip->midiControllerName);
 					ip->midiControllerName = NULL;
 				}
-				if (ip->midiCon != NULL) {
+                if (ip->midiBuffer != NULL) {
+                    free(ip->midiBuffer);
+                    ip->midiBuffer = NULL;
+                }
+			/*	if (ip->midiCon != NULL) {
 					CHECK_ERR(result, AUMIDIControllerDispose(ip->midiCon));
 					ip->midiCon = NULL;
-				}
+				} */
 				if (ip->bufferList != NULL) {
 					sMDAudioReleaseMyBufferList(ip->bufferList);
 					ip->bufferList = NULL;
@@ -730,7 +808,7 @@ MDAudioSelectIOStreamDevice(int idx, int deviceIndex)
 			if (deviceIndex >= kMDAudioMusicDeviceIndexOffset) {
 				int i, n, len;
 				MDAudioIOStreamInfo *ip2;
-				CFStringRef str;
+			//	CFStringRef str;
 				/*  Music Device  */
 				/*  Create input node  */
 				desc.componentType = kAudioUnitType_MusicDevice;
@@ -754,7 +832,7 @@ MDAudioSelectIOStreamDevice(int idx, int deviceIndex)
 				/*  Input and output audio format for the converter  */
 				CHECK_ERR(result, AudioUnitSetProperty(ip->converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &mp->format, sizeof(AudioStreamBasicDescription)));
 				CHECK_ERR(result, AudioUnitSetProperty(ip->converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription)));
-				/*  Create the MIDI controller  */
+				/*  Create the MIDI controller name  */
 				len = strlen(mp->name) + 5;
 				ip->midiControllerName = (char *)malloc(len);
 				strcpy(ip->midiControllerName, mp->name);
@@ -770,12 +848,19 @@ MDAudioSelectIOStreamDevice(int idx, int deviceIndex)
 						continue;
 					}
 				}
-				str = CFStringCreateWithCString(NULL, ip->midiControllerName, kCFStringEncodingUTF8);
+                /*  Allocate buffer for MIDI scheduling  */
+                ip->midiBuffer = (unsigned char *)malloc(kMDAudioMIDIBufferSize);
+                ip->midiBufferWriteOffset = 0;
+                ip->midiBufferReadOffset = 0;
+
+                /*  Set render notify callback  */
+                CHECK_ERR(result, AudioUnitAddRenderNotify(ip->unit, sMDAudioSendMIDIProc, ip));
+			/*	str = CFStringCreateWithCString(NULL, ip->midiControllerName, kCFStringEncodingUTF8);
 				result = AUMIDIControllerCreate(str, &ip->midiCon);
 				if (result == noErr) {
 					result = AUMIDIControllerMapChannelToAU(ip->midiCon, -1, ip->unit, -1, 0);
 				}
-				CFRelease(str);
+				CFRelease(str); */
 				midiSetupChanged = 1;
 			} else {
 				/*  Audio Device  */
@@ -828,6 +913,7 @@ MDAudioSelectIOStreamDevice(int idx, int deviceIndex)
 			ip->deviceID = newDeviceID;
 			ip->deviceIndex = deviceIndex;
 			ip->busIndex = (idx % kMDAudioNumberOfOutputStreams);
+            ip->format = format;
 		}
 	}
 exit:
@@ -1352,15 +1438,19 @@ MDStatus
 MDAudioPrepareRecording(const char *filename, const MDAudioFormat *format, int audioFileType)
 {
 	OSStatus err;
-	FSRef parentDir;
-	CFStringRef filenameStr;
-	const char *p;
+/*	FSRef parentDir; */
+/*	CFStringRef filenameStr; */
+    CFURLRef urlRef;
+/*	const char *p; */
 	
 	if (gAudio->isRecording)
 		return kMDErrorCannotSetupAudio;
 	
+    /*  Prepare CFURLRef from the filename (assuming it is a full path)  */
+    urlRef = CFURLCreateFromFileSystemRepresentation(NULL, (const unsigned char *)filename, strlen(filename), 0);
+    
 	/*  Prepare FSRef/CFStringRef representation of the filename  */
-	if ((p = strrchr(filename, '/')) == NULL) {
+/*	if ((p = strrchr(filename, '/')) == NULL) {
 		char buf[MAXPATHLEN];
 		getcwd(buf, sizeof buf);
 		err = FSPathMakeRef((unsigned char *)buf, &parentDir, NULL);
@@ -1377,12 +1467,16 @@ MDAudioPrepareRecording(const char *filename, const MDAudioFormat *format, int a
 		if (err != noErr)
 			return kMDErrorCannotSetupAudio;
 		filenameStr = CFStringCreateWithCString(NULL, p + 1, kCFStringEncodingUTF8);
-	}
+	} */
+    
 	
 	/*  Create a new audio file  */
-	err = ExtAudioFileCreateNew(&parentDir, filenameStr, audioFileType, format, NULL, &(gAudio->audioFile));
+    
+    err = ExtAudioFileCreateWithURL(urlRef, audioFileType, format, NULL, kAudioFileFlags_EraseFile, &(gAudio->audioFile));
+//	err = ExtAudioFileCreateNew(&parentDir, filenameStr, audioFileType, format, NULL, &(gAudio->audioFile));
 	if (err != noErr)
 		return kMDErrorCannotSetupAudio;
+    CFRelease(urlRef);
 
 	/*  Set the client data format to the canonical one (i.e. the format the mixer handles) */
 	err = ExtAudioFileSetProperty(gAudio->audioFile, kExtAudioFileProperty_ClientDataFormat, sizeof(AudioStreamBasicDescription), &gAudio->preferredFormat);

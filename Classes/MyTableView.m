@@ -173,10 +173,10 @@
 	
 	if (insertNewline) {
 		/*  Insert an empty event with the same tick (TODO: or advance the tick by some specified value?)  */
-		long position = [[self dataSource] eventPositionForTableRow: row];
-		[[self dataSource] startEditAtColumn: column creatingEventWithTick: kMDNegativeTick atPosition: position + 1];
+		long position = [(ListWindowController *)[self dataSource] eventPositionForTableRow: row];
+		[(ListWindowController *)[self dataSource] startEditAtColumn: column creatingEventWithTick: kMDNegativeTick atPosition: position + 1];
 	} else {
-		[[self dataSource] startEditAtColumn: column row: row];
+		[(ListWindowController *)[self dataSource] startEditAtColumn: column row: row];
 	}
 
 //	if (insertNewline) {
@@ -216,14 +216,14 @@
 			} else {
 				insertFlag = NO;
 			}
-			position = [[self dataSource] eventPositionForTableRow: row];
-			[[self dataSource] startEditAtColumn: -1 creatingEventWithTick: kMDNegativeTick atPosition: position + 1];
+			position = [(ListWindowController *)[self dataSource] eventPositionForTableRow: row];
+			[(ListWindowController *)[self dataSource] startEditAtColumn: -1 creatingEventWithTick: kMDNegativeTick atPosition: position + 1];
 			return;
 		}
 		NSBeep();
 	} else if (charCode == NSBackspaceCharacter || charCode == NSDeleteCharacter) {
 		if ([self numberOfSelectedRows] > 0)
-			[[self dataSource] deleteSelectedEvents: self];
+			[(ListWindowController *)[self dataSource] deleteSelectedEvents: self];
 		else NSBeep();
 	} else [super keyDown:theEvent];
 }

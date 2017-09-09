@@ -44,12 +44,15 @@ typedef struct MyTMTask {
 } MyTMTask;
 #endif
 
+#define kInvalidUniqueID 0
+
 typedef struct MDDeviceIDRecord {
 	char *      name;
 	
 	/*  OS-specific fields for identification of devices  */
+    /*  Only one of uniqueID or comp is valid  */
 	int         uniqueID;       /*  CoreMIDI device  */
-
+    int         streamIndex;    /*  MDAudioIOStream index (= bus index of Audio setup)  */
 } MDDeviceIDRecord;
 
 typedef struct MDDeviceInfo {
@@ -67,8 +70,11 @@ typedef struct MDDestinationInfo {
 
 	/*  CoreMIDI (Mac OS X) specfic fields  */
 	long	bytesToSend;
+    int numEvents;
 	MIDIEndpointRef	eref;         /*  MIDI device  */
-	MIDIPacketList	packetList;
+    MusicDeviceComponent comp;    /*  MusicDevice  */
+    int streamIndex;              /*  Index of MDAudioIOStreamInfo (same as MDDeviceIDRecord.streamIndex) */
+    MIDIPacketList	packetList;
 	MIDIPacket *	packetPtr;
 	MDTimeType		timeOfLastEvent;
 	MIDISysexSendRequest	sysexRequest;
@@ -272,17 +278,6 @@ MDPlayerReloadDeviceInformationSub(MDDeviceIDRecord **src_dst_p, long *src_dst_N
 			if ((*src_dst_p)[i].uniqueID == uniqueID)
 				break;
 		}
-	/*	if (i >= *src_dst_Num_p) {
-			MDDeviceIDRecord *idp;
-			if ((*src_dst_p) != NULL)
-				idp = (MDDeviceIDRecord *)realloc((*src_dst_p), sizeof(MDDeviceIDRecord) * (i + 1));
-			else
-				idp = (MDDeviceIDRecord *)malloc(sizeof(MDDeviceIDRecord) * (i + 1));
-			memset(&idp[i], 0, sizeof(MDDeviceIDRecord));
-			(*src_dst_p) = idp;
-			(*src_dst_Num_p) = (i + 1);
-			(*src_dst_p)[i].uniqueID = uniqueID;
-		} */
 		if (i >= 0 && i < *src_dst_Num_p) {
 			/*  If found, then update the name  */
 			p = (*src_dst_p)[i].name;
@@ -297,11 +292,29 @@ MDPlayerReloadDeviceInformationSub(MDDeviceIDRecord **src_dst_p, long *src_dst_N
 			/*  Look up by device name, and create a new entry if not found  */
 			i = (is_dst ? MDPlayerAddDestinationName(buf) : MDPlayerAddSourceName(buf));
 			/*  And update the uniqueID  */
-			if (i >= 0 && i < *src_dst_Num_p)
+            if (i >= 0 && i < *src_dst_Num_p) {
 				(*src_dst_p)[i].uniqueID = uniqueID;
+            	(*src_dst_p)[i].streamIndex = -1;
+            }
 		}
 	}
 
+    /*  Handle MusicDevice  */
+    if (is_dst) {
+        MDAudioIOStreamInfo *ip;
+        int j;
+        for (i = 0; i < kMDAudioNumberOfInputStreams; i++) {
+            ip = MDAudioGetIOStreamInfoAtIndex(i);
+            if (ip->midiControllerName == NULL)
+                continue;
+            j = MDPlayerAddDestinationName(ip->midiControllerName);
+            if (j >= 0 && j < *src_dst_Num_p) {
+                /*  Update the device info  */
+                (*src_dst_p)[j].uniqueID = kInvalidUniqueID;
+                (*src_dst_p)[j].streamIndex = i;
+            }
+        }
+    }
 }
 
 static void
@@ -396,6 +409,7 @@ MDPlayerGetDestinationNumberFromName(const char *name)
     return -1;
 }
 
+#if 0
 /* --------------------------------------
 	･ MDPlayerGetDestinationUniqueID
    -------------------------------------- */
@@ -424,6 +438,7 @@ MDPlayerGetDestinationNumberFromUniqueID(long uniqueID)
     }
     return -1;
 }
+#endif
 
 /* --------------------------------------
 	･ MDPlayerGetNumberOfSources
@@ -470,6 +485,7 @@ MDPlayerGetSourceNumberFromName(const char *name)
     return -1;
 }
 
+#if 0
 /* --------------------------------------
 	･ MDPlayerGetSourceUniqueID
    -------------------------------------- */
@@ -498,6 +514,7 @@ MDPlayerGetSourceNumberFromUniqueID(long uniqueID)
     }
     return -1;
 }
+#endif
 
 /* --------------------------------------
 	･ MDPlayerAddDestinationName
@@ -567,9 +584,18 @@ MDPlayerInitDestinationInfo(long dev, MDDestinationInfo *info)
 	if (dev >= 0 && dev < sDeviceInfo.destNum) {
 		MIDIObjectType objType;
 		MIDIObjectRef eref;
-	/*	info->eref = MIDIGetDestination(dev); */
-		if (MIDIObjectFindByUniqueID(sDeviceInfo.dest[dev].uniqueID, &eref, &objType) == noErr && objType == kMIDIObjectType_Destination)
-			info->eref = eref;
+        if (sDeviceInfo.dest[dev].uniqueID != kInvalidUniqueID) {
+            if (MIDIObjectFindByUniqueID(sDeviceInfo.dest[dev].uniqueID, &eref, &objType) == noErr && objType == kMIDIObjectType_Destination) {
+                info->eref = eref;
+                info->comp = NULL;
+            }
+        } else {
+            int streamIndex = sDeviceInfo.dest[dev].streamIndex;
+            MDAudioIOStreamInfo *ip = MDAudioGetIOStreamInfoAtIndex(streamIndex);
+            info->eref = MIDIObjectNull;
+            info->comp = ip->unit;
+            info->streamIndex = streamIndex;
+        }
 	}
 }
 
@@ -970,6 +996,37 @@ PrepareMetronomeForTick(MDPlayer *inPlayer, MDTickType inTick)
 	else inPlayer->nextTimeSignature = MDGetTick(ep);
 }
 
+static int
+ScheduleMIDIEventToMusicDevice(MDDestinationInfo *info, UInt64 timeStamp, int length, unsigned char *data)
+{
+    MDAudioIOStreamInfo *ip = MDAudioGetIOStreamInfoAtIndex(info->streamIndex);
+    int readOffset = ip->midiBufferReadOffset;
+    int writeOffset = ip->midiBufferWriteOffset;
+    int spaceSize = (readOffset + kMDAudioMaxMIDIBytesToSendPerDevice - 1 - writeOffset) % kMDAudioMaxMIDIBytesToSendPerDevice + 1;
+    int length2;
+    if (length == 1 && *data == 0xff) {
+        /*  Schedule sysex  */
+        ip->sysexLength = info->sysexRequest.bytesToSend;
+        ip->sysexData = (unsigned char *)info->sysexRequest.data;
+    }
+    length2 = length + sizeof(timeStamp) + 1;
+    if (spaceSize > length2) {
+        int i;
+        for (i = 0; i < length2; i++) {
+            unsigned char c;
+            if (i < sizeof(timeStamp))
+                c = (timeStamp >> (i * 8)) & 0xff;
+            else if (i == sizeof(timeStamp))
+                c = length & 0xff;  /*  Should be length <= 255  */
+            else
+                c = data[i - sizeof(timeStamp) - 1];
+            ip->midiBuffer[(writeOffset + i) % kMDAudioMaxMIDIBytesToSendPerDevice] = c;
+        }
+        ip->midiBufferWriteOffset = (writeOffset + length2) % kMDAudioMaxMIDIBytesToSendPerDevice;
+        return 0;
+    } else return 1;
+}
+
 static long
 SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType prefetch_tick, MDTickType *outNextTick)
 {
@@ -982,7 +1039,7 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 	unsigned char buf[4];
 	const unsigned char *p;
 	int track, processed;
-	long dev, n, bytesSent;
+    long dev, n, bytesSent;
 	MDDestinationInfo *info;
 	unsigned char isNoteOff, isMetronome;
 
@@ -1167,25 +1224,26 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 		nextTime = MDCalibratorTickToTime(inPlayer->calib, nextTick);
 		if (nextTime <= lastTime)
 			nextTime = lastTime + 10;
-		info->packetPtr = MIDIPacketListAdd(&info->packetList, sizeof(info->packetList), info->packetPtr,
-			ConvertMDTimeTypeToHostTime(nextTime + inPlayer->startTime), n, (Byte *)p);
-		if (info->packetPtr == NULL) {
-			if (MDIsSysexEvent(ep)) {
-				/*  Prepare a MIDISysexSendRequest  */
-				MIDISysexSendRequest *rp = &info->sysexRequest;
-				rp->destination = info->eref;
-				rp->data = (Byte *)p;
-				rp->bytesToSend = n;
-				rp->complete = 0;
-				rp->completionProc = MySysexCompletionProc;
-				rp->completionRefCon = info;
-				lastTime = nextTime;
-				MDMergerForward(merger);
-				nextTick = MDMergerGetTick(merger);
-			}
-			break;
+        if (MDIsSysexEvent(ep) && n >= 256) {
+            /*  Prepare a MIDISysexSendRequest, and stop collecting events  */
+            MIDISysexSendRequest *rp = &info->sysexRequest;
+            rp->destination = info->eref;
+            rp->data = (Byte *)p;
+            rp->bytesToSend = n;
+            rp->complete = 0;
+            rp->completionProc = MySysexCompletionProc;
+            rp->completionRefCon = info;
+            lastTime = nextTime;
+            MDMergerForward(merger);
+            nextTick = MDMergerGetTick(merger);
+            break;
+        } else {
+            info->packetPtr = MIDIPacketListAdd(&info->packetList, sizeof(info->packetList), info->packetPtr, ConvertMDTimeTypeToHostTime(nextTime + inPlayer->startTime), n, (Byte *)p);
+            if (info->packetPtr == NULL)
+                break;
 		}
 		info->bytesToSend += n;
+        info->numEvents++;
 		lastTime = nextTime;
 	next:
 		if (isNoteOff) {
@@ -1199,6 +1257,9 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 			MDMergerForward(merger);
 		}
 		processed++;
+        //  Avoid too many bytes to schedule
+        if (info->bytesToSend + info->numEvents * (sizeof(UInt64) + 1) > kMDAudioMaxMIDIBytesToSendPerDevice)
+            break;
 	}
 	
 	/*  Send the MIDI packet  */
@@ -1207,15 +1268,31 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 		info = inPlayer->destInfo[n];
 		if (info != NULL) {
 			if (info->bytesToSend > 0) {
-				sts = MIDISend(sMIDIOutputPortRef, info->eref, &info->packetList);
+                if (info->eref != MIDIObjectNull) {
+                    sts = MIDISend(sMIDIOutputPortRef, info->eref, &info->packetList);
+                } else if (info->comp != NULL) {
+                    int i;
+                    MIDIPacket *packet = &(info->packetList.packet[0]);
+                    for (i = 0; i < info->packetList.numPackets; i++) {
+                        ScheduleMIDIEventToMusicDevice(info, packet->timeStamp, packet->length, packet->data);
+                        packet = MIDIPacketNext(packet);
+                    }
+                }
+                /*  TODO: MusicDeviceMIDIEvent() should also be used  */
 				if (bytesSent < info->bytesToSend)
 					bytesSent = info->bytesToSend;
 				info->bytesToSend = 0;
+                info->numEvents = 0;
 			}
 			if (info->sysexTransmitting == 0 && info->sysexRequest.bytesToSend > 0) {
 				/*  Send the last sysex using MIDISendSysex  */
-				info->sysexTransmitting = 1;
-				MIDISendSysex(&info->sysexRequest);
+                info->sysexTransmitting = 1;
+                if (info->eref != MIDIObjectNull) {
+                    MIDISendSysex(&info->sysexRequest);
+                } else if (info->comp != NULL) {
+                    static unsigned char dummyBytes[1] = { 0xff };  /*  Dummy status byte  */
+                    ScheduleMIDIEventToMusicDevice(info, ConvertMDTimeTypeToHostTime(nextTime + inPlayer->startTime), 1, dummyBytes);
+                }
 				if (bytesSent < info->sysexRequest.bytesToSend)
 					bytesSent = info->sysexRequest.bytesToSend;				
 			}

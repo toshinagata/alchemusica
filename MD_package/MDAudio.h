@@ -67,7 +67,10 @@ typedef struct MDAudioMusicDeviceInfo {
 #define kMDAudioFirstIndexForOutputStream kMDAudioNumberOfInputStreams
 #define kMDAudioMusicDeviceIndexOffset 1000
 
-/*  Cached information for audio input (up to 8) and output (one). */
+#define kMDAudioMaxMIDIBytesToSendPerDevice 4096
+#define kMDAudioMIDIBufferSize (kMDAudioMaxMIDIBytesToSendPerDevice * 8)
+
+/*  Cached information for audio input (up to 40) and output (one). */
 typedef struct MDAudioIOStreamInfo {
 	
 	int deviceIndex;  /*  -1: none, 0-999: {input|output}DeviceInfos, 1000-: musicDeviceInfos  */
@@ -80,6 +83,7 @@ typedef struct MDAudioIOStreamInfo {
 	AUNode converterNode;
 	float pan;
 	float volume;
+    MDAudioFormat format;  /*  Audio format for the unit  */
 	
 	/*  for input AUHAL only  */
 	AudioBufferList *bufferList;  /*  Buffer for getting audio signal from AUHAL  */
@@ -90,8 +94,13 @@ typedef struct MDAudioIOStreamInfo {
 	SInt32 bufferSizeFrames;      /*  buffer size  */
 
 	/*  for MusicDevice only  */
-	AUMIDIControllerRef midiCon;
+//	AUMIDIControllerRef midiCon;
 	char *midiControllerName;  /*  malloc'ed  */
+    unsigned char *midiBuffer; /*  Ring buffer for MIDI scheduling  */
+    int32_t midiBufferWriteOffset;
+    int32_t midiBufferReadOffset;
+    int32_t sysexLength;
+    unsigned char *sysexData;
 } MDAudioIOStreamInfo;
 
 MDStatus MDAudioInitialize(void);
