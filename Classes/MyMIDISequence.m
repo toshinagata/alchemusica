@@ -190,7 +190,7 @@ NSString
 		track = MDSequenceGetTrack(mySequence, index);
 		if (track != NULL) {
 			MDTrackGetName(track, buf, sizeof buf);
-			return [NSString stringWithCString:buf];
+			return [NSString stringWithUTF8String:buf];
 		}
 	}
 	return nil;
@@ -207,7 +207,7 @@ NSString
 			//	long dev = MDTrackGetDevice(track);
 			//	if (dev < 0 || MDPlayerGetDestinationName(dev, buf, sizeof buf) != kMDNoError)
 			MDTrackGetDeviceName(track, buf, sizeof buf);
-			return [NSString stringWithCString: buf];
+			return [NSString stringWithUTF8String: buf];
 		//	}
 		}
 	}

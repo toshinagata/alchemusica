@@ -123,13 +123,13 @@ typedef struct TimeScalingRecord {
                 widthPerBeat = [(MyDocument *)[dataSource document] timebase] * ppt * 4 / sigDenominator;
                 widthPerMeasure = widthPerBeat * sigNumerator;
                 if (interval * majorCount >= widthPerMeasure) {
-                    label = [NSString stringWithFormat: @"%d", n1];
+                    label = [NSString stringWithFormat: @"%d", (int)n1];
                 } else if (interval * majorCount >= widthPerBeat) {
                     //  The major tick interval >= beat
-                    label = [NSString stringWithFormat: @"%d:%d", n1, n2];
+                    label = [NSString stringWithFormat: @"%d:%d", (int)n1, (int)n2];
                 } else {
                     //  The major tick interval < beat
-                    label = [NSString stringWithFormat: @"%d:%d:%d", n1, n2, n3];
+                    label = [NSString stringWithFormat: @"%d:%d:%d", (int)n1, (int)n2, (int)n3];
                 }
                 [label drawAtPoint: NSMakePoint(floor(pt1.x), floor(pt1.y + 10.0)) withAttributes: nil clippingRect: aRect];
             }
@@ -159,11 +159,11 @@ typedef struct TimeScalingRecord {
 		pt1.x = editingRangeStartX - 5.0;
 		pt1.y = visibleRect.origin.y + 1.0;
 		if (pt1.x >= aRect.origin.x && pt1.x < aRect.origin.x + aRect.size.width) {
-			[sStartEditingImage compositeToPoint: pt1 operation: NSCompositeSourceAtop fraction: 1.0];
+            [sStartEditingImage drawAtPoint: pt1 fromRect: NSZeroRect operation: NSCompositeSourceAtop fraction: 1.0];
 		}
 		pt1.x = editingRangeEndX;
 		if (pt1.x >= aRect.origin.x && pt1.x < aRect.origin.x + aRect.size.width) {
-			[sEndEditingImage compositeToPoint: pt1 operation: NSCompositeSourceAtop fraction: 1.0];
+            [sEndEditingImage drawAtPoint: pt1 fromRect: NSZeroRect operation: NSCompositeSourceAtop fraction: 1.0];
 		}
 	}
 	

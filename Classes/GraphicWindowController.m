@@ -1058,7 +1058,7 @@ sTableColumnIDToInt(id identifier)
 - (void)reflectClientViews
 {
 	NSRect visibleRect, documentRect;
-	float pos, wid;
+	double pos, wid;
 	if (myClientViewsCount == 0 || myScroller == nil)
 		return;
 	documentRect = [records[0].client frame];
@@ -1071,7 +1071,8 @@ sTableColumnIDToInt(id identifier)
 		pos = (visibleRect.origin.x - documentRect.origin.x) / (documentRect.size.width - visibleRect.size.width);
 		wid = visibleRect.size.width / documentRect.size.width;
 		[myScroller setEnabled: YES];
-		[myScroller setFloatValue: pos knobProportion: wid];
+        [myScroller setKnobProportion: wid];
+        [myScroller setDoubleValue: pos];
 	}
 }
 
@@ -1908,7 +1909,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 		[(MyComboBoxCell *)cell setControlView: myTableView];
 		[tableColumn setDataCell: cell];
 
-		[myTableView setRowHeight: [font defaultLineHeightForFont]];
+        [myTableView setRowHeight: [[NSWindowController sharedLayoutManager] defaultLineHeightForFont:font]];
 		enumerator = [[myTableView tableColumns] objectEnumerator];
 		while ((tableColumn = (NSTableColumn *)[enumerator nextObject]) != nil) {
 			[[tableColumn dataCell] setFont: font];
@@ -2835,15 +2836,15 @@ row:(int)rowIndex
 {
     RemapDevicePanelController *controller;
     NSMutableArray *selection;
-    NSEnumerator *en;
-    id obj;
+    NSIndexSet *iset;
+    NSUInteger idx;
     if ([myTableView numberOfSelectedRows] == 0)
         selection = nil;
     else {
-        en = [myTableView selectedRowEnumerator];
+        iset = [myTableView selectedRowIndexes];
         selection = [NSMutableArray array];
-        while ((obj = [en nextObject]) != nil) {
-            [selection addObject: obj];
+        for (idx = [iset firstIndex]; idx != NSNotFound; idx = [iset indexGreaterThanIndex:idx]) {
+            [selection addObject:[NSNumber numberWithInteger:(int)idx]];
         }
     }
     controller = [[RemapDevicePanelController allocWithZone: [self zone]] initWithDocument: [self document] trackSelection: selection];

@@ -312,7 +312,7 @@ MDDataStreamReallocate(data_stream_record *dp, size_t size_to_extend)
 			return p;
 		} else return NULL;
 	} else {
-		new_size = ((dp->offset + size_to_extend) / MDDATASTREAM_PAGESIZE + 1) * MDDATASTREAM_PAGESIZE;
+		new_size = (size_t)((dp->offset + size_to_extend) / MDDATASTREAM_PAGESIZE + 1) * MDDATASTREAM_PAGESIZE;
 		if (new_size > dp->bufsize) {
 			p = realloc(dp->ptr, new_size);
 			if (p != NULL) {

@@ -712,7 +712,7 @@
 			shouldContinuePlay = YES;
 			[self pressStopButton: self];
 		}
-		tick = (MDTimeType)[[tickArray objectAtIndex: index] doubleValue];
+		tick = (MDTickType)[[tickArray objectAtIndex: index] doubleValue];
 		currentTime = MDCalibratorTickToTime(calibrator, tick);
 		MDPlayerJumpToTick(player, tick);
 		if (shouldContinuePlay)

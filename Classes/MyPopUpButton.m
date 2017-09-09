@@ -52,10 +52,10 @@ static NSImage *sTriangleImage;
 	else fraction = 0.5;
 	if (theImage != nil) {
 		size = [theImage size];
-		[theImage compositeToPoint: NSMakePoint(center.x - size.width / 2, center.y + size.height / 2) operation: NSCompositeSourceAtop fraction: fraction];
+        [theImage drawAtPoint: NSMakePoint(center.x - size.width / 2, center.y + size.height / 2) fromRect: NSZeroRect operation: NSCompositeSourceAtop fraction: fraction];
 	}
 //	theRect = NSMakeRect(theRect.origin.x + theRect.size.width - 7, theRect.origin.y + theRect.size.height - 7, 5, 5);
-	[[MyPopUpButton triangleImage] compositeToPoint: NSMakePoint(theRect.origin.x + theRect.size.width - 7, theRect.origin.y + theRect.size.height - 2) operation: NSCompositeSourceAtop fraction: fraction];
+    [[MyPopUpButton triangleImage] drawAtPoint: NSMakePoint(theRect.origin.x + theRect.size.width - 7, theRect.origin.y + theRect.size.height - 2) fromRect: NSZeroRect operation: NSCompositeSourceAtop fraction: fraction];
 }
 
 

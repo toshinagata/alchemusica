@@ -302,7 +302,7 @@ callback(float progress, void *data)
 
     //  Create a new directory if necessary
     if (docCode == 1) {
-        if (![[NSFileManager defaultManager] createDirectoryAtPath: fileName attributes: nil])
+        if (![[NSFileManager defaultManager] createDirectoryAtPath: fileName withIntermediateDirectories: YES attributes: nil error:NULL])
             return NO;
         /*  TODO: Make it package <-- not necessary! (Info.plist description is enough)  */
     }
@@ -338,7 +338,7 @@ callback(float progress, void *data)
     mainWindowController = [[[GraphicWindowController allocWithZone:[self zone]] init] autorelease];
     [self addWindowController: mainWindowController];
     if (docCode == 1)
-        [self decodeDocumentAttributesFromFile: [self fileName]];
+        [self decodeDocumentAttributesFromFile: [[self fileURL] path]];
     [[mainWindowController window] makeKeyAndOrderFront: self];
     [[mainWindowController window] makeFirstResponder: [[mainWindowController window] initialFirstResponder]];
 }
@@ -3379,7 +3379,7 @@ isConductorEvent(const MDEvent *ep, long position, void *inUserData)
 	if (dirname == nil) {
 		dirname = [@"~/Music" stringByExpandingTildeInPath];
 		if (![manager fileExistsAtPath: dirname])
-			[manager createDirectoryAtPath: dirname attributes: nil];
+            [manager createDirectoryAtPath:dirname withIntermediateDirectories:YES attributes:nil error:NULL];
 	} else dirname = [dirname stringByExpandingTildeInPath];
 	if (![manager fileExistsAtPath: dirname isDirectory: &isDir] || !isDir) {
 		errmsg = [NSString stringWithFormat: @"There is no directory at %@", [dirname stringByAbbreviatingWithTildeInPath]];
@@ -3390,14 +3390,14 @@ isConductorEvent(const MDEvent *ep, long position, void *inUserData)
 	fullname = [dirname stringByAppendingPathComponent: filename];
 	if ([manager fileExistsAtPath: fullname]) {
 		if ([[info valueForKey: MyRecordingInfoOverwriteExistingFileFlagKey] boolValue]) {
-			[manager removeFileAtPath: fullname handler: nil];
+            [manager removeItemAtURL:[NSURL fileURLWithPath:fullname] error:NULL];
 		} else {
 			//  Ask whether to overwrite the existing file
 			int retval = NSRunCriticalAlertPanel(@"", [NSString stringWithFormat: @"The file %@ already exists. Do you want to overwrite it?", filename], @"Cancel", @"Overwrite", @"Save with modified name", nil);
 			switch (retval) {
 				case NSAlertDefaultReturn: return NO;
 				case NSAlertAlternateReturn: {
-					[manager removeFileAtPath: fullname handler: nil];
+                    [manager removeItemAtURL:[NSURL fileURLWithPath:fullname] error:NULL];
 					break;
 				}
 				case NSAlertOtherReturn: {
@@ -3421,8 +3421,13 @@ isConductorEvent(const MDEvent *ep, long position, void *inUserData)
     if ([[self myMIDISequence] startAudioRecordingWithName: fullname] == kMDNoError)
         return YES;
     else errmsg = @"Failed to record audio";
-  error:
-	NSRunAlertPanel(@"", errmsg, nil, nil, nil);
+    error: {
+        NSAlert *alert = [[NSAlert alloc] init];
+        [alert setMessageText:@"Audio Recording Error"];
+        [alert setInformativeText:errmsg];
+        [alert runModal];
+        [alert release];
+    }
 	return NO;
 }
 

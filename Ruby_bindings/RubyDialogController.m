@@ -1333,11 +1333,15 @@ RubyDialogCallback_savePanel(const char *title, const char *dirname, const char 
 {
 	int result;
 	NSSavePanel *panel = [NSSavePanel savePanel];
-	NSString *dirstr = (dirname != NULL ? [NSString stringWithUTF8String: dirname] : nil);
+//	NSString *dirstr = (dirname != NULL ? [NSString stringWithUTF8String: dirname] : nil);
 	[panel setTitle: [NSString stringWithUTF8String: title]];
-	result = [panel runModalForDirectory: dirstr file: [NSString stringWithUTF8String: buf]];
+    if (dirname != NULL)
+        [panel setDirectoryURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:dirname]]];
+    if (buf != NULL)
+        [panel setNameFieldStringValue:[NSString stringWithUTF8String:buf]];
+    result = [panel runModal];
 	if (result == NSFileHandlingPanelOKButton) {
-		strncpy(buf, [[panel filename] UTF8String], bufsize - 1);
+		strncpy(buf, [[[panel URL] path] UTF8String], bufsize - 1);
 		buf[bufsize - 1] = 0;
 		result = 1;
 	} else {
@@ -1353,20 +1357,22 @@ RubyDialogCallback_openPanel(const char *title, const char *dirname, const char 
 {
 	int result = 0;
 	NSOpenPanel *panel = [NSOpenPanel openPanel];
-	NSString *dirstr = (dirname != NULL ? [NSString stringWithUTF8String: dirname] : nil);
+//	NSString *dirstr = (dirname != NULL ? [NSString stringWithUTF8String: dirname] : nil);
 	[panel setTitle: [NSString stringWithUTF8String: title]];
 	if (for_directories) {
 		[panel setCanChooseFiles: NO];
 		[panel setCanChooseDirectories: YES];
 	}
-	result = [panel runModalForDirectory: dirstr file: nil types: nil];
+    if (dirname != NULL)
+        [panel setDirectoryURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:dirname]]];
+	result = [panel runModal];
 	if (result == NSOKButton) {
-		NSArray *names = [panel filenames];
-		int n = [names count];
+		NSArray *URLs = [panel URLs];
+		int n = [URLs count];
 		int i;
 		*array = (char **)malloc(sizeof(char *) * n);
 		for (i = 0; i < n; i++) {
-			(*array)[i] = strdup([[names objectAtIndex: i] UTF8String]);
+			(*array)[i] = strdup([[[URLs objectAtIndex: i] path] UTF8String]);
 		}
 		result = n;
 	} else result = 0;

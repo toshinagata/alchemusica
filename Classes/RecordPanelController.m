@@ -103,7 +103,7 @@ sAllowedExtensionsForTag(int tag)
 	theTick = [[info valueForKey: MyRecordingInfoStartTickKey] doubleValue];
 	if (theTick >= 0 && theTick < kMDMaxTick) {
 		MDCalibratorTickToMeasure(calib, theTick, &bar, &beat, &tick);
-		s = [NSString stringWithFormat: @"%d:%d:%d", bar, beat, tick];
+		s = [NSString stringWithFormat: @"%d:%d:%d", (int)bar, (int)beat, (int)tick];
 	} else {
 		s = @"----:--:----";
 	}
@@ -112,7 +112,7 @@ sAllowedExtensionsForTag(int tag)
 	theTick = [[info valueForKey: MyRecordingInfoStopTickKey] doubleValue];
 	if (theTick > 0 && theTick < kMDMaxTick) {
 		MDCalibratorTickToMeasure(calib, theTick, &bar, &beat, &tick);
-		s = [NSString stringWithFormat: @"%d:%d:%d", bar, beat, tick];
+		s = [NSString stringWithFormat: @"%d:%d:%d", (int)bar, (int)beat, (int)tick];
 	} else {
 		s = @"----:--:----";
 	}
@@ -141,7 +141,7 @@ sAllowedExtensionsForTag(int tag)
 		[audioFormatPopUp selectItemAtIndex: ival];
 		locationText = [info valueForKey: MyRecordingInfoFolderNameKey];
 		if (locationText == nil) {
-			locationText = [[myDocument fileName] stringByDeletingLastPathComponent];
+			locationText = [[[myDocument fileURL] path] stringByDeletingLastPathComponent];
 			if (locationText == nil)
 				locationText = @"~/Music";
 		}
@@ -452,9 +452,11 @@ sAllowedExtensionsForTag(int tag)
 	obj = sAllowedExtensionsForTag(tag);
 	if (obj)
 		[panel setAllowedFileTypes:obj];
-	if ([panel runModalForDirectory: [foldername stringByExpandingTildeInPath] file: filename] == NSFileHandlingPanelOKButton) {
-		foldername = [[panel directory] stringByAbbreviatingWithTildeInPath];
-		filename = [[panel filename] lastPathComponent];
+    [panel setDirectoryURL: [NSURL fileURLWithPath:[foldername stringByExpandingTildeInPath]]];
+    [panel setNameFieldStringValue:filename];
+	if ([panel runModal] == NSFileHandlingPanelOKButton) {
+		foldername = [[[panel directoryURL] path] stringByAbbreviatingWithTildeInPath];
+		filename = [[[panel URL] path] lastPathComponent];
 		[info setValue: foldername forKey: MyRecordingInfoFolderNameKey];
 		[info setValue: filename forKey: MyRecordingInfoFileNameKey];
 	}

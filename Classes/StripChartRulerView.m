@@ -71,7 +71,8 @@
 		if (y < 0)
 			y = 0;
 		str = [NSString stringWithFormat: @"%g", (yval >= maxValue - 0.01 ? maxValue : yval)];
-		x = frame.size.width - 4.0 - [font widthOfString: str];
+//		x = frame.size.width - 4.0 - [font widthOfString: str];
+        x = frame.size.width - 4.0 - [str sizeWithAttributes:[NSDictionary dictionaryWithObject:font forKey:NSFontAttributeName]].width;
 		[str drawAtPoint: NSMakePoint(x, y) withAttributes: attr];
 	}
 	[super drawRect:aRect];

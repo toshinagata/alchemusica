@@ -77,7 +77,7 @@ static int sScriptMenuCount = 0;
 		int status = 0;
 		NSString *pluginDir = [[[NSBundle mainBundle] builtInPlugInsPath] stringByAppendingPathComponent: @"Ruby_Scripts"];
 		NSString *cwd = [manager currentDirectoryPath];
-		NSArray *scriptArray = [[manager directoryContentsAtPath: pluginDir] sortedArrayUsingSelector: @selector(caseInsensitiveCompare:)];
+        NSArray *scriptArray = [[manager contentsOfDirectoryAtPath:pluginDir error:NULL] sortedArrayUsingSelector: @selector(caseInsensitiveCompare:)];
 		[manager changeCurrentDirectoryPath: pluginDir];
 		for (i = 0; i < [scriptArray count]; i++) {
 			const char *s = [[scriptArray objectAtIndex: i] UTF8String];
@@ -167,16 +167,17 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 {
 	NSOpenPanel *panel = [NSOpenPanel openPanel];
 	int status;
-	NSArray *filenames;
+	NSArray *URLs;
 	NSString *filename;
 	NSMutableString *script;
 	[panel setMessage: @"Choose Ruby script file"];
-	status = [panel runModalForTypes: [NSArray arrayWithObjects: @"rb", nil]];
-	filenames = [panel filenames];
+    [panel setAllowedFileTypes:[NSArray arrayWithObjects: @"rb", nil]];
+	status = [panel runModal];
+	URLs = [panel URLs];
 	[panel close];
 	if (status != NSOKButton)
 		return;
-	filename = [filenames objectAtIndex: 0];
+    filename = [[URLs objectAtIndex: 0] path];
 
 	//  Show command line in the Ruby console
 	script = [NSMutableString stringWithString: filename];

@@ -49,7 +49,7 @@
 		pt.y = cellFrame.origin.y + floor(cellFrame.size.height / 2 - sz.height / 2);
 		if ([[NSView focusView] isFlipped])
 			pt.y += sz.height;
-		[image compositeToPoint: pt operation: NSCompositeSourceAtop];
+        [image drawAtPoint: pt fromRect: NSZeroRect operation: NSCompositeSourceAtop fraction: 1.0];
 	}
 }
 

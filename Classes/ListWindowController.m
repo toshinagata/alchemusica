@@ -469,7 +469,7 @@ EventSelector(const MDEvent *ep, long position, void *inUserData)
 {
 	int n = MDTrackGetNumberOfEvents(myTrack) + 1;
 	int m = [myEventTrackView numberOfSelectedRows];
-	[myInfoText setStringValue:[NSString stringWithFormat:@"%d row%s/%d shown/%d selected", n, (n == 1 ? "" : "s"), myCount + 1, m]];
+	[myInfoText setStringValue:[NSString stringWithFormat:@"%d row%s/%d shown/%d selected", n, (n == 1 ? "" : "s"), (int)myCount + 1, m]];
 }
 
 - (void)updateEditingRangeText
@@ -703,7 +703,7 @@ row:(int)rowIndex
 			npos = [document changeTick: tick atPosition: position inTrack: trackNo originalPosition: -1];
 			if (npos >= 0) {
 				/*  Select npos'th event and show it  */
-				[myEventTrackView selectRow: npos byExtendingSelection: NO];
+                [myEventTrackView selectRowIndexes: [NSIndexSet indexSetWithIndex:npos] byExtendingSelection: NO];
 				[[document undoManager] setActionName:NSLocalizedString(
 					@"Change Tick", @"Name of undo/redo menu item after a single tick value is changed")];
 			}
@@ -824,11 +824,11 @@ row:(int)rowIndex
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification
 {
     MDSelectionObject *pointSet;
-    NSEnumerator *enumerator;
-    id obj;
+    NSIndexSet *iset;
     MDStatus sts;
-    int numberOfRows, theRow;
-	unsigned flags;
+    int numberOfRows;
+    unsigned flags;
+    NSUInteger idx;
     if (selectionDidChangeNotificationLevel > 0)
         return;
 
@@ -842,17 +842,16 @@ row:(int)rowIndex
 	}
 	
     pointSet = [[MDSelectionObject allocWithZone: [self zone]] init];
-    enumerator = [myEventTrackView selectedRowEnumerator];
+    iset = [myEventTrackView selectedRowIndexes];
     numberOfRows = [self numberOfRowsInTableView: myEventTrackView];
 	isLastRowSelected = NO;
-    while ((obj = [enumerator nextObject]) != nil) {
-        theRow = [obj intValue];
-        if (theRow == numberOfRows - 1) {
+    for (idx = [iset firstIndex]; idx != NSNotFound; idx = [iset indexGreaterThanIndex:idx]) {
+        if (idx == numberOfRows - 1) {
 			pointSet->isEndOfTrackSelected = YES;
 			isLastRowSelected = YES;
             continue;
 		}
-        sts = IntGroupAdd(pointSet->pointSet, [self eventPositionForTableRow: theRow], 1);
+        sts = IntGroupAdd(pointSet->pointSet, [self eventPositionForTableRow: idx], 1);
         if (sts != kMDNoError)
             break;
     }
@@ -1101,18 +1100,17 @@ row:(int)rowIndex
 
 - (IBAction)deleteSelectedEvents: (id)sender
 {
-	NSEnumerator *en = [myEventTrackView selectedRowEnumerator];
+	NSIndexSet *iset = [myEventTrackView selectedRowIndexes];
 	IntGroupObject *pointSet = [[[IntGroupObject allocWithZone: [self zone]] init] autorelease];
 	MDStatus sts;
 	BOOL mod;
-	id obj;
-	int n, eot;
+    NSUInteger idx;
+	int eot;
 	eot = [myEventTrackView numberOfRows] - 1;	//  End Of Track
-	while ((obj = [en nextObject]) != nil) {
-		n = [obj intValue];
-		if (n == eot)
+    for (idx = [iset firstIndex]; idx != NSNotFound; idx = [iset indexGreaterThanIndex:idx]) {
+		if (idx == eot)
 			continue;
-		sts = IntGroupAdd(pointSet->pointSet, [self eventPositionForTableRow: n], 1);
+		sts = IntGroupAdd(pointSet->pointSet, [self eventPositionForTableRow: idx], 1);
 		if (sts != kMDNoError)
 			return;		//  Cannot proceed
 	}
@@ -1129,7 +1127,7 @@ row:(int)rowIndex
 
 - (void)startEditAtColumn: (int)column row: (int)row
 {
-	[myEventTrackView selectRow: row byExtendingSelection: NO];
+    [myEventTrackView selectRowIndexes: [NSIndexSet indexSetWithIndex:row] byExtendingSelection: NO];
 	if (column < 0)
 	//	column = [myEventTrackView columnWithIdentifier: @"event"];
 		column = 0;

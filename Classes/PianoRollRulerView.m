@@ -16,6 +16,7 @@
 
 #import "PianoRollRulerView.h"
 #import "MDHeaders.h"
+#import "NSWindowControllerAdditions.h"  //  For sharedLayoutManager
 
 @implementation PianoRollRulerView
 
@@ -37,7 +38,7 @@
 	/*	[labels addObject:
 			[[[NSCell allocWithZone: [self zone]]
 				initTextCell: [NSString stringWithCString: name]] autorelease]]; */
-        [labels addObject: [NSString stringWithCString: name]];
+        [labels addObject: [NSString stringWithUTF8String: name]];
 	}
 }
 
@@ -55,7 +56,7 @@
 	[NSBezierPath strokeLineFromPoint: pt toPoint: NSMakePoint(pt.x, pt.y + rect.size.height)];
 //	rect.size.height = 0.0;
 	rect.origin.x = rect.origin.x + rect.size.width - 32.0;
-    rect.size.height = [[GraphicRulerView rulerLabelFont] defaultLineHeightForFont];
+    rect.size.height = [[NSWindowController sharedLayoutManager] defaultLineHeightForFont:[GraphicRulerView rulerLabelFont]];
 	rect.size.width = 32.0;
 	scale = [(GraphicClientView *)[self clientView] yScale];
 	for (index = -17; index <= +19; index++) {
@@ -69,7 +70,7 @@
         }
 /*		cell = (NSCell *)[labels objectAtIndex: index + 17];
 		if (rect.size.height == 0.0) {
-			rect.size.height = [[cell font] defaultLineHeightForFont];
+			rect.size.height = [[NSWindowManager sharedLayoutManager] defaultLineHeightForFont:[cell font]];
 			rect.origin.y = -rect.size.height * 2;
 		}
 		pt = [self convertPoint: NSMakePoint(0, n * scale) fromView: clientView];

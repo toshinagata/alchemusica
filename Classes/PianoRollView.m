@@ -423,7 +423,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 			//	[draggingImage dissolveToPoint: aRect.origin fromRect: rect fraction: 0.8];
 			} else {
 				size = [draggingImage size];
-				[draggingImage dissolveToPoint: NSMakePoint(draggingPoint.x - size.width / 2, draggingPoint.y - size.height / 2) fraction: 0.8];
+				[draggingImage drawAtPoint:NSMakePoint(draggingPoint.x - size.width / 2, draggingPoint.y - size.height / 2) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:0.8];
 			}
 		}
 	}

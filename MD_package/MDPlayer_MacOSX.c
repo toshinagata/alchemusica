@@ -170,7 +170,7 @@ struct MDPlayer {
 
 static MDPlayer *sRecordingPlayer = NULL;	/*  the MDPlayer that receives the incoming MIDI messages */
 static long sMIDIThruDevice = -1;
-static MIDIEndpointRef sMIDIThruDeviceRef = NULL;
+static MIDIEndpointRef sMIDIThruDeviceRef = MIDIObjectNull;
 static int sMIDIThruChannel = 0;  /*  0..15; if 16, then incoming channel number is kept */
 
 /*  Minimum interval of interrupts  */
@@ -563,7 +563,7 @@ MDPlayerInitDestinationInfo(long dev, MDDestinationInfo *info)
 	info->bytesToSend = 0;
 	info->sysexTransmitting = 0;
 	info->packetPtr = MIDIPacketListInit(&info->packetList);
-	info->eref = NULL;
+	info->eref = MIDIObjectNull;
 	if (dev >= 0 && dev < sDeviceInfo.destNum) {
 		MIDIObjectType objType;
 		MIDIObjectRef eref;
@@ -1270,7 +1270,7 @@ MyTimerFunc(MDPlayer *player)
 			next_time = kMDPlayerMinimumInterval;
 		if (next_time < last_time - now_time)
 			next_time = last_time - now_time;
-		return next_time;
+		return (long)next_time;
 	}
 }
 
@@ -1999,12 +1999,12 @@ MDPlayerSetMIDIThruDeviceAndChannel(long dev, int ch)
         sMIDIThruDevice = dev;
 		if (MIDIObjectFindByUniqueID(sDeviceInfo.dest[dev].uniqueID, &eref, &objType) == noErr && objType == kMIDIObjectType_Destination)
 			sMIDIThruDeviceRef = eref;
-		else sMIDIThruDeviceRef = NULL;
+		else sMIDIThruDeviceRef = MIDIObjectNull;
     /*    sMIDIThruDeviceRef = MIDIGetDestination(dev); */
         sMIDIThruChannel = ch;  /*  If 16, then incoming channel is kept  */
     } else {
         sMIDIThruDevice = -1;
-        sMIDIThruDeviceRef = NULL;
+        sMIDIThruDeviceRef = MIDIObjectNull;
     }
 }
 
