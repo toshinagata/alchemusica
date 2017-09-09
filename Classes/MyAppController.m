@@ -483,7 +483,10 @@ MyAppCallback_getObjectGlobalSettings(id keyPath)
 		if (sGlobalSettings == nil) {
 			sGlobalSettings = [[NSMutableDictionary alloc] init];
 			[defaults setValue:sGlobalSettings forKey:@"settings"];
-		}
+        } else {
+            /*  Make it mutable recursively  */
+            sGlobalSettings = (NSMutableDictionary *)CFPropertyListCreateDeepCopy(kCFAllocatorDefault, (CFDictionaryRef)sGlobalSettings, kCFPropertyListMutableContainers);
+        }
 	}
 	if (keyPath != nil)
 		return [sGlobalSettings valueForKeyPath:keyPath];
