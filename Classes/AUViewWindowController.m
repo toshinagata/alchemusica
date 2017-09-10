@@ -18,6 +18,7 @@
 
 #import "AUViewWindowController.h"
 
+#import <Carbon/Carbon.h>
 #import <CoreAudioKit/CoreAudioKit.h>
 #import <AudioUnit/AUCocoaUIView.h>
 

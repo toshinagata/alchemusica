@@ -1003,28 +1003,30 @@ ScheduleMIDIEventToMusicDevice(MDDestinationInfo *info, UInt64 timeStamp, int le
     int readOffset = ip->midiBufferReadOffset;
     int writeOffset = ip->midiBufferWriteOffset;
     int spaceSize = (readOffset + kMDAudioMaxMIDIBytesToSendPerDevice - 1 - writeOffset) % kMDAudioMaxMIDIBytesToSendPerDevice + 1;
-    int length2;
+    int i, length2;
     if (length == 1 && *data == 0xff) {
         /*  Schedule sysex  */
+        if (ip->sysexData != NULL)
+            return 1;  /*  Sysex is waiting: cannot schedule until this is done  */
         ip->sysexLength = info->sysexRequest.bytesToSend;
         ip->sysexData = (unsigned char *)info->sysexRequest.data;
+        return 0;
     }
     length2 = length + sizeof(timeStamp) + 1;
-    if (spaceSize > length2) {
-        int i;
-        for (i = 0; i < length2; i++) {
-            unsigned char c;
-            if (i < sizeof(timeStamp))
-                c = (timeStamp >> (i * 8)) & 0xff;
-            else if (i == sizeof(timeStamp))
-                c = length & 0xff;  /*  Should be length <= 255  */
-            else
-                c = data[i - sizeof(timeStamp) - 1];
-            ip->midiBuffer[(writeOffset + i) % kMDAudioMaxMIDIBytesToSendPerDevice] = c;
-        }
-        ip->midiBufferWriteOffset = (writeOffset + length2) % kMDAudioMaxMIDIBytesToSendPerDevice;
-        return 0;
-    } else return 1;
+    if (spaceSize <= length2)
+        return 1;
+    for (i = 0; i < length2; i++) {
+        unsigned char c;
+        if (i < sizeof(timeStamp))
+            c = (timeStamp >> (i * 8)) & 0xff;
+        else if (i == sizeof(timeStamp))
+            c = length & 0xff;  /*  Should be length <= 255  */
+        else
+            c = data[i - sizeof(timeStamp) - 1];
+        ip->midiBuffer[(writeOffset + i) % kMDAudioMaxMIDIBytesToSendPerDevice] = c;
+    }
+    ip->midiBufferWriteOffset = (writeOffset + length2) % kMDAudioMaxMIDIBytesToSendPerDevice;
+    return 0;
 }
 
 static long
@@ -1228,9 +1230,15 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
                 MIDISendSysex(&info->sysexRequest);
             } else if (info->comp != NULL) {
                 /*  Software MIDI device  */
-                static unsigned char dummyBytes[1] = { 0xff };  /*  Dummy status byte  */
-                if (ScheduleMIDIEventToMusicDevice(info, timeStamp, 1, dummyBytes) != 0)
-                    break;  /*  Cannot schedule: we should retry later  */
+                /*  Try to schedule raw bytes  */
+                if (ScheduleMIDIEventToMusicDevice(info, timeStamp, n, (Byte *)p) != 0) {
+                    /*  If unsuccessful, then try to use sysexRequest  */
+                    static unsigned char dummyBytes[1] = { 0xff };  /*  Dummy status byte  */
+                    info->sysexRequest.bytesToSend = n;
+                    info->sysexRequest.data = (Byte *)p;
+                    if (ScheduleMIDIEventToMusicDevice(info, timeStamp, 1, dummyBytes) != 0)
+                        break;  /*  Cannot schedule: we should retry later  */
+                }
             }
         } else {
             /*  Schedule a MIDI channel event  */

@@ -22,8 +22,6 @@
 #import "MyMIDISequence.h"
 #import "MDObjects.h"
 
-#include <version.h>  /*  for Ruby version  */
-#include <node.h>     /*  for rb_add_event_hook()  */
 #include <sys/time.h> /*  for gettimeofday()  */
 #include <time.h>     /*  for clock()  */
 #include <signal.h>   /*  for sigaction()  */
@@ -122,7 +120,7 @@ Ruby_getVersionStrings(const char **version, const char **copyright)
 	static char *s_ruby_copyright;
 	*version = ruby_version;
 	if (s_ruby_copyright == NULL)
-		asprintf(&s_ruby_copyright, "Copyright (C) %d-%d %s", RUBY_BIRTH_YEAR, RUBY_RELEASE_YEAR, RUBY_AUTHOR);
+		asprintf(&s_ruby_copyright, "Copyright (C) %d-%d %s", RUBY_BIRTH_YEAR, 2013, RUBY_AUTHOR);
 	*copyright = s_ruby_copyright;
 }
 
@@ -807,32 +805,32 @@ s_executeRubyOnDocument(VALUE vinfo)
 	if (rp->argfmt != NULL && rp->argfmt[0] != 0) {
 		const char *p = rp->argfmt;
 		int ival;
-		va_list ap = rp->ap;
+	/*	va_list ap = rp->ap; *//*  This assignment does not work on 64-bit build  */
 		while (*p != 0) {
 			switch (*p) {
 				case 'b': 
-					ival = va_arg(ap, int);
+					ival = va_arg(rp->ap, int);
 					aval = (ival ? Qtrue : Qfalse);
 					break;
 				case 'i':
-					aval = INT2NUM(va_arg(ap, int)); break;
+					aval = INT2NUM(va_arg(rp->ap, int)); break;
 				case 'l':
-					aval = INT2NUM(va_arg(ap, long)); break;
+					aval = INT2NUM(va_arg(rp->ap, long)); break;
 				case 'q':
-					aval = LL2NUM(va_arg(ap, long long)); break;
+					aval = LL2NUM(va_arg(rp->ap, long long)); break;
 				case 'd':
-					aval = rb_float_new(va_arg(ap, double)); break;
+					aval = rb_float_new(va_arg(rp->ap, double)); break;
 				case 's':
-					aval = rb_str_new2(va_arg(ap, const char *)); break;
+					aval = rb_str_new2(va_arg(rp->ap, const char *)); break;
 				case 'a':  /*  ASCII characters (can contain NUL)  */
-					n = va_arg(ap, int);
-					aval = rb_str_new(va_arg(ap, const char *), n);
+					n = va_arg(rp->ap, int);
+					aval = rb_str_new(va_arg(rp->ap, const char *), n);
 					break;
 				case 'B': case 'I': case 'L': case 'Q': case 'D': case 'S': case 'A': {
 					VALUE aaval;
 					void *pp;
-					n = va_arg(ap, int);
-					pp = va_arg(ap, void *);
+					n = va_arg(rp->ap, int);
+					pp = va_arg(rp->ap, void *);
 					aval = rb_ary_new2(n);
 					for (i = 0; i < n; i++) {
 						switch (*p) {
@@ -857,9 +855,9 @@ s_executeRubyOnDocument(VALUE vinfo)
 				}
 				case ';':
 					retfmt = *++p;
-					retp1 = va_arg(ap, void *);
+					retp1 = va_arg(rp->ap, void *);
 					if (retfmt == 'a' || (retfmt >= 'A' && retfmt <= 'Z'))
-						retp2 = va_arg(ap, void *);
+						retp2 = va_arg(rp->ap, void *);
 					goto out_of_loop;
 			} /* end switch */
 			rb_ary_push(args, aval);

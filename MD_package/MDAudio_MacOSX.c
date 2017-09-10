@@ -280,11 +280,20 @@ sMDAudioSendMIDIProc(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, 
     }
     while (readPos - readOffset < dataSize) {
         UInt64 timeStamp = 0;
+        UInt32 offset;
         int i, len;
         unsigned char c;
         for (i = 0; i < 8; i++) {
             c = ip->midiBuffer[(readPos + i) % kMDAudioMaxMIDIBytesToSendPerDevice];
             timeStamp += (((UInt64)c) << (i * 8));
+        }
+        if (timeStamp > inTimeStamp->mHostTime) {
+            offset = (UInt32)((double)(timeStamp - inTimeStamp->mHostTime) * (1.0 / ip->format.mSampleRate));
+        } else offset = 0;
+        if (offset >= inNumberFrames) {
+            /*  This event is scheduled in the next or later frame, so it
+             should be processed in later callback  */
+            break;
         }
         len = ip->midiBuffer[(readPos + 8) % kMDAudioMaxMIDIBytesToSendPerDevice];
         c = ip->midiBuffer[(readPos + 9) % kMDAudioMaxMIDIBytesToSendPerDevice];
@@ -298,7 +307,10 @@ sMDAudioSendMIDIProc(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, 
             if (numChannelEvents > 0)
                 break;
             if (c == 0xff) {
-                MusicDeviceSysEx(ip->unit, ip->sysexData, ip->sysexLength);
+                if (ip->sysexData != NULL) {
+                    MusicDeviceSysEx(ip->unit, ip->sysexData, ip->sysexLength);
+                    ip->sysexData = NULL;
+                }
                 readPos += 10; /* 8 (timeStamp) + 1 (length) + 1 (0xff) */
             } else {
                 static unsigned char tempBuffer[256];
@@ -310,21 +322,12 @@ sMDAudioSendMIDIProc(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, 
             }
         } else {
             unsigned char c2, c3;
-            UInt32 offset;
             c2 = c3 = 0;
             if (len >= 2) {
                 c2 = ip->midiBuffer[(readPos + 10) % kMDAudioMaxMIDIBytesToSendPerDevice];
                 if (len >= 3) {
                     c3 = ip->midiBuffer[(readPos + 11) % kMDAudioMaxMIDIBytesToSendPerDevice];
                 }
-            }
-            if (timeStamp > inTimeStamp->mHostTime) {
-                offset = (UInt32)((double)(timeStamp - inTimeStamp->mHostTime) * (1.0 / ip->format.mSampleRate));
-            } else offset = 0;
-            if (offset >= inNumberFrames) {
-                /*  This event is scheduled in the next or later frame, so it
-                 should be processed in later callback  */
-                break;
             }
             MusicDeviceMIDIEvent(ip->unit, c, c2, c3, offset);
         //    printf("%08x %02x %02x %02x %d\n", (UInt32)ip->unit, c, c2, c3, offset);

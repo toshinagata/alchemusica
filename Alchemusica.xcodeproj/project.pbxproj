@@ -1146,7 +1146,6 @@
 				GCC_PREFIX_HEADER = "";
 				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../ruby-2.0.0-p353",
 					"$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/include/ruby-2.0.0",
 					"$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/include/ruby-2.0.0/universal-darwin10.8.0",
 				);
@@ -1178,7 +1177,6 @@
 				GCC_PREFIX_HEADER = "";
 				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../ruby-2.0.0-p353",
 					"$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/include/ruby-2.0.0",
 					"$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/include/ruby-2.0.0/universal-darwin10.8.0",
 				);
@@ -1211,7 +1209,6 @@
 				GCC_PREFIX_HEADER = "";
 				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../ruby-2.0.0-p353",
 					"$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/include/ruby-2.0.0",
 					"$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/include/ruby-2.0.0/universal-darwin10.8.0",
 				);
