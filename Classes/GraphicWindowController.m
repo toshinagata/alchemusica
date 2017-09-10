@@ -578,6 +578,7 @@ sTableColumnIDToInt(id identifier)
             NSEraseRect([myFloatingView convertRect:timeIndicatorRect fromView:myMainView]);
             [myFloatingView unlockFocus];
         }
+        /*
         if (cachedImage != nil && epos == endOfSequencePos) {
             if ([myMainView canDraw]) {
                 NSImage *image = [[[NSImage alloc] init] autorelease];
@@ -590,9 +591,10 @@ sTableColumnIDToInt(id identifier)
             //  If the sequence duration changed during recording, then
             //  we need to redraw the cached part
             [myMainView displayRect:timeIndicatorRect];
-        }
-        [cachedImage release];
-        cachedImage = nil;
+        } */
+        [myMainView displayRect:timeIndicatorRect];
+    /*    [cachedImage release];
+        cachedImage = nil; */
     }
     timeIndicatorRect = NSZeroRect;
 }

@@ -115,7 +115,7 @@ enum {
 	//  The position of the time indicator during playing
 	MDTickType timeIndicatorPos;	//  In tick
 	NSRect timeIndicatorRect;	    //  In MyFloatingView coordinates
-    NSBitmapImageRep *cachedImage;  //  Image
+//    NSBitmapImageRep *cachedImage;  //  Image
     MDTickType endOfSequencePos;    //  In tick
     
     //  Tracking rect
