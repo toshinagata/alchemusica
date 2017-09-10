@@ -544,15 +544,15 @@ sTableColumnIDToInt(id identifier)
 		bpath = [self bouncingBallPathAtBeat: beat];
 		if (bpath)
 			bounds = NSUnionRect(bounds, [bpath bounds]);
-        bounds = NSInsetRect(bounds, -1, -1);
+        bounds = NSInsetRect(bounds, -2, -1);
         bounds = [myMainView convertRect: bounds fromView: myFloatingView];
         origin.x = floor(bounds.origin.x);
         origin.y = floor(bounds.origin.y);
         bounds.size.width = ceil(bounds.origin.x + bounds.size.width - origin.x);
         bounds.size.height = ceil(bounds.origin.y + bounds.size.height - origin.y);
         bounds.origin = origin;
-        cachedImage = [[myMainView bitmapImageRepForCachingDisplayInRect:bounds] retain];
-        [myMainView cacheDisplayInRect:bounds toBitmapImageRep:cachedImage];
+    //    cachedImage = [[myMainView bitmapImageRepForCachingDisplayInRect:bounds] retain];
+    //    [myMainView cacheDisplayInRect:bounds toBitmapImageRep:cachedImage];
         [myFloatingView lockFocus];
         [path stroke];
         if (bpath)
@@ -562,6 +562,7 @@ sTableColumnIDToInt(id identifier)
         timeIndicatorRect = bounds;
 	}
     timeIndicatorPos = beat;
+    endOfSequencePos = [[[self document] myMIDISequence] sequenceDuration];
 }
 
 - (void)hideTimeIndicator
@@ -570,18 +571,25 @@ sTableColumnIDToInt(id identifier)
 //	[theWindow restoreCachedImage];
 //	[theWindow discardCachedImage];
 //	[theWindow flushWindowIfNeeded];
+    MDTickType epos = [[[self document] myMIDISequence] sequenceDuration];
     if (!NSIsEmptyRect(timeIndicatorRect)) {
         if ([myFloatingView canDraw]) {
             [myFloatingView lockFocus];
             NSEraseRect([myFloatingView convertRect:timeIndicatorRect fromView:myMainView]);
             [myFloatingView unlockFocus];
         }
-        if ([myMainView canDraw] && cachedImage != nil) {
-            NSImage *image = [[[NSImage alloc] init] autorelease];
-            [image addRepresentation:cachedImage];
-            [myMainView lockFocus];
-            [image drawInRect:timeIndicatorRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-            [myMainView unlockFocus];
+        if (cachedImage != nil && epos == endOfSequencePos) {
+            if ([myMainView canDraw]) {
+                NSImage *image = [[[NSImage alloc] init] autorelease];
+                [image addRepresentation:cachedImage];
+                [myMainView lockFocus];
+                [image drawInRect:timeIndicatorRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+                [myMainView unlockFocus];
+            }
+        } else {
+            //  If the sequence duration changed during recording, then
+            //  we need to redraw the cached part
+            [myMainView displayRect:timeIndicatorRect];
         }
         [cachedImage release];
         cachedImage = nil;

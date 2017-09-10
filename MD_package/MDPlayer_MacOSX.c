@@ -1039,7 +1039,7 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 	unsigned char buf[4];
 	const unsigned char *p;
 	int track, processed;
-    long dev, n, bytesSent;
+    long dev, n, bytesToSend;
 	MDDestinationInfo *info;
 	unsigned char isNoteOff, isMetronome;
 
@@ -1054,15 +1054,19 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 	lastTime = 0;
 	MDPointerSetPosition(inPlayer->noteOffPtr, 0);
 	processed = 0;
-	dev = -1;
+    bytesToSend = 0;
 
-	/*  Create the MIDIPacketLists  */
 	while (1) {
 		MDTickType mergerTick = MDMergerGetTick(merger);
 		MDTickType metroTick;
 		MDTickType noteOffTick = inPlayer->noteOffTick;
+        UInt64 timeStamp;
+        MDEvent offEvent;  /*  Internal note off  */
+        MDEventInit(&offEvent);
 		isMetronome = isNoteOff = 0;
-		if (gMetronomeInfo.enableWhenPlay || (gMetronomeInfo.enableWhenRecord && inPlayer->isRecording)) {
+        dev = -1;
+
+        if (gMetronomeInfo.enableWhenPlay || (gMetronomeInfo.enableWhenRecord && inPlayer->isRecording)) {
 			if (inPlayer->nextMetronomeBeat < 0) {
 				PrepareMetronomeForTick(inPlayer, now_tick);
 			}
@@ -1070,6 +1074,7 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 			if (metroTick >= inPlayer->nextMetronomeBar)
 				metroTick = inPlayer->nextMetronomeBar;
 		} else metroTick = kMDMaxTick;
+        
 		/*  Check which comes first, metronome or note-off or real MIDI event  */
 		if ((inPlayer->status == kMDPlayer_exhausted && inPlayer->isRecording && metroTick < kMDMaxTick) || (metroTick <= noteOffTick && metroTick <= mergerTick)) {
 			/*  Metronome  */
@@ -1121,33 +1126,44 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 			metDuration = MDCalibratorTimeToTick(inPlayer->calib, MDCalibratorTickToTime(inPlayer->calib, metroTick) + gMetronomeInfo.duration) - metroTick;
 			MDSetDuration(&metEvent, metDuration);
 			ep = &metEvent;
+            for (dev = 0; dev < inPlayer->destNum; dev++) {
+                if (inPlayer->destInfo[dev]->dev == gMetronomeInfo.dev)
+                    break;
+            }
 		} else if (noteOffTick <= mergerTick) {
 			/*  Registered note off  */
+            isNoteOff = 1;
 			ep = MDPointerCurrent(inPlayer->noteOffPtr);
 			if (ep != NULL && MDGetKind(ep) != kMDEventSpecial)
 				dev = MDGetLData(ep);
-			isNoteOff = 1;
 		} else {
 			/*  Ordinary MIDI event  */
 			ep = MDMergerCurrent(merger);
 			track = MDMergerGetCurrentTrack(merger);
 			isNoteOff = 0;
+            if (track >= inPlayer->trackNum)
+                dev = -1;   /*  track number out of range  */
+            else if (inPlayer->trackAttr[track] & (kMDTrackAttributeMute | kMDTrackAttributeMuteBySolo))
+                dev = -1;   /*  Mute  */
+            else dev = inPlayer->destIndex[track];
 		}
 
 		if (ep == NULL) {
 			nextTick = kMDMaxTick;
 			break;	/*  No more data  */
 		}
-		if (MDIsMetaEvent(ep))
-			goto next;	/*  Skip meta events  */
-		nextTick = MDGetTick(ep);
-		if (nextTick > prefetch_tick)
-			break;	/*  This should be after meta-event check  */
 
-		if (MDGetKind(ep) == kMDEventSpecial) {
+        nextTick = MDGetTick(ep);
+        if (MDIsMetaEvent(ep))
+			goto next;	/*  Skip meta events  */
+		if (nextTick > prefetch_tick)
+			break;	/*  Wait until next interrupt (this should be after meta-event check)  */
+
+        /*  Handle special events  */
+        if (MDGetKind(ep) == kMDEventSpecial) {
 			int code;
 			if (nextTick > now_tick)
-				break;  /*  Should be processed in the next interrupt cycle  */
+				break;  /*  Wait until interrupt cycle  */
 			code = MDGetCode(ep);
 			if (code == kMDSpecialStopPlaying) {
 				if (inPlayer->isRecording)
@@ -1157,35 +1173,18 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 			} else if (code == kMDSpecialEndOfSequence) {
 				inPlayer->status = kMDPlayer_exhausted;
 			}
-/*			if ((code == kMDSpecialEndOfSequence && !inPlayer->isRecording) || code == kMDSpecialStopPlaying) {
-				if (inPlayer->isRecording)
-					MDPlayerStopRecording(inPlayer);
-				if (MDAudioIsRecording())
-					MDAudioStopRecording();
-				inPlayer->status = kMDPlayer_exhausted;
-			} */
-			break;
+            goto next;  /*  Skip this event  */
 		}
 
-		if (isMetronome) {
-			for (dev = 0; dev < inPlayer->destNum; dev++) {
-				if (inPlayer->destInfo[dev]->dev == gMetronomeInfo.dev)
-					break;
-			}
-        } else if (!isNoteOff) {
-			if (track >= inPlayer->trackNum)
-				goto next;  /*  track number out of range  */
-            if (inPlayer->trackAttr[track] & (kMDTrackAttributeMute | kMDTrackAttributeMuteBySolo))
-                goto next;	/*  Mute --- no output  */    
-            dev = inPlayer->destIndex[track];
-        }
-        
 		if (dev < 0 || dev >= inPlayer->destNum || (info = inPlayer->destInfo[dev]) == NULL)
 			goto next;	/*  No output  */
 		if (info->sysexTransmitting)
-			break;		/*  Sysex is being transmitted on this device: no more output  */
+			break;		/*  Sysex is being transmitted on this device: wait until next interrupt  */
 
-		if (MDIsSysexEvent(ep)) {
+        nextTime = MDCalibratorTickToTime(inPlayer->calib, nextTick);
+        timeStamp = ConvertMDTimeTypeToHostTime(nextTime + inPlayer->startTime);
+
+        if (MDIsSysexEvent(ep)) {
 			p = MDGetMessageConstPtr(ep, &n);
 		} else if (MDIsChannelEvent(ep)) {
 			int channel;
@@ -1205,47 +1204,64 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 			/*  ---------  */
 			if (MDGetKind(ep) == kMDEventNote) {
 				/*  Register note-off */
-				MDEvent event;
-				MDEventInit(&event);
-				MDSetKind(&event, kMDEventInternalNoteOff);
-				MDSetCode(&event, MDGetCode(ep));
-				MDSetChannel(&event, channel);
-				MDSetNoteOffVelocity(&event, MDGetNoteOffVelocity(ep));
-				MDSetTick(&event, MDGetTick(ep) + MDGetDuration(ep));
-				MDSetLData(&event, dev);
-				RegisterEventInNoteOffTrack(inPlayer, &event);
-                dprintf(2, "register note-off (total %ld), tick %ld code %d vel %d\n", MDTrackGetNumberOfEvents(inPlayer->noteOff), MDGetTick(&event), MDGetCode(&event), MDGetNoteOffVelocity(&event));
+				MDSetKind(&offEvent, kMDEventInternalNoteOff);
+				MDSetCode(&offEvent, MDGetCode(ep));
+				MDSetChannel(&offEvent, channel);
+				MDSetNoteOffVelocity(&offEvent, MDGetNoteOffVelocity(ep));
+				MDSetTick(&offEvent, MDGetTick(ep) + MDGetDuration(ep));
+				MDSetLData(&offEvent, dev);
 			}
 		} else goto next;	/*  Not a MIDI event  */
 
-		inPlayer->lastTick = MDGetTick(ep);
-
-		/*  Calculate the time stamp  */
-		nextTime = MDCalibratorTickToTime(inPlayer->calib, nextTick);
-		if (nextTime <= lastTime)
-			nextTime = lastTime + 10;
-        if (MDIsSysexEvent(ep) && n >= 256) {
-            /*  Prepare a MIDISysexSendRequest, and stop collecting events  */
-            MIDISysexSendRequest *rp = &info->sysexRequest;
-            rp->destination = info->eref;
-            rp->data = (Byte *)p;
-            rp->bytesToSend = n;
-            rp->complete = 0;
-            rp->completionProc = MySysexCompletionProc;
-            rp->completionRefCon = info;
-            lastTime = nextTime;
-            MDMergerForward(merger);
-            nextTick = MDMergerGetTick(merger);
-            break;
+        if (MDIsSysexEvent(ep)) {
+            /*  Schedule a sysex event  */
+            if (info->eref != MIDIObjectNull) {
+                /*  Real MIDI device  */
+                MIDISysexSendRequest *rp = &info->sysexRequest;
+                rp->destination = info->eref;
+                rp->data = (Byte *)p;
+                rp->bytesToSend = n;
+                rp->complete = 0;
+                rp->completionProc = MySysexCompletionProc;
+                rp->completionRefCon = info;
+                info->sysexTransmitting = 1;
+                MIDISendSysex(&info->sysexRequest);
+            } else if (info->comp != NULL) {
+                /*  Software MIDI device  */
+                static unsigned char dummyBytes[1] = { 0xff };  /*  Dummy status byte  */
+                if (ScheduleMIDIEventToMusicDevice(info, timeStamp, 1, dummyBytes) != 0)
+                    break;  /*  Cannot schedule: we should retry later  */
+            }
         } else {
-            info->packetPtr = MIDIPacketListAdd(&info->packetList, sizeof(info->packetList), info->packetPtr, ConvertMDTimeTypeToHostTime(nextTime + inPlayer->startTime), n, (Byte *)p);
-            if (info->packetPtr == NULL)
-                break;
+            /*  Schedule a MIDI channel event  */
+            if (info->eref != MIDIObjectNull) {
+                /*  Real MIDI device  */
+                info->packetPtr = MIDIPacketListAdd(&info->packetList, sizeof(info->packetList), info->packetPtr, timeStamp, n, (Byte *)p);
+                if (info->packetPtr == NULL)
+                    break;  /*  Cannot create packetPtr (this would not happen)  */
+                sts = MIDISend(sMIDIOutputPortRef, info->eref, &info->packetList);
+                if (sts != noErr)
+                    break;  /*  Cannot schedule: we should retry later  */
+            } else if (info->comp != NULL) {
+                /*  Software MIDI device  */
+                if (ScheduleMIDIEventToMusicDevice(info, timeStamp, n, (unsigned char *)p) != 0)
+                    break;  /*  Cannot schedule: we should retry later  */
+            }
 		}
+        
+        /*  Register note off if necessary  */
+        if (MDGetKind(&offEvent) == kMDEventInternalNoteOff) {
+            RegisterEventInNoteOffTrack(inPlayer, &offEvent);
+            dprintf(2, "register note-off (total %ld), tick %ld code %d vel %d\n", MDTrackGetNumberOfEvents(inPlayer->noteOff), MDGetTick(&offEvent), MDGetCode(&offEvent), MDGetNoteOffVelocity(&offEvent));
+        }
+
 		info->bytesToSend += n;
         info->numEvents++;
 		lastTime = nextTime;
+        bytesToSend += n;
+        
 	next:
+        inPlayer->lastTick = nextTick;  /*  An event with this tick has been processed  */
 		if (isNoteOff) {
 			MDPointerDeleteAnEvent(inPlayer->noteOffPtr, NULL);
 			MDPointerSetPosition(inPlayer->noteOffPtr, 0);
@@ -1257,50 +1273,10 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 			MDMergerForward(merger);
 		}
 		processed++;
-        //  Avoid too many bytes to schedule
-        if (info->bytesToSend + info->numEvents * (sizeof(UInt64) + 1) > kMDAudioMaxMIDIBytesToSendPerDevice)
-            break;
 	}
 	
-	/*  Send the MIDI packet  */
-	bytesSent = 0;
-	for (n = inPlayer->destNum - 1; n >= 0; n--) {
-		info = inPlayer->destInfo[n];
-		if (info != NULL) {
-			if (info->bytesToSend > 0) {
-                if (info->eref != MIDIObjectNull) {
-                    sts = MIDISend(sMIDIOutputPortRef, info->eref, &info->packetList);
-                } else if (info->comp != NULL) {
-                    int i;
-                    MIDIPacket *packet = &(info->packetList.packet[0]);
-                    for (i = 0; i < info->packetList.numPackets; i++) {
-                        ScheduleMIDIEventToMusicDevice(info, packet->timeStamp, packet->length, packet->data);
-                        packet = MIDIPacketNext(packet);
-                    }
-                }
-                /*  TODO: MusicDeviceMIDIEvent() should also be used  */
-				if (bytesSent < info->bytesToSend)
-					bytesSent = info->bytesToSend;
-				info->bytesToSend = 0;
-                info->numEvents = 0;
-			}
-			if (info->sysexTransmitting == 0 && info->sysexRequest.bytesToSend > 0) {
-				/*  Send the last sysex using MIDISendSysex  */
-                info->sysexTransmitting = 1;
-                if (info->eref != MIDIObjectNull) {
-                    MIDISendSysex(&info->sysexRequest);
-                } else if (info->comp != NULL) {
-                    static unsigned char dummyBytes[1] = { 0xff };  /*  Dummy status byte  */
-                    ScheduleMIDIEventToMusicDevice(info, ConvertMDTimeTypeToHostTime(nextTime + inPlayer->startTime), 1, dummyBytes);
-                }
-				if (bytesSent < info->sysexRequest.bytesToSend)
-					bytesSent = info->sysexRequest.bytesToSend;				
-			}
-		}
-	}
-		
 	*outNextTick = nextTick;
-	return bytesSent;
+	return bytesToSend;
 }
 
 static long

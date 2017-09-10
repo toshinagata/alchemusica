@@ -259,9 +259,9 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	if (draggingMode > 0 && draggingMode < 3 && draggingImage != nil)
 		isDraggingImage = YES;
 
+	num = [dataSource visibleTrackCount];
 	if (cacheArray == nil || originTick != cacheTick)
 		[self cacheNotesBeforeTick: originTick];
-	num = [dataSource visibleTrackCount];
 	normalPath = [[NSBezierPath allocWithZone: [self zone]] init];
 	selectedPath = [[NSBezierPath allocWithZone: [self zone]] init];
 	if (isDraggingImage)
@@ -294,6 +294,8 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 				continue;
 			isFocus = [dataSource isFocusTrack: trackNum];
 		}
+		if (i >= [cacheArray count])
+			continue;  /*  Nothing to draw  */
 		pset = [[cacheArray objectAtIndex: i] pointSet];
 		pt = MDPointerNew(track);
 		if (pt != NULL)
