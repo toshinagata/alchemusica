@@ -377,54 +377,51 @@
 
 - (void)timerCallback: (NSTimer *)timer
 {
+    int status;
+    BOOL redrawRecordTrack = NO;
 	MyMIDISequence *seq = [myDocument myMIDISequence];
 	MDPlayer *player = [seq myPlayer];
 	callbackCount++;
-	if (player != NULL) {
-		int status = MDPlayerGetStatus(player);
-		int isPlayerRecording = MDPlayerIsRecording(player);
-		if (status == kMDPlayer_playing || status == kMDPlayer_exhausted) {
-			currentTime = MDPlayerGetTime(player);  /*  Update the current time  */
-			[self refreshTimeDisplay];
-			if (isRecording || isAudioRecording) {
-				NSDictionary *info = [seq recordingInfo];
-				//  Check for automatic stop recording
-				if ([[info valueForKey: MyRecordingInfoStopFlagKey] boolValue]) {
-					MDTickType currentTick = MDCalibratorTimeToTick(calibrator, currentTime);
-					if (currentTick > [[info valueForKey: MyRecordingInfoStopTickKey] doubleValue]) {
-						//  Stop recording (but continue to play)
-						if (isAudioRecording) {
-							[myDocument finishAudioRecording];
-							isAudioRecording = NO;
-						} else {
-							[myDocument finishRecording];
-						}
-						isRecording = NO;
-						[recordButton setState:NSOffState];
-					}
-				}
-			}
-		}
-//		if (status != kMDPlayer_playing && !(status == kMDPlayer_exhausted && isRecording && !isAudioRecording)) {
-//		if (status != kMDPlayer_playing && status != kMDPlayer_suspended) {
-		if (status == kMDPlayer_exhausted && !isRecording && !isAudioRecording) {
-			//  If not playing, then self stop
-			[self pressStopButton: self];
-		}
-		if (isRecording && isPlayerRecording && callbackCount % 10 == 0) {
-			[seq collectRecordedEvents];
-			[parentController reloadClientViews];
-		}
-	}
-/*	MyDocument *doc;
-	if (activeIndex >= 0 && status == kMDPlayer_playing) {
-		doc = [docArray objectAtIndex: activeIndex];
-		[self refreshTimeDisplay];
-	//	[playButton hilite: YES];
-		player = [[doc myMIDISequence] myPlayer];
-        if (player != NULL && MDPlayerGetStatus(player) == kMDPlayer_exhausted)
-			[self pressStopButton: self];
-	} */
+    if (player == NULL)
+        return;
+    status = MDPlayerGetStatus(player);
+    if (status == kMDPlayer_playing) {
+        currentTime = MDPlayerGetTime(player);  /*  Update the current time  */
+        [self refreshTimeDisplay];
+        if (isRecording) {
+            NSDictionary *info = [seq recordingInfo];
+            if (callbackCount % 10 == 0)
+                redrawRecordTrack = YES;
+            //  Check if recording should be stopped
+            if ([[info valueForKey: MyRecordingInfoStopFlagKey] boolValue]) {
+                MDTickType currentTick = MDCalibratorTimeToTick(calibrator, currentTime);
+                if (currentTick >= [[info valueForKey: MyRecordingInfoStopTickKey] doubleValue]) {
+                    //  Stop recording (but continue to play)
+                    if (isAudioRecording) {
+                        //  Audio data can be retrieved at this time
+                        [myDocument finishAudioRecording];
+                        isAudioRecording = NO;
+                    } else {
+                        //  MIDI data will be retrieved when the stop button is pressed
+                        //  (It is a bad idea to insert a new track during playing)
+                        //  At this time, only flush the buffer and put the events to
+                        //  the recordTrack (in MyMIDISequence object)
+                        MDPlayerStopRecording(player);
+                        redrawRecordTrack = YES;
+                    }
+                    isRecording = NO;
+                    [recordButton setState:NSOffState];
+                }
+            }
+        }
+    } else if (status == kMDPlayer_exhausted) {
+        //  Player stopped playing
+        [self pressStopButton: self];
+    }
+    if (redrawRecordTrack) {
+        [seq collectRecordedEvents];
+        [parentController reloadClientViews];
+    }
 }
 
 #pragma mark ====== Action methods ======
@@ -667,22 +664,24 @@
 		MDTimeType maxTime;
 		currentTime = MDPlayerGetTime(player);
 		if (timer != nil) {
-	/*	if (status == kMDPlayer_playing) { */
 			[timer invalidate];
 			[timer autorelease];
             timer = nil;
 		}
-        if (isRecording) {
-			if (isAudioRecording)
-				[myDocument finishAudioRecording];
-			else
-				[myDocument finishRecording];
-			isRecording = NO;
-			isAudioRecording = NO;
-			[recordButton setState:NSOnState];
-		}
-		MDPlayerStop(player);
-	/*	MDPlayerRefreshTrackDestinations(player);  *//*  Refresh internal track list  */
+        MDPlayerStop(player);
+        
+        //  Finish recording
+        //  MIDI recording may have finished before (see timerCallback:), so
+        //  we need to check the presence of [myMIDISequence recordTrack]
+        if ([[myDocument myMIDISequence] recordTrack] != NULL) {
+            [myDocument finishRecording];
+        } else if (isRecording && isAudioRecording) {
+            [myDocument finishAudioRecording];
+        }
+        isRecording = NO;
+        isAudioRecording = NO;
+        [recordButton setState:NSOnState];
+
 		/*  Limit currentTime by sequence duration  */
 		maxTime = MDCalibratorTickToTime(calibrator, MDSequenceGetDuration([[myDocument myMIDISequence] mySequence]));
 		if (currentTime > maxTime)
@@ -690,11 +689,9 @@
 	}
 	status = kMDPlayer_ready;
 	[self refreshTimeDisplay];
-//	[doc postPlayPositionNotification];
 	[playButton setState:NSOffState];
 	[pauseButton setState:NSOffState];
 	[recordButton setState:NSOffState];
-//	[doc postStopPlayingNotification];
 }
 
 - (IBAction)selectMarker:(id)sender

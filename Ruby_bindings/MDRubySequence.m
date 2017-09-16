@@ -487,6 +487,106 @@ MRSequence_Current(VALUE self)
 	return MRSequenceFromMyDocument([docs objectAtIndex: 0]);
 }
 
+/*  For DEBUG  */
+VALUE
+s_MRSequence_Merger(int argc, VALUE *argv, VALUE self)
+{
+    int i;
+    MyDocument *doc = MyDocumentFromMRSequenceValue(self);
+    MyMIDISequence *seq = [doc myMIDISequence];
+    MDTrackMerger *merger = MDTrackMergerNew();
+    MDTrack *track;
+    int numEvents = 0;
+    MDEvent **ebuf, *ep;
+    char buf[256];
+    FILE *fp;
+    int *ibuf;
+    for (i = 0; i < argc; i++) {
+        int n = NUM2INT(argv[i]);
+        track = [seq getTrackAtIndex:n];
+        if (track != NULL) {
+            MDTrackMergerAddTrack(merger, track);
+            numEvents += MDTrackGetNumberOfEvents(track);
+        }
+    }
+    ebuf = (MDEvent **)calloc(sizeof(MDEvent *), numEvents);
+    ibuf = (int *)calloc(sizeof(int), numEvents);
+    if (ebuf == NULL || ibuf == NULL) {
+        fprintf(stderr, "out of memory\n");
+        return Qnil;
+    }
+    ep = MDTrackMergerCurrent(merger, &track);
+    fp = fopen([[@"~/merger_test.txt" stringByExpandingTildeInPath] UTF8String], "w");
+    if (fp == NULL) {
+        fprintf(stderr, "Cannot open merger_test.txt\n");
+        return Qnil;
+    }
+    for (i = 0; i < numEvents && ep != NULL; i++) {
+        int trno = [seq lookUpTrack:track];
+        ebuf[i] = ep;
+        ibuf[i] = trno;
+        MDEventToString(ep, buf, sizeof(buf));
+        fprintf(fp, "%d:%s\n", trno, buf);
+        ep = MDTrackMergerForward(merger, &track);
+    }
+    fclose(fp);
+    free(ebuf);
+    free(ibuf);
+    return INT2NUM(numEvents);
+}
+
+VALUE
+s_MRSequence_BackMerger(int argc, VALUE *argv, VALUE self)
+{
+    int i;
+    MyDocument *doc = MyDocumentFromMRSequenceValue(self);
+    MyMIDISequence *seq = [doc myMIDISequence];
+    MDTrackMerger *merger = MDTrackMergerNew();
+    MDTrack *track;
+    int numEvents = 0;
+    MDEvent **ebuf, *ep;
+    char buf[256];
+    FILE *fp;
+    int *ibuf;
+    for (i = 0; i < argc; i++) {
+        int n = NUM2INT(argv[i]);
+        track = [seq getTrackAtIndex:n];
+        if (track != NULL) {
+            MDTrackMergerAddTrack(merger, track);
+            numEvents += MDTrackGetNumberOfEvents(track);
+        }
+    }
+    ebuf = (MDEvent **)calloc(sizeof(MDEvent *), numEvents);
+    ibuf = (int *)calloc(sizeof(int), numEvents);
+    if (ebuf == NULL || ibuf == NULL) {
+        fprintf(stderr, "out of memory\n");
+        return Qnil;
+    }
+    MDTrackMergerJumpToTick(merger, kMDMaxTick, NULL);
+    fp = fopen([[@"~/backmerger_test.txt" stringByExpandingTildeInPath] UTF8String], "w");
+    if (fp == NULL) {
+        fprintf(stderr, "Cannot open backmerger_test.txt\n");
+        return Qnil;
+    }
+    for (i = numEvents - 1; i >= 0; i--) {
+        int trno;
+        ep = MDTrackMergerBackward(merger, &track);
+        if (ep == NULL)
+            break;
+        trno = [seq lookUpTrack:track];
+        ebuf[i] = ep;
+        ibuf[i] = trno;
+    }
+    for (i = 0; i < numEvents; i++) {
+        MDEventToString(ebuf[i], buf, sizeof(buf));
+        fprintf(fp, "%d:%s\n", ibuf[i], buf);
+    }
+    fclose(fp);
+    free(ebuf);
+    free(ibuf);
+    return INT2NUM(numEvents);
+}
+
 #if 0
  static id
 s_ObjCFromValue(VALUE val)
@@ -767,6 +867,10 @@ MRSequenceInitClass(void)
 	rb_define_method(rb_cMRSequence, "path", s_MRSequence_Path, 0);
 	rb_define_method(rb_cMRSequence, "dir", s_MRSequence_Dir, 0);
 	
+    /*  for DEBUG  */
+    rb_define_method(rb_cMRSequence, "merger", s_MRSequence_Merger, -1);
+    rb_define_method(rb_cMRSequence, "backmerger", s_MRSequence_BackMerger, -1);
+
 /*    rb_define_method(rb_cMRSequence, "pointer", s_MRSequence_Pointer, 1); */
     rb_define_singleton_method(rb_cMRSequence, "current", MRSequence_Current, 0);
 

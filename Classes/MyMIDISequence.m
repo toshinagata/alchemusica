@@ -408,10 +408,10 @@ MyRecordingInfoFileExtensionForFormat(int format)
 	tick = (MDTickType)[[recordingInfo valueForKey: MyRecordingInfoStartTickKey] doubleValue];
 	if (tick >= 0 && tick < kMDMaxTick)
 		MDPlayerJumpToTick(myPlayer, tick);
-/*	if ([[recordingInfo valueForKey: MyRecordingInfoStopFlagKey] boolValue]) {
+	if ([[recordingInfo valueForKey: MyRecordingInfoStopFlagKey] boolValue]) {
 		tick = (MDTickType)[[recordingInfo valueForKey: MyRecordingInfoStopTickKey] doubleValue];
-		MDPlayerScheduleStopTick(myPlayer, tick);
-	} */
+		MDPlayerSetRecordingStopTick(myPlayer, tick);
+	}
     MDPlayerStartRecording(myPlayer);
     return kMDNoError;
 }
@@ -498,7 +498,8 @@ MyRecordingInfoFileExtensionForFormat(int format)
 //	NSString *sourceAudioDevice;
 //	MDAudioDeviceID deviceID;
 //	MDAudioDeviceInfo *infop;
-	MDTickType tick;
+    MDTickType tick, stopTick;
+    UInt64 duration;
 	MDStatus result;
 //	MDAudio *myAudio;
 	MDAudioFormat audioFormat;
@@ -540,17 +541,23 @@ MyRecordingInfoFileExtensionForFormat(int format)
 	audioFormat.mBytesPerPacket = audioFormat.mBytesPerFrame * audioFormat.mFramesPerPacket;
 	audioFormat.mReserved = 0;
 //	MDAudioFormatSetCanonical(&audioFormat, 44100, 2, YES);
-	result = MDAudioPrepareRecording([filename fileSystemRepresentation], &audioFormat, mdAudioFileFormat);
-	if (result != kMDNoError)
-		return result;
 	
 /*	#error "Maybe need to set up audio thru device here" */
 
-/*	if ([[recordingInfo valueForKey: MyRecordingInfoStopFlagKey] boolValue]) {
-		tick = (MDTickType)[[recordingInfo valueForKey: MyRecordingInfoStopTickKey] doubleValue];
-		MDPlayerScheduleStopTick(myPlayer, tick);
-	} */
+    duration = 0;
+	if ([[recordingInfo valueForKey: MyRecordingInfoStopFlagKey] boolValue]) {
+        MDTimeType durationTime;
+		stopTick = (MDTickType)[[recordingInfo valueForKey: MyRecordingInfoStopTickKey] doubleValue];
+		MDPlayerSetRecordingStopTick(myPlayer, stopTick);
+        durationTime = MDCalibratorTickToTime(calib, stopTick) - MDCalibratorTickToTime(calib, tick);
+        if (durationTime > 0)
+            duration = ConvertMDTimeTypeToHostTime(durationTime);
+	}
 	
+    result = MDAudioPrepareRecording([filename fileSystemRepresentation], &audioFormat, mdAudioFileFormat, duration);
+    if (result != kMDNoError)
+        return result;
+
     MDPlayerStart(myPlayer);
 	MDAudioStartRecording();
 

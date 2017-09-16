@@ -59,7 +59,9 @@ struct MDAudio {
 	/*  Recording to file  */
 	ExtAudioFileRef audioFile;
 	int isRecording;
-	
+    UInt64 recordingStartTime;
+    UInt64 recordingDuration;
+    
 	/*  Play thru  */
 /*	MDAudioDeviceInfo inputDeviceInfoCache, outputDeviceInfoCache;
 	MDSampleTime firstInputTime, firstOutputTime, inToOutSampleOffset; */
@@ -244,11 +246,15 @@ sMDAudioRecordProc(void* inRefCon, AudioUnitRenderActionFlags* ioActionFlags, co
 	
 	/*  Write to file  */
 	if (gAudio->isRecording) {
-		err = ExtAudioFileWriteAsync(gAudio->audioFile, inNumberFrames, ioData);
-		if (err != noErr) {
-			dprintf(0, "ExtAudioFileWrite() failed with error %d in sMDAudioRecordProc\n", (int)err);
-			return err;
-		}
+        if (gAudio->recordingStartTime == 0)
+            gAudio->recordingStartTime = inTimeStamp->mHostTime;
+        if (gAudio->recordingDuration == 0 || inTimeStamp->mHostTime < gAudio->recordingStartTime + gAudio->recordingDuration) {
+            err = ExtAudioFileWriteAsync(gAudio->audioFile, inNumberFrames, ioData);
+            if (err != noErr) {
+                dprintf(0, "ExtAudioFileWrite() failed with error %d in sMDAudioRecordProc\n", (int)err);
+                return err;
+            }
+        }
 	}
 
 	if (err != noErr) {
@@ -318,6 +324,7 @@ sMDAudioSendMIDIProc(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, 
                     tempBuffer[i] = ip->midiBuffer[(readPos + 9 + i) % kMDAudioMaxMIDIBytesToSendPerDevice];
                 }
                 MusicDeviceSysEx(ip->unit, tempBuffer, len);
+           /*     printf("sysex %d\n", len); */
                 readPos += 9 + len;
             }
         } else {
@@ -330,13 +337,45 @@ sMDAudioSendMIDIProc(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, 
                 }
             }
             MusicDeviceMIDIEvent(ip->unit, c, c2, c3, offset);
-        //    printf("%08x %02x %02x %02x %d\n", (UInt32)ip->unit, c, c2, c3, offset);
+        /*    printf("%08x %02x %02x %02x %d\n", (UInt32)ip->unit, c, c2, c3, offset); */
             readPos += 9 + len;
             numChannelEvents++;
         }
     }
     ip->midiBufferReadOffset = readPos % kMDAudioMaxMIDIBytesToSendPerDevice;
     return noErr;
+}
+
+int
+MDAudioScheduleMIDIToStream(MDAudioIOStreamInfo *ip, UInt64 timeStamp, int length, unsigned char *midiData, int isSysEx)
+{
+    int readOffset = ip->midiBufferReadOffset;
+    int writeOffset = ip->midiBufferWriteOffset;
+    int spaceSize = (readOffset + kMDAudioMaxMIDIBytesToSendPerDevice - 1 - writeOffset) % kMDAudioMaxMIDIBytesToSendPerDevice + 1;
+    int i, length2;
+    if (isSysEx) {
+        /*  Schedule sysex  */
+        if (ip->sysexData != NULL)
+            return 1;  /*  Sysex is waiting: cannot schedule until this is done  */
+        ip->sysexLength = length;
+        ip->sysexData = midiData;
+        return 0;
+    }
+    length2 = length + sizeof(timeStamp) + 1;
+    if (spaceSize <= length2)
+        return 1;  /*  Buffer overflow  */
+    for (i = 0; i < length2; i++) {
+        unsigned char c;
+        if (i < sizeof(timeStamp))
+            c = (timeStamp >> (i * 8)) & 0xff;
+        else if (i == sizeof(timeStamp))
+            c = length & 0xff;  /*  Should be length <= 255  */
+        else
+            c = midiData[i - sizeof(timeStamp) - 1];
+        ip->midiBuffer[(writeOffset + i) % kMDAudioMaxMIDIBytesToSendPerDevice] = c;
+    }
+    ip->midiBufferWriteOffset = (writeOffset + length2) % kMDAudioMaxMIDIBytesToSendPerDevice;
+    return 0;
 }
 
 #pragma mark ====== Device information ======
@@ -1444,7 +1483,7 @@ exit:
 #pragma mark ====== Audio Recording ======
 
 MDStatus
-MDAudioPrepareRecording(const char *filename, const MDAudioFormat *format, int audioFileType)
+MDAudioPrepareRecording(const char *filename, const MDAudioFormat *format, int audioFileType, UInt64 recordingDuration)
 {
 	OSStatus err;
 /*	FSRef parentDir; */
@@ -1513,6 +1552,8 @@ MDAudioPrepareRecording(const char *filename, const MDAudioFormat *format, int a
 	if (err != noErr)
 		return kMDErrorCannotSetupAudio;
 
+    gAudio->recordingDuration = recordingDuration;
+
 	return kMDNoError;
 }
 
@@ -1524,6 +1565,7 @@ MDAudioStartRecording(void)
 		return kMDErrorCannotSetupAudio;
 /*	if (sts != kMDNoError)
 		return sts; */
+    gAudio->recordingStartTime = 0;  /*  Set at the first call to the recording callback  */
 	gAudio->isRecording = 1;
 	return kMDNoError;
 }

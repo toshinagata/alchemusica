@@ -120,6 +120,7 @@ int         MDAudioMusicDeviceCountInfo(void);
 MDAudioMusicDeviceInfo *MDAudioMusicDeviceInfoAtIndex(int idx);
 MDAudioMusicDeviceInfo *MDAudioMusicDeviceInfoForCode(UInt64 code, int *outIndex);
 MDAudioIOStreamInfo *MDAudioGetIOStreamInfoAtIndex(int idx);
+int MDAudioScheduleMIDIToStream(MDAudioIOStreamInfo *ip, UInt64 timeStamp, int length, unsigned char *midiData, int isSysEx);
 
 /*  idx: 0-(kMDAudioNumberOfInputStreams-1)...input, kMDAudioFirstIndexForOutputStream...output */
 /*  deviceIndex: -1: none, 0-999: {input|output}DeviceInfos, 1000-: musicDeviceInfos  */
@@ -134,7 +135,7 @@ MDStatus	MDAudioStopInput(void); */
 /*MDStatus	MDAudioEnablePlayThru(int flag);
 int			MDAudioIsPlayThruEnabled(void); */
 
-MDStatus	MDAudioPrepareRecording(const char *filename, const MDAudioFormat *format, int audioFileType);
+MDStatus	MDAudioPrepareRecording(const char *filename, const MDAudioFormat *format, int audioFileType, UInt64 recordingDuration);
 MDStatus	MDAudioStartRecording(void);
 MDStatus	MDAudioStopRecording(void);
 int         MDAudioIsRecording(void);

@@ -46,6 +46,12 @@ enum {
 	kMDPlayer_exhausted
 };
 
+//#define GetHostTimeInMDTimeType()	((MDTimeType)((AudioConvertHostTimeToNanos(AudioGetCurrentHostTime()) / 1000)))
+#define ConvertMDTimeTypeToHostTime(tm)	AudioConvertNanosToHostTime((UInt64)(tm) * 1000)
+#define ConvertHostTimeToMDTimeType(tm) ((MDTimeType)(AudioConvertHostTimeToNanos(tm) / 1000))
+#define GetHostTimeInMDTimeType() ConvertHostTimeToMDTimeType(AudioGetCurrentHostTime())
+
+
 /* -------------------------------------------------------------------
     MDPlayer functions
    -------------------------------------------------------------------  */
@@ -61,11 +67,11 @@ MDStatus	MDPlayerRefreshTrackDestinations(MDPlayer *inPlayer);
 MDStatus	MDPlayerJumpToTick(MDPlayer *inPlayer, MDTickType inTick);
 MDStatus	MDPlayerPreroll(MDPlayer *inPlayer, MDTickType inTick, int backtrack);
 MDStatus	MDPlayerStart(MDPlayer *inPlayer);
-MDStatus	MDPlayerStartRecording(MDPlayer *inPlayer);
 MDStatus	MDPlayerStop(MDPlayer *inPlayer);
-MDStatus    MDPlayerScheduleStopTick(MDPlayer *inPlayer, MDTickType inStopTick);
-MDStatus    MDPlayerStopRecording(MDPlayer *inPlayer);
 MDStatus	MDPlayerSuspend(MDPlayer *inPlayer);
+MDStatus	MDPlayerStartRecording(MDPlayer *inPlayer);
+MDStatus    MDPlayerSetRecordingStopTick(MDPlayer *inPlayer, MDTickType inTick);
+MDStatus    MDPlayerStopRecording(MDPlayer *inPlayer);
 
 MDPlayerStatus	MDPlayerGetStatus(MDPlayer *inPlayer);
 int			MDPlayerIsRecording(MDPlayer *inPlayer);
@@ -75,7 +81,7 @@ MDTimeType	MDPlayerGetTime(MDPlayer *inPlayer);
 MDTickType	MDPlayerGetTick(MDPlayer *inPlayer);
 
 void		MDPlayerSetMIDIThruDeviceAndChannel(long dev, int ch);
-MDStatus	MDPlayerBacktrackEvents(MDPlayer *inPlayer, const long *inEventType, const long *inEventTypeLastOnly);
+MDStatus	MDPlayerBacktrackEvents(MDPlayer *inPlayer, MDTickType inTick, const long *inEventType, const long *inEventTypeLastOnly);
 int			MDPlayerSendRawMIDI(MDPlayer *player, const unsigned char *p, int size, int destDevice, MDTimeType scheduledTime);
 void		MDPlayerRingMetronomeClick(MDPlayer *inPlayer, MDTimeType atTime, int isPrincipal);
 
@@ -88,8 +94,8 @@ long		MDPlayerGetDestinationNumberFromUniqueID(long uniqueID);
 long		MDPlayerGetNumberOfSources(void);
 MDStatus	MDPlayerGetSourceName(long dev, char *name, long sizeof_name);
 long		MDPlayerGetSourceNumberFromName(const char *name);
-long		MDPlayerGetSourceUniqueID(long dev);
-long		MDPlayerGetSourceNumberFromUniqueID(long uniqueID);
+//long		MDPlayerGetSourceUniqueID(long dev);
+//long		MDPlayerGetSourceNumberFromUniqueID(long uniqueID);
 long        MDPlayerAddDestinationName(const char *name);
 long        MDPlayerAddSourceName(const char *name);
 

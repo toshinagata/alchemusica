@@ -75,6 +75,13 @@ struct MDPointer {
 	char			autoAdjust;	/*  True if autoadjust is done after insert/delete (default is false)  */
 };
 
+struct MDTrackMerger {
+    long            refCount;   /*  the reference count  */
+    MDPointer **    pointers;   /*  array of MDPointers  */
+    int             npointers;  /*  number of MDPointers in pointers[]  */
+    int             idx;        /*  the index of the 'current' track  */
+};
+
 #ifdef __MWERKS__
 #pragma mark -
 #pragma mark ======   MDTrack functions  ======
@@ -2667,4 +2674,230 @@ MDPointerCheck(const MDPointer *inPointer)
 		}
 	}
 	return (err > 0 ? kMDErrorInternalError : kMDNoError);
+}
+
+#if 0
+#pragma mark ====== MDTrackMerger functions ======
+#endif
+
+/* --------------------------------------
+	･ MDTrackMergerNew
+ -------------------------------------- */
+MDTrackMerger *
+MDTrackMergerNew(void)
+{
+    MDTrackMerger *merger = (MDTrackMerger *)malloc(sizeof(MDTrackMerger));
+    if (merger == NULL)
+        return NULL;	/*  out of memory  */
+    memset(merger, 0, sizeof(MDTrackMerger));
+    merger->refCount = 1;
+    return merger;
+}
+
+/* --------------------------------------
+	･ MDTrackMergerRetain
+ -------------------------------------- */
+void
+MDTrackMergerRetain(MDTrackMerger *inMerger)
+{
+    if (inMerger == NULL)
+        return;
+    inMerger->refCount++;
+}
+
+/* --------------------------------------
+	･ MDTrackMergerRelease
+ -------------------------------------- */
+void
+MDTrackMergerRelease(MDTrackMerger *inMerger)
+{
+    if (inMerger == NULL)
+        return;
+    if (--(inMerger->refCount) == 0) {
+        /*  Deallocate  */
+        int i;
+        if (inMerger->npointers > 0) {
+            for (i = 0; i < inMerger->npointers; i++) {
+                MDPointerRelease(inMerger->pointers[i]);
+            }
+            free(inMerger->pointers);
+        }
+        free(inMerger);
+    }
+}
+
+/* --------------------------------------
+	･ MDTrackMergerAddTrack
+ -------------------------------------- */
+int
+MDTrackMergerAddTrack(MDTrackMerger *inMerger, MDTrack *inTrack)
+{
+    MDPointer *pt;
+    if (inMerger == NULL)
+        return -1;
+    if (inMerger->npointers % 8 == 0) {
+        /*  Expand the storage  */
+        MDPointer **pointers;
+        if (inMerger->npointers == 0)
+            pointers = (MDPointer **)malloc(sizeof(MDPointer *) * 8);
+        else
+            pointers = (MDPointer **)realloc(inMerger->pointers, sizeof(MDPointer *) * (inMerger->npointers + 8));
+        if (pointers == NULL)
+            return -1;
+        memset(pointers + inMerger->npointers, 0, 8 * sizeof(MDPointer *));
+        inMerger->pointers = pointers;
+    }
+    pt = MDPointerNew(inTrack);
+    if (pt == NULL)
+        return -1;
+    MDPointerSetPosition(pt, 0);
+    inMerger->pointers[inMerger->npointers++] = pt;
+    return inMerger->npointers;
+}
+
+/* --------------------------------------
+	･ MDTrackMergerRemoveTrack
+ -------------------------------------- */
+int
+MDTrackMergerRemoveTrack(MDTrackMerger *inMerger, MDTrack *inTrack)
+{
+    int i;
+    if (inMerger == NULL)
+        return -1;
+    for (i = inMerger->npointers - 1; i >= 0; i--) {
+        if (MDPointerGetTrack(inMerger->pointers[i]) == inTrack) {
+            /*  Remove this track  */
+            MDPointerRelease(inMerger->pointers[i]);
+            memmove(inMerger->pointers + i, inMerger->pointers + (i + 1), sizeof(MDPointer *) * (inMerger->npointers - (i + 1)));
+            inMerger->npointers--;
+            if (inMerger->npointers > 0 && inMerger->idx >= inMerger->npointers)
+                inMerger->idx--;
+            return inMerger->npointers;
+        }
+    }
+    /*  Not found  */
+    return -1;
+}
+
+/* --------------------------------------
+	･ MDTrackMergerGetTrack
+ -------------------------------------- */
+MDTrack *
+MDTrackMergerGetTrack(MDTrackMerger *inMerger, int num)
+{
+    if (inMerger == NULL || num < 0 || num >= inMerger->npointers)
+        return NULL;
+    return MDPointerGetTrack(inMerger->pointers[num]);
+}
+
+/* --------------------------------------
+	･ MDTrackMergerJumpToTick
+ -------------------------------------- */
+MDEvent *
+MDTrackMergerJumpToTick(MDTrackMerger *inMerger, MDTickType inTick, MDTrack **outTrack)
+{
+    int i, n, idx;
+    MDEvent *ep;
+    MDTrack *tr;
+    if (inMerger == NULL)
+        return NULL;
+    ep = NULL;
+    tr = NULL;
+    n = idx = inMerger->idx;
+    for (i = 0; i < inMerger->npointers; i++) {
+        MDPointer *pt = inMerger->pointers[n];
+        if (MDPointerJumpToTick(pt, inTick)) {
+            MDEvent *ep1 = MDPointerCurrent(pt);
+            if (ep == NULL || MDGetTick(ep) > MDGetTick(ep1)) {
+                ep = ep1;
+                tr = MDPointerGetTrack(pt);
+                idx = n;
+            }
+        }
+        if (++n == inMerger->npointers)
+            n = 0;
+    }
+    inMerger->idx = idx;
+    if (outTrack != NULL)
+        *outTrack = tr;
+    return ep;
+}
+
+/* --------------------------------------
+	･ MDTrackMergerCurrent
+ -------------------------------------- */
+MDEvent *
+MDTrackMergerCurrent(MDTrackMerger *inMerger, MDTrack **outTrack)
+{
+    int i, idx;
+    MDEvent *ep;
+    MDTrack *tr;
+    if (inMerger == NULL)
+        return NULL;
+    ep = NULL;
+    tr = NULL;
+    idx = inMerger->idx;
+    for (i = 0; i < inMerger->npointers; i++) {
+        MDPointer *pt = inMerger->pointers[i];
+        MDEvent *ep1 = MDPointerCurrent(pt);
+        if (ep1 != NULL) {
+            if (ep == NULL || MDGetTick(ep) > MDGetTick(ep1)) {
+                ep = ep1;
+                tr = MDPointerGetTrack(pt);
+                idx = i;
+            }
+        }
+    }
+    inMerger->idx = idx;
+    if (outTrack != NULL)
+        *outTrack = tr;
+    return ep;
+}
+
+/* --------------------------------------
+	･ MDTrackMergerForward
+ -------------------------------------- */
+MDEvent *
+MDTrackMergerForward(MDTrackMerger *inMerger, MDTrack **outTrack)
+{
+    if (inMerger != NULL && inMerger->npointers > 0 && inMerger->idx < inMerger->npointers) {
+        MDPointerForward(inMerger->pointers[inMerger->idx]);
+        return MDTrackMergerCurrent(inMerger, outTrack);
+    }
+    return NULL;
+}
+
+/* --------------------------------------
+	･ MDTrackMergerBackward
+ -------------------------------------- */
+MDEvent *
+MDTrackMergerBackward(MDTrackMerger *inMerger, MDTrack **outTrack)
+{
+    int i, idx;
+    MDEvent *ep;
+    MDTrack *tr;
+    if (inMerger == NULL || inMerger->npointers <= 0 || inMerger->idx >= inMerger->npointers)
+        return NULL;
+    ep = NULL;
+    tr = NULL;
+    idx = inMerger->idx;
+    for (i = inMerger->npointers - 1; i >= 0; i--) {
+        MDPointer *pt = inMerger->pointers[i];
+        MDEvent *ep1;
+        if (inMerger->idx == i || MDPointerGetPosition(pt) >= MDTrackGetNumberOfEvents(MDPointerGetTrack(pt))) {
+            MDPointerBackward(pt);
+        }
+        ep1 = MDPointerCurrent(pt);
+        if (ep1 != NULL) {
+            if (ep == NULL || MDGetTick(ep) < MDGetTick(ep1)) {
+                ep = ep1;
+                tr = MDPointerGetTrack(pt);
+                idx = i;
+            }
+        }
+    }
+    inMerger->idx = idx;
+    if (outTrack != NULL)
+        *outTrack = tr;
+    return ep;
 }

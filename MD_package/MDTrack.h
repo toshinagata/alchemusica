@@ -27,6 +27,10 @@ typedef struct MDTrack			MDTrack;
     （ただし、フィールドにアクセスすることはできない） */
 typedef struct MDPointer			MDPointer;
 
+/*  シーケンス中の全トラック中の全イベントをティック順に取り出すための仕掛け。 */
+/*  MDSequence.h の MDMerger と違って、MDSequence には依存しない。 */
+typedef struct MDTrackMerger		MDTrackMerger;
+
 typedef unsigned char MDTrackAttribute;
 enum {
     kMDTrackAttributeRecord = 1,
@@ -282,6 +286,42 @@ MDStatus		MDPointerSetDuration(MDPointer *inPointer, MDTickType inDuration);
 
 /*  Sanity check  */
 MDStatus		MDPointerCheck(const MDPointer *inPointer);
+
+/*  新しい MDTrackMerger をアロケートする。メモリ不足の場合は NULL を返す。 */
+MDTrackMerger *	MDTrackMergerNew(void);
+
+/*  Retain/release  */
+void			MDTrackMergerRetain(MDTrackMerger *inMerger);
+void			MDTrackMergerRelease(MDTrackMerger *inMerger);
+
+/*  MDTrack を登録する。成功すれば現在のトラック数、失敗すれば -1 を返す。  */
+int             MDTrackMergerAddTrack(MDTrackMerger *inMerger, MDTrack *inTrack);
+
+/*  MDTrack の登録をやめる。現在のトラック数を返す。inTrack が登録されていなければ -1 を返す。  */
+int             MDTrackMergerRemoveTrack(MDTrackMerger *inMerger, MDTrack *inTrack);
+
+/*  num 番目のトラックを返す。存在しなければ NULL を返す。 */
+MDTrack *       MDTrackMergerGetTrack(MDTrackMerger *inMerger, int num);
+    
+/*  inTick より小さくない tick 値を持つ最初のイベントの位置に移動し、そのイベントへの
+ ポインタを返す。そのようなイベントが存在しなければ末尾以降に移動し、NULL を返す。 */
+/*  outTrack が NULL でなければ、現在のイベントが属するトラックを返す。  */
+MDEvent *       MDTrackMergerJumpToTick(MDTrackMerger *inMerger, MDTickType inTick, MDTrack **outTrack);
+
+/*  現在のイベントへのポインタを得る。存在しないイベントを指している場合は NULL を返す。 */
+/*  outTrack が NULL でなければ、現在のイベントが属するトラックを返す。  */
+/* （呼ばれるたびにすべてのトラックの tick を比較するので注意）  */
+MDEvent *		MDTrackMergerCurrent(MDTrackMerger *inMerger, MDTrack **outTrack);
+
+/*  １つ先の位置に進み、そのイベントへのポインタを得る。最後のイベントを越えた場合は
+ NULL を返す。 */
+/*  outTrack が NULL でなければ、現在のイベントが属するトラックを返す。  */
+MDEvent *		MDTrackMergerForward(MDTrackMerger *inMerger, MDTrack **outTrack);
+
+/*  １つ前の位置に戻り、そのイベントへのポインタを得る。先頭のイベントを越えた場合は
+ NULL を返す。 */
+/*  outTrack が NULL でなければ、現在のイベントが属するトラックを返す。  */
+MDEvent *		MDTrackMergerBackward(MDTrackMerger *inMerger, MDTrack **outTrack);
 
 #ifdef __cplusplus
 }

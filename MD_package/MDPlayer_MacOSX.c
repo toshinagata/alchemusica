@@ -46,13 +46,20 @@ typedef struct MyTMTask {
 
 #define kInvalidUniqueID 0
 
+typedef struct MDMIDIDeviceRecord {
+    MIDIEndpointRef eref;               /*  CoreMIDI endpoint  */
+    MIDISysexSendRequest sysexRequest;  /*  Sysex send request  */
+    MIDIPacketList	packetList;         /*  MIDI packet list  */
+} MDMIDIDeviceRecord;
+
 typedef struct MDDeviceIDRecord {
 	char *      name;
 	
 	/*  OS-specific fields for identification of devices  */
-    /*  Only one of uniqueID or comp is valid  */
-	int         uniqueID;       /*  CoreMIDI device  */
+    /*  Only one of uniqueID or streamIndex is valid  */
     int         streamIndex;    /*  MDAudioIOStream index (= bus index of Audio setup)  */
+	int         uniqueID;       /*  CoreMIDI device  */
+    MDMIDIDeviceRecord *midiRec;  /*  CoreMIDI device record (malloc'ed)  */
 } MDDeviceIDRecord;
 
 typedef struct MDDeviceInfo {
@@ -63,32 +70,34 @@ typedef struct MDDeviceInfo {
 	MDDeviceIDRecord *source;	/*  The names of sources  */
 } MDDeviceInfo;
 
+static MDDeviceInfo sDeviceInfo = { 0, 0, NULL, 0, NULL };
+
 /*  Information for MIDI output  */
 typedef struct MDDestinationInfo {
 	long	refCount;
-	long	dev;
+	long	dev;                /*  Index to sDeviceInfo.dest[]  */
 
 	/*  CoreMIDI (Mac OS X) specfic fields  */
 	long	bytesToSend;
     int numEvents;
-	MIDIEndpointRef	eref;         /*  MIDI device  */
-    MusicDeviceComponent comp;    /*  MusicDevice  */
-    int streamIndex;              /*  Index of MDAudioIOStreamInfo (same as MDDeviceIDRecord.streamIndex) */
+//	MIDIEndpointRef	eref;         /*  MIDI device  */
+//    MusicDeviceComponent comp;    /*  MusicDevice  */
+//    int streamIndex;              /*  Index of MDAudioIOStreamInfo (same as MDDeviceIDRecord.streamIndex) */
     MIDIPacketList	packetList;
 	MIDIPacket *	packetPtr;
 	MDTimeType		timeOfLastEvent;
 	MIDISysexSendRequest	sysexRequest;
-	char			sysexTransmitting;		/* non-zero if sysexRequest is being processed */
+	unsigned char	sysexTransmitting;		/* non-zero if sysexRequest is being processed */
+
+    MDTrackMerger * merger;
+    MDEvent *       currentEp;
+    MDTrack *       currentTrack;
+    MDTickType      currentTick;
+    MDTrack *		noteOff;		/*  Keep the 'internal' note off  */
+    MDPointer *		noteOffPtr;
+    MDTickType		noteOffTick;
 
 } MDDestinationInfo;
-
-/*
-static MDDestinationInfo *MDPlayerNewDestinationInfo(long dev);
-static void	MDPlayerInitDestinationInfo(long dev, MDDestinationInfo *outInfo);
-static void MDPlayerReleaseDestinationInfo(MDDestinationInfo *info);
-*/
-
-static MDDeviceInfo sDeviceInfo = { 0, 0, NULL, 0, NULL };
 
 #define MIDIObjectNull ((MIDIObjectRef)0)
 
@@ -116,39 +125,32 @@ typedef struct MDRecordingEventHeader {
 
 struct MDPlayer {
 	long			refCount;
-	MDMerger *		merger;
+    MDSequence *    sequence;
 	MDCalibrator *	calib;		/*  for tick <-> time conversion  */
 	MDTimeType		time;		/*  the last time when interrupt fired  */
 	MDTimeType		startTime;	/*  In microseconds  */
-	MDTickType      stopTick;
 	MDTickType		lastTick;	/*  tick of the last event already sent  */
 	MDPlayerStatus	status;
-	int				trackNum;   /*  Number of tracks when this MDPlayer is initialized  */
-								/*  (= size of destIndex[], destChannel[], trackAttr[] ) */
-	long			*destIndex;		/*  The index to destInfo[] for each track  */
+    unsigned char   shouldTerminate; /*  Flag to request the playing thread to terminate */
+    
+    /*  Destination list  */
 	long			destNum;		/*  The number of destinations used in this player  */
 	MDDestinationInfo	**destInfo;	/*  Information for MIDI output  */
-    unsigned char	*destChannel;	/*  Output channel for each track (single-channel mode) */
-    MDTrackAttribute	*trackAttr;		/*  Track attributes for each track  */
 
-	MDTrack *		noteOff;		/*  Keep the note-off events for output  */
-	MDPointer *		noteOffPtr;
-	MDTickType		noteOffTick;
-
-	MDTickType		nextMetronomeBar;  /*  Tick to ring the metronome bell (top of bar)  */
+    /*  Metronome status  */
+    MDTickType		nextMetronomeBar;  /*  Tick to ring the metronome bell (top of bar)  */
 	MDTickType		nextMetronomeBeat; /*  Tick to ring the metronome click (each beat)  */
 	int             metronomeBar;      /*  Bar length  */
 	int             metronomeBeat;     /*  Beat length  */
 	MDTickType      nextTimeSignature; /*  Next time signature change for metronome  */
 
+    /*  Recording info  */
     unsigned char	isRecording;
-/*    unsigned char	isRefreshingInternalInfo;	*//*  Suspend MIDI output while updating destination information  */
-	unsigned char   shouldTerminate; /*  Flag to request the playing thread to terminate */
-
+    MDTickType      recordingStopTick;
+    
 	MDAudio *		audio;
 
     /*  Recording buffer  */
-/*    MDRecordingBuffer *firstBuffer;  */
     MDRecordingBuffer *topBuffer;
     long topPos;
     long topSize;
@@ -175,9 +177,14 @@ struct MDPlayer {
 };
 
 static MDPlayer *sRecordingPlayer = NULL;	/*  the MDPlayer that receives the incoming MIDI messages */
+
+/*  TODO: Don't use MIDI device directly. Use MDDestinationInfo instead.  */
+//static long sMIDIThruDevice = -1;
+//static MIDIEndpointRef sMIDIThruDeviceRef = MIDIObjectNull;
+
+//static MDDestinationInfo *sMIDIThruDestination = NULL;
 static long sMIDIThruDevice = -1;
-static MIDIEndpointRef sMIDIThruDeviceRef = MIDIObjectNull;
-static int sMIDIThruChannel = 0;  /*  0..15; if 16, then incoming channel number is kept */
+static int sMIDIThruChannel = 0; /*  0..15; if 16, then incoming channel number is kept */
 
 /*  Minimum interval of interrupts  */
 #define	kMDPlayerMinimumInterval	50000   /* 50 msec */
@@ -279,7 +286,7 @@ MDPlayerReloadDeviceInformationSub(MDDeviceIDRecord **src_dst_p, long *src_dst_N
 				break;
 		}
 		if (i >= 0 && i < *src_dst_Num_p) {
-			/*  If found, then update the name  */
+			/*  If found, then update the name and eref */
 			p = (*src_dst_p)[i].name;
 			if (p == NULL || strcmp(p, buf) != 0) {
 				if (p != NULL)
@@ -291,12 +298,21 @@ MDPlayerReloadDeviceInformationSub(MDDeviceIDRecord **src_dst_p, long *src_dst_N
 		} else {
 			/*  Look up by device name, and create a new entry if not found  */
 			i = (is_dst ? MDPlayerAddDestinationName(buf) : MDPlayerAddSourceName(buf));
-			/*  And update the uniqueID  */
-            if (i >= 0 && i < *src_dst_Num_p) {
-				(*src_dst_p)[i].uniqueID = uniqueID;
-            	(*src_dst_p)[i].streamIndex = -1;
+        }
+        /*  And update the uniqueID  */
+        if (i >= 0 && i < *src_dst_Num_p) {
+            MDDeviceIDRecord *dp = *src_dst_p + i;
+            if (dp->midiRec == NULL) {
+                dp->midiRec = (MDMIDIDeviceRecord *)calloc(sizeof(MDMIDIDeviceRecord), 1);
+                if (dp->midiRec == NULL)
+                    return;
+                /*  Raise sysex completion flag (to enable sysex sending)  */
+                dp->midiRec->sysexRequest.complete = 1;
             }
-		}
+            dp->uniqueID = uniqueID;
+            dp->streamIndex = -1;
+            dp->midiRec->eref = eref;
+        }
 	}
 
     /*  Handle MusicDevice  */
@@ -307,10 +323,18 @@ MDPlayerReloadDeviceInformationSub(MDDeviceIDRecord **src_dst_p, long *src_dst_N
             ip = MDAudioGetIOStreamInfoAtIndex(i);
             if (ip->midiControllerName == NULL)
                 continue;
-            j = MDPlayerAddDestinationName(ip->midiControllerName);
+            for (j = 0; j < *src_dst_Num_p; j++) {
+                p = (*src_dst_p)[j].name;
+                if (p == NULL || strcmp(p, ip->midiControllerName) == 0)
+                    break;
+            }
+            if (j >= *src_dst_Num_p) {
+                j = MDPlayerAddDestinationName(ip->midiControllerName);
+            }
             if (j >= 0 && j < *src_dst_Num_p) {
                 /*  Update the device info  */
                 (*src_dst_p)[j].uniqueID = kInvalidUniqueID;
+                (*src_dst_p)[j].midiRec = NULL;
                 (*src_dst_p)[j].streamIndex = i;
             }
         }
@@ -409,37 +433,6 @@ MDPlayerGetDestinationNumberFromName(const char *name)
     return -1;
 }
 
-#if 0
-/* --------------------------------------
-	･ MDPlayerGetDestinationUniqueID
-   -------------------------------------- */
-long
-MDPlayerGetDestinationUniqueID(long dev)
-{
-/*	if (!sDeviceInfo.initialized)
-		MDPlayerReloadDeviceInformation(); */
-	if (dev >= 0 && dev < sDeviceInfo.destNum) {
-		return sDeviceInfo.dest[dev].uniqueID;
-	} else return -1;
-}
-
-/* --------------------------------------
-	･ MDPlayerGetDestinationNumberFromUniqueID
-   -------------------------------------- */
-long
-MDPlayerGetDestinationNumberFromUniqueID(long uniqueID)
-{
-    long dev;
-/*	if (!sDeviceInfo.initialized)
-		MDPlayerReloadDeviceInformation(); */
-    for (dev = 0; dev < sDeviceInfo.destNum; dev++) {
-        if (uniqueID == sDeviceInfo.dest[dev].uniqueID)
-            return dev;
-    }
-    return -1;
-}
-#endif
-
 /* --------------------------------------
 	･ MDPlayerGetNumberOfSources
    -------------------------------------- */
@@ -485,37 +478,6 @@ MDPlayerGetSourceNumberFromName(const char *name)
     return -1;
 }
 
-#if 0
-/* --------------------------------------
-	･ MDPlayerGetSourceUniqueID
-   -------------------------------------- */
-long
-MDPlayerGetSourceUniqueID(long dev)
-{
-/*	if (!sDeviceInfo.initialized)
-		MDPlayerReloadDeviceInformation(); */
-	if (dev >= 0 && dev < sDeviceInfo.sourceNum) {
-		return sDeviceInfo.source[dev].uniqueID;
-	} else return -1;
-}
-
-/* --------------------------------------
-	･ MDPlayerGetSourceNumberFromUniqueID
-   -------------------------------------- */
-long
-MDPlayerGetSourceNumberFromUniqueID(long uniqueID)
-{
-    long dev;
-/*	if (!sDeviceInfo.initialized)
-		MDPlayerReloadDeviceInformation(); */
-    for (dev = 0; dev < sDeviceInfo.sourceNum; dev++) {
-        if (uniqueID == sDeviceInfo.source[dev].uniqueID)
-            return dev;
-    }
-    return -1;
-}
-#endif
-
 /* --------------------------------------
 	･ MDPlayerAddDestinationName
    -------------------------------------- */
@@ -550,8 +512,6 @@ long
 MDPlayerAddSourceName(const char *name)
 {
 	long dev;
-/*	if (!sDeviceInfo.initialized)
-		MDPlayerReloadDeviceInformation(); */
 	dev = MDPlayerGetSourceNumberFromName(name);
 	if (dev < 0) {
 		/*  Expand the array  */
@@ -574,29 +534,12 @@ MDPlayerAddSourceName(const char *name)
 	･ MDPlayerInitDestinationInfo
    -------------------------------------- */
 static void
-MDPlayerInitDestinationInfo(long dev, MDDestinationInfo *info)
+MDPlayerInitDestinationInfo(MDDestinationInfo *info, long dev)
 {
-	/*  CoreMIDI (Mac OS X) specfic initialization  */
+    info->dev = dev;
 	info->bytesToSend = 0;
 	info->sysexTransmitting = 0;
 	info->packetPtr = MIDIPacketListInit(&info->packetList);
-	info->eref = MIDIObjectNull;
-	if (dev >= 0 && dev < sDeviceInfo.destNum) {
-		MIDIObjectType objType;
-		MIDIObjectRef eref;
-        if (sDeviceInfo.dest[dev].uniqueID != kInvalidUniqueID) {
-            if (MIDIObjectFindByUniqueID(sDeviceInfo.dest[dev].uniqueID, &eref, &objType) == noErr && objType == kMIDIObjectType_Destination) {
-                info->eref = eref;
-                info->comp = NULL;
-            }
-        } else {
-            int streamIndex = sDeviceInfo.dest[dev].streamIndex;
-            MDAudioIOStreamInfo *ip = MDAudioGetIOStreamInfoAtIndex(streamIndex);
-            info->eref = MIDIObjectNull;
-            info->comp = ip->unit;
-            info->streamIndex = streamIndex;
-        }
-	}
 }
 
 /* --------------------------------------
@@ -606,15 +549,12 @@ static MDDestinationInfo *
 MDPlayerNewDestinationInfo(long dev)
 {
 	MDDestinationInfo *info;
-/*	if (!sDeviceInfo.initialized)
-		MDPlayerReloadDeviceInformation(); */
 	info = (MDDestinationInfo *)malloc(sizeof(MDDestinationInfo));
 	if (info == NULL)
 		return NULL;
 	memset(info, 0, sizeof(MDDestinationInfo));
 	info->refCount = 1;
-    info->dev = dev;
-	MDPlayerInitDestinationInfo(dev, info);
+	MDPlayerInitDestinationInfo(info, dev);
 	return info;
 }
 
@@ -627,9 +567,12 @@ MDPlayerReleaseDestinationInfo(MDDestinationInfo *info)
 	if (info != NULL) {
 		info->refCount--;
 		if (info->refCount == 0) {
-			
-			/*  CoreMIDI (Mac OS X) specfic release protocol  */
-			
+            if (info->merger != NULL)
+                MDTrackMergerRelease(info->merger);
+            if (info->noteOffPtr != NULL)
+                MDPointerRelease(info->noteOffPtr);
+            if (info->noteOff != NULL)
+                MDTrackRelease(info->noteOff);
 			free(info);
 		}
 	}
@@ -640,11 +583,6 @@ MDPlayerReleaseDestinationInfo(MDDestinationInfo *info)
 #if DEBUG
 static FILE *sMIDIInputDump;
 #endif
-
-//#define GetHostTimeInMDTimeType()	((MDTimeType)((AudioConvertHostTimeToNanos(AudioGetCurrentHostTime()) / 1000)))
-#define ConvertMDTimeTypeToHostTime(tm)	AudioConvertNanosToHostTime((UInt64)(tm) * 1000)
-#define ConvertHostTimeToMDTimeType(tm) ((MDTimeType)(AudioConvertHostTimeToNanos(tm) / 1000))
-#define GetHostTimeInMDTimeType() ConvertHostTimeToMDTimeType(AudioGetCurrentHostTime())
 
 static void
 MDPlayerReleaseRecordingBuffer(MDPlayer *inPlayer)
@@ -741,18 +679,6 @@ MDPlayerPutRecordingData(MDPlayer *inPlayer, MDTimeType timeStamp, long size, co
     long topPos;
     long nsize, n;
 
-	#if DEBUG
-/*	if (0) {
-		if (sMIDIInputDump != NULL) {
-			int i;
-			fprintf(sMIDIInputDump, "%qd ", (long long)timeStamp);
-			for (i = 0; i < size; i++) {
-				fprintf(sMIDIInputDump, "%02x%c", buf[i], (i == size - 1 ? '\n' : ' '));
-			}
-		}
-	} */
-	#endif
-	
     if (inPlayer == NULL)
         return -1;
     if (inPlayer->topBuffer == NULL) {
@@ -908,6 +834,72 @@ MDPlayerGetRecordingData(MDPlayer *inPlayer, MDTimeType *outTimeStamp, long *out
     return 0;
 }
 
+#if 0
+static void
+MySysexCompletionProc(MIDISysexSendRequest *request)
+{
+    request->bytesToSend = 0;
+    *((unsigned char *)(request->completionRefCon)) = 0;
+}
+#endif
+
+static int
+ScheduleMIDIEventToDevice(long dev, UInt64 timeStamp, int length, unsigned char *data)
+{
+    OSStatus sts;
+    if (dev < 0 || dev >= sDeviceInfo.destNum)
+        return 0;  /*  No output  */
+    MDDeviceIDRecord *rp = &(sDeviceInfo.dest[dev]);
+    if (rp->midiRec != NULL) {
+        /*  Real MIDI device  */
+        MDMIDIDeviceRecord *mrec = rp->midiRec;
+        MIDIPacket *packet;
+        packet = MIDIPacketListInit(&mrec->packetList);
+        packet = MIDIPacketListAdd(&mrec->packetList, sizeof(mrec->packetList), packet, timeStamp, length, data);
+        if (packet != NULL) {
+            /*  Send packet  */
+            sts = MIDISend(sMIDIOutputPortRef, mrec->eref, &mrec->packetList);
+        } else sts = 1;
+        if (sts != 0 && data[0] == 0xf0 && mrec->sysexRequest.complete != 0) {
+            /*  Try to send sysex  */
+            mrec->sysexRequest.destination = mrec->eref;
+            mrec->sysexRequest.data = data;
+            mrec->sysexRequest.bytesToSend = length;
+            mrec->sysexRequest.complete = 0;
+            mrec->sysexRequest.completionProc = NULL;
+            mrec->sysexRequest.completionRefCon = NULL;
+            sts = MIDISendSysex(&mrec->sysexRequest);
+        }
+        return (sts == 0 ? length : -1);
+    } else if (rp->streamIndex >= 0) {
+        MDAudioIOStreamInfo *ip = MDAudioGetIOStreamInfoAtIndex(rp->streamIndex);
+//        printf("%lld %d %02x %02x...\n", ConvertHostTimeToMDTimeType(timeStamp), length, data[0], data[1]);
+        sts = MDAudioScheduleMIDIToStream(ip, timeStamp, length, data, 0);
+        if (sts != 0 && data[0] == 0xf0) {
+            /*  Try to send sysex  */
+            sts = MDAudioScheduleMIDIToStream(ip, timeStamp, length, data, 1);
+        }
+        return (sts == 0 ? length : -1);
+    } else return 0;  /*  No output  */
+}
+
+static int
+ScheduleMDEventToDevice(long dev, UInt64 timeStamp, MDEvent *ep, int channel)
+{
+    unsigned char buf[4];
+    unsigned char *p;
+    long len;
+    if (MDIsSysexEvent(ep)) {
+        p = MDGetMessagePtr(ep, &len);
+    } else if (MDIsChannelEvent(ep)) {
+        memset(buf, 0, 4);
+        len = MDEventToMIDIMessage(ep, buf);
+        buf[0] |= channel;
+        p = buf;
+    } else return 0;  /*  No output  */
+    return ScheduleMIDIEventToDevice(dev, timeStamp, len, p);
+}
+
 static void
 MyMIDIReadProc(const MIDIPacketList *pktlist, void *refCon, void *connRefCon)
 {
@@ -931,45 +923,37 @@ MyMIDIReadProc(const MIDIPacketList *pktlist, void *refCon, void *connRefCon)
             } else myTimeStamp = now;
             n = MDPlayerPutRecordingData(sRecordingPlayer, myTimeStamp, (long)(packet->length), (unsigned char *)(packet->data));
         }
-        /*  Rechannelize status bytes  */
-		if (sMIDIThruChannel >= 0 && sMIDIThruChannel < 16) {
-		/*	dprintf(0, "MyMIDIReadProc; rechannelize status bytes\n"); */
-			for (j = 0; j < packet->length; j++) {
-				if (packet->data[j] >= 0x80 && packet->data[j] < 0xf0)
-					packet->data[j] = (packet->data[j] & 0xf0) | sMIDIThruChannel;
-			}
-		}
+        /*  Echo back  */
+        if (sMIDIThruDevice >= 0) {
+            if (sMIDIThruChannel >= 0 && sMIDIThruChannel < 16) {
+                /*  Rechannelize status bytes  */
+                for (j = 0; j < packet->length; j++) {
+                    if (packet->data[j] >= 0x80 && packet->data[j] < 0xf0)
+                        packet->data[j] = (packet->data[j] & 0xf0) | sMIDIThruChannel;
+                }
+            }
+            ScheduleMIDIEventToDevice(sMIDIThruDevice, packet->timeStamp, packet->length, packet->data);
+        }
     }
-
-    /*  Echo back  */
-    if (sMIDIThruDeviceRef != MIDIObjectNull)
-        MIDISend(sMIDIOutputPortRef, sMIDIThruDeviceRef, pktlist);
 }
 
 static void
-MySysexCompletionProc(MIDISysexSendRequest *request)
-{
-	request->bytesToSend = 0;
-	((MDDestinationInfo *)(request->completionRefCon))->sysexTransmitting = 0;
-}
-
-static void
-RegisterEventInNoteOffTrack(MDPlayer *inPlayer, const MDEvent *ep)
+RegisterEventInNoteOffTrack(MDDestinationInfo *info, const MDEvent *ep)
 {
 	MDEvent *ep0;
-	MDPointerJumpToTick(inPlayer->noteOffPtr, MDGetTick(ep) + 1);
-	MDPointerInsertAnEvent(inPlayer->noteOffPtr, ep);
-	MDPointerSetPosition(inPlayer->noteOffPtr, 0);
-	if ((ep0 = MDPointerCurrent(inPlayer->noteOffPtr)) != NULL)
-		inPlayer->noteOffTick = MDGetTick(ep0);
-	else inPlayer->noteOffTick = kMDMaxTick;
+	MDPointerJumpToTick(info->noteOffPtr, MDGetTick(ep) + 1);
+	MDPointerInsertAnEvent(info->noteOffPtr, ep);
+	MDPointerSetPosition(info->noteOffPtr, 0);
+	if ((ep0 = MDPointerCurrent(info->noteOffPtr)) != NULL)
+		info->noteOffTick = MDGetTick(ep0);
+	else info->noteOffTick = kMDMaxTick;
 }
 
 static void
 PrepareMetronomeForTick(MDPlayer *inPlayer, MDTickType inTick)
 {
 	MDEvent *ep;
-	long timebase = MDSequenceGetTimebase(MDMergerGetSequence(inPlayer->merger));
+	long timebase = MDSequenceGetTimebase(inPlayer->sequence);
 	MDTickType t, t0;
 	MDCalibratorJumpToTick(inPlayer->calib, inTick);
 	ep = MDCalibratorGetEvent(inPlayer->calib, NULL, kMDEventTimeSignature, -1);
@@ -996,310 +980,197 @@ PrepareMetronomeForTick(MDPlayer *inPlayer, MDTickType inTick)
 	else inPlayer->nextTimeSignature = MDGetTick(ep);
 }
 
-static int
-ScheduleMIDIEventToMusicDevice(MDDestinationInfo *info, UInt64 timeStamp, int length, unsigned char *data)
-{
-    MDAudioIOStreamInfo *ip = MDAudioGetIOStreamInfoAtIndex(info->streamIndex);
-    int readOffset = ip->midiBufferReadOffset;
-    int writeOffset = ip->midiBufferWriteOffset;
-    int spaceSize = (readOffset + kMDAudioMaxMIDIBytesToSendPerDevice - 1 - writeOffset) % kMDAudioMaxMIDIBytesToSendPerDevice + 1;
-    int i, length2;
-    if (length == 1 && *data == 0xff) {
-        /*  Schedule sysex  */
-        if (ip->sysexData != NULL)
-            return 1;  /*  Sysex is waiting: cannot schedule until this is done  */
-        ip->sysexLength = info->sysexRequest.bytesToSend;
-        ip->sysexData = (unsigned char *)info->sysexRequest.data;
-        return 0;
-    }
-    length2 = length + sizeof(timeStamp) + 1;
-    if (spaceSize <= length2)
-        return 1;
-    for (i = 0; i < length2; i++) {
-        unsigned char c;
-        if (i < sizeof(timeStamp))
-            c = (timeStamp >> (i * 8)) & 0xff;
-        else if (i == sizeof(timeStamp))
-            c = length & 0xff;  /*  Should be length <= 255  */
-        else
-            c = data[i - sizeof(timeStamp) - 1];
-        ip->midiBuffer[(writeOffset + i) % kMDAudioMaxMIDIBytesToSendPerDevice] = c;
-    }
-    ip->midiBufferWriteOffset = (writeOffset + length2) % kMDAudioMaxMIDIBytesToSendPerDevice;
-    return 0;
-}
+/*  Send MIDI events before prefetch_tick to their destinations  */
+/*  foreach destination {
+      while true {
+        get_one_event # metronome, internal note-off, or MIDI event
+        if beyond stop_tick {
+          set next_tick
+          break
+        }
+        if beyond prefetch_tick { 
+          #  stop_tick should be handled by the caller as prefetch_tick
+          set next_tick
+          break  #  to next destination
+        } else if cannot schedule {
+          set next_tick
+          break  #  to next destination
+        }
+     }
+   }
+*/
+
+enum {
+    kNoScheduleType = 0,
+    kMetronomeScheduleType,
+    kNoteOffScheduleType,
+    kTrackScheduleType,
+    kMutedScheduleType
+};
 
 static long
 SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType prefetch_tick, MDTickType *outNextTick)
 {
-	MDTimeType nextTime, lastTime;
-	MDTickType nextTick;
-	MDMerger *merger;
-	MDEvent *ep;
-	MDEvent metEvent;
-	OSStatus sts;
-	unsigned char buf[4];
-	const unsigned char *p;
-	int track, processed;
-    long dev, n, bytesToSend;
-	MDDestinationInfo *info;
-	unsigned char isNoteOff, isMetronome;
+    int n, bytesToSend = 0;
+    MDTickType sequenceDuration = MDSequenceGetDuration(inPlayer->sequence);
+    MDTickType nextTick = kMDMaxTick;
 
-	/*  Initialize the MIDIPacketLists  */
-	for (n = inPlayer->destNum - 1; n >= 0; n--) {
-		info = inPlayer->destInfo[n];
-		if (info != NULL)
-			info->packetPtr = MIDIPacketListInit(&info->packetList);
-	}
-	
-	merger = inPlayer->merger;
-	lastTime = 0;
-	MDPointerSetPosition(inPlayer->noteOffPtr, 0);
-	processed = 0;
-    bytesToSend = 0;
-
-	while (1) {
-		MDTickType mergerTick = MDMergerGetTick(merger);
-		MDTickType metroTick;
-		MDTickType noteOffTick = inPlayer->noteOffTick;
-        UInt64 timeStamp;
-        MDEvent offEvent;  /*  Internal note off  */
-        MDEventInit(&offEvent);
-		isMetronome = isNoteOff = 0;
-        dev = -1;
-
-        if (gMetronomeInfo.enableWhenPlay || (gMetronomeInfo.enableWhenRecord && inPlayer->isRecording)) {
-			if (inPlayer->nextMetronomeBeat < 0) {
-				PrepareMetronomeForTick(inPlayer, now_tick);
-			}
-			metroTick = inPlayer->nextMetronomeBeat;
-			if (metroTick >= inPlayer->nextMetronomeBar)
-				metroTick = inPlayer->nextMetronomeBar;
-		} else metroTick = kMDMaxTick;
-        
-		/*  Check which comes first, metronome or note-off or real MIDI event  */
-		if ((inPlayer->status == kMDPlayer_exhausted && inPlayer->isRecording && metroTick < kMDMaxTick) || (metroTick <= noteOffTick && metroTick <= mergerTick)) {
-			/*  Metronome  */
-			int isPrincipal = 0;
-			MDTickType metDuration;
-			isMetronome = 1;
-			if (metroTick <= prefetch_tick) {
-				if (inPlayer->nextMetronomeBeat >= inPlayer->nextMetronomeBar) {
-					/*  Ring the bell  */
-					isPrincipal = 1;
-					if (inPlayer->nextMetronomeBar == inPlayer->nextTimeSignature) {
-						/*  Update the new beat/bar  */
-						long timebase = MDSequenceGetTimebase(MDMergerGetSequence(inPlayer->merger));
-						MDCalibratorJumpToTick(inPlayer->calib, inPlayer->nextTimeSignature);
-						ep = MDCalibratorGetEvent(inPlayer->calib, NULL, kMDEventTimeSignature, -1);
-						if (ep == NULL) {
-							/*  This cannot happen ... */
-							inPlayer->metronomeBeat = timebase;
-							inPlayer->metronomeBar = timebase * 4;
-						} else {
-							const unsigned char *p = MDGetMetaDataPtr(ep);
-							inPlayer->metronomeBeat = timebase * p[2] / 24;
-							inPlayer->metronomeBar = timebase * p[0] * 4 / (1 << p[1]);
-						}
-						ep = MDCalibratorGetNextEvent(inPlayer->calib, NULL, kMDEventTimeSignature, -1);
-						if (ep == NULL)
-							inPlayer->nextTimeSignature = kMDMaxTick;
-						else inPlayer->nextTimeSignature = MDGetTick(ep);
-					}
-					inPlayer->nextMetronomeBeat = inPlayer->nextMetronomeBar + inPlayer->metronomeBeat;
-					inPlayer->nextMetronomeBar += inPlayer->metronomeBar;
-					if (inPlayer->nextMetronomeBar > inPlayer->nextTimeSignature)
-						inPlayer->nextMetronomeBar = inPlayer->nextTimeSignature;
-				} else {
-					/*  Ring the click  */
-					isPrincipal = 0;
-					inPlayer->nextMetronomeBeat += inPlayer->metronomeBeat;
-				}
-				if (inPlayer->nextMetronomeBeat > inPlayer->nextMetronomeBar)
-					inPlayer->nextMetronomeBeat = inPlayer->nextMetronomeBar;
-			}
-			MDEventInit(&metEvent);
-			MDSetKind(&metEvent, kMDEventNote);
-			MDSetCode(&metEvent, (isPrincipal ? gMetronomeInfo.note1 : gMetronomeInfo.note2));
-			MDSetNoteOnVelocity(&metEvent, (isPrincipal ? gMetronomeInfo.vel1 : gMetronomeInfo.vel2));
-			MDSetNoteOffVelocity(&metEvent, 0);
-			MDSetTick(&metEvent, metroTick);
-			MDSetChannel(&metEvent, gMetronomeInfo.channel & 15);
-			metDuration = MDCalibratorTimeToTick(inPlayer->calib, MDCalibratorTickToTime(inPlayer->calib, metroTick) + gMetronomeInfo.duration) - metroTick;
-			MDSetDuration(&metEvent, metDuration);
-			ep = &metEvent;
-            for (dev = 0; dev < inPlayer->destNum; dev++) {
-                if (inPlayer->destInfo[dev]->dev == gMetronomeInfo.dev)
-                    break;
+    for (n = 0; n < inPlayer->destNum; n++) {
+        MDDestinationInfo *info;
+        MDTickType currentTick;
+        info = inPlayer->destInfo[n];
+        while (1) {
+            unsigned char scheduleType = kTrackScheduleType;
+            MDEvent *ep, metEvent, offEvent;
+            unsigned char channel, isBell;
+            
+            currentTick = info->currentTick;
+            if (info->currentEp == NULL) {
+                /*  No event  */
+                currentTick = kMDMaxTick;
+                scheduleType = kNoScheduleType;
+            } else {
+                MDTrackAttribute attr;
+                attr = MDTrackGetAttribute(info->currentTrack);
+                if (attr & (kMDTrackAttributeMute | kMDTrackAttributeMuteBySolo))
+                    scheduleType = kMutedScheduleType;
             }
-		} else if (noteOffTick <= mergerTick) {
-			/*  Registered note off  */
-            isNoteOff = 1;
-			ep = MDPointerCurrent(inPlayer->noteOffPtr);
-			if (ep != NULL && MDGetKind(ep) != kMDEventSpecial)
-				dev = MDGetLData(ep);
-		} else {
-			/*  Ordinary MIDI event  */
-			ep = MDMergerCurrent(merger);
-			track = MDMergerGetCurrentTrack(merger);
-			isNoteOff = 0;
-            if (track >= inPlayer->trackNum)
-                dev = -1;   /*  track number out of range  */
-            else if (inPlayer->trackAttr[track] & (kMDTrackAttributeMute | kMDTrackAttributeMuteBySolo))
-                dev = -1;   /*  Mute  */
-            else dev = inPlayer->destIndex[track];
-		}
 
-		if (ep == NULL) {
-			nextTick = kMDMaxTick;
-			break;	/*  No more data  */
-		}
-
-        nextTick = MDGetTick(ep);
-        if (MDIsMetaEvent(ep))
-			goto next;	/*  Skip meta events  */
-		if (nextTick > prefetch_tick)
-			break;	/*  Wait until next interrupt (this should be after meta-event check)  */
-
-        /*  Handle special events  */
-        if (MDGetKind(ep) == kMDEventSpecial) {
-			int code;
-			if (nextTick > now_tick)
-				break;  /*  Wait until interrupt cycle  */
-			code = MDGetCode(ep);
-			if (code == kMDSpecialStopPlaying) {
-				if (inPlayer->isRecording)
-					MDPlayerStopRecording(inPlayer);
-				if (MDAudioIsRecording())
-					MDAudioStopRecording();
-			} else if (code == kMDSpecialEndOfSequence) {
-				inPlayer->status = kMDPlayer_exhausted;
-			}
-            goto next;  /*  Skip this event  */
-		}
-
-		if (dev < 0 || dev >= inPlayer->destNum || (info = inPlayer->destInfo[dev]) == NULL)
-			goto next;	/*  No output  */
-		if (info->sysexTransmitting)
-			break;		/*  Sysex is being transmitted on this device: wait until next interrupt  */
-
-        nextTime = MDCalibratorTickToTime(inPlayer->calib, nextTick);
-        timeStamp = ConvertMDTimeTypeToHostTime(nextTime + inPlayer->startTime);
-
-        if (MDIsSysexEvent(ep)) {
-			p = MDGetMessageConstPtr(ep, &n);
-		} else if (MDIsChannelEvent(ep)) {
-			int channel;
-			if (isMetronome) 
-				channel = gMetronomeInfo.channel;
-			else if (isNoteOff)
-				channel = MDGetChannel(ep);
-			else
-				channel = inPlayer->destChannel[track];
-			memset(buf, 0, 4);
-			n = MDEventToMIDIMessage(ep, buf);
-            if (isNoteOff == 0)
-                buf[0] |= channel;
-			p = buf;
-			/*  For debug  */
-            dprintf(2, "Port %d, (%08ld) %02X %02X %02X\n", (int)dev, (long)MDGetTick(ep), (int)buf[0], (int)buf[1], (int)buf[2]);
-			/*  ---------  */
-			if (MDGetKind(ep) == kMDEventNote) {
-				/*  Register note-off */
-				MDSetKind(&offEvent, kMDEventInternalNoteOff);
-				MDSetCode(&offEvent, MDGetCode(ep));
-				MDSetChannel(&offEvent, channel);
-				MDSetNoteOffVelocity(&offEvent, MDGetNoteOffVelocity(ep));
-				MDSetTick(&offEvent, MDGetTick(ep) + MDGetDuration(ep));
-				MDSetLData(&offEvent, dev);
-			}
-		} else goto next;	/*  Not a MIDI event  */
-
-        if (MDIsSysexEvent(ep)) {
-            /*  Schedule a sysex event  */
-            if (info->eref != MIDIObjectNull) {
-                /*  Real MIDI device  */
-                MIDISysexSendRequest *rp = &info->sysexRequest;
-                rp->destination = info->eref;
-                rp->data = (Byte *)p;
-                rp->bytesToSend = n;
-                rp->complete = 0;
-                rp->completionProc = MySysexCompletionProc;
-                rp->completionRefCon = info;
-                info->sysexTransmitting = 1;
-                MIDISendSysex(&info->sysexRequest);
-            } else if (info->comp != NULL) {
-                /*  Software MIDI device  */
-                /*  Try to schedule raw bytes  */
-                if (ScheduleMIDIEventToMusicDevice(info, timeStamp, n, (Byte *)p) != 0) {
-                    /*  If unsuccessful, then try to use sysexRequest  */
-                    static unsigned char dummyBytes[1] = { 0xff };  /*  Dummy status byte  */
-                    info->sysexRequest.bytesToSend = n;
-                    info->sysexRequest.data = (Byte *)p;
-                    if (ScheduleMIDIEventToMusicDevice(info, timeStamp, 1, dummyBytes) != 0)
-                        break;  /*  Cannot schedule: we should retry later  */
+            /*  Registered note-off?  */
+            if (info->noteOffTick < currentTick) {
+                scheduleType = kNoteOffScheduleType;
+                currentTick = info->noteOffTick;
+            }
+            
+            /*  Metronome device?  */
+            if (gMetronomeInfo.dev == info->dev) {
+                if (gMetronomeInfo.enableWhenPlay || (gMetronomeInfo.enableWhenRecord && inPlayer->isRecording)) {
+                    MDTickType metroTick;
+                    if (inPlayer->nextMetronomeBeat < 0) {
+                        PrepareMetronomeForTick(inPlayer, now_tick);
+                    }
+                    metroTick = inPlayer->nextMetronomeBeat;
+                    if (!inPlayer->isRecording && metroTick >= sequenceDuration) {
+                        /* Metronome will not ring after sequence duration
+                           unless MIDI recording is on  */
+                        metroTick = kMDMaxTick;
+                    }
+                    if (metroTick <= currentTick) {
+                        /*  Metronome event is earlier  */
+                        scheduleType = kMetronomeScheduleType;
+                        currentTick = metroTick;
+                        isBell = (metroTick == inPlayer->nextMetronomeBar);
+                    }
                 }
             }
-        } else {
-            /*  Schedule a MIDI channel event  */
-            if (info->eref != MIDIObjectNull) {
-                /*  Real MIDI device  */
-                info->packetPtr = MIDIPacketListAdd(&info->packetList, sizeof(info->packetList), info->packetPtr, timeStamp, n, (Byte *)p);
-                if (info->packetPtr == NULL)
-                    break;  /*  Cannot create packetPtr (this would not happen)  */
-                sts = MIDISend(sMIDIOutputPortRef, info->eref, &info->packetList);
-                if (sts != noErr)
-                    break;  /*  Cannot schedule: we should retry later  */
-            } else if (info->comp != NULL) {
-                /*  Software MIDI device  */
-                if (ScheduleMIDIEventToMusicDevice(info, timeStamp, n, (unsigned char *)p) != 0)
-                    break;  /*  Cannot schedule: we should retry later  */
-            }
-		}
-        
-        /*  Register note off if necessary  */
-        if (MDGetKind(&offEvent) == kMDEventInternalNoteOff) {
-            RegisterEventInNoteOffTrack(inPlayer, &offEvent);
-            dprintf(2, "register note-off (total %ld), tick %ld code %d vel %d\n", MDTrackGetNumberOfEvents(inPlayer->noteOff), MDGetTick(&offEvent), MDGetCode(&offEvent), MDGetNoteOffVelocity(&offEvent));
-        }
 
-		info->bytesToSend += n;
-        info->numEvents++;
-		lastTime = nextTime;
-        bytesToSend += n;
-        
-	next:
-        inPlayer->lastTick = nextTick;  /*  An event with this tick has been processed  */
-		if (isNoteOff) {
-			MDPointerDeleteAnEvent(inPlayer->noteOffPtr, NULL);
-			MDPointerSetPosition(inPlayer->noteOffPtr, 0);
-			if ((ep = MDPointerCurrent(inPlayer->noteOffPtr)) != NULL)
-				inPlayer->noteOffTick = MDGetTick(ep);
-			else inPlayer->noteOffTick = kMDMaxTick;
-            dprintf(2, "%d: unregister note-off (total %ld)\n", MDGetCode(ep), MDTrackGetNumberOfEvents(inPlayer->noteOff));
-		} else if (!isMetronome) {
-			MDMergerForward(merger);
-		}
-		processed++;
-	}
-	
-	*outNextTick = nextTick;
-	return bytesToSend;
+            /*  Out of range?  */
+            if (currentTick >= prefetch_tick)
+                break;
+
+            /*  Prepare MIDI event  */
+            if (scheduleType == kMetronomeScheduleType) {
+                MDTickType metDuration;
+                MDEventInit(&metEvent);
+                MDSetKind(&metEvent, kMDEventNote);
+                MDSetCode(&metEvent, (isBell ? gMetronomeInfo.note1 : gMetronomeInfo.note2));
+                MDSetNoteOnVelocity(&metEvent, (isBell ? gMetronomeInfo.vel1 : gMetronomeInfo.vel2));
+                MDSetNoteOffVelocity(&metEvent, 0);
+                MDSetTick(&metEvent, currentTick);
+                MDSetChannel(&metEvent, gMetronomeInfo.channel & 15);
+                metDuration = MDCalibratorTimeToTick(inPlayer->calib, MDCalibratorTickToTime(inPlayer->calib, currentTick) + gMetronomeInfo.duration) - currentTick;
+                MDSetDuration(&metEvent, metDuration);
+                ep = &metEvent;
+                channel = gMetronomeInfo.channel & 15;
+            //    printf("%ld %c\n", currentTick, (isBell ? '*' : ' '));
+            } else if (scheduleType == kNoteOffScheduleType) {
+                ep = MDPointerCurrent(info->noteOffPtr);
+                channel = MDGetChannel(ep);
+            } else if (scheduleType == kTrackScheduleType) {
+                ep = info->currentEp;
+                channel = MDTrackGetTrackChannel(info->currentTrack);
+                if (MDIsMetaEvent(ep)) {
+                    ep = NULL;
+                }
+            } else ep = NULL;
+            
+            if (ep != NULL) {
+                int len;
+                MDTimeType scheduleTime = MDCalibratorTickToTime(inPlayer->calib, currentTick);
+                UInt64 timeStamp = ConvertMDTimeTypeToHostTime(scheduleTime + inPlayer->startTime);
+                /*  Schedule the MIDI event to the device  */
+                len = ScheduleMDEventToDevice(info->dev, timeStamp, ep, channel);
+                if (len < 0) {
+                    /*  Unsuccessful: break loop and continue to the next destination  */
+                    break;
+                }
+                bytesToSend += len;
+                if (scheduleType == kMetronomeScheduleType) {
+                    /*  Proceed to the next metronome event  */
+                    if (inPlayer->nextMetronomeBar == inPlayer->nextMetronomeBeat)
+                        inPlayer->nextMetronomeBar += inPlayer->metronomeBar;
+                    inPlayer->nextMetronomeBeat += inPlayer->metronomeBeat;
+                    if (inPlayer->nextMetronomeBeat > inPlayer->nextMetronomeBar)
+                        inPlayer->nextMetronomeBeat = inPlayer->nextMetronomeBar;
+                    if (inPlayer->nextMetronomeBar >= inPlayer->nextTimeSignature) {
+                        PrepareMetronomeForTick(inPlayer, inPlayer->nextMetronomeBeat);
+                    }
+                } else if (scheduleType == kNoteOffScheduleType) {
+                    /*  Unregister this internal-note-off  */
+                    MDPointerDeleteAnEvent(info->noteOffPtr, NULL);
+                    MDPointerSetPosition(info->noteOffPtr, 0);
+                    if ((ep = MDPointerCurrent(info->noteOffPtr)) != NULL)
+                        info->noteOffTick = MDGetTick(ep);
+                    else info->noteOffTick = kMDMaxTick;
+                } else if (MDGetKind(ep) == kMDEventNote) {
+                    /*  Register an internal-note-off  */
+                    MDSetKind(&offEvent, kMDEventInternalNoteOff);
+                    MDSetCode(&offEvent, MDGetCode(ep));
+                    MDSetChannel(&offEvent, channel);
+                    MDSetNoteOffVelocity(&offEvent, MDGetNoteOffVelocity(ep));
+                    MDSetTick(&offEvent, MDGetTick(ep) + MDGetDuration(ep));
+                    RegisterEventInNoteOffTrack(info, &offEvent);
+                }
+            }
+            if (scheduleType == kTrackScheduleType) {
+                /*  Proceed to next event  */
+                info->currentEp = MDTrackMergerForward(info->merger, &(info->currentTrack));
+                if (info->currentEp != NULL)
+                    info->currentTick = MDGetTick(info->currentEp);
+                else info->currentTick = kMDMaxTick;
+            }
+        }
+        /*  At this point, currentTick is 'the tick of the next event'
+            (if no more event are present, then kMDMaxTick)  */
+        if (currentTick < nextTick)
+            nextTick = currentTick;
+    }
+    if (nextTick == kMDMaxTick) {
+        if (prefetch_tick < sequenceDuration) {
+            /*  If no more event is present but sequence duration is not reached  */
+            nextTick = sequenceDuration;
+        } else if (inPlayer->isRecording) {
+            /*  If no more event is present but is recording MIDI, then continue playing  */
+            nextTick = prefetch_tick + 1;
+        }
+    }
+    *outNextTick = nextTick;
+    return bytesToSend;
 }
 
 static long
 MyTimerFunc(MDPlayer *player)
 {
-	MDTimeType now_time, next_time, last_time;
+	MDTimeType now_time, last_time;
+    MDTimeType time_to_wait;
 	MDTickType now_tick, prefetch_tick, tick;
-	MDMerger *merger;
 	MDSequence *sequence;
 	long n;
 	
-	if (player == NULL || (merger = player->merger) == NULL)
+	if (player == NULL)
 		return -1;
 
-	sequence = MDMergerGetSequence(player->merger);
+	sequence = player->sequence;
 	
 	now_time = GetHostTimeInMDTimeType() - player->startTime;
 	now_tick = MDCalibratorTimeToTick(player->calib, now_time);
@@ -1307,13 +1178,33 @@ MyTimerFunc(MDPlayer *player)
 	last_time = 0;
 	
     if (MDSequenceTryLock(sequence) == 0) {
+    /*    if (now_tick >= player->recordingStopTick) {
+            if (player->isRecording)
+                MDPlayerStopRecording(player);
+            if (MDAudioIsRecording())
+                MDAudioStopRecording();
+            player->recordingStopTick = kMDMaxTick;
+        } */
         n = SendMIDIEventsBeforeTick(player, now_tick, prefetch_tick, &tick);
+    //    printf("now_tick = %ld tick = %ld\n", now_tick, tick);
+        if (tick >= kMDMaxTick) {
+            player->status = kMDPlayer_exhausted;
+            time_to_wait = -1;
+        } else {
+            time_to_wait = now_time - MDCalibratorTickToTime(player->calib, tick);
+            if (time_to_wait > kMDPlayerPrefetchInterval)
+                time_to_wait = kMDPlayerPrefetchInterval;
+            else if (time_to_wait < kMDPlayerMinimumInterval)
+                time_to_wait = kMDPlayerMinimumInterval;
+        }
 		MDSequenceUnlock(sequence);
     } else {
         n = 0;
-        tick = prefetch_tick + 1;
+        time_to_wait = kMDPlayerPrefetchInterval;
     }
+    return (long)time_to_wait;
     
+#if 0
 	player->time = now_time;
 	if (tick >= kMDMaxTick && !player->isRecording && !MDAudioIsRecording()) {
 		player->status = kMDPlayer_exhausted;
@@ -1323,6 +1214,13 @@ MyTimerFunc(MDPlayer *player)
 		player->time = MDCalibratorTickToTime(player->calib, tick);
 		return -1;
 	} else {
+        if (now_tick >= player->recordingStopTick) {
+            if (player->isRecording)
+                MDPlayerStopRecording(player);
+            if (MDAudioIsRecording())
+                MDAudioStopRecording();
+            player->recordingStopTick = kMDMaxTick;
+        }
 		if (tick >= kMDMaxTick && player->nextMetronomeBeat < tick)
 			tick = player->nextMetronomeBeat;
 		next_time = MDCalibratorTickToTime(player->calib, tick + 1);
@@ -1333,6 +1231,7 @@ MyTimerFunc(MDPlayer *player)
 			next_time = last_time - now_time;
 		return (long)next_time;
 	}
+#endif
 }
 
 #if !USE_TIME_MANAGER
@@ -1369,8 +1268,9 @@ MyTimerCallback(TMTaskPtr tmTaskPtr)
 static void
 StopSoundInAllTracks(MDPlayer *inPlayer)
 {
-	int n, track, num;
+	int n, num;
 	MDDestinationInfo *info;
+    MDDeviceIDRecord *rec;
     MDAudioIOStreamInfo *ip;
 	unsigned char buf[6];
 
@@ -1379,85 +1279,80 @@ StopSoundInAllTracks(MDPlayer *inPlayer)
 
 	/*  Dispose the already scheduled MIDI events  */
 	for (n = inPlayer->destNum - 1; n >= 0; n--) {
-		info = inPlayer->destInfo[n];
-        if (info != NULL) {
-            if (info->eref != MIDIObjectNull) {
-                MIDIFlushOutput(info->eref);
-            } else if (info->streamIndex >= 0) {
-                ip = MDAudioGetIOStreamInfoAtIndex(info->streamIndex);
+        if (inPlayer->destInfo[n] != NULL) {
+            rec = &sDeviceInfo.dest[inPlayer->destInfo[n]->dev];
+            if (rec->midiRec != NULL) {
+                MIDIFlushOutput(rec->midiRec->eref);
+            } else if (rec->streamIndex >= 0) {
+                ip = MDAudioGetIOStreamInfoAtIndex(rec->streamIndex);
                 ip->requestFlush = 1;
             }
-		}
-	}
+        }
+    }
 	
     /*  Wait until all requestFlush are processed  */
     while (1) {
         for (n = inPlayer->destNum - 1; n >= 0; n--) {
-            info = inPlayer->destInfo[n];
-            if (info != NULL && info->eref == MIDIObjectNull && info->streamIndex >= 0) {
-                ip = MDAudioGetIOStreamInfoAtIndex(info->streamIndex);
-                if (ip->requestFlush)
-                    break;
+            if (inPlayer->destInfo[n] != NULL) {
+                rec = &sDeviceInfo.dest[inPlayer->destInfo[n]->dev];
+                if (rec->midiRec == NULL && rec->streamIndex >= 0) {
+                    ip = MDAudioGetIOStreamInfoAtIndex(rec->streamIndex);
+                    if (ip->requestFlush)
+                        break;
+                }
             }
         }
         if (n < 0)
             break;
+        my_usleep(10000);
     }
     
 	/*  Dispose the pending note-offs  */
-	if (inPlayer->noteOff != NULL) {
-		MDTrackClear(inPlayer->noteOff);
-		inPlayer->noteOffTick = kMDMaxTick;
-	}
-	
-	/*  Send AllNoteOff (Bn 7B 00) and AllSoundOff (Bn 78 00) to all tracks  */
-    num = MDSequenceGetNumberOfTracks(MDMergerGetSequence(inPlayer->merger));
-	for (track = 0; track < inPlayer->trackNum; track++) {
-		n = inPlayer->destIndex[track];
-		if (n < 0 || (info = inPlayer->destInfo[n]) == NULL)
-			continue;
-        buf[0] = 0xB0 + inPlayer->destChannel[track];
-        buf[1] = 0x7B;
-        buf[2] = 0;
-        buf[3] = 0xB0 + inPlayer->destChannel[track];
-        buf[4] = 0x78;
-        buf[5] = 0;
-        if (info->eref != MIDIObjectNull) {
-            info->packetPtr = MIDIPacketListInit(&info->packetList);
-            info->packetPtr = MIDIPacketListAdd(&info->packetList, sizeof(info->packetList), info->packetPtr, 0, 3, (Byte *)buf);
-            info->packetPtr = MIDIPacketListAdd(&info->packetList, sizeof(info->packetList), info->packetPtr, 0, 3, (Byte *)buf + 3);
-            MIDISend(sMIDIOutputPortRef, info->eref, &info->packetList);
-        } else if (info->streamIndex >= 0) {
-            ScheduleMIDIEventToMusicDevice(info, 0, 3, buf);
-            ScheduleMIDIEventToMusicDevice(info, 0, 3, buf + 3);
+    for (n = inPlayer->destNum - 1; n >= 0; n--) {
+        MDTrack *track;
+        info = inPlayer->destInfo[n];
+        if (info == NULL)
+            continue;
+        if (info->noteOff != NULL) {
+            MDTrackClear(info->noteOff);
+            info->noteOffTick = kMDMaxTick;
         }
-	}
+        
+        /*  Send AllNoteOff (Bn 7B 00), AllSoundOff (Bn 78 00), ResetAllControllers
+            (Bn 79 00) to all tracks  */
+        for (num = 0; (track = MDTrackMergerGetTrack(info->merger, num)) != NULL; num++) {
+            int channel = MDTrackGetTrackChannel(track);
+            buf[0] = 0xB0 + channel;
+            buf[1] = 0x7B;
+            buf[2] = 0;
+            ScheduleMIDIEventToDevice(info->dev, 0, 3, buf);
+            buf[0] = 0xB0 + channel;
+            buf[1] = 0x78;
+            buf[2] = 0;
+            ScheduleMIDIEventToDevice(info->dev, 0, 3, buf);
+            buf[0] = 0xB0 + channel;
+            buf[1] = 0x79;
+            buf[2] = 0;
+            ScheduleMIDIEventToDevice(info->dev, 0, 3, buf);
+        }
+    }
 }
 
 int
-MDPlayerSendRawMIDI(MDPlayer *player, const unsigned char *p, int size, int destDevice, MDTimeType scheduledTime)
+MDPlayerSendRawMIDI(MDPlayer *inPlayer, const unsigned char *p, int size, int destDevice, MDTimeType scheduledTime)
 {
-	MIDIObjectType objType;
-	MIDIObjectRef	eref;
-	MIDIPacketList	packetList;
-	MIDIPacket *	packetPtr;
-	OSStatus sts;
-	MIDITimeStamp timeStamp;
-
-	if (destDevice < 0 || destDevice >= sDeviceInfo.destNum)
+    MDDeviceIDRecord *rp;
+    UInt64 timeStamp;
+    
+    if (destDevice < 0 || destDevice >= sDeviceInfo.destNum)
 		return -1;
-	
-	if (MIDIObjectFindByUniqueID(sDeviceInfo.dest[destDevice].uniqueID, &eref, &objType) != noErr || objType != kMIDIObjectType_Destination)
-		return -1;
-	if (player != NULL && scheduledTime >= 0)
-		timeStamp = ConvertMDTimeTypeToHostTime(scheduledTime + player->startTime);
-	else if (scheduledTime >= 0)
-		timeStamp = ConvertMDTimeTypeToHostTime(scheduledTime);
-	else timeStamp = 0;
-	packetPtr = MIDIPacketListInit(&packetList);
-	packetPtr = MIDIPacketListAdd(&packetList, sizeof(packetList), packetPtr, timeStamp, size, (Byte *)p);
-	sts = MIDISend(sMIDIOutputPortRef, (MIDIEndpointRef)eref, &packetList);
-	return sts;
+    rp = &(sDeviceInfo.dest[destDevice]);
+    if (inPlayer != NULL && scheduledTime >= 0)
+        timeStamp = ConvertMDTimeTypeToHostTime(scheduledTime + inPlayer->startTime);
+    else if (scheduledTime >= 0)
+        timeStamp = ConvertMDTimeTypeToHostTime(scheduledTime);
+    else timeStamp = 0;
+    return ScheduleMIDIEventToDevice(destDevice, timeStamp, size, (unsigned char *)p);
 }
 
 void
@@ -1489,11 +1384,8 @@ MDPlayerNew(MDSequence *inSequence)
 	if (player != NULL) {
 		memset(player, 0, sizeof(MDPlayer));
 		player->refCount = 1;
-
-		player->merger = MDMergerNew(inSequence);
-		if (player->merger == NULL)
-            goto error;
-
+        player->sequence = inSequence;
+        MDSequenceRetain(inSequence);
 		player->calib = MDCalibratorNew(inSequence, NULL, kMDEventTempo, -1);
 		if (player->calib == NULL)
             goto error;
@@ -1502,25 +1394,14 @@ MDPlayerNew(MDSequence *inSequence)
 		player->status = kMDPlayer_idle;
 		player->time = 0;
 		player->startTime = 0;
-		player->stopTick = kMDMaxTick;
+		player->recordingStopTick = kMDMaxTick;
 
 		player->destInfo = NULL;
 		player->destNum = 0;
-		player->destIndex = NULL;
+	/*	player->destIndex = NULL;
         player->destChannel = NULL;
-        player->trackAttr = NULL;
+        player->trackAttr = NULL; */
 
-		player->noteOff = MDTrackNew();
-		if (player->noteOff == NULL)
-            goto error;
-		
-		player->noteOffPtr = MDPointerNew(player->noteOff);
-		if (player->noteOffPtr == NULL)
-            goto error;
-		
-	/*	if (gAUGraph == NULL)
-			MDPlayerInitMIDIDevices(); */
-        
         if (MDPlayerAllocateRecordingBuffer(player) == NULL)
             goto error;
     
@@ -1529,8 +1410,6 @@ MDPlayerNew(MDSequence *inSequence)
             goto error;
         player->tempStorageSize = 256;
 		
-	/*	player->audio = MDAudioNew(); */
-        
 	}
 	return player;
 
@@ -1538,14 +1417,10 @@ MDPlayerNew(MDSequence *inSequence)
     MDPlayerReleaseRecordingBuffer(player);
     if (player->tempStorage != NULL)
         free(player->tempStorage);
-    if (player->noteOffPtr != NULL)
-        MDPointerRelease(player->noteOffPtr);
-    if (player->noteOff != NULL)
-        MDTrackRelease(player->noteOff);
     if (player->calib != NULL)
         MDCalibratorRelease(player->calib);
-    if (player->merger != NULL)
-        MDMergerRelease(player->merger);
+    if (player->sequence != NULL)
+        MDSequenceRelease(player->sequence);
     free(player);
     return NULL;
 }
@@ -1578,23 +1453,17 @@ MDPlayerRelease(MDPlayer *inPlayer)
 			}
             if (inPlayer->tempStorage != NULL)
                 free(inPlayer->tempStorage);
-            if (inPlayer->trackAttr != NULL)
+       /*     if (inPlayer->trackAttr != NULL)
                 free(inPlayer->trackAttr);
             if (inPlayer->destChannel != NULL)
                 free(inPlayer->destChannel);
 			if (inPlayer->destIndex != NULL)
-				free(inPlayer->destIndex);
-			if (inPlayer->merger != NULL)
-				MDMergerRelease(inPlayer->merger);
+				free(inPlayer->destIndex); */
 			if (inPlayer->calib != NULL)
 				MDCalibratorRelease(inPlayer->calib);
-			if (inPlayer->noteOffPtr != NULL)
-				MDPointerRelease(inPlayer->noteOffPtr);
-			if (inPlayer->noteOff != NULL)
-				MDTrackRelease(inPlayer->noteOff);
+            if (inPlayer->sequence != NULL)
+                MDSequenceRelease(inPlayer->sequence);
             MDPlayerReleaseRecordingBuffer(inPlayer);
-		/*	if (inPlayer->audio != NULL)
-				MDAudioRelease(inPlayer->audio); */
 			free(inPlayer);
 		}
 	}
@@ -1606,8 +1475,7 @@ MDPlayerRelease(MDPlayer *inPlayer)
 MDStatus
 MDPlayerSetSequence(MDPlayer *inPlayer, MDSequence *inSequence)
 {
-	MDStatus result;
-	if (inPlayer != NULL && inPlayer->merger != NULL) {
+    if (inPlayer != NULL) {
 		MDCalibrator *calib;
 		if (inPlayer->status == kMDPlayer_playing || inPlayer->status == kMDPlayer_exhausted)
 			MDPlayerStop(inPlayer);
@@ -1616,13 +1484,13 @@ MDPlayerSetSequence(MDPlayer *inPlayer, MDSequence *inSequence)
 			return kMDErrorOutOfMemory;
 		MDCalibratorRelease(inPlayer->calib);
 		inPlayer->calib = calib;
-		result = MDMergerSetSequence(inPlayer->merger, inSequence);
-		if (result == kMDNoError) {
-			inPlayer->time = 0;
-			inPlayer->startTime = 0;
-		}
-		return result;
-	} else return kMDNoError;
+        MDSequenceRelease(inPlayer->sequence);
+        inPlayer->sequence = inSequence;
+        MDSequenceRetain(inSequence);
+        inPlayer->time = 0;
+        inPlayer->startTime = 0;
+	}
+    return kMDNoError;
 }
 
 /* --------------------------------------
@@ -1642,37 +1510,96 @@ MDPlayerGetAudioPlayer(MDPlayer *inPlayer)
 MDStatus
 MDPlayerRefreshTrackDestinations(MDPlayer *inPlayer)
 {
-    long n, num, i, dev, origDestNum;
-	int status;
-    long *temp;
     MDSequence *sequence;
-	MDTickType oldTick;
+    long n, num, i, dev;
+    long *temp;
 
-    if (inPlayer == NULL || inPlayer->merger == NULL || (sequence = MDMergerGetSequence(inPlayer->merger)) == NULL)
+    /*  TODO: we need to rewrite all here!  */
+    if (inPlayer == NULL || (sequence = inPlayer->sequence) == NULL)
         return kMDNoError;
 	
     num = MDSequenceGetNumberOfTracks(sequence);
-	inPlayer->trackNum = num;
-    inPlayer->destIndex = (long *)re_malloc(inPlayer->destIndex, num * sizeof(long));
-    if (inPlayer->destIndex == NULL)
-        return kMDErrorOutOfMemory;
-    inPlayer->destChannel = (unsigned char *)re_malloc(inPlayer->destChannel, num * sizeof(unsigned char));
-    if (inPlayer->destChannel == NULL)
-        return kMDErrorOutOfMemory;
-    inPlayer->trackAttr = (MDTrackAttribute *)re_malloc(inPlayer->trackAttr, num * sizeof(MDTrackAttribute));
-    if (inPlayer->trackAttr == NULL)
-        return kMDErrorOutOfMemory;
+//	inPlayer->trackNum = num;
+//    inPlayer->destIndex = (long *)re_malloc(inPlayer->destIndex, num * sizeof(long));
+//    if (inPlayer->destIndex == NULL)
+//        return kMDErrorOutOfMemory;
+//    inPlayer->destChannel = (unsigned char *)re_malloc(inPlayer->destChannel, num * sizeof(unsigned char));
+//    if (inPlayer->destChannel == NULL)
+//        return kMDErrorOutOfMemory;
+//    inPlayer->trackAttr = (MDTrackAttribute *)re_malloc(inPlayer->trackAttr, num * sizeof(MDTrackAttribute));
+//    if (inPlayer->trackAttr == NULL)
+//        return kMDErrorOutOfMemory;
 
     temp = (long *)malloc((num + 1) * sizeof(long));
     if (temp == NULL)
         return kMDErrorOutOfMemory;
 
-	for (i = 0; i < inPlayer->destNum; i++)
-        temp[i] = inPlayer->destInfo[i]->dev;
-    origDestNum = inPlayer->destNum;
+//	for (i = 0; i < inPlayer->destNum; i++)
+//        temp[i] = inPlayer->destInfo[i]->dev;
+//    origDestNum = inPlayer->destNum;
 
 	MDSequenceLock(sequence);
+    
+    /*  Dispose previous destInfo[]  */
+    if (inPlayer->destInfo != NULL) {
+        for (i = 0; i < inPlayer->destNum; i++)
+            MDPlayerReleaseDestinationInfo(inPlayer->destInfo[i]);
+        free(inPlayer->destInfo);
+    }
+    
+    /*  Allocate destInfo  */
+    inPlayer->destInfo = (MDDestinationInfo **)malloc((num + 1) * sizeof(MDDestinationInfo *));
+    if (inPlayer->destInfo == NULL)
+        return kMDErrorOutOfMemory;
+    memset(inPlayer->destInfo, 0, num * sizeof(MDDestinationInfo *));
+    inPlayer->destNum = 0;
 
+    /*  Initialize MDDestinationInfo for necessary destinations  */
+    /*  (each track and metronome)  */
+    for (n = 0; n <= num; n++) {
+        MDTrack *track;
+        MDDestinationInfo *info;
+        char name1[256];
+        if (n == num) {
+            dev = gMetronomeInfo.dev;
+        } else {
+            track = MDSequenceGetTrack(sequence, n);
+            if (track == NULL)
+                continue;
+            MDTrackGetDeviceName(track, name1, sizeof name1);
+            dev = MDPlayerGetDestinationNumberFromName(name1);
+        }
+        if (dev >= 0) {
+            for (i = 0; i < inPlayer->destNum; i++) {
+                if (inPlayer->destInfo[i]->dev == dev)
+                    break;
+            }
+            if (i == inPlayer->destNum) {
+                /*  New device  */
+                inPlayer->destInfo[i] = MDPlayerNewDestinationInfo(dev);
+                inPlayer->destNum++;
+            }
+            /*  Add this track to the destination info  */
+            info = inPlayer->destInfo[i];
+            if (info->merger == NULL) {
+                info->merger = MDTrackMergerNew();
+                if (info->merger == NULL)
+                    return kMDErrorOutOfMemory;
+            }
+            if (n < num && MDTrackMergerAddTrack(info->merger, track) < 0)
+                return kMDErrorOutOfMemory;
+            info->noteOff = MDTrackNew();
+            info->noteOffPtr = MDPointerNew(info->noteOff);
+            info->noteOffTick = kMDMaxTick;
+        }
+    }
+    MDPlayerJumpToTick(inPlayer, 0);
+
+    MDSequenceUnlock(sequence);
+    
+    return kMDNoError;
+
+#if 0
     /*  Update destIndex[] and destChannel[] */
     for (n = 0; n < num; n++) {
         MDTrack *track;
@@ -1713,23 +1640,7 @@ MDPlayerRefreshTrackDestinations(MDPlayer *inPlayer)
 			inPlayer->destNum++;
 		}
 	}
-    /*  Allocate destInfo[]  */
-    inPlayer->destInfo = (MDDestinationInfo **)re_malloc(inPlayer->destInfo, inPlayer->destNum * sizeof(MDDestinationInfo *));
-    if (inPlayer->destInfo == NULL) {
-        status = kMDErrorOutOfMemory;
-	} else {
-		MDCalibratorReset(inPlayer->calib);
-		oldTick = MDCalibratorTimeToTick(inPlayer->calib, inPlayer->time);
-		MDMergerReset(inPlayer->merger);
-		MDMergerJumpToTick(inPlayer->merger, oldTick);
-		for (i = origDestNum; i < inPlayer->destNum; i++)
-			inPlayer->destInfo[i] = MDPlayerNewDestinationInfo(temp[i]);
-		status = kMDNoError;
-	}
-
-	MDSequenceUnlock(sequence);
-
-    return status;
+#endif
 }
 
 /* --------------------------------------
@@ -1738,18 +1649,21 @@ MDPlayerRefreshTrackDestinations(MDPlayer *inPlayer)
 MDStatus
 MDPlayerJumpToTick(MDPlayer *inPlayer, MDTickType inTick)
 {
-/*	if (inPlayer->status == kMDPlayer_playing || inPlayer->status == kMDPlayer_exhausted)
-		MDPlayerStop(inPlayer); */
-	MDMergerJumpToTick(inPlayer->merger, inTick);
-	MDCalibratorJumpToTick(inPlayer->calib, inTick);
-/*	inPlayer->tick = inTick;  */
+    int i;
+    MDCalibratorJumpToTick(inPlayer->calib, inTick);
+    for (i = 0; i < inPlayer->destNum; i++) {
+        MDDestinationInfo *info = inPlayer->destInfo[i];
+        info->currentEp = MDTrackMergerJumpToTick(info->merger, inTick, &info->currentTrack);
+        if (info->currentEp != NULL)
+            info->currentTick = MDGetTick(info->currentEp);
+        else info->currentTick = kMDMaxTick;
+        MDTrackClear(info->noteOff);
+        MDPointerSetPosition(info->noteOffPtr, 0);
+        info->noteOffTick = kMDMaxTick;
+    }
+    inPlayer->lastTick = inTick;
 	inPlayer->time = MDCalibratorTickToTime(inPlayer->calib, inTick);
 	inPlayer->status = kMDPlayer_ready;
-	MDTrackClear(inPlayer->noteOff);
-	inPlayer->noteOffTick = kMDMaxTick;
-	inPlayer->lastTick = kMDNegativeTick;
-
-
 	return kMDNoError;
 }
 
@@ -1759,52 +1673,34 @@ MDPlayerJumpToTick(MDPlayer *inPlayer, MDTickType inTick)
 MDStatus
 MDPlayerPreroll(MDPlayer *inPlayer, MDTickType inTick, int backtrack)
 {
-    long n;
 /*	long i, num, dev, *temp; */
-	MDSequence *sequence;
+/*	MDSequence *sequence; */
     MDStatus sts;
-	if (inPlayer != NULL && inPlayer->merger != NULL) {
-
-		sequence = MDMergerGetSequence(inPlayer->merger);		
-	
+	if (inPlayer != NULL && inPlayer->sequence != NULL) {
+        sts = MDPlayerRefreshTrackDestinations(inPlayer);
 		MDPlayerJumpToTick(inPlayer, inTick);
-
-        /*  Release old destination infos  */
-        if (inPlayer->destInfo != NULL) {
-            for (n = 0; n < inPlayer->destNum; n++) {
-                MDPlayerReleaseDestinationInfo(inPlayer->destInfo[n]);
-                inPlayer->destInfo[n] = NULL;
-            }
+        if (sts != kMDNoError)
+            return sts;
+        /*  Backtrack earlier events  */
+        if (inTick > 0 && backtrack) {
+            static long sEventType[] = {
+                kMDEventSysex, kMDEventSysexCont, kMDEventKeyPres,
+                kMDEventProgram,
+                ((0 << 16) + kMDEventControl), ((6 << 16) + kMDEventControl),
+                ((32 << 16) + kMDEventControl), ((100 << 16) + kMDEventControl),
+                ((101 << 16) + kMDEventControl), ((98 << 16) + kMDEventControl),
+                ((99 << 16) + kMDEventControl),
+                -1 };
+            static long sEventLastOnly[] = {
+                kMDEventPitchBend, kMDEventChanPres,
+                ((0xffff << 16) | kMDEventControl),
+                -1 };
+            MDPlayerBacktrackEvents(inPlayer, inTick, sEventType, sEventLastOnly);
         }
-        inPlayer->destNum = 0;
-
-		if (sequence != NULL) {
-            sts = MDPlayerRefreshTrackDestinations(inPlayer);
-            if (sts != kMDNoError)
-                return sts;
-
-			/*  Backtrack earlier events  */
-			if (inTick > 0 && backtrack) {
-				static long sEventType[] = {
-					kMDEventSysex, kMDEventSysexCont, kMDEventKeyPres,
-					((0 << 16) + kMDEventControl), ((6 << 16) + kMDEventControl),
-					((32 << 16) + kMDEventControl), ((100 << 16) + kMDEventControl),
-					((101 << 16) + kMDEventControl), ((98 << 16) + kMDEventControl),
-					((99 << 16) + kMDEventControl),
-					-1 };
-				static long sEventLastOnly[] = {
-					kMDEventPitchBend, kMDEventChanPres, kMDEventProgram,
-					((0xffff << 16) | kMDEventControl),
-					-1 };
-				MDPlayerBacktrackEvents(inPlayer, sEventType, sEventLastOnly);
-			}
-			
-			/*  Prepare metronome  */
-			PrepareMetronomeForTick(inPlayer, inTick);
-			
-			inPlayer->status = kMDPlayer_suspended;
-
-		}
+        
+        /*  Prepare metronome  */
+        PrepareMetronomeForTick(inPlayer, inTick);
+        inPlayer->status = kMDPlayer_suspended;
 	}
 	return kMDNoError;
 }
@@ -1817,45 +1713,42 @@ MDStatus
 MDPlayerStart(MDPlayer *inPlayer)
 {
 	int status;
-	MDSequence *sequence;
+/*	MDSequence *sequence; */
 
-	if (inPlayer == NULL || inPlayer->merger == NULL)
+	if (inPlayer == NULL || inPlayer->sequence == NULL)
 		return kMDNoError;
 	if (inPlayer->status == kMDPlayer_playing)
 		return kMDNoError;
 
-	sequence = MDMergerGetSequence(inPlayer->merger);
-	
-//	if (inPlayer->status != kMDPlayer_suspended) {
-//		MDPlayerPreroll(inPlayer, 0, 0);
-//	}
 	if (inPlayer->status != kMDPlayer_suspended)
 		MDPlayerPreroll(inPlayer, MDCalibratorTimeToTick(inPlayer->calib, inPlayer->time), 0);
 	
 	/*  Schedule special events  */
-	{
+    /*  TODO: these events should probably be stored as tick values in inPlayer structure. */
+/*	{
 		MDEvent anEvent;
 		MDTickType tick, duration;
 		duration = MDSequenceGetDuration(sequence);
 		MDSetKind(&anEvent, kMDEventSpecial);
-		if (inPlayer->stopTick < kMDMaxTick)
-			tick = inPlayer->stopTick;
+		if (inPlayer->recordingStopTick < kMDMaxTick)
+			tick = inPlayer->recordingStopTick;
 		else tick = kMDMaxTick - 1;
 		MDSetCode(&anEvent, kMDSpecialStopPlaying);
-		MDSetTick(&anEvent, inPlayer->stopTick);
+		MDSetTick(&anEvent, inPlayer->recordingStopTick);
 		RegisterEventInNoteOffTrack(inPlayer, &anEvent);
 		MDSetCode(&anEvent, kMDSpecialEndOfSequence);
 		MDSetTick(&anEvent, duration);
 		RegisterEventInNoteOffTrack(inPlayer, &anEvent);
-	}
+	} */
 	
-	if (MDSequenceCreateMutex(sequence))
+	if (MDSequenceCreateMutex(inPlayer->sequence))
 		return kMDErrorOnSequenceMutex;
 	
 	inPlayer->startTime = GetHostTimeInMDTimeType() - inPlayer->time;
 	inPlayer->status = kMDPlayer_playing;
 	inPlayer->shouldTerminate = 0;
-
+/*    inPlayer->trackDuration = MDSequenceGetDuration(inPlayer->sequence); */
+    
 #if !USE_TIME_MANAGER
 	status = pthread_create(&inPlayer->playThread, NULL, MyThreadFunc, inPlayer);
 	if (status != 0)
@@ -1875,6 +1768,61 @@ MDPlayerStart(MDPlayer *inPlayer)
 #endif
 
 	return kMDNoError;
+}
+
+/* --------------------------------------
+	･ MDPlayerStop
+ -------------------------------------- */
+MDStatus
+MDPlayerStop(MDPlayer *inPlayer)
+{
+    if (inPlayer == NULL || inPlayer->sequence == NULL)
+        return kMDNoError;
+    
+    if (inPlayer->status == kMDPlayer_suspended) {
+        inPlayer->recordingStopTick = kMDMaxTick;
+        inPlayer->status = kMDPlayer_ready;
+        return kMDNoError;
+    }
+    if (inPlayer->status != kMDPlayer_playing && inPlayer->status != kMDPlayer_exhausted)
+        return kMDNoError;
+    
+    /*  Stop MIDI recording  */
+    MDPlayerStopRecording(inPlayer);
+    
+    /*  Stop Audio Processing  */
+    /*	MDAudioStop(inPlayer->audio); */
+    
+    /*    for (i = MIDIGetNumberOfSources() - 1; i >= 0; i--) {
+     MIDIPortDisconnectSource(sMIDIInputPortRef, MIDIGetSource(i));
+     } */
+    
+#if !USE_TIME_MANAGER
+    inPlayer->shouldTerminate = 1;
+    pthread_join(inPlayer->playThread, NULL);  /*  Wait for the playing thread to terminate  */
+#else
+    {
+        OSStatus err = RemoveTimeTask((QElemPtr)&(inPlayer->myTMTask));
+        DisposeTimerUPP(inPlayer->myTMTask.tmTask.tmAddr);
+        inPlayer->myTMTask.player = NULL;
+    }
+#endif
+    
+    MDSequenceDisposeMutex(inPlayer->sequence);
+    
+    /*  Send AllNoteOff (Bn 7B 00) and AllSoundOff (Bn 78 00)  */
+    /*	{
+     static unsigned char sAllNoteAndSoundOff[] = {0xB0, 0x7B, 0x00, 0xB0, 0x78, 0x00};
+     MDTimeType lastTime = MDCalibratorTickToTime(inPlayer->calib, inPlayer->lastTick);
+     SendMIDIEventsToAllTracks(inPlayer, lastTime, 6, sAllNoteAndSoundOff);
+     } */
+    StopSoundInAllTracks(inPlayer);
+    
+    inPlayer->status = kMDPlayer_ready;
+    
+    inPlayer->recordingStopTick = kMDMaxTick;
+    
+    return kMDNoError;
 }
 
 /* --------------------------------------
@@ -1933,86 +1881,31 @@ MDPlayerStopRecording(MDPlayer *inPlayer)
 }
 
 /* --------------------------------------
-	･ MDPlayerStop
-   -------------------------------------- */
-MDStatus
-MDPlayerStop(MDPlayer *inPlayer)
-{
-	if (inPlayer == NULL || inPlayer->merger == NULL)
-		return kMDNoError;
-	if (inPlayer->status == kMDPlayer_suspended) {
-		inPlayer->stopTick = kMDMaxTick;
-		inPlayer->status = kMDPlayer_ready;
-		return kMDNoError;
-	}
-	if (inPlayer->status != kMDPlayer_playing && inPlayer->status != kMDPlayer_exhausted)
-		return kMDNoError;
-
-    /*  Stop MIDI recording  */
-	MDPlayerStopRecording(inPlayer);
-	
-	/*  Stop Audio Processing  */
-/*	MDAudioStop(inPlayer->audio); */
-
-/*    for (i = MIDIGetNumberOfSources() - 1; i >= 0; i--) {
-        MIDIPortDisconnectSource(sMIDIInputPortRef, MIDIGetSource(i));
-    } */
-
-#if !USE_TIME_MANAGER
-	inPlayer->shouldTerminate = 1;
-	pthread_join(inPlayer->playThread, NULL);  /*  Wait for the playing thread to terminate  */
-#else
-	{
-		OSStatus err = RemoveTimeTask((QElemPtr)&(inPlayer->myTMTask));
-		DisposeTimerUPP(inPlayer->myTMTask.tmTask.tmAddr);
-		inPlayer->myTMTask.player = NULL;
-	}
-#endif
-	
-	MDSequenceDisposeMutex(MDMergerGetSequence(inPlayer->merger));
-	
-	
-	/*  Send AllNoteOff (Bn 7B 00) and AllSoundOff (Bn 78 00)  */
-/*	{
-		static unsigned char sAllNoteAndSoundOff[] = {0xB0, 0x7B, 0x00, 0xB0, 0x78, 0x00};
-		MDTimeType lastTime = MDCalibratorTickToTime(inPlayer->calib, inPlayer->lastTick);
-		SendMIDIEventsToAllTracks(inPlayer, lastTime, 6, sAllNoteAndSoundOff);
-	} */
-	StopSoundInAllTracks(inPlayer);
-	
-	inPlayer->status = kMDPlayer_ready;
-
-	inPlayer->stopTick = kMDMaxTick;
-	
-    return kMDNoError;
-}
-
-/* --------------------------------------
-	･ MDPlayerScheduleStopTick
-   -------------------------------------- */
-MDStatus
-MDPlayerScheduleStopTick(MDPlayer *inPlayer, MDTickType inStopTick)
-{
-	/*  Note: stop tick will be reset every time MDPlayerStop() is called  */
-	if (inPlayer != NULL)
-		inPlayer->stopTick = inStopTick;
-	return kMDNoError;
-}
-
-/* --------------------------------------
 	･ MDPlayerSuspend
-   -------------------------------------- */
+ -------------------------------------- */
 MDStatus
 MDPlayerSuspend(MDPlayer *inPlayer)
 {
-	MDStatus sts;
-	if (inPlayer != NULL) {
-		sts = MDPlayerStop(inPlayer);
-		inPlayer->status = kMDPlayer_suspended;
-		return sts;
-	} else return kMDNoError;
+    MDStatus sts;
+    if (inPlayer != NULL) {
+        sts = MDPlayerStop(inPlayer);
+        inPlayer->status = kMDPlayer_suspended;
+        return sts;
+    } else return kMDNoError;
 }
-	
+
+/* --------------------------------------
+	･ MDPlayerSetRecordingStopTick
+   -------------------------------------- */
+MDStatus
+MDPlayerSetRecordingStopTick(MDPlayer *inPlayer, MDTickType inTick)
+{
+	/*  Note: recording stop tick will be reset every time MDPlayerStop() is called  */
+	if (inPlayer != NULL)
+		inPlayer->recordingStopTick = inTick;
+	return kMDNoError;
+}
+
 /* --------------------------------------
 	･ MDPlayerGetStatus
    -------------------------------------- */
@@ -2080,50 +1973,129 @@ MDPlayerGetTick(MDPlayer *inPlayer)
 void
 MDPlayerSetMIDIThruDeviceAndChannel(long dev, int ch)
 {
-    if (dev >= 0 && dev < MDPlayerGetNumberOfDestinations()) {
-		MIDIObjectType objType;
-		MIDIObjectRef eref;
-        sMIDIThruDevice = dev;
-		if (MIDIObjectFindByUniqueID(sDeviceInfo.dest[dev].uniqueID, &eref, &objType) == noErr && objType == kMIDIObjectType_Destination)
-			sMIDIThruDeviceRef = eref;
-		else sMIDIThruDeviceRef = MIDIObjectNull;
-    /*    sMIDIThruDeviceRef = MIDIGetDestination(dev); */
-        sMIDIThruChannel = ch;  /*  If 16, then incoming channel is kept  */
-    } else {
-        sMIDIThruDevice = -1;
-        sMIDIThruDeviceRef = MIDIObjectNull;
-    }
+ //   if (sMIDIThruDestination != NULL)
+ //       MDPlayerReleaseDestinationInfo(sMIDIThruDestination);
+ //   sMIDIThruDestination = MDPlayerNewDestinationInfo(dev);
+    sMIDIThruDevice = dev;
+    sMIDIThruChannel = ch;
 }
 
 /* --------------------------------------
 	･ MDPlayerBacktrackEvents
    -------------------------------------- */
 MDStatus
-MDPlayerBacktrackEvents(MDPlayer *inPlayer, const long *inEventType, const long *inEventTypeLastOnly)
+MDPlayerBacktrackEvents(MDPlayer *inPlayer, MDTickType inTick, const long *inEventType, const long *inEventTypeLastOnly)
 {
 	/*  The long values in inEventType[] and inEventTypeLastOnly[] are in the following format:
 		lower 16 bits = MDEventKind, upper 16 bits = the 'code' field in MDEvent record.
 		The value -1 is used for termination.  */
 	
-	typedef struct EventWithDest {
-		MDEvent *ep;
-		long	dest;
-	} EventWithDest;
-	EventWithDest *eventWithDestList;
-	MDEvent *ep;
-	long num, n, dest, index, track, maxIndex;
-	MDMerger *merger;
+    MDEvent *ep;
+    MDEvent **lastOnlyEvents;
 	MDDestinationInfo *info;
-	static const long sDefaultEventType[] = {-1};
+    int i, channel, num, lastOnlyCount, processedDest;
+    static const long sDefaultEventType = { -1 };
 
 	if (inEventType == NULL)
-		inEventType = sDefaultEventType;
+		inEventType = &sDefaultEventType;
 	if (inEventTypeLastOnly == NULL)
-		inEventTypeLastOnly = sDefaultEventType;
-	merger = MDMergerDuplicate(inPlayer->merger);
-	if (merger == NULL)
-		return kMDErrorOutOfMemory;
+		inEventTypeLastOnly = &sDefaultEventType;
 
+    /*  Count the 'last only' types  */
+    for (i = 0; inEventTypeLastOnly[i] != -1; i++);
+    lastOnlyCount = i;
+    if (lastOnlyCount > 0)
+        lastOnlyEvents = (MDEvent **)calloc(sizeof(MDEvent *), lastOnlyCount * inPlayer->destNum * 16);
+    else lastOnlyEvents = NULL;
+    
+    /*  Rewind to the top of the sequence  */
+    MDPlayerJumpToTick(inPlayer, 0);
+    
+    /*  Use note-off track for keeping 'last only' events  */
+    for (num = 0; num < inPlayer->destNum; num++) {
+        info = inPlayer->destInfo[num];
+        MDPointerSetPosition(info->noteOffPtr, 0);
+        MDTrackClear(info->noteOff);
+    }
+        
+    do {
+        processedDest = 0;
+        for (num = 0; num < inPlayer->destNum; num++) {
+            int kind, code;
+            long n;
+            info = inPlayer->destInfo[num];
+            if (info->currentTick < inTick) {
+                processedDest++;
+                ep = info->currentEp;
+                /*  Is this event to be sent?  */
+                for (i = 0; (n = inEventType[i]) != -1; i++) {
+                    kind = (n & 0xffff);
+                    code = ((n >> 16) & 0xffff);
+                    if (MDGetKind(ep) == kind && (!MDHasCode(ep) || code == 0xffff || MDGetCode(ep) == code))
+                        break;
+                }
+                if (n != -1) {
+                    /*  Schedule this event  */
+                    channel = (MDTrackGetTrackChannel(info->currentTrack) & 15);
+                    if (ScheduleMDEventToDevice(info->dev, 0, ep, channel) < 0)
+                        continue;
+                } else {
+                    /*  Is this 'last only' event?  */
+                    for (i = 0; i < lastOnlyCount; i++) {
+                        n = inEventTypeLastOnly[i];
+                        kind = (n & 0xffff);
+                        code = ((n >> 16) & 0xffff);
+                        if (MDGetKind(ep) == kind && (!MDHasCode(ep) || code == 0xffff || MDGetCode(ep) == code))
+                            break;
+                    }
+                    if (i < lastOnlyCount) {
+                        /*  Store this event; if the same type of event is already
+                            present, then overwrite it  */
+                        MDEvent ev, *ep1;
+                        MDEventClear(&ev);
+                        MDEventCopy(&ev, ep, 1);
+                        channel = (MDTrackGetTrackChannel(info->currentTrack) & 15);
+                        MDSetChannel(&ev, channel);
+                        MDSetTick(&ev, 0);
+                        MDPointerSetPosition(info->noteOffPtr, -1);
+                        kind = MDGetKind(ep);
+                        code = (MDHasCode(ep) ? MDGetCode(ep) : 0);
+                        while ((ep1 = MDPointerForward(info->noteOffPtr)) != NULL) {
+                            if (MDGetChannel(ep1) == channel
+                                && MDGetKind(ep1) == kind
+                                && (!MDHasCode(ep1) || MDGetCode(ep1) == code))
+                                break;
+                        }
+                        if (ep1 != NULL) {
+                            /*  Replace ep1 with ev  */
+                            MDPointerReplaceAnEvent(info->noteOffPtr, &ev, NULL);
+                        } else {
+                            /*  Add ev  */
+                            MDPointerInsertAnEvent(info->noteOffPtr, &ev);
+                        }
+                    }
+                }
+                info->currentEp = MDTrackMergerForward(info->merger, &(info->currentTrack));
+                info->currentTick = (info->currentEp != NULL ? MDGetTick(info->currentEp) : kMDMaxTick);
+            }
+        }
+    } while (processedDest > 0);
+    /*  Send the 'last only' events  */
+    for (num = 0; num < inPlayer->destNum; num++) {
+        MDEvent *ep2;
+        info = inPlayer->destInfo[num];
+        MDPointerSetPosition(info->noteOffPtr, -1);
+        while ((ep2 = MDPointerForward(info->noteOffPtr)) != NULL) {
+            ScheduleMDEventToDevice(info->dev, 0, ep2, 0);
+        }
+        MDPointerSetPosition(info->noteOffPtr, 0);
+        MDTrackClear(info->noteOff);
+        info->noteOffTick = kMDMaxTick;
+    }
+    inPlayer->lastTick = inTick;
+    inPlayer->time = MDCalibratorTickToTime(inPlayer->calib, inTick);
+    return 0;
+#if 0
 	/*  eventWithDestList[]: record the event to be sent  */
 	maxIndex = 256;
 	eventWithDestList = (EventWithDest *)malloc(maxIndex * sizeof(EventWithDest));
@@ -2223,6 +2195,7 @@ MDPlayerBacktrackEvents(MDPlayer *inPlayer, const long *inEventType, const long 
 	free(eventWithDestList);
 	MDMergerRelease(merger);
 	return kMDNoError;
+#endif
 }
 
 static int
@@ -2246,6 +2219,7 @@ MDPlayerGetRecordedEvents(MDPlayer *inPlayer, MDEvent **outEvent, int *outEventB
 {
     int result;
     MDTimeType timeStamp;
+    MDTickType tick;
 	int eventCount = 0, n;
 	while (eventCount == 0) {
 		result = MDPlayerGetRecordingData(inPlayer, &timeStamp, &(inPlayer->tempStorageLength), &(inPlayer->tempStorage), &(inPlayer->tempStorageSize));
@@ -2289,20 +2263,28 @@ MDPlayerGetRecordedEvents(MDPlayer *inPlayer, MDEvent **outEvent, int *outEventB
 			/*	MDEventInit(outEvent);
 				return kMDErrorNoEvents; */
 			}
-			MDSetTick(&tempEvent, MDCalibratorTimeToTick(inPlayer->calib, timeStamp));
-			if (*outEvent == NULL || eventCount >= *outEventBufSiz) {
-				/*  (Re)allocate the event buffer  */
-				int allocSize = *outEventBufSiz + 8;
-				MDEvent *ep = (MDEvent *)calloc(sizeof(MDEvent), allocSize);
-				if (*outEvent != NULL && *outEventBufSiz > 0)
-					MDEventMove(ep, *outEvent, *outEventBufSiz);
-				*outEventBufSiz = allocSize;
-				if (*outEvent != NULL)
-					free(*outEvent);
-				*outEvent = ep;
-			}
-			MDEventMove(*outEvent + eventCount, &tempEvent, 1);
-			eventCount++;
+            tick = MDCalibratorTimeToTick(inPlayer->calib, timeStamp);
+            if (tick < inPlayer->recordingStopTick) {
+                MDSetTick(&tempEvent, tick);
+                if (*outEvent == NULL || eventCount >= *outEventBufSiz) {
+                    /*  (Re)allocate the event buffer  */
+                    int allocSize = *outEventBufSiz + 8;
+                    MDEvent *ep = (MDEvent *)calloc(sizeof(MDEvent), allocSize);
+                    if (*outEvent != NULL && *outEventBufSiz > 0)
+                        MDEventMove(ep, *outEvent, *outEventBufSiz);
+                    *outEventBufSiz = allocSize;
+                    if (*outEvent != NULL)
+                        free(*outEvent);
+                    *outEvent = ep;
+                }
+                MDEventMove(*outEvent + eventCount, &tempEvent, 1);
+                eventCount++;
+            } else {
+                /*  If the tick exceeds recordingStopTick, then do not collect it  */
+                /*  This does not happen so often, because recording should be stopped
+                 by PlayingViewController after a while  */
+                MDEventClear(&tempEvent);
+            }
 		}
 	}
     return eventCount;

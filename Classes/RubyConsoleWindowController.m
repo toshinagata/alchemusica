@@ -40,6 +40,7 @@ static RubyConsoleWindowController *shared;
 	[super windowDidLoad];
 	font = [NSFont userFixedPitchFontOfSize:11.0];
 	[consoleView setFont:font];
+    [consoleView setEnabledTextCheckingTypes:0];  //  Disable "smart=***"
 }
 
 - (void)flushMessage

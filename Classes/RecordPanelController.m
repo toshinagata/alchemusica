@@ -452,6 +452,13 @@ sAllowedExtensionsForTag(int tag)
 	obj = sAllowedExtensionsForTag(tag);
 	if (obj)
 		[panel setAllowedFileTypes:obj];
+    if (filename == nil) {
+        NSString *ext = (obj != nil ? [obj objectAtIndex:0] : @"");
+        filename = [NSString stringWithFormat: @"untitled.%@", ext];
+    }
+    if (foldername == nil)
+        foldername = @"~/Music";
+            
     [panel setDirectoryURL: [NSURL fileURLWithPath:[foldername stringByExpandingTildeInPath]]];
     [panel setNameFieldStringValue:filename];
 	if ([panel runModal] == NSFileHandlingPanelOKButton) {

@@ -571,7 +571,7 @@ sTableColumnIDToInt(id identifier)
 //	[theWindow restoreCachedImage];
 //	[theWindow discardCachedImage];
 //	[theWindow flushWindowIfNeeded];
-    MDTickType epos = [[[self document] myMIDISequence] sequenceDuration];
+//   MDTickType epos = [[[self document] myMIDISequence] sequenceDuration];
     if (!NSIsEmptyRect(timeIndicatorRect)) {
         if ([myFloatingView canDraw]) {
             [myFloatingView lockFocus];
