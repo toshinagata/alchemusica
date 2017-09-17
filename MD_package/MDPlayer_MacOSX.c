@@ -367,10 +367,11 @@ MDPlayerInitCoreMIDI(void)
 	if (sMIDIInputPortRef == MIDIObjectNull)
 		MIDIInputPortCreate(sMIDIClientRef, CFSTR("Input port"), MyMIDIReadProc, NULL, &sMIDIInputPortRef);
 	/*  Start receiving incoming MIDI messages  */
-	for (n = MIDIGetNumberOfSources() - 1; n >= 0; n--) {
-		MIDIPortConnectSource(sMIDIInputPortRef, MIDIGetSource(n), (void *)n);
-	/*	dprintf(0, "connecting input source %d\n", (int)n); */
-	}
+    /*  -> Now handled in MDPlayerReloadDeviceInformation()  */
+//	for (n = MIDIGetNumberOfSources() - 1; n >= 0; n--) {
+//		MIDIPortConnectSource(sMIDIInputPortRef, MIDIGetSource(n), (void *)n);
+//	/*	dprintf(0, "connecting input source %d\n", (int)n); */
+//	}
 	sDeviceInfo.initialized = 1;
 }
 
@@ -380,12 +381,29 @@ MDPlayerInitCoreMIDI(void)
 void
 MDPlayerReloadDeviceInformation(void)
 {
+    int n;
+    
 	if (!sDeviceInfo.initialized)
 		MDPlayerInitCoreMIDI();
+    
+    /*  Disconnect the previous MIDI sources from the input port  */
+    for (n = 0; n < sDeviceInfo.sourceNum; n++) {
+        if (sDeviceInfo.source[n].uniqueID != kInvalidUniqueID) {
+            MIDIPortDisconnectSource(sMIDIInputPortRef, sDeviceInfo.source[n].midiRec->eref);
+        }
+    }
+
 	/*  Update the device information  */
 	/*  The device index to the same device [i.e. the device with the same uniqueID] remains the same.  */
 	MDPlayerReloadDeviceInformationSub(&(sDeviceInfo.dest), &(sDeviceInfo.destNum), 1);
 	MDPlayerReloadDeviceInformationSub(&(sDeviceInfo.source), &(sDeviceInfo.sourceNum), 0);
+
+    /*  Connect the updated MIDI sources to the input port  */
+    for (n = 0; n < sDeviceInfo.sourceNum; n++) {
+        if (sDeviceInfo.source[n].uniqueID != kInvalidUniqueID) {
+            MIDIPortConnectSource(sMIDIInputPortRef, sDeviceInfo.source[n].midiRec->eref, (void *)n);
+        }
+    }
 }
 
 /* --------------------------------------

@@ -189,7 +189,9 @@ sAllowedExtensionsForTag(int tag)
 	MyMIDISequence *seq = [myDocument myMIDISequence];
 
 	//  Update the device information before starting the dialog
-	MDPlayerReloadDeviceInformation();
+    //  This is unnecessary: device information is always updated whenever
+    //  Audio/MIDI setup changes
+//	MDPlayerReloadDeviceInformation();
 	
 	//  Initialize device popups (set device names and tags)
 	[sourceDevicePopUp removeAllItems];
@@ -337,6 +339,7 @@ sAllowedExtensionsForTag(int tag)
 {
 	id item;
 	int tag, ch;
+    long dev;
 	NSString *str;
 	MyMIDISequence *seq = [myDocument myMIDISequence];
 
@@ -359,9 +362,28 @@ sAllowedExtensionsForTag(int tag)
 		//	MDAudioSelectInOutDeviceAtIndices(-1, [item tag]);
 		} else {
 			[info setValue: str forKey: MyRecordingInfoDestinationDeviceKey];
+            dev = MDPlayerGetDestinationNumberFromName([str UTF8String]);
+            ch = 0;
+            if (dev >= 0) {
+                item = [midiChannelPopUp selectedItem];
+                if (item != nil)
+                    ch = [item tag] - 1;
+            }
+            MDPlayerSetMIDIThruDeviceAndChannel(dev, ch);
 		}
 	} else if (sender == midiChannelPopUp) {
 		[info setValue: [NSNumber numberWithInt: tag - 1] forKey: MyRecordingInfoDestinationChannelKey];
+        if (!isAudio) {
+            item = [destinationDevicePopUp selectedItem];
+            if (item != nil) {
+                str = [item title];
+                if (str != nil) {
+                    dev = MDPlayerGetDestinationNumberFromName([str UTF8String]);
+                    if (dev >= 0)
+                        MDPlayerSetMIDIThruDeviceAndChannel(dev, tag - 1);
+                }
+            }
+        }
 	} else if (sender == destinationTrackPopUp) {
 		
 		[info setValue: [NSNumber numberWithInt: (tag > 0 ? tag : -1)] forKey: MyRecordingInfoTargetTrackKey];
