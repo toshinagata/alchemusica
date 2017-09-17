@@ -2487,9 +2487,11 @@ MDPointerReplaceAnEvent(MDPointer *inPointer, const MDEvent *inEvent, MDEvent *o
     MDEvent *ep;
     MDTrack *track;
     MDTickType oldTick;
+    int oldHasDuration;
     if (inPointer == NULL || (ep = MDPointerCurrent(inPointer)) == NULL)
         return kMDNoError;
     track = MDPointerGetTrack(inPointer);
+    oldHasDuration = MDHasDuration(ep);
     if (outEvent != NULL)
         MDEventCopy(outEvent, ep, 1);
     if (MDIsChannelEvent(ep))
@@ -2507,12 +2509,13 @@ MDPointerReplaceAnEvent(MDPointer *inPointer, const MDEvent *inEvent, MDEvent *o
     else track->nch[17]++;
     if (oldTick != MDGetTick(inEvent))
         return MDPointerChangeTick(inPointer, MDGetTick(inEvent), -1);
-    else if (MDHasDuration(inEvent)) {
-        MDTickType tick1 = MDGetTick(inEvent) + MDGetDuration(inEvent);
-		if (tick1 >= MDTrackGetDuration(track))
-			MDTrackSetDuration(track, tick1 + 1);
-        if (inPointer->block->largestTick >= 0 && tick1 > inPointer->block->largestTick)
-            inPointer->block->largestTick = tick1;
+    else if (MDHasDuration(inEvent) || oldHasDuration) {
+        if (MDHasDuration(inEvent)) {
+            MDTickType tick1 = MDGetTick(inEvent) + MDGetDuration(inEvent);
+            if (tick1 >= MDTrackGetDuration(track))
+                MDTrackSetDuration(track, tick1 + 1);
+        }
+        inPointer->block->largestTick = kMDNegativeTick;
     }
     return kMDNoError;
 }

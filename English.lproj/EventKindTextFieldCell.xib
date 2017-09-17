@@ -11,7 +11,7 @@
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
-        <customObject id="-3" userLabel="Application"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <menu title="Menu" id="5" userLabel="MyContextMenu">
             <items>
                 <menuItem title="Note" id="24">
@@ -223,42 +223,48 @@
                                     <action selector="eventKindMenuSelected:" target="-2" id="65"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Copyright" tag="2005" id="20">
+                            <menuItem title="Text" tag="2005" id="jNY-n1-7Mx">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="eventKindMenuSelected:" target="-2" id="lF3-FH-8MK"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Copyright" tag="2006" id="20">
                                 <connections>
                                     <action selector="eventKindMenuSelected:" target="-2" id="66"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Sequence" tag="2006" id="14">
+                            <menuItem title="Sequence" tag="2007" id="14">
                                 <connections>
                                     <action selector="eventKindMenuSelected:" target="-2" id="67"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Instrument" tag="2007" id="21">
+                            <menuItem title="Instrument" tag="2008" id="21">
                                 <connections>
                                     <action selector="eventKindMenuSelected:" target="-2" id="68"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Lyric" tag="2008" id="10">
+                            <menuItem title="Lyric" tag="2009" id="10">
                                 <connections>
                                     <action selector="eventKindMenuSelected:" target="-2" id="69"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Marker" tag="2009" id="16">
+                            <menuItem title="Marker" tag="2010" id="16">
                                 <connections>
                                     <action selector="eventKindMenuSelected:" target="-2" id="70"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Cue" tag="2010" id="19">
+                            <menuItem title="Cue" tag="2011" id="19">
                                 <connections>
                                     <action selector="eventKindMenuSelected:" target="-2" id="71"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Program" tag="2011" id="22">
+                            <menuItem title="Program" tag="2012" id="22">
                                 <connections>
                                     <action selector="eventKindMenuSelected:" target="-2" id="72"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Device" tag="2012" id="12">
+                            <menuItem title="Device" tag="2013" id="12">
                                 <connections>
                                     <action selector="eventKindMenuSelected:" target="-2" id="73"/>
                                 </connections>

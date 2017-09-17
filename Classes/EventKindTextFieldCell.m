@@ -122,16 +122,17 @@
 			case 2004: /* port */
 				MDSetKind(&event, kMDEventPortNumber);
 				break;
-			case 2005: /* copyright */
-			case 2006: /* sequence */
-			case 2007: /* instrument */
-			case 2008: /* lyric */
-			case 2009: /* marker */
-			case 2010: /* cue */
-			case 2011: /* program */
-			case 2012: /* device */
+            case 2005: /* text */
+			case 2006: /* copyright */
+			case 2007: /* sequence */
+			case 2008: /* instrument */
+			case 2009: /* lyric */
+			case 2010: /* marker */
+			case 2011: /* cue */
+			case 2012: /* program */
+			case 2013: /* device */
 				MDSetKind(&event, kMDEventMetaText);
-				MDSetCode(&event, tag - 2005 + kMDMetaCopyright);
+				MDSetCode(&event, tag - 2005 + kMDMetaText);
 				break;
 			default:
 				return;

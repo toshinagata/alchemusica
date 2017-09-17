@@ -114,7 +114,7 @@ typedef struct ListWindowFilterRecord {
 - (IBAction)myShowCount:(id)sender;
 - (IBAction)myShowMillisecond:(id)sender;
 //- (IBAction)myDoubleAction:(id)sender;
-- (IBAction)eventKindMenuSelected:(id)sender;
+//- (IBAction)eventKindMenuSelected:(id)sender;
 
 - (IBAction)deleteSelectedEvents:(id)sender;
 
