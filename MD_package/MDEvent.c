@@ -595,7 +595,7 @@ MDEventToKindString(const MDEvent *eref, char *buf, long length)
 	return strlen(buf);
 }
 
-static char *sMetronomeBeatModifier[] = { "", ".", "*" };
+static char *sMetronomeBeatModifier[] = { "", ".", "t", "*" };
 
 /* --------------------------------------
 	･ MDEventToDataString
@@ -622,16 +622,20 @@ MDEventToDataString(const MDEvent *eref, char *buf, long length)
                 int d3, dot;
                 switch (ptr[2]) {
                     case 96: case 48: case 24: case 12: case 6: case 3:
-                        d3 = 96 / ptr[2];
+                        d3 = 96 / ptr[2];  /* normal notes */
                         dot = 0;
                         break;
                     case 144: case 72: case 36: case 18: case 9:
-                        d3 = 144 / ptr[2];
+                        d3 = 144 / ptr[2]; /* dotted notes */
                         dot = 1;
+                        break;
+                    case 64: case 32: case 16: case 8: case 4: case 2: case 1:
+                        d3 = 64 / ptr[2];  /* triplets */
+                        dot = 2;
                         break;
                     default:
                         d3 = ptr[2];
-                        dot = 2;
+                        dot = 3;
                         break;
                 }
                 n = sprintf(buf, "%d/%d (%d%s)", (int)ptr[0], d1, d3, sMetronomeBeatModifier[dot]);
@@ -892,6 +896,8 @@ MDEventDataStringToEvent(const MDEvent *epin, const char *buf, MDEventFieldData 
 			return kMDEventFieldTempo;
 		case kMDEventTimeSignature:
 			if (sscanf(buf, "%d/%d%n", &d1, &d2, &d3) == 2) {
+                if (32 % d2 != 0)
+                    break;  /*  Invalid note name  */
                 switch (d2) {
                     case 1: d4 = 0; break;
                     case 2: d4 = 1; break;
@@ -899,26 +905,30 @@ MDEventDataStringToEvent(const MDEvent *epin, const char *buf, MDEventFieldData 
                     case 8: d4 = 3; break;
                     case 16: d4 = 4; break;
                     case 32: d4 = 5; break;
-                    default: d4 = -1; break;
                 }
 				d1 = (d1 & 0x7f);
-				if (d1 != 0 && d4 >= 0) {
+				if (d1 != 0) {
                     char cc;
 					epout->ucValue[0] = d1;
 					epout->ucValue[1] = d4;
                     if (sscanf(buf + d3, " (%d%c", &d1, &cc) == 2) {
-                        if (cc == sMetronomeBeatModifier[1][0])
-                            cc = 1;
-                        else if (cc == sMetronomeBeatModifier[2][0])
-                            cc = 2;
-                        else cc = 0;
-                        if (d1 == 0) {
-                            d1 = 96 / d2;
-                        } else if (cc == 0) {
+                        if (d1 == 0)
+                            break;  /*  Invalid  */
+                        if (cc == ')') {
+                            /*  Normal note  */
+                            if (32 % d1 != 0)
+                                break;  /*  Invalid note name  */
                             d1 = 96 / d1;
-                        } else if (cc == 1) {
+                        } else if (cc == sMetronomeBeatModifier[1][0]) {
+                            if (16 % d1 != 0)
+                                break;  /*  Invalid note name  */
                             d1 = 144 / d1;
-                        }
+                        } else if (cc == sMetronomeBeatModifier[2][0]) {
+                            if (64 % d1 != 0)
+                                break;  /*  Invalid note name  */
+                            d1 = 64 / d1;
+                        } else if (cc != sMetronomeBeatModifier[3][0])
+                            break;  /*  Invalid format  */
                     } else d1 = 96 / d2;
                     if (d1 == 0)
                         d1 = 1;

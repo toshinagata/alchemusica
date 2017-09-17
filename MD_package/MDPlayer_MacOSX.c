@@ -356,7 +356,6 @@ sCoreMIDINotifyProc(const MIDINotification *message, void *refCon)
 void
 MDPlayerInitCoreMIDI(void)
 {
-	int n;
 	if (sDeviceInfo.initialized)
 		return;
 
@@ -366,12 +365,6 @@ MDPlayerInitCoreMIDI(void)
 		MIDIOutputPortCreate(sMIDIClientRef, CFSTR("Output port"), &sMIDIOutputPortRef);
 	if (sMIDIInputPortRef == MIDIObjectNull)
 		MIDIInputPortCreate(sMIDIClientRef, CFSTR("Input port"), MyMIDIReadProc, NULL, &sMIDIInputPortRef);
-	/*  Start receiving incoming MIDI messages  */
-    /*  -> Now handled in MDPlayerReloadDeviceInformation()  */
-//	for (n = MIDIGetNumberOfSources() - 1; n >= 0; n--) {
-//		MIDIPortConnectSource(sMIDIInputPortRef, MIDIGetSource(n), (void *)n);
-//	/*	dprintf(0, "connecting input source %d\n", (int)n); */
-//	}
 	sDeviceInfo.initialized = 1;
 }
 
