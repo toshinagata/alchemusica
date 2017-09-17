@@ -1646,7 +1646,7 @@ MDTrackRecache(MDTrack *inTrack, int check)
 	pt2 = MDPointerNew((MDTrack *)inTrack);
 	if (pt1 == NULL || pt2 == NULL)
 		return kMDErrorOutOfMemory;
-	lastTick = 0;
+    lastTick = kMDNegativeTick;
 	for (i = 0; i < 18; i++)
 		nch[i] = 0;
 	
