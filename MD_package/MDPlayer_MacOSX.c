@@ -1173,6 +1173,7 @@ MyTimerFunc(MDPlayer *player)
 	sequence = player->sequence;
 	
 	now_time = GetHostTimeInMDTimeType() - player->startTime;
+    player->time = now_time;
 	now_tick = MDCalibratorTimeToTick(player->calib, now_time);
 	prefetch_tick = MDCalibratorTimeToTick(player->calib, now_time + kMDPlayerPrefetchInterval);
 	last_time = 0;

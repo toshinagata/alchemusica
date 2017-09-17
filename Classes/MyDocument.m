@@ -3303,15 +3303,23 @@ isConductorEvent(const MDEvent *ep, long position, void *inUserData)
 	MyMIDISequence *seq;
     MDTrackObject *newTrack;
     long recIndex;
-	MDTickType startTick, endTick;
+    MDTickType startTick, endTick, currentTick;
+    MDTimeType currentTime;
+    NSDictionary *info;
 	static unsigned char remapTable[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	
 	seq = [self myMIDISequence];
-	endTick = MDPlayerGetTick([seq myPlayer]);
+    info = [seq recordingInfo];
+    currentTime = MDPlayerGetTime([seq myPlayer]);
+    currentTick = MDCalibratorTimeToTick([seq sharedCalibrator], currentTime);
+    if ([[info valueForKey: MyRecordingInfoStopFlagKey] boolValue]) {
+        endTick = [[info valueForKey: MyRecordingInfoStopTickKey] doubleValue];
+        if (currentTick < endTick)
+            endTick = currentTick;
+    } else endTick = currentTick;
 	newTrack = [seq finishMIDIRecording];
 	MDTrackSetDuration([newTrack track], endTick);
 	if (newTrack != nil) {
-		NSDictionary *info = [seq recordingInfo];
 		int destChannel;
 		recIndex = [[info valueForKey: MyRecordingInfoTargetTrackKey] intValue];
 		startTick = [[info valueForKey: MyRecordingInfoStartTickKey] doubleValue];
