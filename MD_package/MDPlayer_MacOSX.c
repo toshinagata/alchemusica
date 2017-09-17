@@ -966,6 +966,10 @@ PrepareMetronomeForTick(MDPlayer *inPlayer, MDTickType inTick)
 		t = MDGetTick(ep);
 		inPlayer->metronomeBeat = timebase * p[2] / 24;
 		inPlayer->metronomeBar = timebase * p[0] * 4 / (1 << p[1]);
+        if (inPlayer->metronomeBar < timebase / 64)
+            inPlayer->metronomeBar = timebase;
+        if (inPlayer->metronomeBeat < timebase / 64)
+            inPlayer->metronomeBeat = inPlayer->metronomeBar;
 	}
 	inPlayer->nextMetronomeBar = t + (inTick - t + inPlayer->metronomeBar - 1) / inPlayer->metronomeBar * inPlayer->metronomeBar;
 	t0 = inPlayer->nextMetronomeBar;

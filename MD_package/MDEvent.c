@@ -595,6 +595,8 @@ MDEventToKindString(const MDEvent *eref, char *buf, long length)
 	return strlen(buf);
 }
 
+static char *sMetronomeBeatModifier[] = { "", ".", "*" };
+
 /* --------------------------------------
 	･ MDEventToDataString
    -------------------------------------- */
@@ -612,7 +614,28 @@ MDEventToDataString(const MDEvent *eref, char *buf, long length)
 			break;
 		case kMDEventTimeSignature:
 			ptr = MDGetMetaDataPtr(eref);
-			n = sprintf(buf, "%d/%d", (int)ptr[0], (1 << (int)ptr[1]));
+            d1 = (1 << (int)ptr[1]);
+            d2 = 96 / d1;
+            if (ptr[2] == d2) {
+                n = sprintf(buf, "%d/%d", (int)ptr[0], d1);
+            } else {
+                int d3, dot;
+                switch (ptr[2]) {
+                    case 96: case 48: case 24: case 12: case 6: case 3:
+                        d3 = 96 / ptr[2];
+                        dot = 0;
+                        break;
+                    case 144: case 72: case 36: case 18: case 9:
+                        d3 = 144 / ptr[2];
+                        dot = 1;
+                        break;
+                    default:
+                        d3 = ptr[2];
+                        dot = 2;
+                        break;
+                }
+                n = sprintf(buf, "%d/%d (%d%s)", (int)ptr[0], d1, d3, sMetronomeBeatModifier[dot]);
+            }
 			break;
 		case kMDEventKey:
 			ptr = MDGetMetaDataPtr(eref);
@@ -868,15 +891,38 @@ MDEventDataStringToEvent(const MDEvent *epin, const char *buf, MDEventFieldData 
 			epout->floatValue = dbl;
 			return kMDEventFieldTempo;
 		case kMDEventTimeSignature:
-			if (sscanf(buf, "%d/%d", &d1, &d2) == 2) {
-				unsigned int ud = d2;
-				d1 = (d1 & 0xff);
-				if (d1 != 0 && ud != 0) {
+			if (sscanf(buf, "%d/%d%n", &d1, &d2, &d3) == 2) {
+                switch (d2) {
+                    case 1: d4 = 0; break;
+                    case 2: d4 = 1; break;
+                    case 4: d4 = 2; break;
+                    case 8: d4 = 3; break;
+                    case 16: d4 = 4; break;
+                    case 32: d4 = 5; break;
+                    default: d4 = -1; break;
+                }
+				d1 = (d1 & 0x7f);
+				if (d1 != 0 && d4 >= 0) {
+                    char cc;
 					epout->ucValue[0] = d1;
-					for (d1 = 0; ud != 1; ud >>= 1)
-						d1++;
-					epout->ucValue[1] = d1;
-					epout->ucValue[2] = 24;
+					epout->ucValue[1] = d4;
+                    if (sscanf(buf + d3, " (%d%c", &d1, &cc) == 2) {
+                        if (cc == sMetronomeBeatModifier[1][0])
+                            cc = 1;
+                        else if (cc == sMetronomeBeatModifier[2][0])
+                            cc = 2;
+                        else cc = 0;
+                        if (d1 == 0) {
+                            d1 = 96 / d2;
+                        } else if (cc == 0) {
+                            d1 = 96 / d1;
+                        } else if (cc == 1) {
+                            d1 = 144 / d1;
+                        }
+                    } else d1 = 96 / d2;
+                    if (d1 == 0)
+                        d1 = 1;
+                    epout->ucValue[2] = d1;
 					epout->ucValue[3] = 8;
 					return kMDEventFieldMetaData;
 				}
