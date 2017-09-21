@@ -21,7 +21,8 @@
 
 #include <unistd.h>    /*  For getcwd()  */
 #include <sys/param.h> /*  For MAXPATHLEN  */
-#include <CoreServices/CoreServices.h>
+//#include <CoreServices/CoreServices.h> /* Use Audio Component Services instead */
+#include <AudioUnit/AudioComponent.h>
 #include <AudioUnit/AudioUnit.h>
 #include <AudioToolbox/AUGraph.h>			/*  for AUNode output  */
 #include <AudioToolbox/AUMIDIController.h>	/*  for routing MIDI to DLS synth */
@@ -541,10 +542,9 @@ exit:
 static MDStatus
 sMDAudioUpdateSoftwareDeviceInfo(void)
 {
-	ComponentDescription ccd, fcd;
-	Component cmp = NULL;
-	Handle pName;
-	char *cName;
+	AudioComponentDescription ccd, fcd;
+	AudioComponent cmp = NULL;
+	const char *cName;
 	int len, n, i;
 	UInt32 propSize;
 	MDAudioMusicDeviceInfo info, *ip;
@@ -560,23 +560,21 @@ sMDAudioUpdateSoftwareDeviceInfo(void)
 	
 	memset(&fcd, 0, sizeof(fcd));
 	fcd.componentType = kAudioUnitType_MusicDevice;
-	pName = NewHandle(0);
 	n = 0;
-	while ((cmp = FindNextComponent(cmp, &fcd)) != 0) {
-		ComponentInstance ci;
-		
+	while ((cmp = AudioComponentFindNext(cmp, &fcd)) != 0) {
+		AudioUnit unit;
+        CFStringRef nameRef;
+
 		/*  Get the component information  */
-		GetComponentInfo(cmp, &ccd, pName, NULL, NULL);
-		HLock(pName);
-		cName = *pName;
-		len = (unsigned char)(*cName++);
-		memset(&info, 0, sizeof(info));
+        AudioComponentCopyName(cmp, &nameRef);
+        cName = CFStringGetCStringPtr(nameRef, kCFStringEncodingUTF8);
+        len = strlen(cName);
+        memset(&info, 0, sizeof(info));
+        AudioComponentGetDescription(cmp, &ccd);
 		info.code = (((UInt64)ccd.componentSubType) << 32) + ((UInt64)ccd.componentManufacturer);
-		info.name = (char *)malloc(len + 1);
-		strncpy(info.name, cName, len);
-		info.name[len] = 0;
-		HUnlock(pName);
-		for (i = 0; (ip = MDArrayFetchPtr(gAudio->musicDeviceInfos, i)) != NULL; i++) {
+        info.name = strdup(cName);
+
+        for (i = 0; (ip = MDArrayFetchPtr(gAudio->musicDeviceInfos, i)) != NULL; i++) {
 			if (ip->code == info.code && strncmp(ip->name, cName, len) == 0) {
 				free(info.name);
 				info.name = NULL;
@@ -589,33 +587,38 @@ sMDAudioUpdateSoftwareDeviceInfo(void)
 		MyAppCallback_startupMessage("Loading %s...", info.name);
 		
 		/*  Get the audio output format  */
-		err = OpenAComponent(cmp, &ci);
+		err = AudioComponentInstanceNew(cmp, &unit);
 		if (err == noErr) {
 			propSize = sizeof(MDAudioFormat);
-			err = AudioUnitGetProperty(ci, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &info.format, &propSize);
+			err = AudioUnitGetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &info.format, &propSize);
 		} else {
-			ci = NULL;
+			unit = NULL;
 		}
 		if (err == noErr) {
 			propSize = sizeof(MDAudioFormat);
-			err = AudioUnitGetProperty(ci, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &info.format, &propSize);
+			err = AudioUnitGetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &info.format, &propSize);
 		}
 		if (err == noErr) {
-			err = AudioUnitGetPropertyInfo(ci, kAudioUnitProperty_GetUIComponentList, kAudioUnitScope_Global, 0, &propSize, NULL);
-			if (err == noErr && propSize > 0)
-				info.hasCustomView = 1;
-			else {
-				info.hasCustomView = 0;
-				err = noErr;
-			}
+            err = AudioUnitGetPropertyInfo(unit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global, 0, &propSize, NULL);
+            if (err == noErr && propSize > 0)
+                info.hasCustomView = kMDAudioHasCocoaView;
+            else {
+                err = AudioUnitGetPropertyInfo(unit, kAudioUnitProperty_GetUIComponentList, kAudioUnitScope_Global, 0, &propSize, NULL);
+                if (err == noErr && propSize > 0)
+                    info.hasCustomView = kMDAudioHasCarbonView;
+                else {
+                    info.hasCustomView = 0;
+                    err = noErr;
+                }
+            }
 		}
 		if (err == noErr) {
 			status = MDArrayInsert(gAudio->musicDeviceInfos, MDArrayCount(gAudio->musicDeviceInfos), 1, &info);
 		} else {
 			status = kMDErrorCannotSetupAudio;
 		}
-		if (ci != NULL)
-			CloseComponent(ci);
+		if (unit != NULL)
+			AudioComponentInstanceDispose(unit);
 		if (status == kMDNoError)
 			n++;
 		else {
@@ -624,7 +627,6 @@ sMDAudioUpdateSoftwareDeviceInfo(void)
 			break;
 		}
 	}
-	DisposeHandle(pName);
 	MyAppCallback_startupMessage("");
 	return status;
 }

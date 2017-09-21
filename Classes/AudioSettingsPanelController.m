@@ -219,11 +219,11 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 			ip = MDAudioGetIOStreamInfoAtIndex(idx);
 			if (ip != NULL && ip->unit != NULL) {
 				char *name = NULL;
-				id cont = [AUViewWindowController windowControllerForAudioUnit: ip->unit forceGeneric: NO delegate: nil];
+                MDAudioMusicDeviceInfo *mp = MDAudioMusicDeviceInfoAtIndex(ip->deviceIndex - kMDAudioMusicDeviceIndexOffset);
+				id cont = [AUViewWindowController windowControllerForAudioUnit: ip->unit cocoaView:(mp->hasCustomView == kMDAudioHasCocoaView) delegate: nil];
 				if (ip->midiControllerName != NULL)
 					name = ip->midiControllerName;
 				else {
-					MDAudioMusicDeviceInfo *mp = MDAudioMusicDeviceInfoAtIndex(ip->deviceIndex - kMDAudioMusicDeviceIndexOffset);
 					if (mp != NULL && mp->name != NULL)
 						name = mp->name;
 				}

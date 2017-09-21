@@ -34,8 +34,8 @@
 	WindowRef carbonWindowRef;
 //	NSWindow *carbonWindow;  //  For adding Windows menu item
 }
-+ (AUViewWindowController *)windowControllerForAudioUnit:(AudioUnit)unit forceGeneric:(BOOL)forceGeneric delegate:(id)delegate;
-- (id)initWithAudioUnit:(AudioUnit)unit forceGeneric:(BOOL)forceGeneric delegate:(id)delegate;
++ (AUViewWindowController *)windowControllerForAudioUnit:(AudioUnit)unit cocoaView:(BOOL)cocoaView delegate:(id)delegate;
+- (id)initWithAudioUnit:(AudioUnit)unit cocoaView:(BOOL)cocoaView delegate:(id)delegate;
 - (AudioUnit)audioUnit;
 /*
 - (int)showCocoaViewForAudioUnit:(AudioUnit)anAudioUnit;

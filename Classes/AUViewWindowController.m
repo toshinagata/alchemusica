@@ -52,7 +52,7 @@ sWindowEventHandler(EventHandlerCallRef myHandler, EventRef theEvent, void* user
 
 static NSMutableArray *sAUViewWindowControllers = nil;
 
-+ (AUViewWindowController *)windowControllerForAudioUnit:(AudioUnit)unit forceGeneric:(BOOL)forceGeneric delegate:(id)delegate
++ (AUViewWindowController *)windowControllerForAudioUnit:(AudioUnit)unit cocoaView:(BOOL)cocoaView delegate:(id)delegate
 {
 	int i, n;
 	id cont;
@@ -67,7 +67,7 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 			return cont;
 		}
 	}
-	cont = [[[AUViewWindowController alloc] initWithAudioUnit:unit forceGeneric:forceGeneric delegate:delegate] autorelease];
+	cont = [[[AUViewWindowController alloc] initWithAudioUnit:unit cocoaView:cocoaView delegate:delegate] autorelease];
 	if (cont != nil) {
 		[sAUViewWindowControllers addObject: cont];
 		[[cont window] makeKeyAndOrderFront: nil];
@@ -309,7 +309,7 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 	[sAUViewWindowControllers removeObject: self];
 }
 
-- (id)initWithAudioUnit:(AudioUnit)unit forceGeneric:(BOOL)forceGeneric delegate:(id)delegate
+- (id)initWithAudioUnit:(AudioUnit)unit cocoaView:(BOOL)cocoaView delegate:(id)delegate
 {
 	NSWindow *aWindow;
 
@@ -324,28 +324,19 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 	// We need to chack this in showWindow:
 	carbonWindowRef = 0;
 	
-	//  Try to create carbon view first
-	[self findUIViewComponentDescription: forceGeneric];
-	@try {
+    if (cocoaView) {
+        aWindow = [self createCocoaWindow];
+    } else {
+        [self findUIViewComponentDescription: NO];
 		aWindow = [self createCarbonWindow];
 	}
-	@catch (NSException * e) {
-		NSLog(@"ERROR: name %@ reason %@ userInfo %@", [e name], [e reason], [e userInfo]);
-		aWindow = nil;
-	}
-	@finally {
-	}
-	if (aWindow != nil) {
-		[self setWindow: aWindow];
-		if ([aWindow delegate] == nil)
-			[aWindow setDelegate: self];
-	} else if ([self hasCocoaView] && (aWindow = [self createCocoaWindow]) != nil) {
-		[self setWindow: aWindow];
-		if ([aWindow delegate] == nil)
-			[aWindow setDelegate: self];
-	} else {
-		[self release];
-		return nil;
+    if (aWindow == nil) {
+        [self release];
+        return nil;
+    }
+    [self setWindow:aWindow];
+    if ([aWindow delegate] == nil) {
+        [aWindow setDelegate: self];
 	}
 	[[self window] makeKeyAndOrderFront: nil];
 	return self;

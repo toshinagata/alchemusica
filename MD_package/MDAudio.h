@@ -53,6 +53,11 @@ typedef struct MDAudioDeviceInfo {
 	MDAudioFormat format;
 } MDAudioDeviceInfo;
 
+enum {
+    kMDAudioHasCocoaView = 1,
+    kMDAudioHasCarbonView = 2
+};
+
 /*  Cached information for Music Devices (software synthesizers)  */
 typedef struct MDAudioMusicDeviceInfo {
 	UInt64 code;  /*  SubType and Manufacturer  */
