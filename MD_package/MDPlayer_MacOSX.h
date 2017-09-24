@@ -99,6 +99,10 @@ long		MDPlayerGetSourceNumberFromName(const char *name);
 long        MDPlayerAddDestinationName(const char *name);
 long        MDPlayerAddSourceName(const char *name);
 
+int         MDPlayerUpdatePatchNames(long dev);
+int         MDPlayerGetNumberOfPatchNames(long dev);
+int         MDPlayerGetPatchName(long dev, int bank, int progno, char *name, long sizeof_name);
+
 int			MDPlayerGetRecordedEvents(MDPlayer *inPlayer, MDEvent **outEvent, int *outEventBufSiz);
 void		MDPlayerClearRecordedEvents(MDPlayer *inPlayer);
 

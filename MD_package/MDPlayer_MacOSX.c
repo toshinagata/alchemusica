@@ -52,6 +52,11 @@ typedef struct MDMIDIDeviceRecord {
     MIDIPacketList	packetList;         /*  MIDI packet list  */
 } MDMIDIDeviceRecord;
 
+typedef struct MDPatchNameRecord {
+    UInt32 instno;  /*  0xMMLLPP, MM: bank MSB, LL: bank LSB, PP: program number  */
+    char *name;
+} MDPatchNameRecord;
+
 typedef struct MDDeviceIDRecord {
 	char *      name;
 	
@@ -60,6 +65,11 @@ typedef struct MDDeviceIDRecord {
     int         streamIndex;    /*  MDAudioIOStream index (= bus index of Audio setup)  */
 	int         uniqueID;       /*  CoreMIDI device  */
     MDMIDIDeviceRecord *midiRec;  /*  CoreMIDI device record (malloc'ed)  */
+    
+    /*  Patch names  */
+    int         npatches;
+    MDPatchNameRecord *patches;
+
 } MDDeviceIDRecord;
 
 typedef struct MDDeviceInfo {
@@ -336,6 +346,7 @@ MDPlayerReloadDeviceInformationSub(MDDeviceIDRecord **src_dst_p, long *src_dst_N
                 (*src_dst_p)[j].uniqueID = kInvalidUniqueID;
                 (*src_dst_p)[j].midiRec = NULL;
                 (*src_dst_p)[j].streamIndex = i;
+                MDPlayerUpdatePatchNames(j);
             }
         }
     }
@@ -539,6 +550,109 @@ MDPlayerAddSourceName(const char *name)
 		sDeviceInfo.sourceNum = dev + 1;
 	}
 	return dev;
+}
+
+/* --------------------------------------
+	･ MDPlayerUpdatePatchNames
+ -------------------------------------- */
+/*  Update the patch name info for the given device. */
+int
+MDPlayerUpdatePatchNames(long dev)
+{
+    MDDeviceIDRecord *rp;
+    int i;
+    if (dev < 0 || dev >= sDeviceInfo.destNum)
+        return -1;  /*  Invalid device  */
+    rp = &(sDeviceInfo.dest[dev]);
+    if (rp->uniqueID != kInvalidUniqueID) {
+        /*  TODO: Implement patch list for external MIDI device  */
+        return -1;
+    } else if (rp->streamIndex >= 0) {
+        /*  MusicDevice  */
+        OSStatus err;
+        UInt32 count, instno;
+        UInt32 datasize;
+        MDAudioIOStreamInfo *mp = MDAudioGetIOStreamInfoAtIndex(rp->streamIndex);
+        if (mp == NULL)
+            return -1;
+        datasize = sizeof(UInt32);
+        err = AudioUnitGetProperty(mp->unit, kMusicDeviceProperty_InstrumentCount, kAudioUnitScope_Global, 0, &count, &datasize);
+        if (err != noErr)
+            return -1;
+        if (rp->npatches > 0) {
+            /*  Free previous info  */
+            for (i = 0; i < rp->npatches; i++) {
+                free(rp->patches[i].name);
+            }
+            free(rp->patches);
+            rp->patches = NULL;
+            rp->npatches = 0;
+        }
+        if (count > 0) {
+            rp->patches = (MDPatchNameRecord *)calloc(sizeof(MDPatchNameRecord), count);
+            rp->npatches = 0;
+            for (i = 0; i < count; i++) {
+                char name[256];
+                datasize = sizeof(instno);
+                err = AudioUnitGetProperty(mp->unit, kMusicDeviceProperty_InstrumentNumber, kAudioUnitScope_Global, i, &instno, &datasize);
+                if (err != noErr)
+                    continue;
+                datasize = sizeof(name);
+                err = AudioUnitGetProperty(mp->unit, kMusicDeviceProperty_InstrumentName, kAudioUnitScope_Global, instno, name, &datasize);
+                if (err != noErr)
+                    continue;
+                rp->patches[rp->npatches].instno = instno;
+                rp->patches[rp->npatches].name = strdup(name);
+                rp->npatches++;
+            }
+        }
+        return rp->npatches;
+    }
+    return -1;
+}
+
+/* --------------------------------------
+	･ MDPlayerGetNumberOfPatchNames
+ -------------------------------------- */
+/*  Returns the number of available patch names. */
+int
+MDPlayerGetNumberOfPatchNames(long dev)
+{
+    if (dev >= 0 && dev < sDeviceInfo.destNum) {
+        return sDeviceInfo.dest[dev].npatches;
+    } else return 0;
+}
+    
+/* --------------------------------------
+	･ MDPlayerGetPatchName
+ -------------------------------------- */
+/*  Returns the patch name if available. If bank is -1, then progno is the index that
+    scans all registered patch information. If bank is 0xMMLL (MM and LL are the bank
+    select MSB and LSB), then the progno is the program number (0-127).
+    Returns 0 if the patch name is available, -1 otherwise  */
+int
+MDPlayerGetPatchName(long dev, int bank, int progno, char *name, long sizeof_name)
+{
+    int idx = -1;
+    if (dev >= 0 && dev < sDeviceInfo.destNum) {
+        if (bank == -1) {
+            if (progno >= 0 && progno < sDeviceInfo.dest[dev].npatches)
+                idx = progno;
+        } else if (progno >= 0 && progno < 128) {
+            /*  Look for the given bank and program  */
+            UInt32 instno = (bank << 8) + progno;
+            for (idx = sDeviceInfo.dest[dev].npatches - 1; idx >= 0; idx--) {
+                MDPatchNameRecord *pr = &(sDeviceInfo.dest[dev].patches[idx]);
+                if (pr->instno == instno)
+                    break;
+            }
+        }
+    }
+    if (idx >= 0) {
+        strncpy(name, sDeviceInfo.dest[dev].patches[idx].name, sizeof_name - 1);
+        name[sizeof_name - 1] = 0;
+    }
+    return idx;
 }
 
 /* --------------------------------------

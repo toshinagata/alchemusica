@@ -1266,7 +1266,6 @@ MDAudioInitialize(void)
 	CHECK_ERR(err, AudioUnitSetProperty(gAudio->mixerUnit, kAudioUnitProperty_MeteringMode, kAudioUnitScope_Global, 0, &unum, sizeof(UInt32)));
 	
 	CHECK_ERR(err, AUGraphInitialize(gAudio->graph));	
-	CHECK_ERR(err, AUGraphStart(gAudio->graph));
 
 
 	{
@@ -1289,6 +1288,8 @@ MDAudioInitialize(void)
 	/*  Set built-in output as the audio output  */
 	CHECK_ERR(err, MDAudioSelectIOStreamDevice(kMDAudioFirstIndexForOutputStream, 0));
 	
+    CHECK_ERR(err, AUGraphStart(gAudio->graph));
+    
 	return 0;
 
 exit:

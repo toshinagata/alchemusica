@@ -177,6 +177,8 @@ static NSColor *sMiscColor = nil;
 	MDPointerSetAutoAdjust(myPointer, 1);
 	myCalibrator = MDCalibratorNew([[self myMIDISequence] mySequence], myTrack, kMDEventTimeSignature, -1);
 	MDCalibratorAppend(myCalibrator, myTrack, kMDEventTempo, -1);
+    MDCalibratorAppend(myCalibrator, myTrack, kMDEventControl, 0); // Bank select MSB
+    MDCalibratorAppend(myCalibrator, myTrack, kMDEventControl, 32); // Bank select LSB
 	myRow = -1;
 	myCount = -1;
 	myTickColumnCount = 1;
@@ -559,7 +561,25 @@ row:(int)rowIndex
 			if ([@"duration" isEqualToString: identifier]) {
 				MDEventToGTString(ep, eventStr, sizeof(eventStr));
 			} else if ([@"data" isEqualToString: identifier]) {
-				MDEventToDataString(ep, eventStr, sizeof(eventStr));
+                if (MDGetKind(ep) == kMDEventProgram) {
+                    MDEvent *ep1;
+                    int bank = 0;
+                    int n, data1;
+                    long dev;
+                    data1 = MDGetData1(ep);
+                    n = snprintf(eventStr, sizeof eventStr, "%d:", data1);
+                    ep1 = MDCalibratorGetEvent(myCalibrator, myTrack, kMDEventControl, 0);
+                    if (ep1 != NULL)
+                        bank = MDGetData1(ep1) * 256;
+                    ep1 = MDCalibratorGetEvent(myCalibrator, myTrack, kMDEventControl, 32);
+                    if (ep1 != NULL)
+                        bank += MDGetData1(ep1);
+                    dev = MDTrackGetDevice(myTrack);
+                    if (MDPlayerGetPatchName(dev, bank, data1, eventStr + n, sizeof(eventStr) - n) < 0) {
+                        //  Patch name was not available
+                        snprintf(eventStr, sizeof eventStr, "%d", data1);
+                    }
+                } else MDEventToDataString(ep, eventStr, sizeof(eventStr));
 			} else return nil;
 		} else return nil;
 		return [NSString stringWithUTF8String:eventStr];
