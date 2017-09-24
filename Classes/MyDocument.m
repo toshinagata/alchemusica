@@ -1123,8 +1123,8 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	if (track != NULL) {
 		long tduration = MDTrackGetLargestTick(track);
 		long oduration = MDTrackGetDuration(track);
-		if (tduration > duration)
-			duration = tduration;
+		if (tduration >= duration)
+            duration = tduration + 1;
 		if (oduration != duration) {
 			MDTrackSetDuration(track, duration);
 			/*  Register undo action with current value  */

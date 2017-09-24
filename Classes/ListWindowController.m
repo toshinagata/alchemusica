@@ -884,10 +884,13 @@ row:(int)rowIndex
 - (BOOL)myTableView:(MyTableView *)tableView shouldEditColumn:(int)column row:(int)row
 {
 	if (tableView == myEventTrackView) {
-		MDEvent *ep = [self eventPointerForTableRow:row];
-	//	int count = [self eventPositionForTableRow:row];
-		if (ep == NULL)
-			return NO;
+        MDEvent *ep;
+        NSTableColumn *col = [[tableView tableColumns] objectAtIndex:column];
+        if (row == myCount && [self tagForTickIdentifier:[col identifier]] >= 0)
+            return YES;
+        ep = [self eventPointerForTableRow:row];
+        if (ep == NULL)
+            return NO;
 	/*	if (MDGetKind(ep) == kMDEventSysex) {
 			//  Special editing feature
 			int n = Ruby_callMethodOfDocument("edit_sysex_dialog", [self document], 0, "ii", (int)myTrackNumber, count);
@@ -1148,6 +1151,25 @@ row:(int)rowIndex
 
 #pragma mark ====== PopUp button handlers ======
 
+static NSString *sTickIdentifiers[] = { @"bar", @"sec", @"msec", @"count", @"deltacount", nil };
+
+- (int)tagForTickIdentifier:(NSString *)identifier
+{
+    int tag;
+    for (tag = 0; sTickIdentifiers[tag] != nil; tag++) {
+        if ([sTickIdentifiers[tag] isEqualToString:identifier])
+            return tag;
+    }
+    return -1;
+}
+
+- (NSString *)tickIdentifierForTag:(int)tag
+{
+    if (tag >= 0 && tag < sizeof(sTickIdentifiers) / sizeof(sTickIdentifiers[0]) - 1)
+        return sTickIdentifiers[tag];
+    else return nil;
+}
+
 - (IBAction)myAppendColumn:(id)sender
 {
 }
@@ -1197,22 +1219,11 @@ row:(int)rowIndex
 - (NSMenu *)tableHeaderView:(NSTableHeaderView *)headerView popUpMenuAtHeaderColumn:(int)column
 {
 	NSTableColumn *tableColumn;
-	NSString *identifier;
 	int i, tag;
-//	NSLog(@"Popup menu for column %d\n", column);
 	tableColumn = (NSTableColumn *)[[myEventTrackView tableColumns] objectAtIndex:column];
-	identifier = (NSString *)[tableColumn identifier];
-    if ([@"bar" isEqualToString: identifier]) {
-		tag = 0;
-	} else if ([@"sec" isEqualToString: identifier]) {
-		tag = 1;
-	} else if ([@"msec" isEqualToString: identifier]) {
-		tag = 2;
-	} else if ([@"count" isEqualToString: identifier]) {
-		tag = 3;
-	} else if ([@"deltacount" isEqualToString: identifier]) {
-		tag = 4;
-	} else return nil;
+    tag = [self tagForTickIdentifier:[tableColumn identifier]];
+    if (tag < 0)
+        return nil;
 	for (i = 0; i < 4; i++) {
 		[[myTickDescriptionMenu itemWithTag:i] setState:(i == tag ? NSOnState : NSOffState)];
 	}
