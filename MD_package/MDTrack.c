@@ -180,6 +180,30 @@ MDTrackClearBlock(MDTrack *inTrack, MDBlock *inBlock)
 	MDTrackDeallocateBlock(inTrack, inBlock);	
 }
 
+/* --------------------------------------
+	･ MDTrackUpdateLargestTickForBlock
+ -------------------------------------- */
+static void
+MDTrackUpdateLargestTickForBlock(MDTrack *inTrack, MDBlock *inBlock)
+{
+    MDTickType tick, largestTick;
+    int i;
+    MDEvent *ep;
+    if (inBlock->largestTick < 0) {
+        /*  Recalc the largest tick and cache it  */
+        largestTick = kMDNegativeTick;
+        for (i = 0; i < inBlock->num; i++) {
+            ep = &inBlock->events[i];
+            tick = MDGetTick(ep);
+            if (MDHasDuration(ep))
+                tick += MDGetDuration(ep);
+            if (tick > largestTick)
+                largestTick = tick;
+        }
+        inBlock->largestTick = largestTick;
+    }
+}
+
 #ifdef __MWERKS__
 #pragma mark ====== Basic Insert/Delete (private functions) ======
 #endif
@@ -1210,26 +1234,12 @@ MDTrackOffsetTick(MDTrack *inTrack, MDTickType offset)
 MDTickType
 MDTrackGetLargestTick(MDTrack *inTrack)
 {
-    long i;
-    MDTickType tick, largestTick, globalLargestTick;
+    MDTickType globalLargestTick;
     MDBlock *block;
-    MDEvent *ep;
 	globalLargestTick = kMDNegativeTick;
     for (block = inTrack->first; block != NULL; block = block->next) {
-		if (block->largestTick < 0) {
-			/*  Recalc the largest tick and cache it  */
-			largestTick = kMDNegativeTick;
-			for (i = 0; i < block->num; i++) {
-				ep = &block->events[i];
-				tick = MDGetTick(ep);
-				if (MDHasDuration(ep))
-					tick += MDGetDuration(ep);
-				if (tick > largestTick)
-					largestTick = tick;
-			}
-			block->largestTick = largestTick;
-		}
-		if (block->largestTick > globalLargestTick)
+        MDTrackUpdateLargestTickForBlock(inTrack, block);
+        if (block->largestTick > globalLargestTick)
 			globalLargestTick = block->largestTick;
 	}
 	return globalLargestTick;
@@ -2550,6 +2560,8 @@ MDPointerChangeTick(MDPointer *inPointer, MDTickType inTick, long inPosition)
         MDPointerBackward(inPointer);
 		if (tick_last <= inTick && inTick <= tick_next) {
 			MDSetTick(ep, inTick);
+            inPointer->block->largestTick = kMDNegativeTick;
+            MDTrackUpdateLargestTickForBlock(track, inPointer->block);
 			goto exit;
 		}
 	}
