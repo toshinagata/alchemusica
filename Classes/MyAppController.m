@@ -110,15 +110,45 @@ static BOOL sStartupCompleted = NO;  //  If NO, then Ruby interrupt check is dis
 	MyAppCallback_saveGlobalSettings();
 }
 
+static id
+findMenuItemWithTitle(NSMenu *menu, NSString *title)
+{
+    int i, n;
+    n = [menu numberOfItems];
+    for (i = 0; i < n; i++) {
+        id item = [menu itemAtIndex:i];
+        if ([title isEqualToString:[item title]])
+            return item;
+        if ([item hasSubmenu]) {
+            item = findMenuItemWithTitle([item submenu], title);
+            if (item != nil)
+                return item;
+        }
+    }
+    return nil;
+}
+
 static void
 appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 {
-	int i, n;
+    int i, n, added;
+    NSMenu *mainMenu = [NSApp mainMenu];
 	n = [infos count];
+    added = 0;
 	for (i = 0; i < n; i++) {
 		id obj = [infos objectAtIndex: i];
-		id item = [menu insertItemWithTitle: @"X" action: action keyEquivalent: @"" atIndex: i + sScriptMenuCount + 1];
-		[item setTitle: [obj valueForKey: @"title"]];
+        NSString *title = (NSString *)[obj valueForKey:@"title"];
+        id item;
+        item = findMenuItemWithTitle(mainMenu, title);
+        if (item != nil) {
+            [item setAction:action];
+        } else {
+            if (added == 0)
+                [menu addItem:[NSMenuItem separatorItem]];
+            item = [menu insertItemWithTitle: @"X" action: action keyEquivalent: @"" atIndex: added + sScriptMenuCount + 1];
+            [item setTitle:title];
+            added++;
+        }
 		[item setTag: i];
 		[item setTarget: target];
 	}
@@ -160,7 +190,6 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 		[scriptMenu removeItemAtIndex: sScriptMenuCount];
 	}
 	if ([scriptMenuInfos count] > 0) {
-		[scriptMenu addItem:[NSMenuItem separatorItem]];
 		appendScriptMenuItems(scriptMenu, scriptMenuInfos, @selector(doScriptCommand:), self);
 	}
 }

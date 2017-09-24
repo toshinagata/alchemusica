@@ -22,15 +22,15 @@ def change_control_number_ext
 	  item(:checkbox, :title=>"Change only editable tracks", :tag=>"editable_only"),
 	  item(:checkbox, :title=>"Change only selected events", :tag=>"selection_only"))
   }
-  if hash["status"] == 0
-	old = hash["old"]
-	new = hash["new"]
+  if hash[:status] == 0
+	old = hash["old"].to_i
+	new = hash["new"].to_i
 	editable_only = hash["editable_only"]
 	selection_only = hash["selection_only"]
-#	puts "old = #{old}, new = #{new}, editable_only = #{editable_only}"
+	puts "old = #{old}, new = #{new}, editable_only = #{editable_only}"
 	each_track { |tr|
-	  next if editable_only && !tr.editable?
-	  tr.send(selection_only ? :each_selected : :each) { |p|
+	  next if editable_only != 0 && !tr.editable?
+	  tr.send(selection_only != 0 ? :each_selected : :each) { |p|
 		if p.kind == :control && p.code == old
 		  p.code = new
 		end
@@ -207,7 +207,6 @@ end
 
 end
 
-register_menu("Change timebase...", :change_timebase)
-register_menu("Randomize ticks...", :randomize_ticks, 1)
-register_menu("Thin selected events...", :thin_events, 1)
-# register_menu("Change control number...", :change_control_number_ext)
+register_menu("Change Timebase...", :change_timebase)
+register_menu("Randomize Ticks...", :randomize_ticks, 1)
+register_menu("Thin Selected Events...", :thin_events, 1)

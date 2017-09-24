@@ -264,4 +264,7 @@ def edit_sysex_dialog(track_no, event_no)
   }
 end
 
+register_menu("Shift Selected Events...", :shift_selected_events, 1)
+register_menu("Change Control Number...", :change_control_number, 1)
+
 end

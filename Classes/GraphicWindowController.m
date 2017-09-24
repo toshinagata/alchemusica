@@ -2412,16 +2412,6 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 	[[self document] setEditingRangeStart: tick end: endtick];
 }
 
-- (IBAction)changeControlNumber:(id)sender
-{
-	[(MyAppController *)[NSApp delegate] performScriptCommand:@"change_control_number" forDocument:[self document]];
-}
-
-- (IBAction)shiftSelectedEvents:(id)sender
-{
-	[(MyAppController *)[NSApp delegate] performScriptCommand:@"shift_selected_events" forDocument:[self document]];
-}
-
 #pragma mark ==== Track list ====
 
 - (int)numberOfRowsInTableView:(NSTableView *)aTableView

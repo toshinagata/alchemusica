@@ -11,7 +11,7 @@
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
-        <customObject id="-3" userLabel="Application"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <menu title="MainMenu" systemMenu="main" id="29" userLabel="MainMenu">
             <items>
                 <menuItem title="Alchemusica" id="56">
@@ -241,16 +241,8 @@ DQ
                             <menuItem isSeparatorItem="YES" id="306">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
-                            <menuItem title="Change Control Number..." id="307">
-                                <connections>
-                                    <action selector="changeControlNumber:" target="-1" id="339"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Shift Selected Events..." keyEquivalent="," id="308">
-                                <connections>
-                                    <action selector="shiftSelectedEvents:" target="-1" id="340"/>
-                                </connections>
-                            </menuItem>
+                            <menuItem title="Change Control Number..." id="307"/>
+                            <menuItem title="Shift Selected Events..." keyEquivalent="," id="308"/>
                             <menuItem title="Quantize..." id="346">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
