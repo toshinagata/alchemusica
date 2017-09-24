@@ -629,7 +629,7 @@ MDPlayerGetNumberOfPatchNames(long dev)
 /*  Returns the patch name if available. If bank is -1, then progno is the index that
     scans all registered patch information. If bank is 0xMMLL (MM and LL are the bank
     select MSB and LSB), then the progno is the program number (0-127).
-    Returns 0 if the patch name is available, -1 otherwise  */
+    Returns the patch number (0xMMLLPP) if the patch name is available, -1 otherwise */
 int
 MDPlayerGetPatchName(long dev, int bank, int progno, char *name, long sizeof_name)
 {
@@ -651,8 +651,8 @@ MDPlayerGetPatchName(long dev, int bank, int progno, char *name, long sizeof_nam
     if (idx >= 0) {
         strncpy(name, sDeviceInfo.dest[dev].patches[idx].name, sizeof_name - 1);
         name[sizeof_name - 1] = 0;
-    }
-    return idx;
+        return sDeviceInfo.dest[dev].patches[idx].instno;
+    } else return -1;
 }
 
 /* --------------------------------------

@@ -76,6 +76,9 @@ void			MDCalibratorSetNextInList(MDCalibrator *inCalib, MDCalibrator *inNextCali
 /*  inTick の位置に移動する  */
 void			MDCalibratorJumpToTick(MDCalibrator *inCalib, MDTickType inTick);
 
+/*  指定したトラックの inPosition の位置に移動する。指定トラック以外の情報については、そのイベントの tick 位置に移動する  */
+void            MDCalibratorJumpToPositionInTrack(MDCalibrator *inCalib, long inPosition, MDTrack *inTrack);
+
 /*  小節・拍・カウント表記 <-> tick 変換  */
 MDTickType		MDCalibratorMeasureToTick(MDCalibrator *inCalib, long inMeasure, long inBeat, long inTick);
 void			MDCalibratorTickToMeasure(MDCalibrator *inCalib, MDTickType inTick, long *outMeasure, long *outBeat, long *outTick);

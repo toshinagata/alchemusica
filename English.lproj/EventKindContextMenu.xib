@@ -5,7 +5,7 @@
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11762"/>
     </dependencies>
     <objects>
-        <customObject id="-2" userLabel="File's Owner" customClass="EventKindTextFieldCell">
+        <customObject id="-2" userLabel="File's Owner" customClass="ContextMenuTextFieldCell">
             <connections>
                 <outlet property="menu" destination="5" id="59"/>
             </connections>
@@ -16,7 +16,7 @@
             <items>
                 <menuItem title="Note" id="24">
                     <connections>
-                        <action selector="eventKindMenuSelected:" target="-2" id="108"/>
+                        <action selector="contextMenuSelected:" target="-2" id="Ait-7Y-Yj1"/>
                     </connections>
                 </menuItem>
                 <menuItem title="*Control" tag="1" id="26">
@@ -24,175 +24,178 @@
                         <items>
                             <menuItem title="Bank select MSB (0)" tag="1000" id="33">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="78"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="pAf-T3-Ec6"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Modulation (1)" tag="1001" id="44">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="79"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="rTd-El-caW"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Portament time (5)" tag="1005" id="48">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="80"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="4WW-gh-iF7"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Data entry MSB (6)" tag="1006" id="41">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="81"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="Y0Z-bE-w6c"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Volume (7)" tag="1007" id="54">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="82"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="CMz-cT-NG4"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Pan (10)" tag="1010" id="31">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="83"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="ixB-Qf-7nU"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Expression (11)" tag="1011" id="39">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="84"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="B5Q-dN-YOf"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Bank select LSB (32)" tag="1032" id="51">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="85"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="nMZ-X5-FMT"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Data entry LSB (38)" tag="1038" id="28">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="86"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="BGZ-GO-yCt"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Hold (64)" tag="1064" id="36">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="87"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="Wun-6S-clm"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Portamento (65)" tag="1065" id="29">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="88"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="PdZ-gC-jec"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Sostenuto (66)" tag="1066" id="37">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="89"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="Lr0-5T-00a"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Soft (67)" tag="1067" id="49">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="90"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="1p0-o4-ZHF"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Resonance (71)" tag="1071" id="56">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="91"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="4GF-Zr-Ph1"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Release (72)" tag="1072" id="45">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="92"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="ZSS-M7-SfX"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Attack (73)" tag="1073" id="52">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="93"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="hUa-EK-9HY"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Cutoff (74)" tag="1074" id="30">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="94"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="2Ym-zg-5Zx"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Portament control (84)" tag="1084" id="38">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="95"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="Ggb-EX-Gi4"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Reverb (91)" tag="1091" id="50">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="96"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="cxM-Vj-25Y"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Chorus (93)" tag="1093" id="57">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="97"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="sFw-Rx-aJH"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Variation Effect (94)" tag="1094" id="35">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="98"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="RNC-5J-N6c"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Data increment (96)" tag="1096" id="40">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="99"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="4ZF-tl-9uX"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Data decrement (97)" tag="1097" id="47">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="100"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="GOf-sE-Yjl"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="NRPN LSB (98)" tag="1098" id="55">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="101"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="kI4-kV-W6T"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="NRPN MSB (99)" tag="1099" id="34">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="102"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="SIB-wd-wAK"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="RPN LSB (100)" tag="1100" id="46">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="103"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="Uoa-Ft-eSP"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="RPN MSB (101)" tag="1101" id="42">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="104"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="A9d-L3-l0a"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="All sounds off (120)" tag="1120" id="53">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="105"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="RgI-YG-115"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Reset all controllers (121)" tag="1121" id="32">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="106"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="H5w-wK-hLu"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="All notes off (123)" tag="1123" id="43">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="107"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="Y5p-RK-DIw"/>
                                 </connections>
                             </menuItem>
                         </items>
                     </menu>
+                    <connections>
+                        <action selector="contextMenuSelected:" target="-2" id="tnd-K9-kII"/>
+                    </connections>
                 </menuItem>
                 <menuItem title="+Pitch bend" tag="2" id="6">
                     <connections>
-                        <action selector="eventKindMenuSelected:" target="-2" id="77"/>
+                        <action selector="contextMenuSelected:" target="-2" id="wal-Dz-aro"/>
                     </connections>
                 </menuItem>
                 <menuItem title="+Program change" tag="3" id="23">
                     <connections>
-                        <action selector="eventKindMenuSelected:" target="-2" id="76"/>
+                        <action selector="contextMenuSelected:" target="-2" id="skP-cG-CDi"/>
                     </connections>
                 </menuItem>
                 <menuItem title="+Channel pressure" tag="4" id="7">
                     <connections>
-                        <action selector="eventKindMenuSelected:" target="-2" id="75"/>
+                        <action selector="contextMenuSelected:" target="-2" id="mVy-nt-lYj"/>
                     </connections>
                 </menuItem>
                 <menuItem title="&gt;Polyphonic key pressure" tag="5" id="25">
                     <connections>
-                        <action selector="eventKindMenuSelected:" target="-2" id="74"/>
+                        <action selector="contextMenuSelected:" target="-2" id="TmJ-cg-Ji3"/>
                     </connections>
                 </menuItem>
                 <menuItem title="@Meta event" tag="6" id="8">
@@ -200,81 +203,84 @@
                         <items>
                             <menuItem title="Tempo" tag="2000" id="13">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="61"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="x9l-Ye-wZQ"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Meter" tag="2001" id="11">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="62"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="4An-de-ELH"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Key" tag="2002" id="15">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="63"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="DpM-B3-iji"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="SMPTE" tag="2003" id="18">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="64"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="NAi-zm-49y"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Port" tag="2004" id="17">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="65"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="WIE-dO-mKA"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Text" tag="2005" id="jNY-n1-7Mx">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="lF3-FH-8MK"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="qIY-jO-F4b"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Copyright" tag="2006" id="20">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="66"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="DfO-ms-4jt"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Sequence" tag="2007" id="14">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="67"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="iiS-Zq-Acu"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Instrument" tag="2008" id="21">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="68"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="gbQ-vr-rXr"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Lyric" tag="2009" id="10">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="69"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="x6N-tS-5nf"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Marker" tag="2010" id="16">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="70"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="dtE-kT-DWy"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Cue" tag="2011" id="19">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="71"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="Mh5-jb-97N"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Program" tag="2012" id="22">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="72"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="Mqk-uV-CZJ"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Device" tag="2013" id="12">
                                 <connections>
-                                    <action selector="eventKindMenuSelected:" target="-2" id="73"/>
+                                    <action selector="contextMenuSelected:" target="-2" id="K7e-yK-ZnZ"/>
                                 </connections>
                             </menuItem>
                         </items>
                     </menu>
+                    <connections>
+                        <action selector="contextMenuSelected:" target="-2" id="TQJ-cH-fQj"/>
+                    </connections>
                 </menuItem>
                 <menuItem title="#System exclusive" tag="7" id="58">
                     <connections>
-                        <action selector="eventKindMenuSelected:" target="-2" id="60"/>
+                        <action selector="contextMenuSelected:" target="-2" id="rq1-UY-XD4"/>
                     </connections>
                 </menuItem>
             </items>

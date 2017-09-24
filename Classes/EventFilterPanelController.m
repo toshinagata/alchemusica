@@ -16,7 +16,6 @@
  */
 
 #import "EventFilterPanelController.h"
-#import "EventKindTextFieldCell.h"
 #import "MDObjects.h"
 
 NSString *gModeKey = @"mode",

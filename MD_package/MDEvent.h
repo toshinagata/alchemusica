@@ -350,7 +350,8 @@ enum {
 	kMDEventFieldInvalid
 };
 
-typedef long MDEventFieldDataWhole; /*  MDEventFieldData と少なくとも同じサイズの整数型  */
+/*  MDEventFieldData と少なくとも同じサイズの整数型  */
+typedef intptr_t MDEventFieldDataWhole;
 typedef union MDEventFieldData {
 	MDEventFieldDataWhole whole;			
 	long			longValue;		/*  code, data1  */

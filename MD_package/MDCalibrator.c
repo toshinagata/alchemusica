@@ -47,7 +47,7 @@ struct MDCalibrator {
 #pragma mark ====== Private functions ======
 
 /* --------------------------------------
-	• MDCalibratorTickToMeasureWithoutJump
+	ÔΩ• MDCalibratorTickToMeasureWithoutJump
    -------------------------------------- */
 static void
 MDCalibratorTickToMeasureWithoutJump(MDCalibrator *inCalib, MDTickType inTick,
@@ -72,7 +72,7 @@ long *outMeasure, long *outBeat, long *outTick)
 			*outTick = 0;
 	} else {
 		if (eptr == NULL) {
-			/*  eptr == NULL ÇÃèÍçáÅAdata_before.bar = 1, tick_before = 0 Ç∆ÇµÇƒåvéZÇ∑ÇÈ  */
+			/*  eptr == NULL „ÅÆÂ†¥Âêà„ÄÅdata_before.bar = 1, tick_before = 0 „Å®„Åó„Å¶Ë®àÁÆó„Åô„Çã  */
 			theTickBefore = 0;
 			theBarBefore = 1;
 		} else {
@@ -91,7 +91,7 @@ long *outMeasure, long *outBeat, long *outTick)
 }
 
 /* --------------------------------------
-	• MDCalibratorCalculateTime
+	ÔΩ• MDCalibratorCalculateTime
    -------------------------------------- */
 static MDTimeType
 MDCalibratorCalculateTime(MDCalibrator *inCalib, MDTickType inTick)
@@ -178,7 +178,7 @@ MDCalibratorDeallocateChain(MDCalibrator *inCalib)
 }
 
 /* --------------------------------------
-	• MDCalibratorForward
+	ÔΩ• MDCalibratorForward
    -------------------------------------- */
 static int
 MDCalibratorForward(MDCalibrator *inCalib)
@@ -215,7 +215,7 @@ MDCalibratorForward(MDCalibrator *inCalib)
 		//	inCalib->data_before.bar = inCalib->data_after.bar;
 			MDCalibratorTickToMeasureWithoutJump(inCalib, inCalib->tick_after, &measure, &beat, &tick);
 			if (measure != 0 && (beat > 1 || tick > 0)) {
-				/*  è¨êﬂÇÃìríÜÇ…îèéqãLçÜÇ™Ç†ÇÈ  */
+				/*  Â∞èÁØÄ„ÅÆÈÄî‰∏≠„Å´ÊãçÂ≠êË®òÂè∑„Åå„ÅÇ„Çã  */
 				measure++;
 			}
 			inCalib->data_after.bar = measure;
@@ -230,7 +230,7 @@ MDCalibratorForward(MDCalibrator *inCalib)
 }
 
 /* --------------------------------------
-	• MDCalibratorBackward
+	ÔΩ• MDCalibratorBackward
    -------------------------------------- */
 static int
 MDCalibratorBackward(MDCalibrator *inCalib)
@@ -261,22 +261,22 @@ MDCalibratorBackward(MDCalibrator *inCalib)
 	switch (inCalib->kind) {
 		case kMDEventTempo:
 		//	inCalib->data_after.time = inCalib->data_before.time;
-			/*  âºÇ… data_before.time = 0 Ç∆ÇµÇƒ after à íuÇÃéûçèÇãÅÇﬂÇÈ  */
+			/*  ‰ªÆ„Å´ data_before.time = 0 „Å®„Åó„Å¶ after ‰ΩçÁΩÆ„ÅÆÊôÇÂàª„ÇíÊ±Ç„ÇÅ„Çã  */
 			inCalib->data_before.time = 0;
 			time = MDCalibratorCalculateTime(inCalib, inCalib->tick_after);
-			/*  time == data_after.time Ç…Ç»ÇÈÇÊÇ§Ç… data_before.time Çí≤êﬂÇ∑ÇÈ  */
+			/*  time == data_after.time „Å´„Å™„Çã„Çà„ÅÜ„Å´ data_before.time „ÇíË™øÁØÄ„Åô„Çã  */
 			inCalib->data_before.time += inCalib->data_after.time - time;
 			break;
 		case kMDEventTimeSignature:
 		//	inCalib->data_after.bar = inCalib->data_before.bar;
-			/*  âºÇ… data_before.bar = 1 Ç∆ÇµÇΩÇ∆Ç´ÇÃ after à íuÇÃè¨êﬂêîÇãÅÇﬂÇÈ */
+			/*  ‰ªÆ„Å´ data_before.bar = 1 „Å®„Åó„Åü„Å®„Åç„ÅÆ after ‰ΩçÁΩÆ„ÅÆÂ∞èÁØÄÊï∞„ÇíÊ±Ç„ÇÅ„Çã */
 			inCalib->data_before.bar = 1;
 			MDCalibratorTickToMeasureWithoutJump(inCalib, inCalib->tick_after, &measure, &beat, &tick);
 			if (measure != 0 && (beat > 1 || tick > 0)) {
-				/*  è¨êﬂÇÃìríÜÇ…îèéqãLçÜÇ™Ç†ÇÈ  */
+				/*  Â∞èÁØÄ„ÅÆÈÄî‰∏≠„Å´ÊãçÂ≠êË®òÂè∑„Åå„ÅÇ„Çã  */
 				measure++;
 			}
-			/*  after à íuÇÃè¨êﬂêîÇ™ data_after.bar Ç∆ìôÇµÇ≠Ç»ÇÈÇÊÇ§Ç… data_before.bar Çí≤êﬂÇ∑ÇÈ  */
+			/*  after ‰ΩçÁΩÆ„ÅÆÂ∞èÁØÄÊï∞„Åå data_after.bar „Å®Á≠â„Åó„Åè„Å™„Çã„Çà„ÅÜ„Å´ data_before.bar „ÇíË™øÁØÄ„Åô„Çã  */
 			inCalib->data_before.bar += inCalib->data_after.bar - measure;
 			break;
 		default:
@@ -291,7 +291,7 @@ MDCalibratorBackward(MDCalibrator *inCalib)
 #pragma mark ====== New/Retain/Release ======
 
 /* --------------------------------------
-	• MDCalibratorNew
+	ÔΩ• MDCalibratorNew
    -------------------------------------- */
 MDCalibrator *
 MDCalibratorNew(MDSequence *inSequence, MDTrack *inTrack, MDEventKind inKind, short inCode)
@@ -305,7 +305,7 @@ MDCalibratorNew(MDSequence *inSequence, MDTrack *inTrack, MDEventKind inKind, sh
 }
 
 /* --------------------------------------
-	• MDCalibratorRetain
+	ÔΩ• MDCalibratorRetain
    -------------------------------------- */
 void
 MDCalibratorRetain(MDCalibrator *inCalib)
@@ -315,7 +315,7 @@ MDCalibratorRetain(MDCalibrator *inCalib)
 }
 
 /* --------------------------------------
-	• MDCalibratorRelease
+	ÔΩ• MDCalibratorRelease
    -------------------------------------- */
 void
 MDCalibratorRelease(MDCalibrator *inCalib)
@@ -334,7 +334,7 @@ MDCalibratorRelease(MDCalibrator *inCalib)
 #pragma mark ====== Calibrator list manipulations ======
 
 /* --------------------------------------
-	• MDCalibratorAppend
+	ÔΩ• MDCalibratorAppend
    -------------------------------------- */
 int
 MDCalibratorIsSupporting(MDCalibrator *inCalib, MDTrack *inTrack, MDEventKind inKind, short inCode)
@@ -348,7 +348,7 @@ MDCalibratorIsSupporting(MDCalibrator *inCalib, MDTrack *inTrack, MDEventKind in
 }
 
 /* --------------------------------------
-	• MDCalibratorAppend
+	ÔΩ• MDCalibratorAppend
    -------------------------------------- */
 MDStatus
 MDCalibratorAppend(MDCalibrator *inCalib, MDTrack *inTrack, MDEventKind inKind, short inCode)
@@ -383,7 +383,7 @@ MDCalibratorAppend(MDCalibrator *inCalib, MDTrack *inTrack, MDEventKind inKind, 
 }
 
 /* --------------------------------------
-	• MDCalibratorGetInfo
+	ÔΩ• MDCalibratorGetInfo
    -------------------------------------- */
 MDStatus
 MDCalibratorGetInfo(MDCalibrator *inCalib, int index, MDTrack **outTrack, MDEventKind *outKind, short *outCode)
@@ -402,7 +402,7 @@ MDCalibratorGetInfo(MDCalibrator *inCalib, int index, MDTrack **outTrack, MDEven
 }
 
 /* --------------------------------------
-	• MDCalibratorRemoveAtIndex
+	ÔΩ• MDCalibratorRemoveAtIndex
    -------------------------------------- */
 MDStatus
 MDCalibratorRemoveAtIndex(MDCalibrator *inCalib, int index)
@@ -448,7 +448,7 @@ MDCalibratorRemoveAtIndex(MDCalibrator *inCalib, int index)
 }
 
 /* --------------------------------------
-	• MDCalibratorNextInList
+	ÔΩ• MDCalibratorNextInList
    -------------------------------------- */
 MDCalibrator *
 MDCalibratorNextInList(MDCalibrator *inCalib)
@@ -459,7 +459,7 @@ MDCalibratorNextInList(MDCalibrator *inCalib)
 }
 
 /* --------------------------------------
-	• MDCalibratorSetNextInList
+	ÔΩ• MDCalibratorSetNextInList
    -------------------------------------- */
 void
 MDCalibratorSetNextInList(MDCalibrator *inCalib, MDCalibrator *inNextCalib)
@@ -471,7 +471,7 @@ MDCalibratorSetNextInList(MDCalibrator *inCalib, MDCalibrator *inNextCalib)
 #pragma mark ====== Moving around ======
 
 /* --------------------------------------
-	• MDCalibratorReset
+	ÔΩ• MDCalibratorReset
    -------------------------------------- */
 void
 MDCalibratorReset(MDCalibrator *inCalib)
@@ -499,46 +499,116 @@ MDCalibratorReset(MDCalibrator *inCalib)
 		MDCalibratorReset(inCalib->chain);
 }
 
+/*  Do 'jump to tick' for a single calibrator unit  */
+static void
+MDCalibratorJumpToTickSub(MDCalibrator *inCalib, MDTickType inTick)
+{
+    if (inTick >= inCalib->tick_after) {
+        //  Êú´Â∞æ„Å´Âêë„Åã„Å£„Å¶Êé¢„Åô
+        if (inTick == kMDMaxTick) {
+            do {
+                MDCalibratorForward(inCalib);
+            } while (inCalib->tick_after < kMDMaxTick);
+        } else {
+            do {
+                MDCalibratorForward(inCalib);
+            } while (inTick >= inCalib->tick_after);
+        }
+    } else if (inTick < inCalib->tick_before) {
+        //  ÂÖàÈ†≠„Å´Âêë„Åã„Å£„Å¶Êé¢„Åô
+        if (inTick < 0) {
+            do {
+                MDCalibratorBackward(inCalib);
+            } while (inCalib->tick_before >= 0);
+        } else {
+            do {
+                MDCalibratorBackward(inCalib);
+            } while (inTick < inCalib->tick_before);
+        }
+    }
+}
+
 /* --------------------------------------
-	• MDCalibratorJumpToTick
+	ÔΩ• MDCalibratorJumpToTick
    -------------------------------------- */
 void
 MDCalibratorJumpToTick(MDCalibrator *inCalib, MDTickType inTick)
 {
     if (inCalib == NULL || inCalib->track == NULL || inCalib->before == NULL)
         return;
-
-	if (inTick >= inCalib->tick_after) {
-		//  ññîˆÇ…å¸Ç©Ç¡ÇƒíTÇ∑
-		if (inTick == kMDMaxTick) {
-			do {
-				MDCalibratorForward(inCalib);
-			} while (inCalib->tick_after < kMDMaxTick);
-		} else {
-			do {
-				MDCalibratorForward(inCalib);
-			} while (inTick >= inCalib->tick_after);
-		}
-	} else if (inTick < inCalib->tick_before) {
-		//  êÊì™Ç…å¸Ç©Ç¡ÇƒíTÇ∑
-		if (inTick < 0) {
-			do {
-				MDCalibratorBackward(inCalib);
-			} while (inCalib->tick_before >= 0);
-		} else {
-			do {
-				MDCalibratorBackward(inCalib);
-			} while (inTick < inCalib->tick_before);
-		}
-	}
+    MDCalibratorJumpToTickSub(inCalib, inTick);
 	if (inCalib->chain != NULL)
 		MDCalibratorJumpToTick(inCalib->chain, inTick);
+}
+
+/*  Do 'jump to position in track' for a single calibrator unit  */
+static void
+MDCalibratorJumpToPositionInTrackSub(MDCalibrator *inCalib, MDTickType inTick, long inPosition, MDTrack *inTrack)
+{
+    if (inCalib->track == NULL || inCalib->before == NULL)
+        return;
+    if (inCalib->track != inTrack) {
+        MDCalibratorJumpToTickSub(inCalib, inTick);
+    } else {
+        if (inPosition >= MDPointerGetPosition(inCalib->after)) {
+            //  Êú´Â∞æ„Å´Âêë„Åã„Å£„Å¶Êé¢„Åô
+            if (inPosition >= MDTrackGetNumberOfEvents(inCalib->track)) {
+                do {
+                    MDCalibratorForward(inCalib);
+                } while (inCalib->tick_after < kMDMaxTick);
+            } else {
+                do {
+                    MDCalibratorForward(inCalib);
+                } while (inPosition >= MDPointerGetPosition(inCalib->after));
+            }
+        } else if (inPosition < MDPointerGetPosition(inCalib->before)) {
+            //  ÂÖàÈ†≠„Å´Âêë„Åã„Å£„Å¶Êé¢„Åô
+            if (inPosition < 0) {
+                do {
+                    MDCalibratorBackward(inCalib);
+                } while (inCalib->tick_before >= 0);
+            } else {
+                do {
+                    MDCalibratorBackward(inCalib);
+                } while (inPosition < MDPointerGetPosition(inCalib->before));
+            }
+        }
+    }
+    if (inCalib->chain != NULL)
+        MDCalibratorJumpToPositionInTrackSub(inCalib->chain, inTick, inPosition, inTrack);
+}
+
+/* --------------------------------------
+	ÔΩ• MDCalibratorJumpToPositionInTrack
+ -------------------------------------- */
+void
+MDCalibratorJumpToPositionInTrack(MDCalibrator *inCalib, long inPosition, MDTrack *inTrack)
+{
+    MDTickType tick;
+    MDPointer *pt;
+    MDEvent *ep;
+    
+    if (inCalib == NULL || inCalib->track == NULL || inCalib->before == NULL)
+        return;
+
+    if (inPosition < 0)
+        tick = kMDNegativeTick;
+    else {
+        pt = MDPointerNew(inTrack);
+        MDPointerSetPosition(pt, inPosition);
+        ep = MDPointerCurrent(pt);
+        if (ep == NULL)
+            tick = kMDMaxTick;
+        else tick = MDGetTick(ep);
+        MDPointerRelease(pt);
+    }
+    MDCalibratorJumpToPositionInTrackSub(inCalib, tick, inPosition, inTrack);
 }
 
 #pragma mark ====== Getting calibrated information ======
 
 /* --------------------------------------
-	• MDCalibratorMeasureToTick
+	ÔΩ• MDCalibratorMeasureToTick
    -------------------------------------- */
 MDTickType
 MDCalibratorMeasureToTick(MDCalibrator *inCalib, long inMeasure, long inBeat, long inTick)
@@ -555,24 +625,24 @@ MDCalibratorMeasureToTick(MDCalibrator *inCalib, long inMeasure, long inBeat, lo
 	if (inCalib == NULL)
 		return 0;
 	
-	/*  è¨êﬂÇ™îÕàÕäOÇÃèÍçá  */
+	/*  Â∞èÁØÄ„ÅåÁØÑÂõ≤Â§ñ„ÅÆÂ†¥Âêà  */
 	if (inMeasure < 1)
 		return kMDNegativeTick;
 	if (inMeasure >= LONG_MAX)
 		return kMDMaxTick;
 	if (inMeasure >= inCalib->data_after.bar) {
-		/*  ññîˆÇ…å¸Ç©Ç¡ÇƒíTÇ∑  */
+		/*  Êú´Â∞æ„Å´Âêë„Åã„Å£„Å¶Êé¢„Åô  */
 		do {
 			MDCalibratorForward(inCalib);
 		} while (inMeasure >= inCalib->data_after.bar);
 	} else if (inMeasure < inCalib->data_before.bar) {
-		/*  êÊì™Ç…å¸Ç©Ç¡ÇƒíTÇ∑  */
+		/*  ÂÖàÈ†≠„Å´Âêë„Åã„Å£„Å¶Êé¢„Åô  */
 		do {
 			MDCalibratorBackward(inCalib);
 		} while (inMeasure < inCalib->data_before.bar);
 	}
 	
-	/*  ÇPîèÇÃ tick êîÅAÇPè¨êﬂÇÃîèêîÇìæÇÈ  */
+	/*  ÔºëÊãç„ÅÆ tick Êï∞„ÄÅÔºëÂ∞èÁØÄ„ÅÆÊãçÊï∞„ÇíÂæó„Çã  */
 	eptr = MDPointerCurrent(inCalib->before);
 	timebase = MDSequenceGetTimebase(inCalib->parent);
 	MDEventParseTimeSignature(eptr, timebase, &tickPerBeat, &beatPerMeasure);
@@ -592,7 +662,7 @@ MDCalibratorMeasureToTick(MDCalibrator *inCalib, long inMeasure, long inBeat, lo
 }
 
 /* --------------------------------------
-	• MDCalibratorTickToMeasure
+	ÔΩ• MDCalibratorTickToMeasure
    -------------------------------------- */
 void
 MDCalibratorTickToMeasure(MDCalibrator *inCalib, MDTickType inTick, long *outMeasure, long *outBeat, long *outTick)
@@ -609,7 +679,7 @@ MDCalibratorTickToMeasure(MDCalibrator *inCalib, MDTickType inTick, long *outMea
 }
 
 /* --------------------------------------
-	• MDCalibratorGetTempo
+	ÔΩ• MDCalibratorGetTempo
    -------------------------------------- */
 float
 MDCalibratorGetTempo(MDCalibrator *inCalib)
@@ -628,7 +698,7 @@ MDCalibratorGetTempo(MDCalibrator *inCalib)
 }
 
 /* --------------------------------------
-	• MDCalibratorTimeToTick
+	ÔΩ• MDCalibratorTimeToTick
    -------------------------------------- */
 MDTickType
 MDCalibratorTimeToTick(MDCalibrator *inCalib, MDTimeType inTime)
@@ -664,7 +734,7 @@ MDCalibratorTimeToTick(MDCalibrator *inCalib, MDTimeType inTime)
 }
 
 /* --------------------------------------
-	• MDCalibratorTickToTime
+	ÔΩ• MDCalibratorTickToTime
    -------------------------------------- */
 MDTimeType
 MDCalibratorTickToTime(MDCalibrator *inCalib, MDTickType inTick)
@@ -681,7 +751,7 @@ MDCalibratorTickToTime(MDCalibrator *inCalib, MDTickType inTick)
 }
 
 /* --------------------------------------
-	• MDCalibratorGetEvent
+	ÔΩ• MDCalibratorGetEvent
    -------------------------------------- */
 MDEvent *
 MDCalibratorGetEvent(MDCalibrator *inCalib, MDTrack *inTrack, MDEventKind inKind, short inCode)
@@ -698,7 +768,7 @@ MDCalibratorGetEvent(MDCalibrator *inCalib, MDTrack *inTrack, MDEventKind inKind
 }
 
 /* --------------------------------------
-	• MDCalibratorGetEventPosition
+	ÔΩ• MDCalibratorGetEventPosition
    -------------------------------------- */
 long
 MDCalibratorGetEventPosition(MDCalibrator *inCalib, MDTrack *inTrack, MDEventKind inKind, short inCode)
@@ -715,7 +785,7 @@ MDCalibratorGetEventPosition(MDCalibrator *inCalib, MDTrack *inTrack, MDEventKin
 }
 
 /* --------------------------------------
-	• MDCalibratorGetNextEvent
+	ÔΩ• MDCalibratorGetNextEvent
    -------------------------------------- */
 MDEvent *
 MDCalibratorGetNextEvent(MDCalibrator *inCalib, MDTrack *inTrack, MDEventKind inKind, short inCode)
@@ -732,7 +802,7 @@ MDCalibratorGetNextEvent(MDCalibrator *inCalib, MDTrack *inTrack, MDEventKind in
 }
 
 /* --------------------------------------
-	• MDCalibratorCopyPointer
+	ÔΩ• MDCalibratorCopyPointer
    -------------------------------------- */
 MDPointer *
 MDCalibratorCopyPointer(MDCalibrator *inCalib, MDTrack *inTrack, MDEventKind inKind, short inCode)

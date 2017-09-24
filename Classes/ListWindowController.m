@@ -67,18 +67,9 @@ static NSColor *sMiscColor = nil;
 	NSTableHeaderView *headerView;
 	MyTableHeaderView *myHeaderView;
 	MDSequence *seq;
+    NSMenu *menu;
 
 	[super windowDidLoad];
-
-/*	myPointer = MDPointerNew(myTrack);
-	MDPointerSetAutoAdjust(myPointer, 1);
-	myCalibrator = MDCalibratorNew([[[self document] myMIDISequence] mySequence], myTrack, kMDEventTimeSignature, -1);
-	MDCalibratorAppend(myCalibrator, myTrack, kMDEventTempo, -1);
-	myRow = -1;
-	myCount = -1;
-	myTickColumnCount = 1;
-	myTrackNumber = [[self myMIDISequence] lookUpTrack: myTrack];
-	isLastRowSelected = NO; */
 
 	myPlayingRow = -1;
 
@@ -94,7 +85,6 @@ static NSColor *sMiscColor = nil;
 	headerView = [myEventTrackView headerView];
 	myHeaderView = [[[MyTableHeaderView allocWithZone: [self zone]] initWithFrame:[headerView frame]] autorelease];
 	[myEventTrackView setHeaderView:myHeaderView];
-//	[myEventTrackView setDoubleAction: @selector(myDoubleAction:)];
 
 	MDEventInit(&myDefaultEvent);
 	MDSetKind(&myDefaultEvent, kMDEventNote);
@@ -140,6 +130,10 @@ static NSColor *sMiscColor = nil;
 		selector:@selector(showPlayPosition:)
 		name:MyDocumentPlayPositionNotification
 		object:[self document]];
+    
+    [NSBundle loadNibNamed:@"EventKindContextMenu" owner:kindDataCell];
+    menu = [[[NSMenu alloc] init] autorelease];
+    [dataDataCell setMenu:menu];
 }
 
 - (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName {
@@ -566,8 +560,11 @@ row:(int)rowIndex
                     int bank = 0;
                     int n, data1;
                     long dev;
+                    long pos;
                     data1 = MDGetData1(ep);
                     n = snprintf(eventStr, sizeof eventStr, "%d:", data1);
+                    pos = MDPointerGetPosition(myPointer);
+                    MDCalibratorJumpToPositionInTrack(myCalibrator, pos, myTrack);
                     ep1 = MDCalibratorGetEvent(myCalibrator, myTrack, kMDEventControl, 0);
                     if (ep1 != NULL)
                         bank = MDGetData1(ep1) * 256;
@@ -881,13 +878,7 @@ row:(int)rowIndex
 	[self updateInfoText];
 }
 
-//  EventKindTextFieldCell informal protocol
-- (id)willUseMenu: (id)menu forEvent: (NSEvent *)anEvent inRow: (int)row
-{
-	if (row == myCount)
-		return nil;
-	else return menu;
-}
+#pragma mark ====== Delegate methods ======
 
 //  MyTableView delegate method
 - (BOOL)myTableView:(MyTableView *)tableView shouldEditColumn:(int)column row:(int)row
@@ -940,6 +931,221 @@ row:(int)rowIndex
 	return YES;
 }
 
+- (id)willUseMenu:(id)menu ofCell:(ContextMenuTextFieldCell *)cell inRow:(int)row
+{
+    if (cell == kindDataCell) {
+        if (row == myCount)
+            return nil;
+        else return menu;
+    } else if (cell == dataDataCell) {
+        MDEvent *ep;
+        long dev;
+        int i, count;
+        if (row == myCount)
+            return nil;
+        ep = [self eventPointerForTableRow:row];
+        if (ep == NULL || MDGetKind(ep) != kMDEventProgram)
+            return nil;
+        dev = MDTrackGetDevice(myTrack);
+        count = MDPlayerGetNumberOfPatchNames(dev);
+        if (count <= 0)
+            return nil;
+        /*  Create context menu for patch names  */
+        [menu removeAllItems];
+        for (i = 0; i < count; i++) {
+            id item;
+            NSMenu *submenu;
+            NSString *title;
+            char buf[256];
+            int bank, prog;
+            int instno = MDPlayerGetPatchName(dev, -1, i, buf, sizeof(buf));
+            if (instno < 0)
+                continue;
+            bank = (instno >> 8) & 0x7fff;
+            prog = instno & 0x7f;
+            item = [menu itemWithTag:bank];
+            if (item == nil) {
+                //  Create a submenu with the bank number
+                title = [NSString stringWithFormat:@"Bank %d:%d", (bank >> 8), bank & 0x7f];
+                item = [menu addItemWithTitle:title action:nil keyEquivalent:@""];
+                [item setTag:bank];
+                submenu = [[[NSMenu alloc] init] autorelease];
+                [item setSubmenu:submenu];
+            }
+            submenu = [item submenu];
+            title = [NSString stringWithFormat:@"%d:%s", prog, buf];
+            item = [submenu addItemWithTitle:title action:@selector(contextMenuSelected:) keyEquivalent:@""];
+            [item setTag:instno];
+            [item setTarget:dataDataCell];
+        }
+        return menu;
+    } else return menu;
+}
+
+- (NSString *)stringValueForEventKindTag:(int)tag inRow:(int)row
+{
+    MDEvent event;
+    int len;
+    unsigned char *ucp;
+    char buf[64];
+    
+    MDEventInit(&event);
+    if (tag < 1000) {
+        switch (tag) {
+            case 0: /* Note */
+                MDSetKind(&event, kMDEventNote);
+                MDSetCode(&event, 60);
+                break;
+            case 1: /* Control (non-specific) */
+                MDSetKind(&event, kMDEventControl);
+                break;
+            case 2: /* Pitch bend */
+                MDSetKind(&event, kMDEventPitchBend);
+                break;
+            case 3: /* Program change */
+                MDSetKind(&event, kMDEventProgram);
+                break;
+            case 4: /* Channel pressure */
+                MDSetKind(&event, kMDEventChanPres);
+                break;
+            case 5: /* Polyphonic key pressure */
+                MDSetKind(&event, kMDEventKeyPres);
+                MDSetCode(&event, 60);
+                break;
+            case 6: /* Meta event (non-specific) */
+                MDSetKind(&event, kMDEventMetaText);
+                MDSetCode(&event, kMDMetaText);
+                break;
+            case 7: /* System exclusive */
+                MDSetKind(&event, kMDEventSysex);
+                break;
+            default:
+                return @"";
+        }
+    } else if (tag >= 1000 && tag < 2000) {
+        /*  Control events  */
+        MDSetKind(&event, kMDEventControl);
+        MDSetCode(&event, (tag - 1000) & 127);
+    } else if (tag >= 2000 && tag < 3000) {
+        /*  Meta events  */
+        switch (tag) {
+            case 2000: /* tempo */
+                MDSetKind(&event, kMDEventTempo);
+                MDSetTempo(&event, 120.0);
+                break;
+            case 2001: /* meter */
+                MDSetKind(&event, kMDEventTimeSignature);
+                ucp = MDGetMetaDataPtr(&event);
+                ucp[0] = 4; ucp[1] = 2; ucp[2] = 24; ucp[3] = 8;
+                break;
+            case 2002: /* key */
+                MDSetKind(&event, kMDEventKey);
+                break;
+            case 2003: /* smpte */
+                MDSetKind(&event, kMDEventSMPTE);
+                break;
+            case 2004: /* port */
+                MDSetKind(&event, kMDEventPortNumber);
+                break;
+            case 2005: /* text */
+            case 2006: /* copyright */
+            case 2007: /* sequence */
+            case 2008: /* instrument */
+            case 2009: /* lyric */
+            case 2010: /* marker */
+            case 2011: /* cue */
+            case 2012: /* program */
+            case 2013: /* device */
+                MDSetKind(&event, kMDEventMetaText);
+                MDSetCode(&event, tag - 2005 + kMDMetaText);
+                break;
+            default:
+                return @"";
+        }
+    } else return @"";
+    
+    /*  Get the authentic string representation  */
+    len = 0;
+    if (len == 0)
+        len = MDEventToKindString(&event, buf, sizeof buf);
+    if (len <= 0)
+        buf[0] = 0;
+    return [NSString stringWithUTF8String:buf];
+}
+
+- (NSString *)stringValueForProgramTag:(int)tag inRow:(int)row
+{
+    BOOL mod;
+    MDEventFieldData ed;
+    MDEventObject *newEvent;
+    MDEvent *ep;
+    long pos_bank;
+    long pos;
+    int i;
+    MDTickType tick;
+    MyDocument *document = (MyDocument *)[self document];
+    long trackNo = myTrackNumber;
+
+    ep = [self eventPointerForTableRow:row];
+    tick = MDGetTick(ep);
+    pos = MDPointerGetPosition(myPointer);
+
+    /*  Program change  */
+    ed.longValue = (tag & 0x7f);
+    mod = [document changeValue: ed.whole ofType:kMDEventFieldData atPosition:pos inTrack:trackNo];
+
+    /*  Do bank select MSB and LSB need to be updated?  */
+    for (i = 1; i >= 0; i--) {
+        /*  0: MSB, 1: LSB  */
+        MDPointer *pt;
+        MDEvent *ep1;
+        ed.longValue = ((tag >> (16 - i * 8)) & 0x7f);
+        MDCalibratorJumpToPositionInTrack(myCalibrator, pos, myTrack);
+        ep = MDCalibratorGetEvent(myCalibrator, myTrack, kMDEventControl, i * 32);
+        if (ep != NULL && MDGetData1(ep) == ed.longValue)
+            continue;  /*  No need to update  */
+        /*  Is it OK to change the value of the existing event?  */
+        pt = MDCalibratorCopyPointer(myCalibrator, myTrack, kMDEventControl, i * 32);
+        while ((ep1 = MDPointerForward(pt)) != NULL && MDPointerGetPosition(pt) < pos) {
+            if (MDGetKind(ep1) != kMDEventControl || (MDGetData1(ep1) & ~32) != 0) {
+                /*  Event other than bank select is present ->
+                    we need to insert a new bank select event  */
+                ep = NULL;
+                break;
+            }
+        }
+        if (ep == NULL) {
+            /*  Insert a bank select event at 'pos'  */
+            newEvent = [[MDEventObject allocWithZone: [self zone]] init];
+            ep1 = &(newEvent->event);
+            MDSetTick(ep1, tick);
+            MDSetKind(ep1, kMDEventControl);
+            MDSetCode(ep1, i * 32);
+            MDSetData1(ep1, ed.longValue);
+            newEvent->position = pos;
+            [document insertEvent: newEvent toTrack: trackNo];
+            [newEvent release];
+            pos++;
+            mod = YES;
+        } else {
+            /*  Change the value of the existing event  */
+            pos_bank = MDCalibratorGetEventPosition(myCalibrator, myTrack, kMDEventControl, i * 32);
+            mod = [document changeValue:ed.whole ofType:kMDEventFieldData atPosition:pos_bank inTrack:trackNo] || mod;
+        }
+    }
+
+    return @"";  //  All editing is done, so we do not need text editing
+}
+
+- (NSString *)stringValueForMenuItem:(id)item ofCell:(ContextMenuTextFieldCell *)cell inRow:(int)row
+{
+    if (cell == kindDataCell)
+        return [self stringValueForEventKindTag:[item tag] inRow:row];
+    else if (cell == dataDataCell)
+        return [self stringValueForProgramTag:[item tag] inRow:row];
+    else return @"";
+}
+
 #pragma mark ====== PopUp button handlers ======
 
 - (IBAction)myAppendColumn:(id)sender
@@ -987,111 +1193,6 @@ row:(int)rowIndex
 	[[myClickedColumn headerCell] setStringValue:@"delta count"];
 	[myEventTrackView reloadData];
 }
-
-#if 0
-- (IBAction)eventKindMenuSelected:(id)sender
-{
-	int tag, rowIndex;
-	long trackNo, position;
-	MyDocument *document;
-	MDEvent *ep;
-	MDEventObject *newEvent;
-	MDEventFieldData ed;
-	BOOL mod = NO;
-
-	trackNo = myTrackNumber; /* [[self myMIDISequence] lookUpTrack: [self MIDITrack]]; */
-	rowIndex = [myEventTrackView selectedRow];
-	position = [self eventPositionForTableRow: rowIndex];
-	document = (MyDocument *)[self document];
-	ep = [self eventPointerForTableRow:rowIndex];
-	newEvent = [[[MDEventObject allocWithZone: [self zone]] init] autorelease];
-	tag = [sender tag];	
-	if (tag < 1000) {
-		switch (tag) {
-			case 0: /* Note */
-				ed.ucValue[0] = kMDEventNote;
-				ed.ucValue[1] = 60;
-				break;
-			case 1: /* Control (non-specific) */
-				ed.ucValue[0] = kMDEventControl;
-				ed.ucValue[1] = 0;
-				break;
-			case 2: /* Pitch bend */
-				ed.ucValue[0] = kMDEventPitchBend;
-				break;
-			case 3: /* Program change */
-				ed.ucValue[0] = kMDEventProgram;
-				break;
-			case 4: /* Channel pressure */
-				ed.ucValue[0] = kMDEventChanPres;
-				break;
-			case 5: /* Polyphonic key pressure */
-				ed.ucValue[0] = kMDEventKeyPres;
-				ed.ucValue[1] = 60;
-				break;
-			case 6: /* Meta event (non-specific) */
-				ed.ucValue[0] = kMDEventMetaText;
-				ed.ucValue[1] = kMDMetaText;
-				break;
-			case 7: /* System exclusive */
-				ed.ucValue[0] = kMDEventSysex;
-				break;
-			default:
-				return;
-		}
-	} else if (tag >= 1000 && tag < 2000) {
-		/*  Control events  */
-		ed.ucValue[0] = kMDEventControl;
-		ed.ucValue[1] = (tag - 1000) & 127;
-	} else if (tag >= 2000 && tag < 3000) {
-		/*  Meta events  */
-		switch (tag) {
-			case 2000: /* tempo */
-				ed.ucValue[0] = kMDEventTempo;
-				break;
-			case 2001: /* meter */
-				ed.ucValue[0]= kMDEventTimeSignature;
-				break;
-			case 2002: /* key */
-				ed.ucValue[0] = kMDEventKey;
-				break;
-			case 2003: /* smpte */
-				ed.ucValue[0] = kMDEventSMPTE;
-				break;
-			case 2004: /* port */
-				ed.ucValue[0] = kMDEventPortNumber;
-				break;
-            case 2005: /* text */
-			case 2006: /* copyright */
-			case 2007: /* sequence */
-			case 2008: /* instrument */
-			case 2009: /* lyric */
-			case 2010: /* marker */
-			case 2011: /* cue */
-			case 2012: /* program */
-			case 2013: /* device */
-				ed.ucValue[0] = kMDEventMetaText;
-				ed.ucValue[1] = tag - 2005 + kMDMetaText;
-				break;
-			default:
-				return;
-		}
-    } else return;
-
-	/*  Replace the event with the new event  */
-	newEventFromKindAndCode(&newEvent->event, ed);
-	MDSetTick(&newEvent->event, MDGetTick(ep));
-	newEvent->position = position;
-	mod = [document replaceEvent: newEvent inTrack: trackNo];
-	if (mod) {
-		const MDEvent *cep = [document eventAtPosition: position inTrack: trackNo];
-		MDEventClear(&myDefaultEvent);  /*  Release the message if present  */
-		MDEventCopy(&myDefaultEvent, cep, 1);
-		[[document undoManager] setActionName: NSLocalizedString(
-			@"Modify Event", @"Name of undo/redo menu item after event is modified")];
-	}
-}
-#endif
 
 - (NSMenu *)tableHeaderView:(NSTableHeaderView *)headerView popUpMenuAtHeaderColumn:(int)column
 {

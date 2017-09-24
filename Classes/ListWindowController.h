@@ -16,6 +16,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "ContextMenuTextFieldCell.h"
 #import "MDHeaders.h"
 
 @class MyMIDISequence;
@@ -39,7 +40,9 @@ typedef struct ListWindowFilterRecord {
 	IBOutlet NSMenu      *myTickDescriptionMenu;
 	IBOutlet NSTextField *startEditingRangeText;
 	IBOutlet NSTextField *endEditingRangeText;
-	
+    IBOutlet ContextMenuTextFieldCell *kindDataCell;
+    IBOutlet ContextMenuTextFieldCell *dataDataCell;
+    
 	MDTrack *myTrack;
 	long myTrackNumber;
 
