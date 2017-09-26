@@ -1110,7 +1110,7 @@ row:(int)rowIndex
         /*  Is it OK to change the value of the existing event?  */
         pt = MDCalibratorCopyPointer(myCalibrator, myTrack, kMDEventControl, i * 32);
         while ((ep1 = MDPointerForward(pt)) != NULL && MDPointerGetPosition(pt) < pos) {
-            if (MDGetKind(ep1) != kMDEventControl || (MDGetData1(ep1) & ~32) != 0) {
+            if (MDGetKind(ep1) != kMDEventControl || (MDGetCode(ep1) & ~32) != 0) {
                 /*  Event other than bank select is present ->
                     we need to insert a new bank select event  */
                 ep = NULL;
