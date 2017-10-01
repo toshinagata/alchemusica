@@ -90,7 +90,7 @@ getYValue(const MDEvent *ep, int eventKind)
 {
 	float ppt, height;
 	MDTickType beginTick, endTick;
-	long n;
+	int32_t n;
 	float dx, dy;
 	NSBezierPath *draggingPath;
 	NSMutableArray *array;
@@ -115,7 +115,7 @@ getYValue(const MDEvent *ep, int eventKind)
 		MDPointer *pt;
 		NSColor *color;
 		MDTrack *track;
-		long trackNo;
+		int32_t trackNo;
 		trackNo = [dataSource sortedTrackNumberAtIndex: n];
 		track = [[[dataSource document] myMIDISequence] getTrackAtIndex: trackNo];
 		if (track == NULL)
@@ -157,7 +157,7 @@ getYValue(const MDEvent *ep, int eventKind)
 	}
 	if (array != nil) {
 		int i = 0;
-		n = [array count];
+		n = (int)[array count];
 		while (i < n) {
 		//	NSLog(@"color: %@ path (%d)", [array objectAtIndex: i], [[array objectAtIndex: i + 1] elementCount]);
 			[(NSColor *)[array objectAtIndex: i++] set];
@@ -169,7 +169,7 @@ getYValue(const MDEvent *ep, int eventKind)
 - (void)drawBoxStripInRect: (NSRect)aRect
 {
 	float ppt;
-	long n;
+	int32_t n;
 	MDTickType beginTick, endTick;
 	float height;
 	float dx, dy;
@@ -206,7 +206,7 @@ getYValue(const MDEvent *ep, int eventKind)
 		NSRect rect;
 		NSColor *color, *shadowColor;
 		MDTrack *track;
-		long trackNo, poslast;
+		int32_t trackNo, poslast;
 		BOOL isFocused;
 		if (eventKind == kMDEventTempo)
 			trackNo = 0;
@@ -275,7 +275,7 @@ getYValue(const MDEvent *ep, int eventKind)
 	}
 	if (array != nil) {
 		int i = 0;
-		n = [array count];
+		n = (int)[array count];
 		while (i < n) {
 			[(NSColor *)[array objectAtIndex: i++] set];
 			[[array objectAtIndex: i++] stroke];
@@ -321,7 +321,7 @@ getYValue(const MDEvent *ep, int eventKind)
 		[self drawSelectRegion];
 }
 
-- (void)setKindAndCode: (long)kindAndCode
+- (void)setKindAndCode: (int32_t)kindAndCode
 {
 	int newKind, newCode;
 	MDSequence *sequence;
@@ -424,9 +424,9 @@ getYValue(const MDEvent *ep, int eventKind)
 	}
 }
 
-- (long)kindAndCode
+- (int32_t)kindAndCode
 {
-	return ((((long)eventKind) & 65535) << 16) | (eventCode & 65535);
+	return ((((int32_t)eventKind) & 65535) << 16) | (eventCode & 65535);
 }
 
 - (void)invalidateDraggingRegion
@@ -492,11 +492,11 @@ getYValue(const MDEvent *ep, int eventKind)
 }
 
 /*  Returns 0-3; 0: no event, 1: the hot spot, 2: on the vertical line, 3: on the horizontal line (box mode only) */
-- (int)findStripUnderPoint: (NSPoint)aPoint track: (int *)outTrack position: (long *)outPosition mdEvent: (MDEvent **)outEvent
+- (int)findStripUnderPoint: (NSPoint)aPoint track: (int *)outTrack position: (int32_t *)outPosition mdEvent: (MDEvent **)outEvent
 {
 	int num, i, retval;
 	int trackNum;
-	long poslast;
+	int32_t poslast;
 	MDEvent *ep;
 	float ppt = [dataSource pixelsPerTick];
 	float x, y, xlast, ylast;
@@ -611,7 +611,7 @@ getYValue(const MDEvent *ep, int eventKind)
 //	lineShape = [[self dataSource] graphicLineShape];
 
 	//  selectPoints is an instance variable of GraphicClientView
-	n = [selectPoints count];
+	n = (int)[selectPoints count];
 	if (n == 0)
 		return;
 	[[NSColor cyanColor] set];
@@ -769,7 +769,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 	MyDocument *doc = (MyDocument *)[dataSource document];
 
 	//  selectPoints is an instance variable of GraphicClientView
-	n = [selectPoints count];
+	n = (int)[selectPoints count];
 	if (n == 0)
 		return;
 	pt1 = [[selectPoints objectAtIndex: 0] pointValue];
@@ -970,7 +970,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 			MDSelectionObject *psetObj;
 			IntGroup *pset;
 			int idx;
-			long count, j;
+			int32_t count, j;
 			NSMutableData *theData;
 			float *fp;
 			float x, y, t, v, v0;
@@ -1085,7 +1085,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 - (void)doMouseMoved: (NSEvent *)theEvent
 {
 	int track;
-	long pos;
+	int32_t pos;
 	MDEvent *ep;
 	int n;
 	NSPoint pt = [NSEvent mouseLocation]; /*  Use mouseLocation in case this is called from flagsChanged: handler (not implemented yet)  */
@@ -1112,7 +1112,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 
 - (void)doMouseDown: (NSEvent *)theEvent
 {
-	long pos;
+	int32_t pos;
 	MDEvent *ep;
 	int track;
 	NSRect bounds;

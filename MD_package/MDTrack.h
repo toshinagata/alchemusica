@@ -55,7 +55,7 @@ extern "C" {
 
 /*  MDPointerForwardWithSelector(), MDPointerBackwardWithSelector() などで使う
     コールバック関数 */
-typedef int	(*MDEventSelector)(const MDEvent *ep, long position, void *inUserData);
+typedef int	(*MDEventSelector)(const MDEvent *ep, int32_t position, void *inUserData);
 
 /* -------------------------------------------------------------------
     MDTrack functions
@@ -79,17 +79,17 @@ void	MDTrackClear(MDTrack *inTrack);
 void	MDTrackExchange(MDTrack *inTrack1, MDTrack *inTrack2);
 
 /*  含まれているイベントの数を返す。 */
-long	MDTrackGetNumberOfEvents(const MDTrack *inTrack);
+int32_t	MDTrackGetNumberOfEvents(const MDTrack *inTrack);
 
 /*  含まれているチャンネルイベントの数を返す。channel が 0-15 の範囲でなければ
     すべてのチャンネルイベントの数の合計を返す。 */
-long	MDTrackGetNumberOfChannelEvents(const MDTrack *inTrack, short channel);
+int32_t	MDTrackGetNumberOfChannelEvents(const MDTrack *inTrack, short channel);
 
 /*  含まれているシステムエクスクルーシブイベントの数を返す。 */
-long	MDTrackGetNumberOfSysexEvents(const MDTrack *inTrack);
+int32_t	MDTrackGetNumberOfSysexEvents(const MDTrack *inTrack);
 
 /*  含まれている non-MIDI イベント(メタイベント)の数を返す。 */
-long	MDTrackGetNumberOfNonMIDIEvents(const MDTrack *inTrack);
+int32_t	MDTrackGetNumberOfNonMIDIEvents(const MDTrack *inTrack);
 
 /*  シーケンスの長さを返す。 */
 MDTickType	MDTrackGetDuration(const MDTrack *inTrack);
@@ -99,7 +99,7 @@ void	MDTrackSetDuration(MDTrack *inTrack, MDTickType inDuration);
 
 /*  シーケンスの末尾にイベントを追加する。イベントの順序はチェックしないので注意。
     実際に追加できたイベントの数を返す。 */
-long	MDTrackAppendEvents(MDTrack *inTrack, const MDEvent *inEvent, long count);
+int32_t	MDTrackAppendEvents(MDTrack *inTrack, const MDEvent *inEvent, int32_t count);
 
 /*  ２つのトラックをマージする（inTrack1 の中に inTrack2 のイベントを挿入する）。
     ioSet は NULL ならば無視される。ioSet != NULL で *ioSet == NULL なら、新しく IntGroup を
@@ -147,10 +147,10 @@ IntGroup *MDTrackSearchEventsWithSelector(MDTrack *inTrack, MDEventSelector inSe
 void		MDTrackRemapChannel(MDTrack *inTrack, const unsigned char *newch);
 
 /*  デバイス番号をセットする。 */
-void		MDTrackSetDevice(MDTrack *inTrack, long dev);
+void		MDTrackSetDevice(MDTrack *inTrack, int32_t dev);
 
 /*  デバイス番号を得る。 */
-long		MDTrackGetDevice(const MDTrack *inTrack);
+int32_t		MDTrackGetDevice(const MDTrack *inTrack);
 
 /*  トラックのチャンネルをセットする。この値は親シーケンスがシングルチャンネルモードの場合のみ使われる。 */
 void		MDTrackSetTrackChannel(MDTrack *inTrack, short ch);
@@ -162,19 +162,19 @@ short		MDTrackGetTrackChannel(const MDTrack *inTrack);
 MDStatus	MDTrackSetName(MDTrack *inTrack, const char *inName);
 
 /*  トラックの名前を得る。 */
-void		MDTrackGetName(const MDTrack *inTrack, char *outName, long length);
+void		MDTrackGetName(const MDTrack *inTrack, char *outName, int32_t length);
 
 /*  出力デバイスの名前をセットする。文字列 (inName) は malloc でコピーされる。 */
 MDStatus	MDTrackSetDeviceName(MDTrack *inTrack, const char *inName);
 
 /*  出力デバイスの名前を得る。 */
-void		MDTrackGetDeviceName(const MDTrack *inTrack, char *outName, long length);
+void		MDTrackGetDeviceName(const MDTrack *inTrack, char *outName, int32_t length);
 
 /*  メタイベントからトラック名を推測する。 */
-void		MDTrackGuessName(MDTrack *inTrack, char *outName, long length);
+void		MDTrackGuessName(MDTrack *inTrack, char *outName, int32_t length);
 
 /*  メタイベントからデバイス名を推測する。 */
-void		MDTrackGuessDeviceName(MDTrack *inTrack, char *outName, long length);
+void		MDTrackGuessDeviceName(MDTrack *inTrack, char *outName, int32_t length);
 
 /*  トラック属性 (Rec/Solo/Mute) の取得、セット  */
 MDTrackAttribute	MDTrackGetAttribute(const MDTrack *inTrack);
@@ -216,11 +216,11 @@ MDTrack *		MDPointerGetTrack(const MDPointer *inPointer);
 
 /*  現在位置の変更。存在しない位置に移動しようとした時は先頭以前か末尾以降に
     移動し、0 (false) を返す。 */
-int				MDPointerSetPosition(MDPointer *inPointer, long inPos);
-int				MDPointerSetRelativePosition(MDPointer *inPointer, long inOffset);
+int				MDPointerSetPosition(MDPointer *inPointer, int32_t inPos);
+int				MDPointerSetRelativePosition(MDPointer *inPointer, int32_t inOffset);
 
 /*  現在位置を読み出す */
-long			MDPointerGetPosition(const MDPointer *inPointer);
+int32_t			MDPointerGetPosition(const MDPointer *inPointer);
 
 /*  挿入・削除後に位置を自動調整する場合に 1 をセットする。デフォルトは 0  */
 void			MDPointerSetAutoAdjust(MDPointer *inPointer, char flag);
@@ -260,7 +260,7 @@ MDEvent *		MDPointerForwardWithSelector(MDPointer *inPointer, MDEventSelector in
 MDEvent *		MDPointerBackwardWithSelector(MDPointer *inPointer, MDEventSelector inSelector, void *inUserData);
 
 /*  inPointSet 中の offset 番目の点の位置に移動する  */
-int				MDPointerSetPositionWithPointSet(MDPointer *inPointer, IntGroup *inPointSet, long offset, int *outIndex);
+int				MDPointerSetPositionWithPointSet(MDPointer *inPointer, IntGroup *inPointSet, int32_t offset, int *outIndex);
 
 /*  現在位置より１つ進み、その点が pointSet の *index 番目の区間の終端より先であれば、次の区間の始点に対応する位置に移動して (*index) を +1 する。index == NULL であるか、または *index < 0 であるなら、pointSet に含まれるところまで現在位置を進め、index != NULL ならば *index にその区間の番号を返す。もし対応する点がなければ、inPointer はトラック末尾+1 の位置になり、*index には -1 が返される。 */
 MDEvent *		MDPointerForwardWithPointSet(MDPointer *inPointer, IntGroup *inPointSet, int *index);
@@ -279,7 +279,7 @@ MDStatus		MDPointerReplaceAnEvent(MDPointer *inPointer, const MDEvent *inEvent, 
 
 /*  現在位置のイベントの tick を変更する。inPosition に変更後の位置を指定することができる。inPosition に動かすと
     tick 順に矛盾を生じる場合は、inTick の値に合わせて適当な位置を探す。inPointer は移動後のイベントの位置に移る。 */
-MDStatus		MDPointerChangeTick(MDPointer *inPointer, MDTickType inTick, long inPosition);
+MDStatus		MDPointerChangeTick(MDPointer *inPointer, MDTickType inTick, int32_t inPosition);
 
 /*  Change the duration value, with clearing the largestTick cache in the MDBlock  */
 MDStatus		MDPointerSetDuration(MDPointer *inPointer, MDTickType inDuration);

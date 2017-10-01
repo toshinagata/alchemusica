@@ -25,11 +25,11 @@ typedef struct MDArray	MDArray;
 #endif
 
 struct MDArray {
-	long			refCount;	/*  the reference count  */
-	long			num;		/*  the number of elements  */
-	long			maxIndex;	/*  the number of allocated elements  */
-	long			elemSize;	/*  the size of the element  */
-	long			pageSize;	/*  the page size  */
+	int32_t			refCount;	/*  the reference count  */
+	int32_t			num;		/*  the number of elements  */
+	int32_t			maxIndex;	/*  the number of allocated elements  */
+	int32_t			elemSize;	/*  the size of the element  */
+	int32_t			pageSize;	/*  the page size  */
 	void *			data;		/*  data */
 	char			allocated;	/*  non-zero if data is allocated by malloc()  */
 	void			(*destructor)(void *);	/*  element destructor  */
@@ -45,29 +45,29 @@ extern "C" {
     MDUtility functions
    -------------------------------------------------------------------  */
 
-/* ƒXƒgƒŠ[ƒ€‚©‚ç’l‚ğ“Ç‚İo‚·BANSI-C ‚Ì scanf ‚Æ—‚Ä‚¢‚é‚ªAƒtƒH[ƒ}ƒbƒg•¶š—ñ‚Í
-   Perl ‚Ì pack/unpack ƒtƒH[ƒ}ƒbƒg‚ÌƒTƒuƒZƒbƒg‚Æ‚È‚Á‚Ä‚¨‚èAuŒ^w’è•¶š [ƒJƒEƒ“ƒg]v
-   ‚Ì•À‚Ñ‚Æ‚È‚Á‚Ä‚¢‚éiƒJƒEƒ“ƒg‚ÍÈ—ª‰Â”\jBŒ^w’è•¶š‚Í a, A, c, C, n, N, w ‚ª
-   ƒTƒ|[ƒg‚³‚ê‚Ä‚¢‚éBˆø‚«”‚É‚ÍAw’è‚³‚ê‚½Œ^‚Ì•Ï”‚Ö‚Ìƒ|ƒCƒ“ƒ^‚ğ‡‚É•À‚×‚éB
-   a, A ‚Ìê‡‚ÍƒJƒEƒ“ƒg‚É "*" ‚ğw’è‚Å‚«A‚±‚Ìê‡Ÿ‚Ì long Œ^•Ï”‚ğ‚P‚Â“Ç‚İæ‚Á‚Ä
-   ‚»‚ê‚ğƒJƒEƒ“ƒg‚Æ‚İ‚È‚·B‚±‚êˆÈŠO‚Ìê‡‚ÍƒJƒEƒ“ƒg‚Í’è”‚Å‚È‚¯‚ê‚Î‚È‚ç‚È‚¢B */
-long	MDReadStreamFormat(STREAM stream, const char *format, ...);
+/* ã‚¹ãƒˆãƒªãƒ¼ãƒ ã‹ã‚‰å€¤ã‚’èª­ã¿å‡ºã™ã€‚ANSI-C ã® scanf ã¨ä¼¼ã¦ã„ã‚‹ãŒã€ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆæ–‡å­—åˆ—ã¯
+   Perl ã® pack/unpack ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆã®ã‚µãƒ–ã‚»ãƒƒãƒˆã¨ãªã£ã¦ãŠã‚Šã€ã€Œå‹æŒ‡å®šæ–‡å­— [ã‚«ã‚¦ãƒ³ãƒˆ]ã€
+   ã®ä¸¦ã³ã¨ãªã£ã¦ã„ã‚‹ï¼ˆã‚«ã‚¦ãƒ³ãƒˆã¯çœç•¥å¯èƒ½ï¼‰ã€‚å‹æŒ‡å®šæ–‡å­—ã¯ a, A, c, C, n, N, w ãŒ
+   ã‚µãƒãƒ¼ãƒˆã•ã‚Œã¦ã„ã‚‹ã€‚å¼•ãæ•°ã«ã¯ã€æŒ‡å®šã•ã‚ŒãŸå‹ã®å¤‰æ•°ã¸ã®ãƒã‚¤ãƒ³ã‚¿ã‚’é †ã«ä¸¦ã¹ã‚‹ã€‚
+   a, A ã®å ´åˆã¯ã‚«ã‚¦ãƒ³ãƒˆã« "*" ã‚’æŒ‡å®šã§ãã€ã“ã®å ´åˆæ¬¡ã® int32_t å‹å¤‰æ•°ã‚’ï¼‘ã¤èª­ã¿å–ã£ã¦
+   ãã‚Œã‚’ã‚«ã‚¦ãƒ³ãƒˆã¨ã¿ãªã™ã€‚ã“ã‚Œä»¥å¤–ã®å ´åˆã¯ã‚«ã‚¦ãƒ³ãƒˆã¯å®šæ•°ã§ãªã‘ã‚Œã°ãªã‚‰ãªã„ã€‚ */
+int32_t	MDReadStreamFormat(STREAM stream, const char *format, ...);
 
-/* ƒXƒgƒŠ[ƒ€‚É’l‚ğ‘‚«o‚·BƒtƒH[ƒ}ƒbƒg‚Í MDReadStreamFormat() ‚Æ“¯‚¶B */
-long	MDWriteStreamFormat(STREAM stream, const char *format, ...);
+/* ã‚¹ãƒˆãƒªãƒ¼ãƒ ã«å€¤ã‚’æ›¸ãå‡ºã™ã€‚ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆã¯ MDReadStreamFormat() ã¨åŒã˜ã€‚ */
+int32_t	MDWriteStreamFormat(STREAM stream, const char *format, ...);
 
-/* ƒtƒ@ƒCƒ‹ƒXƒgƒŠ[ƒ€‚ğŠJ‚­Bˆø”‚Í fopen() ‚Æ“¯‚¶B•Ô‚³‚ê‚éƒ|ƒCƒ“ƒ^‚Í STREAM Œ^‚Ì
-   ƒ|ƒCƒ“ƒ^‚Æ‚µ‚ÄAƒ}ƒNƒ PUTC, GETC,... ‚È‚Ç‚Æ‚Æ‚à‚Ég‚¤‚±‚Æ‚ª‚Å‚«‚éB */
+/* ãƒ•ã‚¡ã‚¤ãƒ«ã‚¹ãƒˆãƒªãƒ¼ãƒ ã‚’é–‹ãã€‚å¼•æ•°ã¯ fopen() ã¨åŒã˜ã€‚è¿”ã•ã‚Œã‚‹ãƒã‚¤ãƒ³ã‚¿ã¯ STREAM å‹ã®
+   ãƒã‚¤ãƒ³ã‚¿ã¨ã—ã¦ã€ãƒã‚¯ãƒ­ PUTC, GETC,... ãªã©ã¨ã¨ã‚‚ã«ä½¿ã†ã“ã¨ãŒã§ãã‚‹ã€‚ */
 STREAM	MDStreamOpenFile(const char *fname, const char *mode);
 
-/* ƒf[ƒ^ƒXƒgƒŠ[ƒ€‚ğŠJ‚­Bptr ‚Í NULL ‚©Amalloc() ‚ÅŠm•Û‚µ‚½ƒf[ƒ^ƒ|ƒCƒ“ƒ^‚Å‚È‚¯‚ê‚Î
-   ‚È‚ç‚È‚¢Bsize ‚Íƒf[ƒ^ƒTƒCƒY‚ÅAptr == NULL ‚Ìê‡‚Í 0 ‚ğ“n‚·‚±‚ÆB
-   ’ˆÓFFCLOSE(stream) ‚Å ptr ‚Í‰ğ•ú‚³‚ê‚¸Astream ‚¾‚¯‚ª‰ğ•ú‚³‚ê‚éB‚µ‚½‚ª‚Á‚ÄA
-   FCLOSE ‚Ì‘O‚É MDStreamGetData() ‚Åƒf[ƒ^ƒ|ƒCƒ“ƒ^‚ÆƒTƒCƒY‚ğæ“¾‚µ‚Ä‚¨‚©‚È‚¯‚ê‚Î‚È‚ç‚È‚¢B */
+/* ãƒ‡ãƒ¼ã‚¿ã‚¹ãƒˆãƒªãƒ¼ãƒ ã‚’é–‹ãã€‚ptr ã¯ NULL ã‹ã€malloc() ã§ç¢ºä¿ã—ãŸãƒ‡ãƒ¼ã‚¿ãƒã‚¤ãƒ³ã‚¿ã§ãªã‘ã‚Œã°
+   ãªã‚‰ãªã„ã€‚size ã¯ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã§ã€ptr == NULL ã®å ´åˆã¯ 0 ã‚’æ¸¡ã™ã“ã¨ã€‚
+   æ³¨æ„ï¼šFCLOSE(stream) ã§ ptr ã¯è§£æ”¾ã•ã‚Œãšã€stream ã ã‘ãŒè§£æ”¾ã•ã‚Œã‚‹ã€‚ã—ãŸãŒã£ã¦ã€
+   FCLOSE ã®å‰ã« MDStreamGetData() ã§ãƒ‡ãƒ¼ã‚¿ãƒã‚¤ãƒ³ã‚¿ã¨ã‚µã‚¤ã‚ºã‚’å–å¾—ã—ã¦ãŠã‹ãªã‘ã‚Œã°ãªã‚‰ãªã„ã€‚ */
 STREAM	MDStreamOpenData(void *ptr, size_t size);
 
-/* ƒf[ƒ^ƒXƒgƒŠ[ƒ€‚ÌŒ»İ‚Ìƒf[ƒ^ƒ|ƒCƒ“ƒ^‚Æƒf[ƒ^ƒTƒCƒY‚ğ•Ô‚·BƒXƒgƒŠ[ƒ€‚ªƒf[ƒ^ƒXƒgƒŠ[ƒ€‚Å
-   ‚È‚¢ê‡‚Í -1 ‚ğ•Ô‚·B */
+/* ãƒ‡ãƒ¼ã‚¿ã‚¹ãƒˆãƒªãƒ¼ãƒ ã®ç¾åœ¨ã®ãƒ‡ãƒ¼ã‚¿ãƒã‚¤ãƒ³ã‚¿ã¨ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã‚’è¿”ã™ã€‚ã‚¹ãƒˆãƒªãƒ¼ãƒ ãŒãƒ‡ãƒ¼ã‚¿ã‚¹ãƒˆãƒªãƒ¼ãƒ ã§
+   ãªã„å ´åˆã¯ -1 ã‚’è¿”ã™ã€‚ */
 int     MDStreamGetData(STREAM stream, void **ptr, size_t *size);
 
 /* -------------------------------------------------------------------
@@ -90,46 +90,46 @@ int		_dprintf(const char *fname, int lineno, int level, const char *fmt, ...);
     MDArray functions
    -------------------------------------------------------------------  */
 
-/*  V‚µ‚¢ MDArray ‚ğƒAƒƒP[ƒg‚·‚éBƒƒ‚ƒŠ•s‘«‚Ìê‡‚Í NULL ‚ğ•Ô‚·B 
-    elementSize ‚Í—v‘f‚P‚Â‚ÌƒoƒCƒg”ApageSize ‚Íƒƒ‚ƒŠ‚ğŠm•Û‚·‚é’PˆÊi—v‘f”j */
-MDArray *	MDArrayNew(long elementSize);
-MDArray *	MDArrayNewWithPageSize(long elementSize, long pageSize);
+/*  æ–°ã—ã„ MDArray ã‚’ã‚¢ãƒ­ã‚±ãƒ¼ãƒˆã™ã‚‹ã€‚ãƒ¡ãƒ¢ãƒªä¸è¶³ã®å ´åˆã¯ NULL ã‚’è¿”ã™ã€‚ 
+    elementSize ã¯è¦ç´ ï¼‘ã¤ã®ãƒã‚¤ãƒˆæ•°ã€pageSize ã¯ãƒ¡ãƒ¢ãƒªã‚’ç¢ºä¿ã™ã‚‹å˜ä½ï¼ˆè¦ç´ æ•°ï¼‰ */
+MDArray *	MDArrayNew(int32_t elementSize);
+MDArray *	MDArrayNewWithPageSize(int32_t elementSize, int32_t pageSize);
 
-MDArray *	MDArrayNewWithDestructor(long elementSize, void (*destruct)(void *));
+MDArray *	MDArrayNewWithDestructor(int32_t elementSize, void (*destruct)(void *));
 
-/*  ‚·‚Å‚ÉƒAƒƒP[ƒg‚µ‚Ä‚ ‚éƒƒ‚ƒŠã‚Ì MDArray ‚ğ‰Šú‰»‚·‚éB */
-MDArray *	MDArrayInit(MDArray *arrayRef, long elementSize);
-MDArray *	MDArrayInitWithPageSize(MDArray *arrayRef, long elementSize, long pageSize);
+/*  ã™ã§ã«ã‚¢ãƒ­ã‚±ãƒ¼ãƒˆã—ã¦ã‚ã‚‹ãƒ¡ãƒ¢ãƒªä¸Šã® MDArray ã‚’åˆæœŸåŒ–ã™ã‚‹ã€‚ */
+MDArray *	MDArrayInit(MDArray *arrayRef, int32_t elementSize);
+MDArray *	MDArrayInitWithPageSize(MDArray *arrayRef, int32_t elementSize, int32_t pageSize);
 
-/*  MDArray ‚Ì retain/releaseB */
+/*  MDArray ã® retain/releaseã€‚ */
 void		MDArrayRetain(MDArray *arrayRef);
 void		MDArrayRelease(MDArray *arrayRef);
 
-/*  MDArray ‚Ì’·‚³‚ğ‚O‚É‚·‚é  */
+/*  MDArray ã®é•·ã•ã‚’ï¼ã«ã™ã‚‹  */
 void		MDArrayEmpty(MDArray *arrayRef);
 
-/*  —v‘f‚Ì”‚ğ•Ô‚·  */
-long		MDArrayCount(const MDArray *arrayRef);
+/*  è¦ç´ ã®æ•°ã‚’è¿”ã™  */
+int32_t		MDArrayCount(const MDArray *arrayRef);
 
-/*  MDArray ‚Ì—v‘f”‚ğ•ÏX‚·‚éBinCount ‚ªŒ»İ‚Ì—v‘f”‚æ‚è‘½‚¯‚ê‚ÎA’·‚­‚È‚Á‚½•”•ª‚Í‚OƒNƒŠƒA‚³‚ê‚éBinCount ‚ªŒ»İ‚Ì—v‘f”‚æ‚è­‚È‚¯‚ê‚ÎA’Z‚­‚È‚Á‚½•”•ª‚Í–Ù‚Á‚ÄÌ‚Ä‚ç‚ê‚éB */
-MDStatus    MDArraySetCount(MDArray *arrayRef, long inCount);
+/*  MDArray ã®è¦ç´ æ•°ã‚’å¤‰æ›´ã™ã‚‹ã€‚inCount ãŒç¾åœ¨ã®è¦ç´ æ•°ã‚ˆã‚Šå¤šã‘ã‚Œã°ã€é•·ããªã£ãŸéƒ¨åˆ†ã¯ï¼ã‚¯ãƒªã‚¢ã•ã‚Œã‚‹ã€‚inCount ãŒç¾åœ¨ã®è¦ç´ æ•°ã‚ˆã‚Šå°‘ãªã‘ã‚Œã°ã€çŸ­ããªã£ãŸéƒ¨åˆ†ã¯é»™ã£ã¦æ¨ã¦ã‚‰ã‚Œã‚‹ã€‚ */
+MDStatus    MDArraySetCount(MDArray *arrayRef, int32_t inCount);
 
-/*  inIndex ”Ô–Úiæ“ª‚ª‚Oj‚©‚ç inLength ŒÂ•ª—v‘f‚ğ‘}“ü‚·‚éB•K—v‚È‚ç©“®“I‚É
-    ƒƒ‚ƒŠŠm•Û‚³‚êA’†ŠÔ‚ÉŒŠ‚Ì—v‘f‚ª‚ ‚ê‚Î‚OƒNƒŠƒA‚³‚ê‚éB  */
-MDStatus	MDArrayInsert(MDArray *arrayRef, long inIndex, long inLength, const void *inData);
+/*  inIndex ç•ªç›®ï¼ˆå…ˆé ­ãŒï¼ï¼‰ã‹ã‚‰ inLength å€‹åˆ†è¦ç´ ã‚’æŒ¿å…¥ã™ã‚‹ã€‚å¿…è¦ãªã‚‰è‡ªå‹•çš„ã«
+    ãƒ¡ãƒ¢ãƒªç¢ºä¿ã•ã‚Œã€ä¸­é–“ã«ç©´ã®è¦ç´ ãŒã‚ã‚Œã°ï¼ã‚¯ãƒªã‚¢ã•ã‚Œã‚‹ã€‚  */
+MDStatus	MDArrayInsert(MDArray *arrayRef, int32_t inIndex, int32_t inLength, const void *inData);
 
-/*  inIndex ”Ô–Úiæ“ª‚ª‚Oj‚©‚ç inLength ŒÂ•ª—v‘f‚ğíœ‚·‚é  */
-MDStatus	MDArrayDelete(MDArray *arrayRef, long inIndex, long inLength);
+/*  inIndex ç•ªç›®ï¼ˆå…ˆé ­ãŒï¼ï¼‰ã‹ã‚‰ inLength å€‹åˆ†è¦ç´ ã‚’å‰Šé™¤ã™ã‚‹  */
+MDStatus	MDArrayDelete(MDArray *arrayRef, int32_t inIndex, int32_t inLength);
 
-/*  inIndex ”Ô–Úiæ“ª‚ª‚Oj‚©‚ç inLength ŒÂ‚Ì—v‘f‚ğ inData ‚Å’u‚«Š·‚¦‚éB•K—v‚È‚ç
-    ©“®“I‚Éƒƒ‚ƒŠŠm•Û‚³‚êA’†ŠÔ‚ÉŒŠ‚Ì—v‘f‚ª‚ ‚ê‚Î‚OƒNƒŠƒA‚³‚ê‚éB */
-MDStatus	MDArrayReplace(MDArray *arrayRef, long inIndex, long inLength, const void *inData);
+/*  inIndex ç•ªç›®ï¼ˆå…ˆé ­ãŒï¼ï¼‰ã‹ã‚‰ inLength å€‹ã®è¦ç´ ã‚’ inData ã§ç½®ãæ›ãˆã‚‹ã€‚å¿…è¦ãªã‚‰
+    è‡ªå‹•çš„ã«ãƒ¡ãƒ¢ãƒªç¢ºä¿ã•ã‚Œã€ä¸­é–“ã«ç©´ã®è¦ç´ ãŒã‚ã‚Œã°ï¼ã‚¯ãƒªã‚¢ã•ã‚Œã‚‹ã€‚ */
+MDStatus	MDArrayReplace(MDArray *arrayRef, int32_t inIndex, int32_t inLength, const void *inData);
 
-/*  inIndex ”Ô–Úiæ“ª‚ª‚Oj‚©‚ç inLength ŒÂ‚Ì—v‘f‚ğ outData ‚Éæ‚èo‚·B
-    ÀÛ‚Éæ‚èo‚³‚ê‚½—v‘f‚Ì”‚ğ•Ô‚·B */
-long		MDArrayFetch(const MDArray *arrayRef, long inIndex, long inLength, void *outData);
+/*  inIndex ç•ªç›®ï¼ˆå…ˆé ­ãŒï¼ï¼‰ã‹ã‚‰ inLength å€‹ã®è¦ç´ ã‚’ outData ã«å–ã‚Šå‡ºã™ã€‚
+    å®Ÿéš›ã«å–ã‚Šå‡ºã•ã‚ŒãŸè¦ç´ ã®æ•°ã‚’è¿”ã™ã€‚ */
+int32_t		MDArrayFetch(const MDArray *arrayRef, int32_t inIndex, int32_t inLength, void *outData);
 
-void *		MDArrayFetchPtr(const MDArray *arrayRef, long inIndex);
+void *		MDArrayFetchPtr(const MDArray *arrayRef, int32_t inIndex);
 
 /*  Simpler Array implementation  */
 void *AssignArray(void *base, int *count, int item_size, int idx, const void *value);

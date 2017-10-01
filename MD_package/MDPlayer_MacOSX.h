@@ -22,7 +22,7 @@
 #include "MDAudio.h"
 
 typedef struct MetronomeInfoRecord {
-	long dev;
+	int32_t dev;
 	int channel;
 	int note1;
 	int vel1;
@@ -30,7 +30,7 @@ typedef struct MetronomeInfoRecord {
 	int vel2;
 	char enableWhenPlay;
 	char enableWhenRecord;
-	long duration;
+	int32_t duration;
 } MetronomeInfoRecord;
 
 extern MetronomeInfoRecord gMetronomeInfo;
@@ -80,28 +80,28 @@ MDPlayer *  MDPlayerRecordingPlayer(void);
 MDTimeType	MDPlayerGetTime(MDPlayer *inPlayer);
 MDTickType	MDPlayerGetTick(MDPlayer *inPlayer);
 
-void		MDPlayerSetMIDIThruDeviceAndChannel(long dev, int ch);
-MDStatus	MDPlayerBacktrackEvents(MDPlayer *inPlayer, MDTickType inTick, const long *inEventType, const long *inEventTypeLastOnly);
+void		MDPlayerSetMIDIThruDeviceAndChannel(int32_t dev, int ch);
+MDStatus	MDPlayerBacktrackEvents(MDPlayer *inPlayer, MDTickType inTick, const int32_t *inEventType, const int32_t *inEventTypeLastOnly);
 int			MDPlayerSendRawMIDI(MDPlayer *player, const unsigned char *p, int size, int destDevice, MDTimeType scheduledTime);
 void		MDPlayerRingMetronomeClick(MDPlayer *inPlayer, MDTimeType atTime, int isPrincipal);
 
 void		MDPlayerReloadDeviceInformation(void);
-long		MDPlayerGetNumberOfDestinations(void);
-MDStatus	MDPlayerGetDestinationName(long dev, char *name, long sizeof_name);
-long		MDPlayerGetDestinationNumberFromName(const char *name);
-long		MDPlayerGetDestinationUniqueID(long dev);
-long		MDPlayerGetDestinationNumberFromUniqueID(long uniqueID);
-long		MDPlayerGetNumberOfSources(void);
-MDStatus	MDPlayerGetSourceName(long dev, char *name, long sizeof_name);
-long		MDPlayerGetSourceNumberFromName(const char *name);
-//long		MDPlayerGetSourceUniqueID(long dev);
-//long		MDPlayerGetSourceNumberFromUniqueID(long uniqueID);
-long        MDPlayerAddDestinationName(const char *name);
-long        MDPlayerAddSourceName(const char *name);
+int32_t		MDPlayerGetNumberOfDestinations(void);
+MDStatus	MDPlayerGetDestinationName(int32_t dev, char *name, int32_t sizeof_name);
+int32_t		MDPlayerGetDestinationNumberFromName(const char *name);
+int32_t		MDPlayerGetDestinationUniqueID(int32_t dev);
+int32_t		MDPlayerGetDestinationNumberFromUniqueID(int32_t uniqueID);
+int32_t		MDPlayerGetNumberOfSources(void);
+MDStatus	MDPlayerGetSourceName(int32_t dev, char *name, int32_t sizeof_name);
+int32_t		MDPlayerGetSourceNumberFromName(const char *name);
+//int32_t		MDPlayerGetSourceUniqueID(int32_t dev);
+//int32_t		MDPlayerGetSourceNumberFromUniqueID(int32_t uniqueID);
+int32_t        MDPlayerAddDestinationName(const char *name);
+int32_t        MDPlayerAddSourceName(const char *name);
 
-int         MDPlayerUpdatePatchNames(long dev);
-int         MDPlayerGetNumberOfPatchNames(long dev);
-int         MDPlayerGetPatchName(long dev, int bank, int progno, char *name, long sizeof_name);
+int         MDPlayerUpdatePatchNames(int32_t dev);
+int         MDPlayerGetNumberOfPatchNames(int32_t dev);
+int         MDPlayerGetPatchName(int32_t dev, int bank, int progno, char *name, int32_t sizeof_name);
 
 int			MDPlayerGetRecordedEvents(MDPlayer *inPlayer, MDEvent **outEvent, int *outEventBufSiz);
 void		MDPlayerClearRecordedEvents(MDPlayer *inPlayer);
@@ -109,13 +109,13 @@ void		MDPlayerClearRecordedEvents(MDPlayer *inPlayer);
 /*MDAudio *	MDPlayerGetAudioPlayer(MDPlayer *inPlayer); */
 
 /*  These are only for internal (and debugging) use. Use MDPlayerGetRecordedEvent() to retreave recorded data.  */
-int			MDPlayerPutRecordingData(MDPlayer *inPlayer, MDTimeType timeStamp, long size, const unsigned char *buf);
-int			MDPlayerGetRecordingData(MDPlayer *inPlayer, MDTimeType *outTimeStamp, long *outSize, unsigned char **outBuf, long *outBufSize);
+int			MDPlayerPutRecordingData(MDPlayer *inPlayer, MDTimeType timeStamp, int32_t size, const unsigned char *buf);
+int			MDPlayerGetRecordingData(MDPlayer *inPlayer, MDTimeType *outTimeStamp, int32_t *outSize, unsigned char **outBuf, int32_t *outBufSize);
 
 /*  Defined in MyAppController.m; will be called when any of the MIDI setup is modified  */
 extern void MDPlayerNotificationCallback(void);
 
 /*  Utility function  */
-int my_usleep(unsigned long useconds);
+int my_usleep(uint32_t useconds);
 
 #endif  /*  __MDPlayer_MacOSX__  */

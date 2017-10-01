@@ -37,5 +37,5 @@ extern NSString *gListWindowType;
 @end
 
 @interface NSWindowController (viewWithTag)
-- (id)viewWithTag: (int)tag;
+- (id)viewWithTag: (NSInteger)tag;
 @end

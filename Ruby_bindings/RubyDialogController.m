@@ -81,10 +81,10 @@ VALUE cMRDialog = Qfalse;
 
 - (int)searchDialogItem: (id)ditem
 {
-	unsigned int ui = [ditems indexOfObjectIdenticalTo: ditem];
+	NSUInteger ui = [ditems indexOfObjectIdenticalTo: ditem];
 	if (ui == NSNotFound)
 		return -1;
-	else return ui;
+	else return (int)ui;
 }
 
 - (void)timerCallback:(NSTimer *)theTimer
@@ -156,7 +156,7 @@ static void
 sResizeSubViews(RubyValue dval, NSView *view, int dx, int dy)
 {
 	NSArray *subviews = [view subviews];
-	int idx, n = [subviews count];
+	int idx, n = (int)[subviews count];
 	for (idx = 0; idx < n; idx++) {
 		int i, d, f, d1, d2, d3, ddx, ddy;
 		NSView *current = [subviews objectAtIndex:idx];
@@ -234,23 +234,23 @@ sResizeSubViews(RubyValue dval, NSView *view, int dx, int dy)
 
 #pragma mark ====== TableView data source protocol ======
 
-- (int)numberOfRowsInTableView:(NSTableView *)aTableView
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
 	return RubyDialog_GetTableItemCount((RubyValue)dval, (RDItem *)[aTableView enclosingScrollView]);
 }
 
-- (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
+- (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex
 {
 	char buf[1024];
-	int column = [[aTableView tableColumns] indexOfObject:aTableColumn];
-	RubyDialog_GetTableItemText((RubyValue)dval, (RDItem *)[aTableView enclosingScrollView], rowIndex, column, buf, sizeof buf);
+	int column = (int)[[aTableView tableColumns] indexOfObject:aTableColumn];
+	RubyDialog_GetTableItemText((RubyValue)dval, (RDItem *)[aTableView enclosingScrollView], (int)rowIndex, column, buf, sizeof buf);
 	return [NSString stringWithUTF8String:buf];
 }
 
-- (void)tableView:(NSTableView *)aTableView setObjectValue:(id)anObject forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
+- (void)tableView:(NSTableView *)aTableView setObjectValue:(id)anObject forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex
 {
-	int column = [[aTableView tableColumns] indexOfObject:aTableColumn];
-	RubyDialog_SetTableItemText((RubyValue)dval, (RDItem *)[aTableView enclosingScrollView], rowIndex, column, [anObject UTF8String]);
+	int column = (int)[[aTableView tableColumns] indexOfObject:aTableColumn];
+	RubyDialog_SetTableItemText((RubyValue)dval, (RDItem *)[aTableView enclosingScrollView], (int)rowIndex, column, [anObject UTF8String]);
 }
 
 @end
@@ -341,7 +341,7 @@ RubyDialogCallback_runModal(RubyDialog *dref)
 		return -1;  /*  Cannot run  */
 	[[cont window] makeKeyAndOrderFront: nil];
 	cont->isModal = YES;
-	status = [NSApp runModalForWindow: [cont window]];
+	status = (int)[NSApp runModalForWindow: [cont window]];
 	cont->isModal = NO;
 	if (status == NSRunStoppedResponse)
 		return 0;  /*  OK  */
@@ -1020,7 +1020,7 @@ RubyDialogCallback_getForegroundColorForItem(RDItem *item, double *col)
 	if ([itemView isKindOfClass:[NSScrollView class]])
 		itemView = [(NSScrollView *)itemView documentView];
 	if ([itemView respondsToSelector:@selector(textColor)]) {
-		float rgba[4];
+		CGFloat rgba[4];
 		NSColor *color = [(id)item textColor];
 		[color getRed:rgba green:rgba + 1 blue:rgba + 2 alpha:rgba + 3];
 		col[0] = rgba[0];
@@ -1037,7 +1037,7 @@ RubyDialogCallback_getBackgroundColorForItem(RDItem *item, double *col)
 	if ([itemView isKindOfClass:[NSScrollView class]])
 		itemView = [(NSScrollView *)itemView documentView];
 	if ([itemView respondsToSelector:@selector(backgroundColor)]) {
-		float rgba[4];
+		CGFloat rgba[4];
 		NSColor *color = [(id)item textColor];
 		[color getRed:rgba green:rgba + 1 blue:rgba + 2 alpha:rgba + 3];
 		col[0] = rgba[0];
@@ -1109,7 +1109,7 @@ int
 RubyDialogCallback_countSubItems(RDItem *item)
 {
 	if ([(NSView *)item respondsToSelector: @selector(numberOfItems)]) {
-		return [(id)item numberOfItems];
+		return (int)[(id)item numberOfItems];
 	} else return 0;
 }
 
@@ -1119,7 +1119,7 @@ RubyDialogCallback_appendSubItem(RDItem *item, const char *s)
 	if ([(NSView *)item isKindOfClass: [NSPopUpButton class]]) {
 		NSMenu *menu = [(NSPopUpButton *)item menu];
 		id menuItem = [menu addItemWithTitle: [NSString stringWithUTF8String: s] action: nil keyEquivalent: @""];
-		return [menu indexOfItem: menuItem];
+		return (int)[menu indexOfItem: menuItem];
 	} else return -1;
 }
 
@@ -1129,7 +1129,7 @@ RubyDialogCallback_insertSubItem(RDItem *item, const char *s, int pos)
 	if ([(NSView *)item isKindOfClass: [NSPopUpButton class]]) {
 		NSMenu *menu = [(NSPopUpButton *)item menu];
 		id menuItem = [menu insertItemWithTitle: [NSString stringWithUTF8String: s] action: nil keyEquivalent: @"" atIndex: pos];
-		return [menu indexOfItem: menuItem];
+		return (int)[menu indexOfItem: menuItem];
 	} else return -1;
 }
 
@@ -1174,7 +1174,7 @@ int
 RubyDialogCallback_selectedSubItem(RDItem *item)
 {
 	if ([(NSView *)item isKindOfClass: [NSPopUpButton class]]) {
-		return [(NSPopUpButton *)item indexOfSelectedItem];
+		return (int)[(NSPopUpButton *)item indexOfSelectedItem];
 	}
 	return -1;
 }
@@ -1248,7 +1248,7 @@ RubyDialogCallback_countTableColumn(RDItem *item)
 	if ([itemView isKindOfClass:[NSScrollView class]]) {
 		itemView = [(NSScrollView *)itemView documentView];	
 		if ([itemView isKindOfClass:[NSTableView class]]) {
-			return [(NSTableView *)itemView numberOfColumns];
+			return (int)[(NSTableView *)itemView numberOfColumns];
 		}
 	}
 	return -1;
@@ -1275,13 +1275,13 @@ RubyDialogCallback_selectedTableRows(RDItem *item)
 		itemView = [(NSScrollView *)itemView documentView];
 		if ([itemView isKindOfClass:[NSTableView class]]) {
 			NSIndexSet *iset = [(NSTableView *)itemView selectedRowIndexes];
-			unsigned int buf[20];
+			NSUInteger buf[20];
 			int i, n;
 			IntGroup *ig = IntGroupNew();
 			NSRange range = NSMakeRange(0, 10000000);
-			while ((n = [iset getIndexes:buf maxCount:20 inIndexRange:&range]) > 0) {
+			while ((n = (int)[iset getIndexes:buf maxCount:20 inIndexRange:&range]) > 0) {
 				for (i = 0; i < n; i++)
-					IntGroupAdd(ig, buf[i], 1);
+					IntGroupAdd(ig, (int)buf[i], 1);
 			}
 			return ig;
 		}
@@ -1339,7 +1339,7 @@ RubyDialogCallback_savePanel(const char *title, const char *dirname, const char 
         [panel setDirectoryURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:dirname]]];
     if (buf != NULL)
         [panel setNameFieldStringValue:[NSString stringWithUTF8String:buf]];
-    result = [panel runModal];
+    result = (int)[panel runModal];
 	if (result == NSFileHandlingPanelOKButton) {
 		strncpy(buf, [[[panel URL] path] UTF8String], bufsize - 1);
 		buf[bufsize - 1] = 0;
@@ -1365,10 +1365,10 @@ RubyDialogCallback_openPanel(const char *title, const char *dirname, const char 
 	}
     if (dirname != NULL)
         [panel setDirectoryURL:[NSURL fileURLWithPath:[NSString stringWithUTF8String:dirname]]];
-	result = [panel runModal];
+	result = (int)[panel runModal];
 	if (result == NSOKButton) {
 		NSArray *URLs = [panel URLs];
-		int n = [URLs count];
+		int n = (int)[URLs count];
 		int i;
 		*array = (char **)malloc(sizeof(char *) * n);
 		for (i = 0; i < n; i++) {
@@ -1407,9 +1407,9 @@ RubyDialogCallback_getSelectionInTextView(RDItem *item, int *fromPos, int *toPos
 	if (itemView != nil && [itemView respondsToSelector:@selector(selectedRanges)]) {
 		NSRange range = [[[(id)itemView selectedRanges] objectAtIndex:0] rangeValue];
 		if (fromPos != NULL)
-			*fromPos = range.location;
+			*fromPos = (int)range.location;
 		if (toPos != NULL)
-			*toPos = range.location + range.length;
+            *toPos = (int)(range.location + range.length);
 		return 1;
 	} else {
 		if (fromPos != NULL)
@@ -1529,8 +1529,8 @@ RubyDialogCallback_setPen(RDDeviceContext *dc, void **args)
 				CGContextSetLineWidth(cref, width);
 			} else if (strcmp((const char *)args[i], "style") == 0) {
 				int style = (int)(args[i + 1]);
-				float dash[4];
-				float *dashp = dash;
+				CGFloat dash[4];
+				CGFloat *dashp = dash;
 				int dashLen;
 				switch (style) {
 					case 0: dashp = NULL; dashLen = 0; break;
@@ -1615,7 +1615,7 @@ RubyDialogCallback_saveBitmapToFile(RDBitmap *bitmap, const char *fname)
 {
 	CGImageRef outImage = CGBitmapContextCreateImage((CGContextRef)bitmap);
 	CFURLRef outURL = (CFURLRef)[NSURL fileURLWithPath:[NSString stringWithUTF8String:fname]];
-	int len = strlen(fname);
+	int len = (int)strlen(fname);
 	CFStringRef bitmapType = kUTTypePNG;
 	int retval = 1;
 	if (len >= 4) {

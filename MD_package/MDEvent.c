@@ -26,8 +26,8 @@
 #endif
 
 struct MDMessage {
-	long	refCount;
-	long	length;
+	int32_t	refCount;
+	int32_t	length;
 	unsigned char msg[4];	/*  variable length  */
 };
 
@@ -69,10 +69,10 @@ MDMessageRelease(MDMessage *msgRef)
 	･ MDMessageReallocate
    -------------------------------------- */
 static MDMessage *
-MDMessageReallocate(MDMessage *msgRef, long length)
+MDMessageReallocate(MDMessage *msgRef, int32_t length)
 {
 	MDMessage *newMsg;
-	long newLength;
+	int32_t newLength;
 
 	if (length < 4)
 		newLength = sizeof(*newMsg);
@@ -86,7 +86,7 @@ MDMessageReallocate(MDMessage *msgRef, long length)
 	else {
 		newMsg = (MDMessage *)malloc(newLength);
 		if (newMsg != NULL) {
-			long minLength = (msgRef->length > length ? length : msgRef->length);
+			int32_t minLength = (msgRef->length > length ? length : msgRef->length);
 			msgRef->refCount--;
 			memmove(newMsg->msg, msgRef->msg, minLength + 1);
 		}
@@ -179,7 +179,7 @@ MDEventDefault(MDEvent *eventRef, int kind)
 	･ MDEventCopy
    -------------------------------------- */
 void
-MDEventCopy(MDEvent *destRef, const MDEvent *sourceRef, long count)
+MDEventCopy(MDEvent *destRef, const MDEvent *sourceRef, int32_t count)
 {
 	if (destRef == sourceRef || count == 0)
 		return;
@@ -208,7 +208,7 @@ MDEventCopy(MDEvent *destRef, const MDEvent *sourceRef, long count)
 	･ MDEventMove
    -------------------------------------- */
 void
-MDEventMove(MDEvent *destRef, MDEvent *sourceRef, long count)
+MDEventMove(MDEvent *destRef, MDEvent *sourceRef, int32_t count)
 {
 	if (destRef == sourceRef || count == 0)
 		return;
@@ -238,7 +238,7 @@ MDEventMove(MDEvent *destRef, MDEvent *sourceRef, long count)
 /* --------------------------------------
 	･ MDGetMessageLength
    -------------------------------------- */
-long
+int32_t
 MDGetMessageLength(const MDEvent *eventRef)
 {
 	if (MDHasEventMessage(eventRef)) {
@@ -251,7 +251,7 @@ MDGetMessageLength(const MDEvent *eventRef)
 /* --------------------------------------
 	･ MDGetMessage
    -------------------------------------- */
-long
+int32_t
 MDGetMessage(const MDEvent *eventRef, unsigned char *outBuffer)
 {
 	if (MDHasEventMessage(eventRef)) {
@@ -266,8 +266,8 @@ MDGetMessage(const MDEvent *eventRef, unsigned char *outBuffer)
 /* --------------------------------------
 	･ MDGetMessagePartial
    -------------------------------------- */
-long
-MDGetMessagePartial(const MDEvent *eventRef, unsigned char *outBuffer, long inOffset, long inLength)
+int32_t
+MDGetMessagePartial(const MDEvent *eventRef, unsigned char *outBuffer, int32_t inOffset, int32_t inLength)
 {
 	if (MDHasEventMessage(eventRef)) {
 		MDMessage *message = MDPrivateGetMessage(eventRef);
@@ -284,7 +284,7 @@ MDGetMessagePartial(const MDEvent *eventRef, unsigned char *outBuffer, long inOf
 	･ MDGetMessageConstPtr
    -------------------------------------- */
 const unsigned char *
-MDGetMessageConstPtr(const MDEvent *eventRef, long *outLength)
+MDGetMessageConstPtr(const MDEvent *eventRef, int32_t *outLength)
 {
 	if (MDHasEventMessage(eventRef)) {
 		MDMessage *message = MDPrivateGetMessage(eventRef);
@@ -298,7 +298,7 @@ MDGetMessageConstPtr(const MDEvent *eventRef, long *outLength)
 	･ MDGetMessagePtr
    -------------------------------------- */
 unsigned char *
-MDGetMessagePtr(MDEvent *eventRef, long *outLength)
+MDGetMessagePtr(MDEvent *eventRef, int32_t *outLength)
 {
 	if (MDHasEventMessage(eventRef)) {
 		MDMessage *message = MDPrivateGetMessage(eventRef);
@@ -318,8 +318,8 @@ MDGetMessagePtr(MDEvent *eventRef, long *outLength)
 /* --------------------------------------
 	･ MDSetMessageLength
    -------------------------------------- */
-long
-MDSetMessageLength(MDEvent *eventRef, long inLength)
+int32_t
+MDSetMessageLength(MDEvent *eventRef, int32_t inLength)
 {
 	if (MDHasEventMessage(eventRef)) {
 		MDMessage *message;
@@ -349,7 +349,7 @@ MDCopyMessage(MDEvent *destRef, MDEvent *srcRef)
 /* --------------------------------------
 	･ MDSetMessage
    -------------------------------------- */
-long
+int32_t
 MDSetMessage(MDEvent *eventRef, const unsigned char *inBuffer)
 {
 	if (MDHasEventMessage(eventRef)) {
@@ -372,8 +372,8 @@ MDSetMessage(MDEvent *eventRef, const unsigned char *inBuffer)
 /* --------------------------------------
 	･ MDSetMessagePartial
    -------------------------------------- */
-long
-MDSetMessagePartial(MDEvent *eventRef, const unsigned char *inBuffer, long inOffset, long inLength)
+int32_t
+MDSetMessagePartial(MDEvent *eventRef, const unsigned char *inBuffer, int32_t inOffset, int32_t inLength)
 {
 	if (MDHasEventMessage(eventRef)) {
 		MDMessage *message = MDPrivateGetMessage(eventRef);
@@ -537,8 +537,8 @@ static const char *sUnknown = "<Unknown>";
 /* --------------------------------------
 	･ MDEventToKindString
    -------------------------------------- */
-long
-MDEventToKindString(const MDEvent *eref, char *buf, long length)
+int32_t
+MDEventToKindString(const MDEvent *eref, char *buf, int32_t length)
 {
 	int kind = MDGetKind(eref);
 	int code = MDGetCode(eref);
@@ -592,7 +592,7 @@ MDEventToKindString(const MDEvent *eref, char *buf, long length)
 				break;
 		}
 	}
-	return strlen(buf);
+	return (int)strlen(buf);
 }
 
 static char *sMetronomeBeatModifier[] = { "", ".", "t", "*" };
@@ -600,12 +600,12 @@ static char *sMetronomeBeatModifier[] = { "", ".", "t", "*" };
 /* --------------------------------------
 	･ MDEventToDataString
    -------------------------------------- */
-long
-MDEventToDataString(const MDEvent *eref, char *buf, long length)
+int32_t
+MDEventToDataString(const MDEvent *eref, char *buf, int32_t length)
 {
 	const unsigned char *ptr;
 	const MDSMPTERecord *smp;
-	long n, n1;
+	int32_t n, n1;
 	int d1, d2;
 
 	switch (MDGetKind(eref)) {
@@ -718,17 +718,17 @@ MDEventToDataString(const MDEvent *eref, char *buf, long length)
 /* --------------------------------------
 	･ MDEventToGTString
    -------------------------------------- */
-long
-MDEventToGTString(const MDEvent *eref, char *buf, long length)
+int32_t
+MDEventToGTString(const MDEvent *eref, char *buf, int32_t length)
 {
-	long n;
+	int32_t n;
 /*	char temp1[24]; */
 	MDTickType duration;
 	
 	switch (MDGetKind(eref)) {
 		case kMDEventNote:
             duration = MDGetDuration(eref);
-			n = sprintf(buf, "%6ld", (long)(duration));
+			n = sprintf(buf, "%6d", (int32_t)(duration));
 			break;
 		default:
 			buf[0] = 0;
@@ -881,7 +881,7 @@ MDEventFieldCode
 MDEventDataStringToEvent(const MDEvent *epin, const char *buf, MDEventFieldData *epout)
 {
 	unsigned char *ptr;
-	long n;
+	int32_t n;
 	int d0, d1, d2, d3, d4;
 	double dbl;
 	char temp[64];
@@ -974,16 +974,16 @@ MDEventDataStringToEvent(const MDEvent *epin, const char *buf, MDEventFieldData 
 		case kMDEventKeyPres:
 		case kMDEventControl:
 			if (sscanf(buf, "%d", &d1) == 1) {
-				epout->longValue = d1;
+				epout->intValue = d1;
 				return kMDEventFieldData;
 			}
 			break;
 		case kMDEventMetaText:
-			n = strlen(buf) + 1;
-			ptr = (unsigned char *)malloc(n + sizeof(long));
+			n = (int)strlen(buf) + 1;
+			ptr = (unsigned char *)malloc(n + sizeof(int32_t));
 			if (ptr != NULL) {
-				*((long *)ptr) = n;
-				strcpy((char *)(ptr + sizeof(long)), buf);
+				*((int32_t *)ptr) = n;
+				strcpy((char *)(ptr + sizeof(int32_t)), buf);
 				epout->binaryData = ptr;
 				return kMDEventFieldBinaryData;
 			}
@@ -994,7 +994,7 @@ MDEventDataStringToEvent(const MDEvent *epin, const char *buf, MDEventFieldData 
 			d0 = 16;
 			epout->binaryData = (unsigned char *)malloc(d0);
 			ptr = (unsigned char *)buf;  /*  Save the initial pointer  */
-			d1 = sizeof(long);
+			d1 = sizeof(int32_t);
 			while (*buf != 0) {
 				while (*buf != 0 && isspace(*buf))
 					buf++;
@@ -1003,7 +1003,7 @@ MDEventDataStringToEvent(const MDEvent *epin, const char *buf, MDEventFieldData 
 				if (*buf == 'c' && buf[1] == 's') {
 					/*  Roland check-sum  */
 					d2 = 0;
-					for (d3 = 5 + sizeof(long); d3 < d1; d3++)
+					for (d3 = 5 + sizeof(int32_t); d3 < d1; d3++)
 						d2 += epout->binaryData[d3];
 					d2 = (0x80 - (d2 & 0x7f)) & 0x7f;
 					buf += 2;
@@ -1022,11 +1022,11 @@ MDEventDataStringToEvent(const MDEvent *epin, const char *buf, MDEventFieldData 
 					epout->binaryData = (unsigned char *)realloc(epout->binaryData, d0);
 				}
 			}
-			*((long *)(epout->binaryData)) = d1 - sizeof(long);
+			*((int32_t *)(epout->binaryData)) = d1 - sizeof(int32_t);
 			return kMDEventFieldBinaryData;
 		bad_sysex:
 			free(epout->binaryData);
-			epout->longValue = (long)(buf - (char *)ptr);
+			epout->intValue = (int32_t)(buf - (char *)ptr);
 			return kMDEventFieldInvalid;
 		
 		case kMDEventNote:
@@ -1204,7 +1204,7 @@ MDEventFromMIDIMessage(MDEvent *eventRef, unsigned char firstByte, unsigned char
 	･ MDEventParseTimeSignature
    -------------------------------------- */
 int
-MDEventParseTimeSignature(const MDEvent *eptr, long timebase, long *outTickPerBeat, long *outBeatPerMeasure)
+MDEventParseTimeSignature(const MDEvent *eptr, int32_t timebase, int32_t *outTickPerBeat, int32_t *outBeatPerMeasure)
 {
 	const unsigned char *p;
 	if (eptr != NULL && MDGetKind(eptr) == kMDEventTimeSignature) {
@@ -1212,7 +1212,7 @@ MDEventParseTimeSignature(const MDEvent *eptr, long timebase, long *outTickPerBe
 		if (p[1] >= 31)
 			*outTickPerBeat = timebase;		//  ０除算を避ける
 		else
-			*outTickPerBeat = (long)(timebase * 32 / p[3] / (1L << p[1]));
+			*outTickPerBeat = (int32_t)(timebase * 32 / p[3] / (1L << p[1]));
 		*outBeatPerMeasure = p[0];
 		return 1;
 	} else {
@@ -1226,12 +1226,12 @@ MDEventParseTimeSignature(const MDEvent *eptr, long timebase, long *outTickPerBe
 	･ MDEventToString
    -------------------------------------- */
 char *
-MDEventToString(const MDEvent *eptr, char *buf, long bufsize)
+MDEventToString(const MDEvent *eptr, char *buf, int32_t bufsize)
 {
 	char *p;
-	long n = 0;
+	int32_t n = 0;
 	p = buf;
-	n = snprintf(buf, bufsize, "%ld", (long)MDGetTick(eptr));
+	n = snprintf(buf, bufsize, "%d", (int32_t)MDGetTick(eptr));
 	if (n > bufsize - 5)
 		return buf;
 	buf[n++] = '\t';
@@ -1251,11 +1251,11 @@ MDEventToString(const MDEvent *eptr, char *buf, long bufsize)
 	･ MDEventParseTickString
    -------------------------------------- */
 int
-MDEventParseTickString(const char *s, long *bar, long *beat, long *tick)
+MDEventParseTickString(const char *s, int32_t *bar, int32_t *beat, int32_t *tick)
 {
 	int n;
-	long d1, d2, d3;
-	n = sscanf(s, "%ld%*[^-0-9]%ld%*[^-0-9]%ld", &d1, &d2, &d3);
+	int d1, d2, d3;
+	n = sscanf(s, "%d%*[^-0-9]%d%*[^-0-9]%d", &d1, &d2, &d3);
 	switch (n) {
 		case 1: d2 = 1; d3 = 0; break;
 		case 2: d3 = 0; break;

@@ -172,7 +172,7 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 
 - (IBAction)volumeSliderMoved:(id)sender
 {
-	int idx = [sender tag] - kVolumeSliderBase;
+	int idx = (int)[sender tag] - kVolumeSliderBase;
 	if (idx >= kOutputTagOffset)
 		idx += (kMDAudioFirstIndexForOutputStream - kOutputTagOffset);
 	MDAudioSetMixerVolume(idx, [sender floatValue] * 0.01);
@@ -181,7 +181,7 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 - (IBAction)panKnobMoved:(id)sender
 {
 	float pan, opan;
-	int idx = [sender tag] - kPanKnobBase;
+	int idx = (int)[sender tag] - kPanKnobBase;
 	if (idx >= kOutputTagOffset)
 		idx += (kMDAudioFirstIndexForOutputStream - kOutputTagOffset);
 	pan = [sender floatValue];
@@ -198,8 +198,8 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 
 - (IBAction)myPopUpAction: (id)sender
 {
-	int idx = [sender tag] - kDevicePopUpBase;
-	int dev = [[sender selectedItem] tag];
+	int idx = (int)[sender tag] - kDevicePopUpBase;
+	int dev = (int)[[sender selectedItem] tag];
 	if (dev > 0)
 		dev--;
 	if (idx >= kOutputTagOffset)
@@ -210,7 +210,7 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 
 - (IBAction)customViewButtonPressed: (id)sender
 {
-	int idx = [sender tag] - kCustomViewButtonBase;
+	int idx = (int)[sender tag] - kCustomViewButtonBase;
 	if (idx >= 0 && idx < kMDAudioNumberOfInputStreams) {
 		int dev;
 		MDAudioGetIOStreamDevice(idx, &dev);

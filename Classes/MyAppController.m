@@ -61,7 +61,7 @@ static BOOL sStartupCompleted = NO;  //  If NO, then Ruby interrupt check is dis
 		object:self];
 
 	scriptMenuInfos = [[NSMutableArray array] retain];
-	sScriptMenuCount = [scriptMenu numberOfItems];
+	sScriptMenuCount = (int)[scriptMenu numberOfItems];
 	
 	{
 		int i;
@@ -114,7 +114,7 @@ static id
 findMenuItemWithTitle(NSMenu *menu, NSString *title)
 {
     int i, n;
-    n = [menu numberOfItems];
+    n = (int)[menu numberOfItems];
     for (i = 0; i < n; i++) {
         id item = [menu itemAtIndex:i];
         if ([title isEqualToString:[item title]])
@@ -133,7 +133,7 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 {
     int i, n, added;
     NSMenu *mainMenu = [NSApp mainMenu];
-	n = [infos count];
+	n = (int)[infos count];
     added = 0;
 	for (i = 0; i < n; i++) {
 		id obj = [infos objectAtIndex: i];
@@ -154,10 +154,10 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 	}
 }
 
-- (void)registerScriptMenu: (NSString *)commandName withTitle: (NSString *)menuTitle validator:(long)rubyValue
+- (void)registerScriptMenu: (NSString *)commandName withTitle: (NSString *)menuTitle validator:(int32_t)rubyValue
 {
 	int i, n;
-	n = [scriptMenuInfos count];
+	n = (int)[scriptMenuInfos count];
 	for (i = 0; i < n; i++) {
 		id obj = [scriptMenuInfos objectAtIndex: i];
 		if ([commandName isEqualToString: [obj valueForKey: @"command"]]) {
@@ -203,7 +203,7 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 	NSMutableString *script;
 	[panel setMessage: @"Choose Ruby script file"];
     [panel setAllowedFileTypes:[NSArray arrayWithObjects: @"rb", nil]];
-	status = [panel runModal];
+	status = (int)[panel runModal];
 	URLs = [panel URLs];
 	[panel close];
 	if (status != NSOKButton)
@@ -257,8 +257,8 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 - (BOOL)validateScriptCommand: (id)menuInfo forDocument: (MyDocument *)document
 {
 	int kind;
-	long validator = [[menuInfo valueForKey:@"validator"] longValue];
-	if (validator != (long)RubyNil) {
+	int32_t validator = [[menuInfo valueForKey:@"validator"] intValue];
+	if (validator != (int32_t)RubyNil) {
 		return Ruby_callValidatorForDocument(validator, document);
 	} else {
 		const char *cmd;
@@ -277,7 +277,7 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 {
 	int i, n;
 	NSString *title = [sender title];
-	n = [scriptMenuInfos count];
+	n = (int)[scriptMenuInfos count];
 	for (i = 0; i < n; i++) {
 		id obj = [scriptMenuInfos objectAtIndex: i];
 		if ([title isEqualToString: [obj valueForKey: @"title"]]) {
@@ -315,7 +315,7 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 	if (sel == @selector(doScriptCommand:)) {
 		int i, n;
 		NSString *title = [anItem title];
-		n = [scriptMenuInfos count];
+		n = (int)[scriptMenuInfos count];
 		for (i = 0; i < n; i++) {
 			id obj = [scriptMenuInfos objectAtIndex: i];
 			if ([title isEqualToString: [obj valueForKey: @"title"]]) {
@@ -461,7 +461,7 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 		if ((p1 = strstr(p, "svn_revision =")) != NULL) {
 			p1 = p1 + 14;
 			if (outRevision != NULL)
-				*outRevision = strtol(p1, NULL, 0);
+				*outRevision = (int)strtol(p1, NULL, 0);
 		}		
 	}
 	if (outVersion != NULL)
@@ -576,7 +576,7 @@ MyAppCallback_setGlobalSettings(const char *key, const char *value)
 }
 
 void
-MyAppCallback_registerScriptMenu(const char *cmd, const char *title, long validator)
+MyAppCallback_registerScriptMenu(const char *cmd, const char *title, int32_t validator)
 {
 	MyAppController *cont = (MyAppController *)[NSApp delegate];
 	[cont registerScriptMenu: [NSString stringWithUTF8String: cmd]
@@ -668,7 +668,7 @@ MyAppCallback_messageBox(const char *message, const char *title, int flags, int 
 		case 3: btn1 = nil; btn2 = @"Cancel"; break;
 	}
 	alert = [NSAlert alertWithMessageText:[NSString stringWithUTF8String:title] defaultButton:btn1 alternateButton:btn2 otherButton:nil informativeTextWithFormat:@"%s", message];
-	retval = [alert runModal];
+	retval = (int)[alert runModal];
 	if ((flags & 3) == 3)
 		return (retval == NSAlertDefaultReturn);
 	else return 1;  /*  Always OK, even if the message is "Cancel"  */

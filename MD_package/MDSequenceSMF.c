@@ -29,21 +29,21 @@ struct MDSMFConvert {
 	/*  The information for the whole sequence  */
 	STREAM			stream;
 	MDSequence *	sequence;		/*  the resulting sequence  */
-	long			timebase;		/*  the SMF timebase  */
-	long			max_tick;		/*  the maximum tick (the length of the sequence)  */
-	long			trkno;			/*  the number of tracks  */
+	int32_t			timebase;		/*  the SMF timebase  */
+	int32_t			max_tick;		/*  the maximum tick (the length of the sequence)  */
+	int32_t			trkno;			/*  the number of tracks  */
 
 	/*  The information for each track  */
 	MDTrack *		temptrk;		/*  the current track  */
-	long			track_index;	/*  the current track number  */
-	long			tick;			/*  the tick of the last event  */
-	long			deltatime;		/*  the deltatime of the current event  */
+	int32_t			track_index;	/*  the current track number  */
+	int32_t			tick;			/*  the tick of the last event  */
+	int32_t			deltatime;		/*  the deltatime of the current event  */
 	unsigned char	status;			/*  running status  */
     unsigned char	track_channel;	/*  track channel (16 if the sequence is multi-track mode)  */
-	long			pos;			/*  the file position where the track size is to be written  */
+	int32_t			pos;			/*  the file position where the track size is to be written  */
 
 	MDSequenceCallback callback;	/*  A callback function. Periodically called, and abort if 0 */
-	long			filesize;		/*  total file size  */
+	int32_t			filesize;		/*  total file size  */
 	void *			cbdata;			/*  callback data  */
 };
 
@@ -63,22 +63,22 @@ enum {
 
 #define kMDMaxSMFTempo	16777215		/* 2^24 - 1 */
 
-static long
+static int32_t
 MDSequenceTempoToSMFTempo(float tempo)
 {
     if (tempo < kMDMinTempo)
         return kMDMaxSMFTempo;
     if (tempo > kMDMaxTempo)
-        return (long)(60000000.0 / kMDMaxTempo);
-    else return (long)(60000000.0 / tempo);
+        return (int32_t)(60000000.0 / kMDMaxTempo);
+    else return (int32_t)(60000000.0 / tempo);
 }
 
-static long
-MDSequenceSMFTempoToTempo(long smfTempo)
+static int32_t
+MDSequenceSMFTempoToTempo(int32_t smfTempo)
 {
-    if (smfTempo <= (long)(60000000.0 / kMDMaxTempo))
+    if (smfTempo <= (int32_t)(60000000.0 / kMDMaxTempo))
         return kMDMaxTempo;
-    else if (smfTempo > (long)(60000000.0 / kMDMinTempo))
+    else if (smfTempo > (int32_t)(60000000.0 / kMDMinTempo))
         return kMDMinTempo;
     else return 60000000.0 / smfTempo;
 }
@@ -88,7 +88,7 @@ MDSequenceSMFTempoToTempo(long smfTempo)
 static MDStatus	
 MDSequenceReadSMFReadMessage(MDSMFConvert *cref, MDEvent *eref)
 {
-	long length;
+	int32_t length;
 	unsigned char *msg;
 
 	/*  Read the message length  */
@@ -121,7 +121,7 @@ static MDStatus
 MDSequenceReadSMFMetaEvent(MDSMFConvert *cref, MDEvent *eref)
 {
 	MDStatus result = kMDNoError;
-	long length;
+	int32_t length;
 	int n;
 	unsigned char s[8], *metaDataPtr;
 	
@@ -434,7 +434,7 @@ MDSequenceReadSMFTrack(MDSMFConvert *cref)
 		} else if (MDGetKind(&event) == kMDEventInternalNoteOff) {
 			result = MDTrackMatchNoteOff(cref->temptrk, &event);
 			if (result != kMDNoError) {
-				fprintf(stderr, "Corrupsed file? orphaned note off at %ld\n", (long)MDGetTick(&event));
+				fprintf(stderr, "Corrupsed file? orphaned note off at %d\n", (int32_t)MDGetTick(&event));
 				// break;
 			}
 			skipFlag = 1;
@@ -513,7 +513,7 @@ MDSequenceReadSMF(MDSequence *inSequence, STREAM stream, MDSequenceCallback call
 	MDStatus result = kMDNoError;
 	MDSMFConvert conv;
 	short fmt, trkno, timebase;		/*  SMF format, track number, timebase  */
-	long size, pos;
+	int32_t size, pos;
 	char tag[8];
 	
 	if (inSequence == NULL || stream == NULL)
@@ -524,10 +524,10 @@ MDSequenceReadSMF(MDSequence *inSequence, STREAM stream, MDSequenceCallback call
 	conv.stream = stream;
 	conv.sequence = inSequence;
 	conv.callback = callback;
-	pos = (long)FTELL(stream);
+	pos = (int32_t)FTELL(stream);
 	FSEEK(stream, 0, SEEK_END);
     conv.track_channel = 0;  /*  Not to be used  */
-	conv.filesize = (long)FTELL(stream) - pos;
+	conv.filesize = (int32_t)FTELL(stream) - pos;
 	conv.cbdata = cbdata;
 	FSEEK(stream, pos, SEEK_SET);
 	
@@ -574,7 +574,7 @@ MDSequenceReadSMF(MDSequence *inSequence, STREAM stream, MDSequenceCallback call
 			track = MDSequenceGetTrack(inSequence, i);
 			ptr = MDPointerNew(track);
 			while ((ev = MDPointerForward(ptr)) != NULL) {
-				printf("%ld: %s\n", (long)MDPointerGetPosition(ptr), MDEventToString(ev, buf, sizeof buf));
+				printf("%ld: %s\n", (int32_t)MDPointerGetPosition(ptr), MDEventToString(ev, buf, sizeof buf));
 			}
 			MDPointerRelease(ptr);
 		}
@@ -598,7 +598,7 @@ MDSequenceWriteSMFDeltaTime(MDSMFConvert *cref, MDTickType tick)
 }
 
 static MDStatus	
-MDSequenceWriteSMFWriteMessage(MDSMFConvert *cref, const unsigned char *p, long length)
+MDSequenceWriteSMFWriteMessage(MDSMFConvert *cref, const unsigned char *p, int32_t length)
 {
 	/*  Write the message length  */
 	if (MDWriteStreamFormat(cref->stream, "w", length) != 1)
@@ -647,7 +647,7 @@ MDSequenceWriteSMFSpecialDurationEvent(MDSMFConvert *cref, MDEvent *eref)
 static MDStatus
 MDSequenceWriteSMFMetaEvent(MDSMFConvert *cref, MDEvent *eref)
 {
-	long length;
+	int32_t length;
 	int n;
 	unsigned char s[8], *metaDataPtr;
 	const unsigned char *p;
@@ -668,7 +668,7 @@ MDSequenceWriteSMFMetaEvent(MDSMFConvert *cref, MDEvent *eref)
 				return MDSequenceWriteSMFWriteMessage(cref, p, length);
 			}
 		case kMDEventTempo: {
-			long ntempo;
+			int32_t ntempo;
 			ntempo = MDSequenceTempoToSMFTempo(MDGetTempo(eref));
 			s[0] = ntempo / 65536;
 			s[1] = ntempo / 256;
@@ -782,7 +782,7 @@ MDSequenceWriteSMFTrackNameAndDevice(MDSMFConvert *cref)
 {
     MDStatus result;
     char buf[256];
-	long dev;
+	int32_t dev;
 
     /*  Sequence name  */
     MDTrackGetName(cref->temptrk, buf, sizeof buf);
@@ -793,7 +793,7 @@ MDSequenceWriteSMFTrackNameAndDevice(MDSMFConvert *cref)
         return kMDErrorCannotWriteToStream;
     if (PUTC(kMDMetaSequenceName, cref->stream) == EOF)
         return kMDErrorCannotWriteToStream;
-    result = MDSequenceWriteSMFWriteMessage(cref, (unsigned char *)buf, strlen(buf));
+    result = MDSequenceWriteSMFWriteMessage(cref, (unsigned char *)buf, (int)strlen(buf));
     if (result != kMDNoError)
         return result;
 
@@ -808,7 +808,7 @@ MDSequenceWriteSMFTrackNameAndDevice(MDSMFConvert *cref)
         return kMDErrorCannotWriteToStream;
     if (PUTC(kMDMetaDeviceName, cref->stream) == EOF)
         return kMDErrorCannotWriteToStream;
-    result = MDSequenceWriteSMFWriteMessage(cref, (unsigned char *)buf, strlen(buf));
+    result = MDSequenceWriteSMFWriteMessage(cref, (unsigned char *)buf, (int)strlen(buf));
     if (result != kMDNoError)
         return result;
     return result;
@@ -826,7 +826,7 @@ MDSequenceWriteSMFTrackWithSelection(MDSMFConvert *cref, IntGroup *pset, char eo
 	MDEvent *noteOffRef;
 	MDTickType noteOffTick;
 	int n, count;
-	long nevents;
+	int32_t nevents;
 	int idx;
 	const unsigned char sEndOfTrack[3] = { kMDEventSMFMeta, kMDMetaEndOfTrack, 0 };
 
@@ -911,7 +911,7 @@ MDSequenceWriteSMFTrackWithSelection(MDSMFConvert *cref, IntGroup *pset, char eo
 		/*  Write the status byte  */
 		if (MDIsSysexEvent(eref)) {					/*  sysex events  */
 			const unsigned char *p;
-			long length;
+			int32_t length;
 			p = MDGetMessageConstPtr(eref, &length);
 			if (MDGetKind(eref) == kMDEventSysexCont)
 				n = kMDEventSMFSysexF7;
@@ -1015,7 +1015,7 @@ MDSequenceWriteSMFWithSelection(MDSequence *inSequence, IntGroup **psetArray, ch
 	MDStatus result = kMDNoError;
 	MDSMFConvert conv;
 	short trkno, trkmax;
-	long size, pos;
+	int32_t size, pos;
 	
 	if (inSequence == NULL || stream == NULL)
 		return kMDErrorInternalError;
@@ -1077,7 +1077,7 @@ MDSequenceWriteSMFWithSelection(MDSequence *inSequence, IntGroup **psetArray, ch
         else
             conv.track_channel = 16;
 		if (MDWriteStreamFormat(conv.stream, "A4N", "MTrk", 0L) == 2) {
-			conv.pos = (long)FTELL(conv.stream) - 4;
+			conv.pos = (int32_t)FTELL(conv.stream) - 4;
 		/*	if (pset == (IntGroup *)(-1))
 				result = kMDNoError;
 			else */
@@ -1085,7 +1085,7 @@ MDSequenceWriteSMFWithSelection(MDSequence *inSequence, IntGroup **psetArray, ch
 			if (result != kMDNoError) {
 				dprintf(0, "Error %d occurred during write of SMF track\n", result);
 			}
-			pos = (long)FTELL(conv.stream);
+			pos = (int32_t)FTELL(conv.stream);
 			size = pos - conv.pos - 4;
 			FSEEK(conv.stream, conv.pos, SEEK_SET);
 			MDWriteStreamFormat(conv.stream, "N", size);
@@ -1117,24 +1117,24 @@ MDSequenceWriteCatalog(MDCatalog *inCatalog, STREAM stream)
 	int i;
 	off_t pos0, pos1;
 	pos0 = FTELL(stream);
-	MDWriteStreamFormat(stream, "N", (long)0);  /*  Dummy  */
-	MDWriteStreamFormat(stream, "N", (long)inCatalog->num);
-	MDWriteStreamFormat(stream, "NN", (long)inCatalog->startTick, (long)inCatalog->endTick);
+	MDWriteStreamFormat(stream, "N", (int32_t)0);  /*  Dummy  */
+	MDWriteStreamFormat(stream, "N", (int32_t)inCatalog->num);
+	MDWriteStreamFormat(stream, "NN", (int32_t)inCatalog->startTick, (int32_t)inCatalog->endTick);
 	pos1 = FTELL(stream);
 	FSEEK(stream, pos0, SEEK_SET);
-	MDWriteStreamFormat(stream, "N", (long)(pos1 - pos0 - 4));
+	MDWriteStreamFormat(stream, "N", (int32_t)(pos1 - pos0 - 4));
 	FSEEK(stream, pos1, SEEK_SET);
 
 	for (i = 0; i < inCatalog->num; i++) {
 		MDCatalogTrack *cat = inCatalog->catTrack + i;
 		pos0 = FTELL(stream);
-		MDWriteStreamFormat(stream, "N", (long)0);  /*  Dummy  */
+		MDWriteStreamFormat(stream, "N", (int32_t)0);  /*  Dummy  */
 		memset(buf, 0, 64);
 		strncpy(buf, cat->name, 63);
-		MDWriteStreamFormat(stream, "NA64NN", (long)cat->originalTrackNo, buf, (long)cat->numEvents, (long)cat->numMIDIEvents);
+		MDWriteStreamFormat(stream, "NA64NN", (int32_t)cat->originalTrackNo, buf, (int32_t)cat->numEvents, (int32_t)cat->numMIDIEvents);
 		pos1 = FTELL(stream);
 		FSEEK(stream, pos0, SEEK_SET);
-		MDWriteStreamFormat(stream, "N", (long)(pos1 - pos0 - 4));
+		MDWriteStreamFormat(stream, "N", (int32_t)(pos1 - pos0 - 4));
 		FSEEK(stream, pos1, SEEK_SET);
 	}
 	return kMDNoError;
@@ -1144,7 +1144,7 @@ MDCatalog *
 MDSequenceReadCatalog(STREAM stream)
 {
 	int i;
-	long num, num2, num3;
+	int32_t num, num2, num3;
 	off_t pos0;
 	MDCatalog *catalog;
 

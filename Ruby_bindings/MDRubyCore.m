@@ -46,7 +46,7 @@ Ruby_ObjectAtIndex(VALUE ary, int idx)
 {
 	static ID index_method = 0;
 	if (TYPE(ary) == T_ARRAY) {
-		int len = RARRAY_LEN(ary);
+		int len = (int)RARRAY_LEN(ary);
 		if (idx >= 0 && idx < len)
 			return (RARRAY_PTR(ary))[idx];
 		else return Qnil;
@@ -97,7 +97,7 @@ VALUE
 Ruby_NewEncodedStringValue(const char *str, int len)
 {
 	if (len <= 0)
-		len = strlen(str);
+		len = (int)strlen(str);
 	return rb_enc_str_new(str, len, rb_default_external_encoding());
 }
 
@@ -331,7 +331,7 @@ s_Kernel_CheckInterrupt(VALUE self)
 
 #define USE_SIGALRM 0
 
-static volatile unsigned long sITimerCount = 0;
+static volatile uint32_t sITimerCount = 0;
 
 #if !USE_SIGALRM
 static pthread_t sTimerThread;
@@ -400,8 +400,8 @@ static void
 s_Event_Callback(rb_event_flag_t evflag, VALUE data, VALUE self, ID mid, VALUE klass)
 {
 	if (s_interrupt_flag != Qfalse) {
-		static unsigned long sLastTime = 0;
-		unsigned long currentTime;
+		static uint32_t sLastTime = 0;
+		uint32_t currentTime;
 		int flag;
 		currentTime = sITimerCount;
 		if (currentTime != sLastTime) {
@@ -456,7 +456,7 @@ s_Kernel_RegisterMenu(int argc, VALUE *argv, VALUE self)
 		}
 		rb_ary_push(sValidatorList, validator);
 	}
-	MyAppCallback_registerScriptMenu(StringValuePtr(method), StringValuePtr(title), (long)validator);
+	MyAppCallback_registerScriptMenu(StringValuePtr(method), StringValuePtr(title), (int32_t)validator);
 	return self;
 }
 
@@ -504,7 +504,7 @@ s_Ruby_callValidatorForDocument(VALUE data)
 		return (doc != NULL ? Qtrue : Qfalse);
 	} else if (v[0] == INT2FIX(1)) {
 		/*  Valid if document is open and some events are selected  */
-		long n, c;
+		int32_t n, c;
 		if (doc == NULL)
 			return Qfalse;
 		c = [[doc myMIDISequence] trackCount];
@@ -519,7 +519,7 @@ s_Ruby_callValidatorForDocument(VALUE data)
 }
 
 int
-Ruby_callValidatorForDocument(long validator, void *doc)
+Ruby_callValidatorForDocument(int32_t validator, void *doc)
 {
 	VALUE v[3];
 	VALUE retval;
@@ -815,9 +815,9 @@ s_executeRubyOnDocument(VALUE vinfo)
 				case 'i':
 					aval = INT2NUM(va_arg(rp->ap, int)); break;
 				case 'l':
-					aval = INT2NUM(va_arg(rp->ap, long)); break;
+					aval = INT2NUM(va_arg(rp->ap, int32_t)); break;
 				case 'q':
-					aval = LL2NUM(va_arg(rp->ap, long long)); break;
+					aval = LL2NUM(va_arg(rp->ap, int64_t)); break;
 				case 'd':
 					aval = rb_float_new(va_arg(rp->ap, double)); break;
 				case 's':
@@ -841,9 +841,9 @@ s_executeRubyOnDocument(VALUE vinfo)
 							case 'I':
 								aaval = INT2NUM(((int *)pp)[i]); break;
 							case 'L':
-								aaval = INT2NUM(((long *)pp)[i]); break;
+								aaval = INT2NUM(((int32_t *)pp)[i]); break;
 							case 'Q':
-								aaval = LL2NUM(((long long *)pp)[i]); break;
+								aaval = LL2NUM(((int64_t *)pp)[i]); break;
 							case 'D':
 								aaval = rb_float_new(((double *)pp)[i]); break;
 							case 'S':
@@ -878,16 +878,16 @@ out_of_loop:
 		case 'i':
 			*((int *)retp1) = NUM2INT(rb_Integer(retval)); break;
 		case 'l':
-			*((long *)retp1) = NUM2INT(rb_Integer(retval)); break;
+			*((int32_t *)retp1) = NUM2INT(rb_Integer(retval)); break;
 		case 'q':
-			*((long long *)retp1) = NUM2LL(rb_Integer(retval)); break;
+			*((int64_t *)retp1) = NUM2LL(rb_Integer(retval)); break;
 		case 'd':
 			*((double *)retp1) = NUM2DBL(rb_Float(retval)); break;
 		case 's':
 			*((char **)retp1) = strdup(StringValuePtr(retval)); break;
 		case 'a':
 			retval = rb_str_to_str(retval);
-			n = RSTRING_LEN(retval);
+			n = (int)RSTRING_LEN(retval);
 			*((int *)retp1) = n;
 			retp3 = malloc(n + 1);
 			memmove(retp3, RSTRING_PTR(retval), n);
@@ -897,8 +897,8 @@ out_of_loop:
 		case 'B': case 'I': case 'L': case 'Q': case 'D': case 'S':
 			switch (retfmt) {
 				case 'B': case 'I': i = sizeof(int); break;
-				case 'L': i = sizeof(long); break;
-				case 'Q': i = sizeof(long long); break;
+				case 'L': i = sizeof(int32_t); break;
+				case 'Q': i = sizeof(int64_t); break;
 				case 'D': i = sizeof(double); break;
 				case 'S': i = sizeof(char *); break;
 			}
@@ -906,7 +906,7 @@ out_of_loop:
 				n = 0;
 			else {
 				retval = rb_ary_to_ary(retval);
-				n = RARRAY_LEN(retval);
+				n = (int)RARRAY_LEN(retval);
 			}
 			*((int *)retp1) = n;
 			if (n == 0)
@@ -918,8 +918,8 @@ out_of_loop:
 					switch (retfmt) {
 						case 'B': ((int *)retp3)[i] = RTEST(aval); break;
 						case 'I': ((int *)retp3)[i] = NUM2INT(rb_Integer(aval)); break;
-						case 'L': ((long *)retp3)[i] = NUM2INT(rb_Integer(aval)); break;
-						case 'Q': ((long long *)retp3)[i] = NUM2LL(rb_Integer(aval)); break;
+						case 'L': ((int32_t *)retp3)[i] = NUM2INT(rb_Integer(aval)); break;
+						case 'Q': ((int64_t *)retp3)[i] = NUM2LL(rb_Integer(aval)); break;
 						case 'D': ((double *)retp3)[i] = NUM2DBL(rb_Float(aval)); break;
 						case 'S': ((char **)retp3)[i] = strdup(StringValuePtr(aval)); break;
 					}
@@ -933,7 +933,7 @@ out_of_loop:
 }
 
 /*  argfmt: characters representing the arguments
-    b: boolean (int), i: integer, l: long integer, q: long long integer,
+    b: boolean (int), i: integer, l: int32_t integer, q: int64_t integer,
     d: double, s: string (const char *),
     B, I, L, Q, D, S: array of the above type (two arguments: number of values followed by a pointer)
     ;X (X is one of the above types): return value; if the type is a simple type (represented by

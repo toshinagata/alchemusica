@@ -328,7 +328,7 @@
 		E4CF0D5C0746E734000ADE20 /* MDTrack.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MDTrack.c; path = MD_package/MDTrack.c; sourceTree = "<group>"; wrapsLines = 1; };
 		E4CF0D5D0746E734000ADE20 /* MDTrack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDTrack.h; path = MD_package/MDTrack.h; sourceTree = "<group>"; wrapsLines = 1; };
 		E4CF0D5E0746E734000ADE20 /* MDUtility.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDUtility.c; path = MD_package/MDUtility.c; sourceTree = "<group>"; };
-		E4CF0D5F0746E734000ADE20 /* MDUtility.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MDUtility.h; path = MD_package/MDUtility.h; sourceTree = "<group>"; };
+		E4CF0D5F0746E734000ADE20 /* MDUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDUtility.h; path = MD_package/MDUtility.h; sourceTree = "<group>"; };
 		E4D701EA13F540C5005EE5B3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/RecordPanel.xib; sourceTree = "<group>"; };
 		E4D803D80737CD3500EB5804 /* horizontal_split.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = horizontal_split.png; path = icons/horizontal_split.png; sourceTree = "<group>"; };
 		E4D803DC0737D6F400EB5804 /* move_around.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = move_around.png; path = icons/move_around.png; sourceTree = "<group>"; };
@@ -1145,13 +1145,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				GCC_VERSION = "";
-				HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/include/ruby-2.0.0",
-					"$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/include/ruby-2.0.0/universal-darwin10.8.0",
-				);
+				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/../ruby-2.0.0-p353/osx64-build/include/ruby-2.0.0";
 				INFOPLIST_FILE = "Alchemusica-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/lib";
+				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../ruby-2.0.0-p353/osx64-build/lib";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				OTHER_LDFLAGS = "-lruby-static";
 				PREBINDING = NO;
@@ -1176,13 +1173,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				GCC_VERSION = "";
-				HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/include/ruby-2.0.0",
-					"$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/include/ruby-2.0.0/universal-darwin10.8.0",
-				);
+				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/../ruby-2.0.0-p353/osx64-build/include/ruby-2.0.0";
 				INFOPLIST_FILE = "Alchemusica-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/lib";
+				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../ruby-2.0.0-p353/osx64-build/lib";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				OTHER_LDFLAGS = "-lruby-static";
 				PREBINDING = NO;
@@ -1208,13 +1202,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				GCC_VERSION = "";
-				HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/include/ruby-2.0.0",
-					"$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/include/ruby-2.0.0/universal-darwin10.8.0",
-				);
+				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/../ruby-2.0.0-p353/osx64-build/include/ruby-2.0.0";
 				INFOPLIST_FILE = "Alchemusica-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../ruby-2.0.0-p353/osx-build/lib";
+				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../ruby-2.0.0-p353/osx64-build/lib";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				OTHER_LDFLAGS = "-lruby-static";
 				PREBINDING = NO;

@@ -55,7 +55,7 @@ sAllowedExtensionsForTag(int tag)
 {
 	MyMIDISequence *seq = [myDocument myMIDISequence];
 	NSString *s;
-	long bar, beat, tick;
+	int32_t bar, beat, tick;
 	int ival;
 	MDTickType theTick;
 
@@ -339,14 +339,14 @@ sAllowedExtensionsForTag(int tag)
 {
 	id item;
 	int tag, ch;
-    long dev;
+    int32_t dev;
 	NSString *str;
 	MyMIDISequence *seq = [myDocument myMIDISequence];
 
 	item = [sender selectedItem];
 	if (item == nil)
 		return;
-	tag = [item tag];
+	tag = (int)[item tag];
 	if (sender == sourceDevicePopUp) {
 		str = [item title];
 		if (isAudio) {
@@ -367,7 +367,7 @@ sAllowedExtensionsForTag(int tag)
             if (dev >= 0) {
                 item = [midiChannelPopUp selectedItem];
                 if (item != nil)
-                    ch = [item tag] - 1;
+                    ch = (int)[item tag] - 1;
             }
             MDPlayerSetMIDIThruDeviceAndChannel(dev, ch);
 		}
@@ -426,7 +426,7 @@ sAllowedExtensionsForTag(int tag)
 
 - (IBAction)overdubRadioChecked:(id)sender
 {
-	int tag = [[sender selectedCell] tag];
+	int tag = (int)[[sender selectedCell] tag];
 	[info setValue: [NSNumber numberWithBool: tag] forKey: MyRecordingInfoReplaceFlagKey];
 	[self updateDisplay];
 }
@@ -450,7 +450,7 @@ sAllowedExtensionsForTag(int tag)
 
 - (IBAction)tickTextChanged:(id)sender
 {
-	long bar, beat, tick;
+	int32_t bar, beat, tick;
 	MDTickType mdTick;
 	const char *s;
 	s = [[sender stringValue] UTF8String];

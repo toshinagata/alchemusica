@@ -27,7 +27,7 @@
     lastMenuPoint = [controlView convertPoint:[anEvent locationInWindow] fromView:nil];
 	if ([controlView isKindOfClass: [NSTableView class]]) {
 		id delegate = [controlView delegate];
-        int row = [controlView rowAtPoint:lastMenuPoint];
+        int row = (int)[controlView rowAtPoint:lastMenuPoint];
         if ([delegate respondsToSelector: @selector(willUseMenu:ofCell:inRow:)])
             menu = [delegate willUseMenu:menu ofCell:self inRow:row];
 		[controlView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection: NO];
@@ -46,10 +46,10 @@
     delegate = [controlView delegate];
     if (![delegate respondsToSelector: @selector(stringValueForMenuItem:ofCell:inRow:)])
         return;
-    row = [controlView rowAtPoint:lastMenuPoint];
+    row = (int)[controlView rowAtPoint:lastMenuPoint];
     stringValue = [delegate stringValueForMenuItem:sender ofCell:self inRow:row];
     if (stringValue != nil) {
-        int column = [controlView columnAtPoint: lastMenuPoint];
+        int column = (int)[controlView columnAtPoint: lastMenuPoint];
         id myWindow = [controlView window];
         id fieldEditor;
         //  Start editing mode programatically, modify the text, and end editing mode.

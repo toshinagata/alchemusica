@@ -16,6 +16,12 @@
  GNU General Public License for more details.
  */
 
+#if defined(__LP64__) && __LP64__
+#define USE_CARBON 0
+#else
+#define USE_CARBON 1
+#endif
+
 #import <Cocoa/Cocoa.h>
 #import <AudioUnit/AudioUnit.h>
 #import <AudioUnit/AudioUnitCarbonView.h>
@@ -25,23 +31,20 @@
 	BOOL isProcessingCarbonEventHandler;  //  True while processing carbon event
 @protected
 	AudioUnit audioUnit;
+#if USE_CARBON
 	AudioUnitCarbonView auCarbonView;
+#endif
 	ComponentDescription viewCD;
 	id _delegate;
 	NSSize defaultViewSize;
 	
-//	NSWindow *cocoaWindow;
+#if USE_CARBON
 	WindowRef carbonWindowRef;
-//	NSWindow *carbonWindow;  //  For adding Windows menu item
+#endif
 }
 + (AUViewWindowController *)windowControllerForAudioUnit:(AudioUnit)unit cocoaView:(BOOL)cocoaView delegate:(id)delegate;
 - (id)initWithAudioUnit:(AudioUnit)unit cocoaView:(BOOL)cocoaView delegate:(id)delegate;
 - (AudioUnit)audioUnit;
-/*
-- (int)showCocoaViewForAudioUnit:(AudioUnit)anAudioUnit;
-- (int)showCarbonViewForAudioUnit:(AudioUnit)anAudioUnit;
-+ (id)windowControllerForAudioUnit: (AudioUnit)anAudioUnit;
-*/
 @end
 
 @interface NSObject (AUViewWindowControllerProtocol)

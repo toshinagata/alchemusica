@@ -28,7 +28,7 @@
 	id delegate;
 	point = [self convertPoint:[theEvent locationInWindow] fromView:nil];
 //	NSLog(@"Mouse down at %@ (view coordinate)\n", NSStringFromPoint(point));
-	for (column = [[self tableView] numberOfColumns] - 1; column >= 0; column--) {
+	for (column = (int)[[self tableView] numberOfColumns] - 1; column >= 0; column--) {
 		rect = [self headerRectOfColumn:column];
 		rect = NSInsetRect(rect, 5.0, 0.0);
 	//	NSLog(@"Column %d, rect %@\n", column, NSStringFromRect(rect));

@@ -74,7 +74,7 @@ static NSColor *sMiscColor = nil;
 	myPlayingRow = -1;
 
 	array = [myEventTrackView tableColumns];
-	n = [array count];
+	n = (int)[array count];
 	font = [NSFont userFixedPitchFontOfSize: 10];
     
     [myEventTrackView setRowHeight: [[NSWindowController sharedLayoutManager] defaultLineHeightForFont:font]];
@@ -142,7 +142,7 @@ static NSColor *sMiscColor = nil;
 		MDTrackGetName(myTrack, buf, sizeof buf);
 	//	NSLog(@"Track name = %s\n", buf);
 		if (buf[0] == 0) {
-			snprintf(buf, sizeof buf, "(Track %ld)", myTrackNumber);
+			snprintf(buf, sizeof buf, "(Track %d)", myTrackNumber);
 		}
 		return [NSString stringWithFormat:@"%@:%s", displayName, buf];
 	} else return displayName;
@@ -216,7 +216,7 @@ static NSColor *sMiscColor = nil;
 
 - (void)updateEventTableView:(NSNotification *)notification
 {
-	if (notification == nil || [[[notification userInfo] objectForKey: @"track"] longValue] == myTrackNumber) {
+	if (notification == nil || [[[notification userInfo] objectForKey: @"track"] intValue] == myTrackNumber) {
 		//  Reset myRow and myPointer
 	//	MDPointerSetPosition(myPointer, -1);
 	//	MDPointerForwardWithSelector(myPointer, EventSelector, myFilter);
@@ -236,7 +236,7 @@ static NSColor *sMiscColor = nil;
 {
 	float beat = [[[notification userInfo] objectForKey: @"position"] floatValue];
 	MDTickType tick = beat * [[self document] timebase];
-	long n;
+	int32_t n;
 	int nearestRow, maxRow;
 
 	/*  If event tracking in this window, then don't autoscroll to play position  */
@@ -268,7 +268,7 @@ static NSColor *sMiscColor = nil;
 	if (nearestRow >= 0) {
 		NSRange visibleRowRange = [myEventTrackView rowsInRect:[myEventTrackView visibleRect]];
 		if (!NSLocationInRange(nearestRow, visibleRowRange)) {
-			n = nearestRow + visibleRowRange.length - 2;
+			n = nearestRow + (int)visibleRowRange.length - 2;
 			if (n >= maxRow)
 				n = maxRow;
 			[myEventTrackView scrollRowToVisible:n];
@@ -304,7 +304,7 @@ static NSColor *sMiscColor = nil;
 #pragma mark ====== NSTableView handling methods ======
 
 static int
-EventSelector(const MDEvent *ep, long position, void *inUserData)
+EventSelector(const MDEvent *ep, int32_t position, void *inUserData)
 {
 	ListWindowFilterRecord *filter = (ListWindowFilterRecord *)inUserData;
 	MDEventKind kind;
@@ -335,14 +335,14 @@ EventSelector(const MDEvent *ep, long position, void *inUserData)
     MDSelectionObject *obj = [[self document] selectionOfTrack: myTrackNumber];
     IntGroup *pset = [obj pointSet];
 	NSMutableIndexSet *iset = [NSMutableIndexSet indexSet];
-	long min = IntGroupMinimum(pset);
-	long max = IntGroupMaximum(pset);
+	int32_t min = IntGroupMinimum(pset);
+	int32_t max = IntGroupMaximum(pset);
     selectionDidChangeNotificationLevel++;
 	if (myTrack != NULL && myPointer != NULL) {
 		MDPointerSetPosition(myPointer, -1);
 		myRow = 0;
 		while (MDPointerForwardWithSelector(myPointer, EventSelector, myFilter) != NULL) {
-			long pos = MDPointerGetPosition(myPointer);
+			int32_t pos = MDPointerGetPosition(myPointer);
 			if (pos >= min && IntGroupLookup(pset, pos, NULL))
 				[iset addIndex: myRow];
 			if (pos > max)
@@ -369,8 +369,8 @@ EventSelector(const MDEvent *ep, long position, void *inUserData)
 			while (MDPointerForwardWithSelector(myPointer, EventSelector, myFilter) != NULL)
 				myCount++;
 			myRow = myCount;
-			[myInfoText setStringValue:[NSString localizedStringWithFormat:@"%5ld events, %5ld shown",
-				(long)MDTrackGetNumberOfEvents(myTrack), myCount]];
+			[myInfoText setStringValue:[NSString localizedStringWithFormat:@"%5d events, %5d shown",
+				(int32_t)MDTrackGetNumberOfEvents(myTrack), myCount]];
 		}
 		return myCount + 1;
 	} else return 0;
@@ -378,7 +378,7 @@ EventSelector(const MDEvent *ep, long position, void *inUserData)
 
 - (MDEvent *)eventPointerForTableRow:(int)rowIndex
 {
-	long pos = [self eventPositionForTableRow: rowIndex];
+	int32_t pos = [self eventPositionForTableRow: rowIndex];
 	if (pos < 0)
 		return NULL;
 	if (rowIndex == myCount)
@@ -386,7 +386,7 @@ EventSelector(const MDEvent *ep, long position, void *inUserData)
 	return MDPointerCurrent(myPointer);
 }
 
-- (long)eventPositionForTableRow:(int)rowIndex
+- (int32_t)eventPositionForTableRow:(int)rowIndex
 {
 	if (myTrack == NULL || myPointer == NULL)
 		return -1;
@@ -421,9 +421,9 @@ EventSelector(const MDEvent *ep, long position, void *inUserData)
 	else return kMDNegativeTick;
 }
 
-- (int)rowForEventPosition: (long)position nearestRow: (int *)nearestRow
+- (int)rowForEventPosition: (int32_t)position nearestRow: (int *)nearestRow
 {
-    long mypos;
+    int32_t mypos;
     if (myTrack == NULL || myPointer == NULL)
         return -1;
     if (myCount == -1)
@@ -464,7 +464,7 @@ EventSelector(const MDEvent *ep, long position, void *inUserData)
 - (void)updateInfoText
 {
 	int n = MDTrackGetNumberOfEvents(myTrack) + 1;
-	int m = [myEventTrackView numberOfSelectedRows];
+	int m = (int)[myEventTrackView numberOfSelectedRows];
 	[myInfoText setStringValue:[NSString stringWithFormat:@"%d row%s/%d shown/%d selected", n, (n == 1 ? "" : "s"), (int)myCount + 1, m]];
 }
 
@@ -476,12 +476,12 @@ EventSelector(const MDEvent *ep, long position, void *inUserData)
 	if (startTick < 0 || startTick >= kMDMaxTick) {
 		startString = endString = @"";
 	} else {
-		long startMeasure, startBeat, startSubTick;
-		long endMeasure, endBeat, endSubTick;
+		int32_t startMeasure, startBeat, startSubTick;
+		int32_t endMeasure, endBeat, endSubTick;
 		MDCalibratorTickToMeasure(myCalibrator, startTick, &startMeasure, &startBeat, &startSubTick);
 		MDCalibratorTickToMeasure(myCalibrator, endTick, &endMeasure, &endBeat, &endSubTick);
-		startString = [NSString stringWithFormat: @"%4ld:%2ld:%4ld", startMeasure, startBeat, startSubTick];
-		endString = [NSString stringWithFormat: @"%4ld:%2ld:%4ld", endMeasure, endBeat, endSubTick];
+		startString = [NSString stringWithFormat: @"%4d:%2d:%4d", startMeasure, startBeat, startSubTick];
+		endString = [NSString stringWithFormat: @"%4d:%2d:%4d", endMeasure, endBeat, endSubTick];
 	}
 	
 	[startEditingRangeText setStringValue: startString];
@@ -496,7 +496,7 @@ row:(int)rowIndex
 	MDEvent *ep;
 	MDTickType tick;
 	MDTimeType time;
-	long bar, beat, count;
+	int32_t bar, beat, count;
 	
 	if (rowIndex == myCount) {
 		/*  The "end of track" row  */
@@ -519,7 +519,7 @@ row:(int)rowIndex
 		time = MDCalibratorTickToTime(myCalibrator, tick);
 		return [NSString localizedStringWithFormat:@"%8.2f", (double)(time / 1000.0)];
 	} else if ([@"count" isEqualToString: identifier]) {
-		return [NSString localizedStringWithFormat:@"%8ld", (long)tick];
+		return [NSString localizedStringWithFormat:@"%8d", (int32_t)tick];
 	} else if ([@"deltacount" isEqualToString: identifier]) {
 		if (rowIndex == myCount) {
 			ep = [self eventPointerForTableRow:rowIndex - 1];
@@ -531,14 +531,14 @@ row:(int)rowIndex
 			if (ep != NULL)
 				tick -= MDGetTick(ep);
 		}
-		return [NSString localizedStringWithFormat:@"%6ld", (long)tick];
+		return [NSString localizedStringWithFormat:@"%6d", (int32_t)tick];
 	} else if ([@"st" isEqualToString: identifier]) {
 		ep = MDPointerForward(myPointer);
 		MDPointerBackward(myPointer);
 		if (ep == NULL)
 			tick = 0;
 		else tick = MDGetTick(ep) - tick;
-		return [NSString localizedStringWithFormat:@"%6ld", (long)tick];
+		return [NSString localizedStringWithFormat:@"%6d", (int32_t)tick];
     }
 	if ([@"ch" isEqualToString: identifier]) {
 		if (ep != NULL && MDIsChannelEvent(ep))
@@ -559,8 +559,8 @@ row:(int)rowIndex
                     MDEvent *ep1;
                     int bank = 0;
                     int n, data1;
-                    long dev;
-                    long pos;
+                    int32_t dev;
+                    int32_t pos;
                     data1 = MDGetData1(ep);
                     n = snprintf(eventStr, sizeof eventStr, "%d:", data1);
                     pos = MDPointerGetPosition(myPointer);
@@ -671,7 +671,7 @@ row:(int)rowIndex
 	MDTickType tick;
 	MDTimeType time;
 	MyDocument *document;
-	long trackNo, position;
+	int32_t trackNo, position;
 	char buf[2048];
 	BOOL mod = NO;
 	
@@ -685,7 +685,7 @@ row:(int)rowIndex
 
 	tick = kMDNegativeTick;
     if ([@"bar" isEqualToString: identifier]) {
-		long bar, beat, count;
+		int32_t bar, beat, count;
 		if (MDEventParseTickString(buf, &bar, &beat, &count) < 3)
 			return;
 		tick = MDCalibratorMeasureToTick(myCalibrator, bar, beat, count);
@@ -696,9 +696,9 @@ row:(int)rowIndex
 		time = atof(buf) * 1000.0;
 		tick = MDCalibratorTimeToTick(myCalibrator, time);
 	} else if ([@"count" isEqualToString: identifier]) {
-		tick = atol(buf);
+		tick = (int32_t)atol(buf);
 	} else if ([@"deltacount" isEqualToString: identifier]) {
-		tick = atol(buf);
+		tick = (int32_t)atol(buf);
 		if (rowIndex > 0) {
 			ep = [self eventPointerForTableRow:rowIndex - 1];
 			if (ep != NULL)
@@ -709,7 +709,7 @@ row:(int)rowIndex
 	ep = [self eventPointerForTableRow:rowIndex];
 	if (tick != kMDNegativeTick) {
 		/*  set tick  */
-		long npos;
+		int32_t npos;
 		if (rowIndex == myCount) {
 			/*  Change track duration  */
 			if ([document changeTrackDuration: tick ofTrack: trackNo]) {
@@ -734,7 +734,7 @@ row:(int)rowIndex
 			
 		if ([@"st" isEqualToString: identifier]) {
 
-			tick = atol(buf);
+			tick = (int32_t)atol(buf);
 			/*  set ST  */
 
 		} else if ([@"ch" isEqualToString: identifier]) {
@@ -770,7 +770,7 @@ row:(int)rowIndex
 				/* code = MDEventGTStringToEvent(ep, buf, &ed); */
 				if (MDGetKind(ep) == kMDEventNote) {
 					/*  Change the tick of the note off  */
-					tick = atol(buf);
+					tick = (int32_t)atol(buf);
 					mod = [document changeDuration: tick atPosition: position inTrack: trackNo];
 				}
 			} else if ([@"data" isEqualToString: identifier]) {
@@ -778,13 +778,13 @@ row:(int)rowIndex
 				code = MDEventDataStringToEvent(ep, buf, &ed);
 				if (code == kMDEventFieldInvalid) {
 					char *msg;
-					asprintf(&msg, "%.*s<?>%s", (int)ed.longValue, buf, buf + ed.longValue);
+					asprintf(&msg, "%.*s<?>%s", (int)ed.intValue, buf, buf + ed.intValue);
 					[[NSAlert alertWithMessageText: @"Bad Event Data" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@"The data string cannot be converted to an event data: %s", msg] runModal];
 					free(msg);
 				} else if (code == kMDEventFieldBinaryData) {
 					if (data == nil) {
 						if (ed.binaryData != NULL)
-							data = [NSData dataWithBytes: ed.binaryData + sizeof(long) length: *((long *)ed.binaryData)];
+							data = [NSData dataWithBytes: ed.binaryData + sizeof(int32_t) length: *((int32_t *)ed.binaryData)];
 					}
 					mod = [document changeMessage: data atPosition: position inTrack: trackNo];
 					if (ed.binaryData != NULL) {
@@ -868,7 +868,7 @@ row:(int)rowIndex
 			isLastRowSelected = YES;
             continue;
 		}
-        sts = IntGroupAdd(pointSet->pointSet, [self eventPositionForTableRow: idx], 1);
+        sts = IntGroupAdd(pointSet->pointSet, [self eventPositionForTableRow: (int)idx], 1);
         if (sts != kMDNoError)
             break;
     }
@@ -907,8 +907,8 @@ row:(int)rowIndex
 {
 	if (control == myEventTrackView) {
 		id identifier;
-		int col = [myEventTrackView editedColumn];
-		int row = [myEventTrackView editedRow];
+		int col = (int)[myEventTrackView editedColumn];
+		int row = (int)[myEventTrackView editedRow];
 		if (col < 0)
 			return NO;
 		identifier = [[[myEventTrackView tableColumns] objectAtIndex: col] identifier];
@@ -919,7 +919,7 @@ row:(int)rowIndex
 			code = MDEventKindStringToEvent([[fieldEditor string] UTF8String], &ed);
 			if (code == kMDEventFieldKindAndCode) {
 				MDEvent event;
-				long position;
+				int32_t position;
 				MDEventInit(&event);
 				newEventFromKindAndCode(&event, ed);
 				position = [self eventPositionForTableRow: row];
@@ -942,7 +942,7 @@ row:(int)rowIndex
         else return menu;
     } else if (cell == dataDataCell) {
         MDEvent *ep;
-        long dev;
+        int32_t dev;
         int i, count;
         if (row == myCount)
             return nil;
@@ -1082,19 +1082,19 @@ row:(int)rowIndex
     MDEventFieldData ed;
     MDEventObject *newEvent;
     MDEvent *ep;
-    long pos_bank;
-    long pos;
+    int32_t pos_bank;
+    int32_t pos;
     int i;
     MDTickType tick;
     MyDocument *document = (MyDocument *)[self document];
-    long trackNo = myTrackNumber;
+    int32_t trackNo = myTrackNumber;
 
     ep = [self eventPointerForTableRow:row];
     tick = MDGetTick(ep);
     pos = MDPointerGetPosition(myPointer);
 
     /*  Program change  */
-    ed.longValue = (tag & 0x7f);
+    ed.intValue = (tag & 0x7f);
     mod = [document changeValue: ed.whole ofType:kMDEventFieldData atPosition:pos inTrack:trackNo];
 
     /*  Do bank select MSB and LSB need to be updated?  */
@@ -1102,10 +1102,10 @@ row:(int)rowIndex
         /*  0: MSB, 1: LSB  */
         MDPointer *pt;
         MDEvent *ep1;
-        ed.longValue = ((tag >> (16 - i * 8)) & 0x7f);
+        ed.intValue = ((tag >> (16 - i * 8)) & 0x7f);
         MDCalibratorJumpToPositionInTrack(myCalibrator, pos, myTrack);
         ep = MDCalibratorGetEvent(myCalibrator, myTrack, kMDEventControl, i * 32);
-        if (ep != NULL && MDGetData1(ep) == ed.longValue)
+        if (ep != NULL && MDGetData1(ep) == ed.intValue)
             continue;  /*  No need to update  */
         /*  Is it OK to change the value of the existing event?  */
         pt = MDCalibratorCopyPointer(myCalibrator, myTrack, kMDEventControl, i * 32);
@@ -1124,7 +1124,7 @@ row:(int)rowIndex
             MDSetTick(ep1, tick);
             MDSetKind(ep1, kMDEventControl);
             MDSetCode(ep1, i * 32);
-            MDSetData1(ep1, ed.longValue);
+            MDSetData1(ep1, ed.intValue);
             newEvent->position = pos;
             [document insertEvent: newEvent toTrack: trackNo];
             [newEvent release];
@@ -1143,9 +1143,9 @@ row:(int)rowIndex
 - (NSString *)stringValueForMenuItem:(id)item ofCell:(ContextMenuTextFieldCell *)cell inRow:(int)row
 {
     if (cell == kindDataCell)
-        return [self stringValueForEventKindTag:[item tag] inRow:row];
+        return [self stringValueForEventKindTag:(int)[item tag] inRow:row];
     else if (cell == dataDataCell)
-        return [self stringValueForProgramTag:[item tag] inRow:row];
+        return [self stringValueForProgramTag:(int)[item tag] inRow:row];
     else return @"";
 }
 
@@ -1241,11 +1241,11 @@ static NSString *sTickIdentifiers[] = { @"bar", @"sec", @"msec", @"count", @"del
 	BOOL mod;
     NSUInteger idx;
 	int eot;
-	eot = [myEventTrackView numberOfRows] - 1;	//  End Of Track
+	eot = (int)[myEventTrackView numberOfRows] - 1;	//  End Of Track
     for (idx = [iset firstIndex]; idx != NSNotFound; idx = [iset indexGreaterThanIndex:idx]) {
 		if (idx == eot)
 			continue;
-		sts = IntGroupAdd(pointSet->pointSet, [self eventPositionForTableRow: idx], 1);
+		sts = IntGroupAdd(pointSet->pointSet, [self eventPositionForTableRow:(int)idx], 1);
 		if (sts != kMDNoError)
 			return;		//  Cannot proceed
 	}
@@ -1269,12 +1269,12 @@ static NSString *sTickIdentifiers[] = { @"bar", @"sec", @"msec", @"count", @"del
 	[myEventTrackView editColumn: column row: row withEvent: nil select: YES];
 }
 
-- (void)startEditAtColumn: (int)column creatingEventWithTick: (MDTickType)tick atPosition: (long)position
+- (void)startEditAtColumn: (int)column creatingEventWithTick: (MDTickType)tick atPosition: (int32_t)position
 {
 	MDEvent *ep;
 	MDPointer *ptr = MDPointerNew(myTrack);
 	MDEventObject *newEvent;
-//	long num = MDTrackGetNumberOfEvents(myTrack);
+//	int32_t num = MDTrackGetNumberOfEvents(myTrack);
 	int nearestRow, row;
 	if (!EventSelector(&myDefaultEvent, position, myFilter))
 		/*  The default event will not be displayed: clear the default event  */
@@ -1330,9 +1330,9 @@ static NSString *sTickIdentifiers[] = { @"bar", @"sec", @"msec", @"count", @"del
 - (IBAction)insertNewEvent: (id)sender
 {
 	MDTickType tick, endTick;
-	long position;
+	int32_t position;
 	MDEvent *ep;
-	int row = [myEventTrackView selectedRow];
+	int row = (int)[myEventTrackView selectedRow];
 	if (row < 0) {
 		position = -1;
 		[(MyDocument *)[self document] getEditingRangeStart: &tick end: &endTick];
@@ -1359,7 +1359,7 @@ static NSString *sTickIdentifiers[] = { @"bar", @"sec", @"msec", @"count", @"del
 
 - (IBAction)editSelectedEvent: (id)sender
 {
-	int row = [myEventTrackView selectedRow];
+	int row = (int)[myEventTrackView selectedRow];
 	if (row >= 0)
 		[self startEditAtColumn: -1 row: row];
 }
@@ -1374,7 +1374,7 @@ static NSString *sTickIdentifiers[] = { @"bar", @"sec", @"msec", @"count", @"del
 - (IBAction)editingRangeTextModified: (id)sender
 {
 	BOOL startFlag;
-	long bar, beat, subtick;
+	int32_t bar, beat, subtick;
 	MDTickType tick, duration, endtick;
 	const char *s;
 	if (sender == startEditingRangeText)

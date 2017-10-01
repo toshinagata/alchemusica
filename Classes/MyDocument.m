@@ -161,7 +161,7 @@ docTypeToDocCode(NSString *docType)
     NSMutableDictionary *dict;
     NSEnumerator *en;
     NSWindowController *cont;
-    long i, n;
+    int32_t i, n;
     dict = [NSMutableDictionary dictionary];
     
     //  Track attributes
@@ -240,7 +240,7 @@ callback(float progress, void *data)
             MDTrack *track = [myMIDISequence getTrackAtIndex: i];
             MDTrackGetDeviceName(track, name, sizeof name);
             if (name[0] != 0) {
-                long dev = MDPlayerGetDestinationNumberFromName(name);
+                int32_t dev = MDPlayerGetDestinationNumberFromName(name);
                 if (dev >= 0)
                     MDTrackSetDevice(track, dev);
                 else
@@ -438,7 +438,7 @@ callback(float progress, void *data)
 	//  Register undo action
 	[[[self undoManager] prepareWithInvocationTarget: self]
 	 setTimebase: (float)MDSequenceGetTimebase(sequence)];
-	MDSequenceSetTimebase(sequence, (long)timebase);
+	MDSequenceSetTimebase(sequence, (int32_t)timebase);
 }
 
 - (void)lockMIDISequence
@@ -490,7 +490,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 - (void)getSelectionStartTick: (MDTickType *)startTickPtr endTick: (MDTickType *)endTickPtr editableTracksOnly: (BOOL)flag
 {
 	int i;
-	int ntracks = [selections count];
+	int ntracks = (int)[selections count];
 	MDTickType startTick, endTick;
 	MyMIDISequence *seq = [self myMIDISequence];
 
@@ -574,7 +574,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 		isEditingRangeModified = [keys containsObject: sEditingRangeKey];
 		/*  If selection is modified and editing range is not touched, then new editing range 
 			is calculated from the new selection. */
-		for (i = [keys count] - 1; i >= 0; i--) {
+		for (i = (int)[keys count] - 1; i >= 0; i--) {
 			if ([[keys objectAtIndex: i] isKindOfClass: [NSNumber class]])
 				break;
 		}
@@ -608,8 +608,8 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	int i;
 
 	/*  Post track modified notification for all modified tracks  */
-	for (i = [modifiedTracks count] - 1; i >= 0; i--) {
-		long trackNo = [[modifiedTracks objectAtIndex: i] longValue];
+	for (i = (int)[modifiedTracks count] - 1; i >= 0; i--) {
+		int32_t trackNo = [[modifiedTracks objectAtIndex: i] intValue];
 		[[NSNotificationCenter defaultCenter]
 			postNotificationName:MyDocumentTrackModifiedNotification
 			object:self
@@ -627,7 +627,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	}
 }
 
-- (void)enqueueTrackModifiedNotification: (long)trackNo
+- (void)enqueueTrackModifiedNotification: (int32_t)trackNo
 {
 	int i;
 
@@ -635,8 +635,8 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	MDSequenceResetCalibrators([myMIDISequence mySequence]);
 
 	/*  Add a track to the modifiedTracks array (if not already present)  */
-	for (i = [modifiedTracks count] - 1; i >= 0; i--) {
-		if ([[modifiedTracks objectAtIndex: i] longValue] == trackNo)
+	for (i = (int)[modifiedTracks count] - 1; i >= 0; i--) {
+		if ([[modifiedTracks objectAtIndex: i] intValue] == trackNo)
 			break;
 	}
 	if (i < 0) {
@@ -677,7 +677,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 
 - (void)trackModified: (NSNotification *)notification {
 	if (gMyDocumentSanityCheck) {
-		long trackNo = [[[notification userInfo] objectForKey: @"track"] longValue];
+		int32_t trackNo = [[[notification userInfo] objectForKey: @"track"] intValue];
 		MDTrack *track = [[self myMIDISequence] getTrackAtIndex:trackNo];
 		if (MDTrackRecache(track, 1) > 0) {
 			MyAppCallback_messageBox("Track data has some inconsistency", "Internal Error", 0, 0);
@@ -685,7 +685,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	}
 }
 
-//- (void)postSelectionDidChangeNotification: (long)trackNo selectionChange: (IntGroupObject *)set sender: (id)sender
+//- (void)postSelectionDidChangeNotification: (int32_t)trackNo selectionChange: (IntGroupObject *)set sender: (id)sender
 //{
 //	[[NSNotificationCenter defaultCenter]
 //		postNotificationName:MyDocumentSelectionDidChangeNotification
@@ -718,12 +718,12 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 
 #pragma mark ====== Editing track lists ======
 
-- (BOOL)insertTrack: (MDTrackObject *)trackObj atIndex: (long)trackNo
+- (BOOL)insertTrack: (MDTrackObject *)trackObj atIndex: (int32_t)trackNo
 {
 	MDTrack *track;
 	MDSequence *sequence;
     NSData *attr;
-	long index;
+	int32_t index;
 	if (trackObj == nil) {
 		trackObj = [[[MDTrackObject allocWithZone:[self zone]] init] autorelease];
 	}
@@ -768,12 +768,12 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	} else return NO;
 }
 
-- (BOOL)deleteTrackAt: (long)trackNo
+- (BOOL)deleteTrackAt: (int32_t)trackNo
 {
 	MDTrack *track;
 	MDSequence *sequence;
     NSData *attr;
-	long index;
+	int32_t index;
 	sequence = [[self myMIDISequence] mySequence];
 	track = MDSequenceGetTrack(sequence, trackNo);
 	if (track != NULL) {
@@ -870,7 +870,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 			[array addObject:aname];
 	}
 	if (destinationNames != nil) {
-		n = [destinationNames count];
+		n = (int)[destinationNames count];
 		for (i = 0; i < n; i++) {
 			aname = [destinationNames objectAtIndex:i];
 			if (![array containsObject:aname])
@@ -885,7 +885,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 {
     MDTrack *track;
     MDSequence *sequence;
-    long n, i;
+    int32_t n, i;
     NSMutableData *data;
     MDTrackAttribute *ap;
     sequence = [[self myMIDISequence] mySequence];
@@ -905,13 +905,13 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 {
     MDTrack *track;
     MDSequence *sequence;
-    long n, i;
+    int32_t n, i;
     const MDTrackAttribute *ap;
     sequence = [[self myMIDISequence] mySequence];
     if (sequence == NULL)
         return;
     n = MDSequenceGetNumberOfTracks(sequence);
-    i = [data length] / sizeof(MDTrackAttribute);
+    i = (int)([data length] / sizeof(MDTrackAttribute));
     if (i < n)
         n = i;
     ap = (const MDTrackAttribute *)[data bytes];
@@ -922,7 +922,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
     }
 }
 
-- (MDTrackAttribute)trackAttributeForTrack: (long)trackNo
+- (MDTrackAttribute)trackAttributeForTrack: (int32_t)trackNo
 {
 	MDSequence *seq;
 	MDTrack *track;
@@ -932,7 +932,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	else return 0;
 }
 
-- (void)setTrackAttribute: (MDTrackAttribute)attr forTrack: (long)trackNo
+- (void)setTrackAttribute: (MDTrackAttribute)attr forTrack: (int32_t)trackNo
 {
 	MDSequence *seq;
 	MDTrack *track;
@@ -948,17 +948,17 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	}	
 }
 
-- (BOOL)isTrackSelected: (long)trackNo
+- (BOOL)isTrackSelected: (int32_t)trackNo
 {
 	return [mainWindowController isTrackSelected: trackNo];
 }
 
-- (void)setIsTrackSelected: (long)trackNo flag: (BOOL)flag
+- (void)setIsTrackSelected: (int32_t)trackNo flag: (BOOL)flag
 {
 	[mainWindowController setIsTrackSelected: trackNo flag: flag];
 }
 
-- (BOOL)setRecordFlagOnTrack: (long)trackNo flag: (int)flag
+- (BOOL)setRecordFlagOnTrack: (int32_t)trackNo flag: (int)flag
 {
     MDSequence *sequence = [[self myMIDISequence] mySequence];
     if (sequence != NULL) {
@@ -974,7 +974,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
     return NO;
 }
 
-- (BOOL)setMuteFlagOnTrack: (long)trackNo flag: (int)flag
+- (BOOL)setMuteFlagOnTrack: (int32_t)trackNo flag: (int)flag
 {
     MDSequence *sequence = [[self myMIDISequence] mySequence];
     if (sequence != NULL) {
@@ -990,7 +990,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
     return NO;
 }
 
-- (BOOL)setSoloFlagOnTrack: (long)trackNo flag: (int)flag
+- (BOOL)setSoloFlagOnTrack: (int32_t)trackNo flag: (int)flag
 {
     MDSequence *sequence = [[self myMIDISequence] mySequence];
     if (sequence != NULL) {
@@ -1006,7 +1006,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
     return NO;
 }
 
-- (void)registerUndoChangeTrackDuration: (long)oldDuration ofTrack: (long)trackNo
+- (void)registerUndoChangeTrackDuration: (int32_t)oldDuration ofTrack: (int32_t)trackNo
 {
 	MDTrack *track;
 	MDTickType duration;
@@ -1017,18 +1017,18 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 			changeTrackDuration: oldDuration ofTrack: trackNo];
 }
 
-- (void)updateDeviceNumberForTrack: (long)trackNo
+- (void)updateDeviceNumberForTrack: (int32_t)trackNo
 {
 	MDTrack *track = [myMIDISequence getTrackAtIndex: trackNo];
 	if (track != NULL) {
 		char name[256];
 		MDTrackGetDeviceName(track, name, sizeof name);
-		long deviceNumber = MDPlayerGetDestinationNumberFromName(name);
+		int32_t deviceNumber = MDPlayerGetDestinationNumberFromName(name);
 		MDTrackSetDevice(track, deviceNumber);
 	}
 }
 
-- (BOOL)changeDevice: (NSString *)deviceName forTrack: (long)trackNo
+- (BOOL)changeDevice: (NSString *)deviceName forTrack: (int32_t)trackNo
 {
 	char name[256], oldname[256];
 	MDTrack *track = [myMIDISequence getTrackAtIndex: trackNo];
@@ -1048,10 +1048,10 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 }
 
 /*
-- (BOOL)changeDevice: (NSString *)deviceName deviceNumber: (long)deviceNumber forTrack: (long)trackNo
+- (BOOL)changeDevice: (NSString *)deviceName deviceNumber: (int32_t)deviceNumber forTrack: (int32_t)trackNo
 {
 	char name[256], oldname[256];
-	long oldnumber;
+	int32_t oldnumber;
 	MDTrack *track = [myMIDISequence getTrackAtIndex: trackNo];
 	if (track != NULL) {
         MDTrackGetDeviceName(track, oldname, sizeof oldname);
@@ -1080,7 +1080,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 }
 */
 
-- (BOOL)changeTrackChannel: (int)channel forTrack: (long)trackNo
+- (BOOL)changeTrackChannel: (int)channel forTrack: (int32_t)trackNo
 {
     int oldchannel;
     MDTrack *track;
@@ -1098,7 +1098,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
     return NO;
 }
 
-- (BOOL)changeTrackName: (NSString *)trackName forTrack: (long)trackNo
+- (BOOL)changeTrackName: (NSString *)trackName forTrack: (int32_t)trackNo
 {
 	char name[256], oldname[256];
 	MDTrack *track;
@@ -1117,19 +1117,19 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	return NO;
 }
 
-- (BOOL)changeTrackDuration: (long)duration ofTrack: (long)trackNo
+- (BOOL)changeTrackDuration: (int32_t)duration ofTrack: (int32_t)trackNo
 {
 	MDTrack *track = MDSequenceGetTrack([[self myMIDISequence] mySequence], trackNo);
 	if (track != NULL) {
-		long tduration = MDTrackGetLargestTick(track);
-		long oduration = MDTrackGetDuration(track);
+		int32_t tduration = MDTrackGetLargestTick(track);
+		int32_t oduration = MDTrackGetDuration(track);
 		if (tduration >= duration)
             duration = tduration + 1;
 		if (oduration != duration) {
 			MDTrackSetDuration(track, duration);
 			/*  Register undo action with current value  */
 			[[[self undoManager] prepareWithInvocationTarget: self]
-				changeTrackDuration: oduration ofTrack: (long)trackNo];
+				changeTrackDuration: oduration ofTrack: (int32_t)trackNo];
 			/*  Post the notification that any track has been modified  */
 			[self enqueueTrackModifiedNotification: trackNo];
 			return YES;
@@ -1140,12 +1140,12 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 
 #pragma mark ====== Editing events ======
 
-- (BOOL)insertEvent: (MDEventObject *)eventObj toTrack: (long)trackNo
+- (BOOL)insertEvent: (MDEventObject *)eventObj toTrack: (int32_t)trackNo
 {
 	MDTrack *track;
 	MDPointer *ptr;
 	MDStatus sts;
-	long position;
+	int32_t position;
 	track = [[self myMIDISequence] getTrackAtIndex: trackNo];
 	if (track != NULL) {
 		ptr = MDPointerNew(track);
@@ -1191,7 +1191,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	return NO;			
 }
 
-- (BOOL)deleteEventAt: (long)position fromTrack: (long)trackNo
+- (BOOL)deleteEventAt: (int32_t)position fromTrack: (int32_t)trackNo
 {
 	MDTrack *track;
 	MDPointer *ptr;
@@ -1238,7 +1238,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	return NO;			
 }
 
-- (BOOL)replaceEvent: (MDEventObject *)eventObj inTrack: (long)trackNo
+- (BOOL)replaceEvent: (MDEventObject *)eventObj inTrack: (int32_t)trackNo
 {
 	MDTrack *track;
 	MDPointer *ptr;
@@ -1301,7 +1301,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	return NO;			
 }
 
-- (BOOL)insertMultipleEvents: (MDTrackObject *)trackObj at: (IntGroupObject *)pointSet toTrack: (long)trackNo selectInsertedEvents: (BOOL)flag insertedPositions: (IntGroup **)outPtr
+- (BOOL)insertMultipleEvents: (MDTrackObject *)trackObj at: (IntGroupObject *)pointSet toTrack: (int32_t)trackNo selectInsertedEvents: (BOOL)flag insertedPositions: (IntGroup **)outPtr
 {
 	MDTrack *track;
 	IntGroup *pset;
@@ -1354,7 +1354,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	}
 }
 
-- (BOOL)deleteMultipleEventsAt: (IntGroupObject *)pointSet fromTrack: (long)trackNo deletedEvents: (MDTrack **)outPtr
+- (BOOL)deleteMultipleEventsAt: (IntGroupObject *)pointSet fromTrack: (int32_t)trackNo deletedEvents: (MDTrack **)outPtr
 {
 	MDTrack *track, *newTrack;
 	MDTrackObject *trackObj;
@@ -1405,7 +1405,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	return NO;
 }
 
-- (BOOL)duplicateMultipleEventsAt: (IntGroupObject *)pointSet ofTrack: (long)trackNo selectInsertedEvents: (BOOL)flag
+- (BOOL)duplicateMultipleEventsAt: (IntGroupObject *)pointSet ofTrack: (int32_t)trackNo selectInsertedEvents: (BOOL)flag
 {
 	MDTrack *track, *newTrack;
 	MDTrackObject *newTrackObj;
@@ -1437,8 +1437,8 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 static int
 sInternalComparatorByTick(void *t, const void *a, const void *b)
 {
-	MDTickType ta = ((MDTickType *)t)[*((long *)a)];
-	MDTickType tb = ((MDTickType *)t)[*((long *)b)];
+	MDTickType ta = ((MDTickType *)t)[*((int32_t *)a)];
+	MDTickType tb = ((MDTickType *)t)[*((int32_t *)b)];
 	if (ta < tb)
 		return -1;
 	else if (ta == tb)
@@ -1449,8 +1449,8 @@ sInternalComparatorByTick(void *t, const void *a, const void *b)
 static int
 sInternalComparatorByPosition(void *t, const void *a, const void *b)
 {
-	long ta = ((long *)t)[*((long *)a)];
-	long tb = ((long *)t)[*((long *)b)];
+	int32_t ta = ((int32_t *)t)[*((int32_t *)a)];
+	int32_t tb = ((int32_t *)t)[*((int32_t *)b)];
 	if (ta < tb)
 		return -1;
 	else if (ta == tb)
@@ -1458,7 +1458,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	else return 1;
 }
 
-- (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions
+- (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (int32_t)trackNo mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions
 {
 	MDTrack *track = [[self myMIDISequence] getTrackAtIndex: trackNo];
     if (track == NULL)
@@ -1471,11 +1471,11 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 + (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (id)doc mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions
 {
     MDTrack *tempTrack;
-	long trackNo;
+	int32_t trackNo;
     MDEvent *ep;
     IntGroup *pset, *destPset;
     MDSelectionObject *newDestPointSet;
-    long index, length;
+    int32_t index, length;
     MDTickType dataValue;
     const MDTickType *dataPtr;
     float floatDataValue;
@@ -1485,8 +1485,8 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     MyDocumentModifyMode undoMode;
 	NSMutableData *tempData, *undoData, *undoPositions;
 	MDTickType *tempDataPtr, *undoDataPtr;
-	long *undoPositionsPtr;
-	const long *destPositionsPtr;
+	int32_t *undoPositionsPtr;
+	const int32_t *destPositionsPtr;
 	MDTickType oldDuration;
 	MDPointer *tempTrackPtr;
 
@@ -1501,7 +1501,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     length = IntGroupGetCount(pset);
 	if (destPositions == nil)
 		destPositionsPtr = NULL;
-	else destPositionsPtr = (const long *)[destPositions bytes];
+	else destPositionsPtr = (const int32_t *)[destPositions bytes];
 
 	/*  Prepare tick data  */
 	dataPtr = NULL;
@@ -1510,7 +1510,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
         if (mode == MyDocumentModifyMultiply) {
             floatDataValue = [theData floatValue];
         } else {
-            dataValue = [theData longValue];
+            dataValue = [theData intValue];
         }
     } else if ([theData isKindOfClass: [NSData class]]) {
         dataMode = 1;
@@ -1529,8 +1529,8 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     undoData = [NSMutableData dataWithLength: sizeof(MDTickType) * length];
     undoDataPtr = (MDTickType *)[undoData mutableBytes];
     undoMode = (mode == MyDocumentModifyAdd ? mode : MyDocumentModifySet);
-	undoPositions = [NSMutableData dataWithLength: sizeof(long) * length];
-	undoPositionsPtr = (long *)[undoPositions mutableBytes];
+	undoPositions = [NSMutableData dataWithLength: sizeof(int32_t) * length];
+	undoPositionsPtr = (int32_t *)[undoPositions mutableBytes];
 	
 	/*  Move the target events to a separate track  */
     status = MDTrackUnmerge(track, &tempTrack, pset);
@@ -1574,7 +1574,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 
 	/*  Get old positions (for undo) to undoPositionsPtr[]  */
 	{
-		long i, pt, endPt;
+		int32_t i, pt, endPt;
 		index = 0;
 		for (i = 0; (pt = IntGroupGetStartPoint(pset, i)) >= 0; i++) {
 			endPt = IntGroupGetEndPoint(pset, i);
@@ -1586,11 +1586,11 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	
 	/*  Sort events, tempDataPtr, undoDataPtr, undoPositionsPtr  */
 	{
-		long *new2old;
+		int32_t *new2old;
 		void *tempBuffer;
 		
 		/*  Allocate temporary storage  */
-		new2old = (long *)malloc(sizeof(long) * length);
+		new2old = (int32_t *)malloc(sizeof(int32_t) * length);
 		if (new2old == NULL)
 			return NO;
 		tempBuffer = malloc(sizeof(MDEvent) * length);
@@ -1628,9 +1628,9 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 			undoDataPtr[index] = *((MDTickType *)tempBuffer + new2old[index]);
 		
 		/*  Sort undoPositionsPtr  */
-		memmove(tempBuffer, undoPositionsPtr, sizeof(long) * length);
+		memmove(tempBuffer, undoPositionsPtr, sizeof(int32_t) * length);
 		for (index = 0; index < length; index++)
-			undoPositionsPtr[index] = *((long *)tempBuffer + new2old[index]);
+			undoPositionsPtr[index] = *((int32_t *)tempBuffer + new2old[index]);
 			
 		free(new2old);
 		free(tempBuffer);
@@ -1684,7 +1684,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     return YES;
 }
 
-- (BOOL)modifyCodes: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode
+- (BOOL)modifyCodes: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (int32_t)trackNo mode: (MyDocumentModifyMode)mode
 {
 	MDTrack *track = [[self myMIDISequence] getTrackAtIndex: trackNo];
     if (track == NULL)
@@ -1695,11 +1695,11 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 
 + (BOOL)modifyCodes: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (MyDocument *)doc mode: (MyDocumentModifyMode)mode
 {
-	long trackNo;
+	int32_t trackNo;
     MDPointer *ptr;
     MDEvent *ep;
     IntGroup *pset;
-    long index, length;
+    int32_t index, length;
 	int psetIndex;
     short dataValue, oldValue, newValue;
     short *dataPtr;
@@ -1791,7 +1791,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     return YES;
 }
 
-- (BOOL)modifyDurations: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode
+- (BOOL)modifyDurations: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (int32_t)trackNo mode: (MyDocumentModifyMode)mode
 {
 	MDTrack *track = [[self myMIDISequence] getTrackAtIndex: trackNo];
     if (track == NULL)
@@ -1802,11 +1802,11 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 
 + (BOOL)modifyDurations: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (MyDocument *)doc mode: (MyDocumentModifyMode)mode
 {
-	long trackNo;
+	int32_t trackNo;
     MDPointer *ptr;
     MDEvent *ep;
     IntGroup *pset;
-    long index, length;
+    int32_t index, length;
 	int psetIndex;
     MDTickType dataValue, oldValue, newValue;
     MDTickType *dataPtr;
@@ -1864,7 +1864,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
                 newValue = dataValue;
             else if (dataMode == 1)
                 newValue = dataPtr[index];
-            else newValue = [[theData objectAtIndex: index] longValue];
+            else newValue = [[theData objectAtIndex: index] intValue];
             if (mode == MyDocumentModifyAdd)
                 newValue += oldValue;
         } else if (mode == MyDocumentModifyMultiply) {
@@ -1915,7 +1915,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     return YES;
 }
 
-- (BOOL)modifyData: (id)theData forEventKind: (unsigned char)eventKind ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode
+- (BOOL)modifyData: (id)theData forEventKind: (unsigned char)eventKind ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (int32_t)trackNo mode: (MyDocumentModifyMode)mode
 {
 	MDTrack *track = [[self myMIDISequence] getTrackAtIndex: trackNo];
     if (track == NULL)
@@ -1926,11 +1926,11 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 
 + (BOOL)modifyData: (id)theData forEventKind: (unsigned char)eventKind ofMultipleEventsAt: (IntGroupObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (MyDocument *)doc mode: (MyDocumentModifyMode)mode
 {
-	long trackNo;
+	int32_t trackNo;
     MDPointer *ptr;
     MDEvent *ep;
     IntGroup *pset;
-    long index, length;
+    int32_t index, length;
 	int psetIndex;
     float dataValue, oldValue, newValue;
     float dataMin, dataMax;
@@ -2058,7 +2058,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     return YES;
 }
 
-- (const MDEvent *)eventAtPosition: (long)position inTrack: (long)trackNo
+- (const MDEvent *)eventAtPosition: (int32_t)position inTrack: (int32_t)trackNo
 {
 	MDTrack *track;
 	MDEvent *ep1;
@@ -2072,12 +2072,12 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	return ep1;
 }
 
-- (long)changeTick: (long)tick atPosition: (long)position inTrack: (long)trackNo originalPosition: (long)pos1
+- (int32_t)changeTick: (int32_t)tick atPosition: (int32_t)position inTrack: (int32_t)trackNo originalPosition: (int32_t)pos1
 {
 	MDTrack *track;
 	MDEvent *ep1;
 	MDPointer *pt1;
-	long opos1, npos;
+	int32_t opos1, npos;
 	MDTickType otick, oduration, duration;
 	MDStatus sts = kMDNoError;
 	track = MDSequenceGetTrack([[self myMIDISequence] mySequence], trackNo);
@@ -2119,7 +2119,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	return -1;
 }
 
-- (BOOL)changeChannel: (int)channel atPosition: (long)position inTrack: (long)trackNo
+- (BOOL)changeChannel: (int)channel atPosition: (int32_t)position inTrack: (int32_t)trackNo
 {
 	MDEvent *ep;
 	int ch;
@@ -2144,12 +2144,12 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	return NO;
 }
 
-- (BOOL)changeDuration: (long)duration atPosition: (long)position inTrack: (long)trackNo
+- (BOOL)changeDuration: (int32_t)duration atPosition: (int32_t)position inTrack: (int32_t)trackNo
 {
 	MDTrack *track;
 	MDEvent *ep1;
 	MDPointer *pt1;
-	long oduration, oldTrackDuration;
+	int32_t oduration, oldTrackDuration;
 	BOOL modified = NO;
 	track = MDSequenceGetTrack([[self myMIDISequence] mySequence], trackNo);
 	pt1 = MDPointerNew(track);
@@ -2179,7 +2179,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	return modified;
 }
 
-- (BOOL)changeValue: (MDEventFieldDataWhole)wholeValue ofType: (int)code atPosition: (long)position inTrack: (long)trackNo
+- (BOOL)changeValue: (MDEventFieldDataWhole)wholeValue ofType: (int)code atPosition: (int32_t)position inTrack: (int32_t)trackNo
 {
 	MDEventFieldData ed1, ed2, value;
 	MDEvent *ep;
@@ -2222,8 +2222,8 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 				break;
 			}
 			case kMDEventFieldData:
-				ed2.longValue = MDGetData1(ep);
-				MDSetData1(ep, ed1.longValue);
+				ed2.intValue = MDGetData1(ep);
+				MDSetData1(ep, ed1.intValue);
 				break;
 			case kMDEventFieldSMPTE:
 			{
@@ -2269,7 +2269,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	} else return NO;
 }
 
-- (BOOL)changeMessage: (NSData *)data atPosition: (long)position inTrack: (long)trackNo
+- (BOOL)changeMessage: (NSData *)data atPosition: (int32_t)position inTrack: (int32_t)trackNo
 {
 	MDEvent *ep;
 	MDPointer *pointer = MDPointerNew(MDSequenceGetTrack([[self myMIDISequence] mySequence], trackNo));
@@ -2279,7 +2279,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	if (pointer != NULL && MDPointerSetPosition(pointer, position) && (ep = MDPointerCurrent(pointer)) != NULL) {
 		if (MDHasEventMessage(ep)) {
 			const unsigned char *ptr;
-			long length;
+			int32_t length;
 			[self lockMIDISequence];
 			ptr = MDGetMessageConstPtr(ep, &length);
 			data2 = [NSData dataWithBytes: ptr length: length];
@@ -2292,7 +2292,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 					modify = YES;
 			}
 			if (modify) {
-				length = [data length];
+				length = (int)[data length];
 				if (MDSetMessageLength(ep, length) == length)
 					MDSetMessage(ep, [data bytes]);
 			}
@@ -2313,9 +2313,9 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 }
 
 /*
-- (BOOL)changeDeviceNumber: (long)deviceNumber forTrack: (long)trackNo;
+- (BOOL)changeDeviceNumber: (int32_t)deviceNumber forTrack: (int32_t)trackNo;
 {
-	long oldNumber;
+	int32_t oldNumber;
 	MDTrack *track = [myMIDISequence getTrackAtIndex: trackNo];
 	if (track != NULL) {
         oldNumber = MDTrackGetDevice(track);
@@ -2370,7 +2370,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 /*  NOTE: setSelection and toggleSelection are the main methods to modify track selections.
     Other methods calls these main methods with appropriate parameters.  */
 
-- (BOOL)setSelection: (MDSelectionObject *)set inTrack: (long)trackNo sender: (id)sender
+- (BOOL)setSelection: (MDSelectionObject *)set inTrack: (int32_t)trackNo sender: (id)sender
 {
 /*    MDSelectionObject *diffSet = [[[MDSelectionObject allocWithZone: [self zone]] init] autorelease]; */
     MDSelectionObject *oldSet = (MDSelectionObject *)[[[selections objectAtIndex: trackNo] retain] autorelease];
@@ -2392,7 +2392,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     } else return NO; */
 }
 
-- (BOOL)toggleSelection: (MDSelectionObject *)pointSet inTrack: (long)trackNo sender: (id)sender
+- (BOOL)toggleSelection: (MDSelectionObject *)pointSet inTrack: (int32_t)trackNo sender: (id)sender
 {
     MDSelectionObject *newSet = [[[MDSelectionObject allocWithZone: [self zone]] init] autorelease];
     MDSelectionObject *oldSet = (MDSelectionObject *)[[[selections objectAtIndex: trackNo] retain] autorelease];
@@ -2419,7 +2419,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     } else return NO;
 }
 
-- (BOOL)selectEventAtPosition: (long)position inTrack: (long)trackNo sender: (id)sender
+- (BOOL)selectEventAtPosition: (int32_t)position inTrack: (int32_t)trackNo sender: (id)sender
 {
     if (!IntGroupLookup([(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet], position, NULL)) {
         MDSelectionObject *pointSet = [[[MDSelectionObject allocWithZone: [self zone]] init] autorelease];
@@ -2429,7 +2429,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     } else return NO;
 }
 
-- (BOOL)unselectEventAtPosition: (long)position inTrack: (long)trackNo sender: (id)sender
+- (BOOL)unselectEventAtPosition: (int32_t)position inTrack: (int32_t)trackNo sender: (id)sender
 {
     if (IntGroupLookup([(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet], position, NULL)) {
         MDSelectionObject *pointSet = [[[MDSelectionObject allocWithZone: [self zone]] init] autorelease];
@@ -2439,7 +2439,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     } else return NO;
 }
 
-- (BOOL)selectAllEventsInTrack: (long)trackNo sender: (id)sender
+- (BOOL)selectAllEventsInTrack: (int32_t)trackNo sender: (id)sender
 {
     MDStatus sts;
     MDSelectionObject *pointSet = [[[MDSelectionObject allocWithZone: [self zone]] init] autorelease];
@@ -2449,7 +2449,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     } else return NO;
 }
 
-- (BOOL)unselectAllEventsInTrack: (long)trackNo sender: (id)sender
+- (BOOL)unselectAllEventsInTrack: (int32_t)trackNo sender: (id)sender
 {
 	MDSelectionObject *sel;
 	sel = [self selectionOfTrack: trackNo];
@@ -2468,7 +2468,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	return YES;
 }
 
-- (BOOL)addSelection: (IntGroupObject *)set inTrack: (long)trackNo sender: (id)sender
+- (BOOL)addSelection: (IntGroupObject *)set inTrack: (int32_t)trackNo sender: (id)sender
 {
     MDSelectionObject *pointSet = [[[MDSelectionObject allocWithZone: [self zone]] init] autorelease];
     MDSelectionObject *oldSet = (MDSelectionObject *)[selections objectAtIndex: trackNo];
@@ -2478,7 +2478,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     else return NO;
 }
 
-- (BOOL)isSelectedAtPosition: (long)position inTrack: (long)trackNo
+- (BOOL)isSelectedAtPosition: (int32_t)position inTrack: (int32_t)trackNo
 {
     IntGroup *selection;
     selection = [(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet];
@@ -2487,12 +2487,12 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     } else return NO;
 }
 
-- (MDSelectionObject *)selectionOfTrack: (long)trackNo
+- (MDSelectionObject *)selectionOfTrack: (int32_t)trackNo
 {
     return [[(MDSelectionObject *)[selections objectAtIndex: trackNo] retain] autorelease];
 }
 
-- (MDSelectionObject *)eventSetInTrack: (long)trackNo eventKind: (int)eventKind eventCode: (int)eventCode fromTick: (MDTickType)fromTick toTick: (MDTickType)toTick fromData: (float)fromData toData: (float)toData inPointSet: (IntGroupObject *)pointSet
+- (MDSelectionObject *)eventSetInTrack: (int32_t)trackNo eventKind: (int)eventKind eventCode: (int)eventCode fromTick: (MDTickType)fromTick toTick: (MDTickType)toTick fromData: (float)fromData toData: (float)toData inPointSet: (IntGroupObject *)pointSet
 {
 	MDEvent *ep;
 	MDPointer *pointer = MDPointerNew(MDSequenceGetTrack([[self myMIDISequence] mySequence], trackNo));
@@ -2500,7 +2500,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	IntGroup *resultSet;
 	MDSelectionObject *retObj;
 	int psetIndex;
-	long pos;
+	int32_t pos;
 	int i;
 
 	if (pointer == NULL)
@@ -2517,7 +2517,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	if (pset != NULL) {
 		if (!IntGroupLookup(pset, pos, &psetIndex)) {
 			//  Move forward until the position is included in pset
-			long pos1;
+			int32_t pos1;
 			for (i = 0; (pos1 = IntGroupGetStartPoint(pset, i)) >= 0; i++) {
 				if (pos1 >= pos)
 					break;
@@ -2574,13 +2574,13 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	return retObj;
 }
 
-- (long)countMIDIEventsForTrack: (long)index inSelection: (MDSelectionObject *)sel
+- (int32_t)countMIDIEventsForTrack: (int32_t)index inSelection: (MDSelectionObject *)sel
 {
 	MDEvent *ep;
 	MDTrack *track = [[self myMIDISequence] getTrackAtIndex: index];
 	MDPointer *pt = MDPointerNew(track);
 	IntGroup *pset = [sel pointSet];
-	long count = 0;
+	int32_t count = 0;
 	int n = -1;
 	while ((ep = MDPointerForwardWithPointSet(pt, pset, &n)) != NULL) {
 		if (!MDIsMetaEvent(ep))
@@ -2593,7 +2593,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 - (BOOL)isSelectionEmptyInEditableTracks:(BOOL)editableOnly
 {
 	int i;
-	int ntracks = [selections count];
+	int ntracks = (int)[selections count];
 	for (i = 0; i < ntracks; i++) {
 		MDSelectionObject *selection;
 		if (editableOnly && ([self trackAttributeForTrack: i] & kMDTrackAttributeEditable) == 0)
@@ -2634,7 +2634,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 
 - (IBAction)insertBlankTime:(id)sender
 {
-	long trackNo;
+	int32_t trackNo;
 	MDTickType deltaTick;
 	MDTickType startTick, endTick;
 	NSWindowController *cont = [[NSApp mainWindow] windowController];
@@ -2654,7 +2654,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 		MDTrack *track = [[self myMIDISequence] getTrackAtIndex:trackNo];
 		MDPointer *pt;
 		id psobj;
-		long n1, n2;
+		int32_t n1, n2;
 		if (![cont isFocusTrack:trackNo])
 			continue;
 
@@ -2687,7 +2687,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 
 - (IBAction)deleteSelectedTime:(id)sender
 {
-	long trackNo;
+	int32_t trackNo;
 	MDTickType deltaTick;
 	MDTickType startTick, endTick;
 	NSWindowController *cont = [[NSApp mainWindow] windowController];
@@ -2707,7 +2707,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 		MDTrack *track = [[self myMIDISequence] getTrackAtIndex:trackNo];
 		MDPointer *pt;
 		id psobj;
-		long n1, n2;
+		int32_t n1, n2;
 		if (![cont isFocusTrack:trackNo])
 			continue;
 		
@@ -2749,7 +2749,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 
 - (void)scaleTimeFrom:(MDTickType)startTick to:(MDTickType)endTick newDuration:(MDTickType)newDuration insertTempo:(BOOL)insertTempo
 {
-	long trackNo;
+	int32_t trackNo;
 	MDTickType deltaTick;
 	MDTrack *track;
 	MDPointer *pt;
@@ -2815,7 +2815,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	}
 	
 	for (trackNo = [[self myMIDISequence] trackCount] - 1; trackNo >= 0; trackNo--) {
-		long n1, n2;
+		int32_t n1, n2;
 		MDTickType oldDuration;
 
 		if (![cont isFocusTrack:trackNo] && (!insertTempo || trackNo != 0))
@@ -2895,7 +2895,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	int result;
 	QuantizePanelController *cont = [[QuantizePanelController alloc] init];
 	[cont setTimebase:[self timebase]];
-	result = [NSApp runModalForWindow:[cont window]];
+	result = (int)[NSApp runModalForWindow:[cont window]];
 	[cont close];
 	[cont release];
 	if (result == NSRunStoppedResponse) {
@@ -2912,11 +2912,11 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 		swing = (obj ? [obj floatValue] : 0.5);
 		for (trackNo = [[self myMIDISequence] trackCount] - 1; trackNo >= 1; trackNo--) {
 			MDTickType *tptr;
-			long n1, n2;
+			int32_t n1, n2;
 			int index;
 			MDTrack *track;
 			MDTickType baseTick, nextBaseTick;
-			long baseMeasure;
+			int32_t baseMeasure;
 			IntGroupObject *psobj;
 			IntGroup *pset;
 			MDPointer *pt;
@@ -2938,7 +2938,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 				MDTickType etick = MDGetTick(ep);
 				MDTickType targetTick;
 				if (baseMeasure < 0) {
-					long beat, tick;
+					int32_t beat, tick;
 					MDCalibratorTickToMeasure(calib, etick, &baseMeasure, &beat, &tick);
 					baseTick = MDCalibratorMeasureToTick(calib, baseMeasure, 0, 0);
 					nextBaseTick = MDCalibratorMeasureToTick(calib, ++baseMeasure, 0, 0);
@@ -3184,7 +3184,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 }
 
 static int
-isConductorEvent(const MDEvent *ep, long position, void *inUserData)
+isConductorEvent(const MDEvent *ep, int32_t position, void *inUserData)
 {
 	if (ep == NULL)
 		return 0;
@@ -3228,7 +3228,7 @@ isConductorEvent(const MDEvent *ep, long position, void *inUserData)
 	
 	/*  Check the first track in the list  */
 	if (trackList[0] == 0) {
-		long n;
+		int32_t n;
 		/*  The first target track is the conductor track; MIDI events must not go into this track  */
 		track = MDSequenceGetTrack(seq, 0);
 		n = MDTrackGetNumberOfEvents(track);
@@ -3302,7 +3302,7 @@ isConductorEvent(const MDEvent *ep, long position, void *inUserData)
 {
 	MyMIDISequence *seq;
     MDTrackObject *newTrack;
-    long recIndex;
+    int32_t recIndex;
     MDTickType startTick, endTick, currentTick;
     MDTimeType currentTime;
     NSDictionary *info;
@@ -3401,7 +3401,7 @@ isConductorEvent(const MDEvent *ep, long position, void *inUserData)
             [manager removeItemAtURL:[NSURL fileURLWithPath:fullname] error:NULL];
 		} else {
 			//  Ask whether to overwrite the existing file
-			int retval = NSRunCriticalAlertPanel(@"", [NSString stringWithFormat: @"The file %@ already exists. Do you want to overwrite it?", filename], @"Cancel", @"Overwrite", @"Save with modified name", nil);
+			int retval = (int)NSRunCriticalAlertPanel(@"", [NSString stringWithFormat: @"The file %@ already exists. Do you want to overwrite it?", filename], @"Cancel", @"Overwrite", @"Save with modified name", nil);
 			switch (retval) {
 				case NSAlertDefaultReturn: return NO;
 				case NSAlertAlternateReturn: {

@@ -106,8 +106,8 @@ static short *sObjectIndexToCCMeta;
 - (void)ccMetaPopUpMenuSelected: (id)sender
 {
 	//  Set the text and cc/meta number for the selected row
-	int idx = [ccMetaTableView selectedRow];
-	int tag = [sender tag];
+	int idx = (int)[ccMetaTableView selectedRow];
+	int tag = (int)[sender tag];
 	id obj;
 	if (idx < 0)
 		return;

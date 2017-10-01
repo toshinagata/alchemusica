@@ -21,8 +21,8 @@
     /*  Cache the positions of notes whose note-offs are after cacheTick  */
     MDTickType cacheTick;
     NSMutableArray *cacheArray; /*  An array of IntGroupObject; the number of objects is the number of visible tracks, plus 1 for temporary recording track if present  */
-	long mouseDownTrack;  /*  mouseDownTrack/mouseDownPos remembers the position of the note on which the mouse down event was detected  */
-	long mouseDownPos;
+	int32_t mouseDownTrack;  /*  mouseDownTrack/mouseDownPos remembers the position of the note on which the mouse down event was detected  */
+	int32_t mouseDownPos;
     int draggingMode;
     NSPoint draggingStartPoint;
     NSPoint draggingPoint;
@@ -34,7 +34,7 @@
 	/*  Note on during dragging etc.  */
 	short playingNote;
 	short playingVelocity;
-	long playingTrack;
+	int32_t playingTrack;
 }
 
 @end

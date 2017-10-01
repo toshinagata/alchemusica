@@ -77,11 +77,11 @@ void			MDCalibratorSetNextInList(MDCalibrator *inCalib, MDCalibrator *inNextCali
 void			MDCalibratorJumpToTick(MDCalibrator *inCalib, MDTickType inTick);
 
 /*  指定したトラックの inPosition の位置に移動する。指定トラック以外の情報については、そのイベントの tick 位置に移動する  */
-void            MDCalibratorJumpToPositionInTrack(MDCalibrator *inCalib, long inPosition, MDTrack *inTrack);
+void            MDCalibratorJumpToPositionInTrack(MDCalibrator *inCalib, int32_t inPosition, MDTrack *inTrack);
 
 /*  小節・拍・カウント表記 <-> tick 変換  */
-MDTickType		MDCalibratorMeasureToTick(MDCalibrator *inCalib, long inMeasure, long inBeat, long inTick);
-void			MDCalibratorTickToMeasure(MDCalibrator *inCalib, MDTickType inTick, long *outMeasure, long *outBeat, long *outTick);
+MDTickType		MDCalibratorMeasureToTick(MDCalibrator *inCalib, int32_t inMeasure, int32_t inBeat, int32_t inTick);
+void			MDCalibratorTickToMeasure(MDCalibrator *inCalib, MDTickType inTick, int32_t *outMeasure, int32_t *outBeat, int32_t *outTick);
 
 float			MDCalibratorGetTempo(MDCalibrator *inCalib);
 MDTickType		MDCalibratorTimeToTick(MDCalibrator *inCalib, MDTimeType inTime);
@@ -89,7 +89,7 @@ MDTimeType		MDCalibratorTickToTime(MDCalibrator *inCalib, MDTickType inTick);
 
 MDEvent *		MDCalibratorGetEvent(MDCalibrator *inCalib, MDTrack *inTrack, MDEventKind inKind, short inCode);
 MDEvent *		MDCalibratorGetNextEvent(MDCalibrator *inCalib, MDTrack *inTrack, MDEventKind inKind, short inCode);
-long			MDCalibratorGetEventPosition(MDCalibrator *inCalib, MDTrack *inTrack, MDEventKind inKind, short inCode);
+int32_t			MDCalibratorGetEventPosition(MDCalibrator *inCalib, MDTrack *inTrack, MDEventKind inKind, short inCode);
 MDPointer *		MDCalibratorCopyPointer(MDCalibrator *inCalib, MDTrack *inTrack, MDEventKind inKind, short inCode);
 
 #ifdef __cplusplus

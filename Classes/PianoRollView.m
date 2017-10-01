@@ -27,9 +27,9 @@
 
 @implementation PianoRollView
 
-static float sLineDash1[] = {6.0, 2.0};
-static float sLineDash2[] = {2.0, 6.0};
-static float sDashWidth = 8.0;
+static CGFloat sLineDash1[] = {6.0, 2.0};
+static CGFloat sLineDash2[] = {2.0, 6.0};
+static CGFloat sDashWidth = 8.0;
 
 - (id)initWithFrame: (NSRect)rect
 {
@@ -202,7 +202,7 @@ static float sDashWidth = 8.0;
 		}
 	#if 1
 		pset = MDTrackSearchEventsWithDurationCrossingTick(track, tick);
-//		fprintf(stderr, "%s[%d]: track %p tick %ld, ", __FILE__, __LINE__, track, (long)tick); IntGroupDump(pset);
+//		fprintf(stderr, "%s[%d]: track %p tick %ld, ", __FILE__, __LINE__, track, (int32_t)tick); IntGroupDump(pset);
 	#else
 		pset = IntGroupNew();
 		if (pset != NULL) {
@@ -253,7 +253,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	MDTickType startTick, endTick;
 	int startNote, endNote;
 	MDTickType duration;
-	static float sDash[] = { 2, 2 };
+	static CGFloat sDash[] = { 2, 2 };
 	BOOL isDraggingImage = NO;
 	
 	if (draggingMode > 0 && draggingMode < 3 && draggingImage != nil)
@@ -268,7 +268,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 		[selectedPath setLineDash:sDash count:2 phase:0.0];
 	startTick = (MDTickType)(aRect.origin.x / ppt);
 	endTick = (MDTickType)((aRect.origin.x + aRect.size.width) / ppt);
-//	NSLog(@"drawNotesInRect: startTick %ld endTick %ld", (long)startTick, (long)endTick);
+//	NSLog(@"drawNotesInRect: startTick %ld endTick %ld", (int32_t)startTick, (int32_t)endTick);
 	startNote = floor(aRect.origin.y / ys);
 	endNote = ceil((aRect.origin.y + aRect.size.height) / ys);
 	for (i = num; i >= 0; i--) {
@@ -309,7 +309,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 			if (pset != NULL) {
 				while ((ep = MDPointerForwardWithPointSet(pt, pset, &n)) != NULL && MDGetKind(ep) != kMDEventNote)
 					;
-			//	fprintf(stderr, "%s[%d]: ep=%p pos=%ld n=%ld\n", __FILE__, __LINE__, ep, (long)MDPointerGetPosition(pt), (long)n);
+			//	fprintf(stderr, "%s[%d]: ep=%p pos=%ld n=%ld\n", __FILE__, __LINE__, ep, (int32_t)MDPointerGetPosition(pt), (int32_t)n);
 				if (ep == NULL) {
 					pset = NULL;
 					MDPointerJumpToTick(pt, originTick);
@@ -457,7 +457,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 
 /*  Returns 0-3; 0: no note, 1: left 1/3 of a note, 2: middle 1/3 of a note,
     3: right 1/3 of a note  */
-- (int)findNoteUnderPoint: (NSPoint)aPoint track: (long *)outTrack position: (long *)outPosition mdEvent: (MDEvent **)outEvent
+- (int)findNoteUnderPoint: (NSPoint)aPoint track: (int32_t *)outTrack position: (int32_t *)outPosition mdEvent: (MDEvent **)outEvent
 {
 	int num, i;
 	NSRect rect = [self visibleRect];
@@ -645,18 +645,18 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	int theNote;
 	char buf[8];
 	float ys = [self yScale];
-	long measure, beat, tick;
+	int32_t measure, beat, tick;
 	theTick = [dataSource quantizedTickFromPixel:pt.x];
 	[dataSource convertTick:theTick toMeasure:&measure beat:&beat andTick:&tick];
 	theNote = floor(pt.y / ys);
 	MDEventNoteNumberToNoteName(theNote, buf);
-	[dataSource setInfoText:[NSString stringWithFormat:@"%s, %ld.%ld.%ld", buf, measure, beat, tick]];
+	[dataSource setInfoText:[NSString stringWithFormat:@"%s, %d.%d.%d", buf, measure, beat, tick]];
 }
 
 - (void)doMouseMoved: (NSEvent *)theEvent
 {
-	long track;
-	long pos;
+	int32_t track;
+	int32_t pos;
 	MDEvent *ep;
 	int n;
 	NSPoint pt;
@@ -712,7 +712,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 - (void)doMouseDown: (NSEvent *)theEvent
 {
 //	int track;
-//	long pos;
+//	int32_t pos;
 	MDEvent *ep;
 //	NSSize size;
 //	BOOL shiftDown;

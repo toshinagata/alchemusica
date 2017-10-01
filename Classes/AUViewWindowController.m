@@ -18,10 +18,14 @@
 
 #import "AUViewWindowController.h"
 
+#if USE_CARBON
 #import <Carbon/Carbon.h>
+#endif
+
 #import <CoreAudioKit/CoreAudioKit.h>
 #import <AudioUnit/AUCocoaUIView.h>
 
+#if USE_CARBON
 // Carbon event handler.
 static OSStatus
 sWindowEventHandler(EventHandlerCallRef myHandler, EventRef theEvent, void* userData)
@@ -47,6 +51,7 @@ sWindowEventHandler(EventHandlerCallRef myHandler, EventRef theEvent, void* user
 	cont->isProcessingCarbonEventHandler = NO;
 	return ret;
 }
+#endif
 
 @implementation AUViewWindowController
 
@@ -59,7 +64,7 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 	if (sAUViewWindowControllers == nil) {
 		sAUViewWindowControllers = [[NSMutableArray alloc] init];
 	}
-	n = [sAUViewWindowControllers count];
+	n = (int)[sAUViewWindowControllers count];
 	for (i = 0; i < n; i++) {
 		cont = [sAUViewWindowControllers objectAtIndex: i];
 		if ([cont audioUnit] == unit) {
@@ -88,10 +93,12 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 	return NO;
 }
 
+#if USE_CARBON
 - (WindowRef)carbonWindowRef
 {
 	return carbonWindowRef;
 }
+#endif
 
 - (AudioUnit)audioUnit
 {
@@ -110,6 +117,7 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 }
 */
 
+#if USE_CARBON
 - (void)findUIViewComponentDescription:(BOOL)forceGeneric
 {
 	OSStatus err;
@@ -141,6 +149,7 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 	
 	free(cds);
 }
+#endif
 
 + (BOOL)pluginClassIsValid:(Class)pluginClass 
 {
@@ -199,6 +208,7 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 	return theView;
 }
 
+#if USE_CARBON
 -(NSWindow *)createCarbonWindow
 {
 	OSStatus res;
@@ -267,6 +277,7 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 	
 	return [[[NSWindow alloc] initWithWindowRef: carbonWindowRef] autorelease];
 }
+#endif
 
 - (NSWindow *)createCocoaWindow
 {
@@ -294,17 +305,12 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 {
 	[[self window] orderOut: self];
 	[super close];
-/*	if (cocoaWindow) {
-		[super close];
-		cocoaWindow = nil;
-	}
-	else */
+#if USE_CARBON
 	if (carbonWindowRef) {
-	//	[carbonWindow release];
-	//	carbonWindow = nil;
 		DisposeWindow(carbonWindowRef);
 		carbonWindowRef = 0;
 	}
+#endif
 	[self editWindowClosed];
 	[sAUViewWindowControllers removeObject: self];
 }
@@ -320,15 +326,21 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 	audioUnit = unit;
 	_delegate = delegate;
 	defaultViewSize = NSMakeSize(400, 300);
-	
+
+#if USE_CARBON
 	// We need to chack this in showWindow:
 	carbonWindowRef = 0;
-	
+#endif
+
     if (cocoaView) {
         aWindow = [self createCocoaWindow];
     } else {
+#if USE_CARBON
         [self findUIViewComponentDescription: NO];
 		aWindow = [self createCarbonWindow];
+#else
+        aWindow = nil;
+#endif
 	}
     if (aWindow == nil) {
         [self release];
@@ -345,13 +357,12 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 - (void)dealloc
 {
 	[self setWindow:nil];
+#if USE_CARBON
 	if (auCarbonView)
 		CloseComponent(auCarbonView);
-/*	if (carbonWindow)
-		[carbonWindow release]; */
 	if (carbonWindowRef)
 		DisposeWindow(carbonWindowRef);
-	
+#endif
 	[super dealloc];
 }
 

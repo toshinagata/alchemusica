@@ -44,7 +44,7 @@ typedef struct ListWindowFilterRecord {
     IBOutlet ContextMenuTextFieldCell *dataDataCell;
     
 	MDTrack *myTrack;
-	long myTrackNumber;
+	int32_t myTrackNumber;
 
     /*  >0 なら selectionDidChange Notification に反応しない  */
     int selectionDidChangeNotificationLevel;
@@ -52,13 +52,13 @@ typedef struct ListWindowFilterRecord {
 	/*  myPointer が指す位置が myRow 行目になる。表示されないイベントがあるため、
 	    myRow は必ずしも MDPointerGetPosition(myPointer) とは一致しない。 */
 	MDPointer *myPointer;
-	long	myRow;
+	int32_t	myRow;
 
 	/*  表示するイベントの数をキャッシュしておく  */
-	long	myCount;
+	int32_t	myCount;
 	
 	/*  Tick 表示のカラムの数  */
-	long	myTickColumnCount;
+	int32_t	myTickColumnCount;
 	
 	/*  Tick 表示のポップアップメニューが押されたカラム  */
 	NSTableColumn *myClickedColumn;
@@ -69,9 +69,9 @@ typedef struct ListWindowFilterRecord {
 	
 	/*  編集中のカラム・行位置と、そのセルの中での番号  */
 	/*  編集中のセルがない場合は myEditRow が -1 になる  */
-	long		myEditRow;
-	long		myEditColumn;
-	long		myEditIndex;
+	int32_t		myEditRow;
+	int32_t		myEditColumn;
+	int32_t		myEditIndex;
 	
 	/*  Is the last row (end-of-track) selected?  */
 	/*  (This information is not stored in MyMIDISequence->seletion, so it 
@@ -82,7 +82,7 @@ typedef struct ListWindowFilterRecord {
 	MDEvent     myDefaultEvent;
 
 	/*  The row containing the last event before the playing tick  */
-	long		myPlayingRow;
+	int32_t		myPlayingRow;
 
     /*  最終行（end-of-track）は通常選択を許さないが、end-of-track の時刻を編集する時だけは
         選択を一時的に許可する  */
@@ -100,9 +100,9 @@ typedef struct ListWindowFilterRecord {
 //- (MDTrack *)MIDITrack;
 
 - (MDEvent *)eventPointerForTableRow:(int)rowIndex;
-- (long)eventPositionForTableRow:(int)rowIndex;
+- (int32_t)eventPositionForTableRow:(int)rowIndex;
 - (MDTickType)eventTickForTableRow: (int)rowIndex;
-- (int)rowForEventPosition: (long)position nearestRow: (int *)nearestRow;
+- (int)rowForEventPosition: (int32_t)position nearestRow: (int *)nearestRow;
 - (void)updateInfoText;
 - (void)updateEditingRangeText;
 
@@ -124,7 +124,7 @@ typedef struct ListWindowFilterRecord {
 - (IBAction)insertNewEvent: (id)sender;
 - (IBAction)editSelectedEvent: (id)sender;
 - (void)startEditAtColumn: (int)column row: (int)row;
-- (void)startEditAtColumn: (int)column creatingEventWithTick: (MDTickType)tick atPosition: (long)position;
+- (void)startEditAtColumn: (int)column creatingEventWithTick: (MDTickType)tick atPosition: (int32_t)position;
 
 - (IBAction)editingRangeTextModified: (id)sender;
 

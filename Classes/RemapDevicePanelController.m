@@ -55,7 +55,7 @@
         [tableColumn setDataCell:cell];
     }
 	n1 = MDPlayerGetNumberOfDestinations();
-    n2 = [array count];
+    n2 = (int)[array count];
 	for (i = 0; i < n2; i++) {
         aname = [array objectAtIndex:i];
         if (i > n1) {
@@ -65,7 +65,7 @@
         }
 		[cell addItemWithObjectValue:aname];
     }
-    n1 = [currentValues count];
+    n1 = (int)[currentValues count];
     for (i = 0; i < n1; i++) {
         aname = [currentValues objectAtIndex:i];
         if ([aname isKindOfClass:[NSAttributedString class]])
@@ -112,14 +112,14 @@
 			[deviceNumbers addObject: [NSNumber numberWithInt: -1]];
 			continue;
 		}
-		for (j = [initialValues count] - 1; j >= 0; j--) {
+		for (j = (int)[initialValues count] - 1; j >= 0; j--) {
 			if ([name isEqualToString: [initialValues objectAtIndex: j]])
 				break;
 		}
 		if (j == -1) {
 			/* Not found: register this */
 			[initialValues addObject: name];
-			j = [initialValues count] - 1;
+			j = (int)[initialValues count] - 1;
 		}
 		[deviceNumbers addObject: [NSNumber numberWithInt: j]];
     }
@@ -160,7 +160,7 @@
             id str = [currentValues objectAtIndex: j];
             if ([str isKindOfClass:[NSAttributedString class]])
                 str = [str string];
-        //    long deviceNumber = MDPlayerGetDestinationNumberFromName([str cString]);
+        //    int32_t deviceNumber = MDPlayerGetDestinationNumberFromName([str cString]);
 		//	[myDocument changeDeviceNumber: deviceNumber forTrack: [obj intValue]];
             [myDocument changeDevice: str forTrack: [obj intValue]];
         }
@@ -176,14 +176,14 @@
 //	[self release];
 }
 
-- (int)numberOfRowsInTableView:(NSTableView *)aTableView
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
     return [initialValues count];
 }
 
 - (id)tableView:(NSTableView *)aTableView
 objectValueForTableColumn:(NSTableColumn *)aTableColumn
-row:(int)rowIndex
+row:(NSInteger)rowIndex
 {
 	id identifier = [aTableColumn identifier];
 	if ([@"current" isEqualToString: identifier])
@@ -196,11 +196,11 @@ row:(int)rowIndex
 - (void)tableView:(NSTableView *)aTableView
 setObjectValue:(id)anObject
 forTableColumn:(NSTableColumn *)aTableColumn
-row:(int)rowIndex
+row:(NSInteger)rowIndex
 {
 	if ([@"new" isEqualToString: [aTableColumn identifier]]) {
         NSComboBoxCell *cell = [aTableColumn dataCell];
-        int i, n = [cell numberOfItems];
+        int i, n = (int)[cell numberOfItems];
         if ([anObject isKindOfClass:[NSAttributedString class]])
             anObject = [anObject string];
         for (i = 0; i < n; i++) {

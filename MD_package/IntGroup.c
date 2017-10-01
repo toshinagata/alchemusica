@@ -893,7 +893,7 @@ IntGroupInspect(const IntGroup *pset)
 		strcat(s, "]");
 		return s;
 	}
-	len = strlen(s);
+	len = (int)strlen(s);
 	for (i = 0; i < pset->num; i++) {
 		const char *sep = (i == pset->num - 1 ? "]" : ", ");
 		sp = pset->entries[i * 2];
@@ -902,7 +902,7 @@ IntGroupInspect(const IntGroup *pset)
 			snprintf(buf, sizeof buf, "%d..%d%s", sp, ep - 1, sep);
 		else
 			snprintf(buf, sizeof buf, "%d%s", sp, sep);
-		len2 = strlen(buf);
+		len2 = (int)strlen(buf);
 		if (len + len2 >= size - 1) {
 			size += 64;
 			s = (char *)realloc(s, size);

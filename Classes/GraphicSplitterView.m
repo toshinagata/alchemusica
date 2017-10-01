@@ -64,7 +64,7 @@ searchMenuItemWithTag(NSMenu *menu, int tag)
 {
 	int i;
 	NSMenuItem *item;
-	for (i = [menu numberOfItems] - 1; i >= 0; i--) {
+	for (i = (int)[menu numberOfItems] - 1; i >= 0; i--) {
 		item = (NSMenuItem *)[menu itemAtIndex: i];
 		if ([item tag] == tag)
 			return item;
@@ -191,7 +191,7 @@ searchMenuItemWithTag(NSMenu *menu, int tag)
 {
 }
 
-- (void)setKindAndCode: (long)kindAndCode
+- (void)setKindAndCode: (int32_t)kindAndCode
 {
 	int kind, code;
 	NSMenuItem *item;

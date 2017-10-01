@@ -183,7 +183,7 @@ static NSFont *sRulerLabelFont;
 		[cv setVisibleRangeMin:0.0 max:1.0];
 	} else if (dragStartPoint.x != -10000) {
 		float y1, y2, miny, maxy;
-		long tick;  //  Dummy
+		int32_t tick;  //  Dummy
 		[self invalidateLoupeRect];
 		[cv convertFromPoint:dragStartPoint toY:&y1 andTick:&tick];
 		[cv convertFromPoint:[cv convertPoint:[theEvent locationInWindow] fromView:nil] toY:&y2 andTick:&tick];

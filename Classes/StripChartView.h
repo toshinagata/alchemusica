@@ -39,8 +39,8 @@ enum {
     NSRect limitRect;
 }
 
-- (void)setKindAndCode: (long)kindAndCode;
-- (long)kindAndCode;
+- (void)setKindAndCode: (int32_t)kindAndCode;
+- (int32_t)kindAndCode;
 
 //  Dragging support (accompanying PianoRollView)
 - (void)startExternalDraggingAtPoint:(NSPoint)aPoint mode:(int)aMode;

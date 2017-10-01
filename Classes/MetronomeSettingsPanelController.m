@@ -167,7 +167,7 @@ static id sharedMetronomeSettingsPanelController;
 		str = [item title];
 		MyAppCallback_setObjectGlobalSettings(MetronomeDeviceKey, str);
 	} else if (sender == metronomeChannelPopUp) {
-		MyAppCallback_setObjectGlobalSettings(MetronomeChannelKey, [NSNumber numberWithInt:[sender indexOfSelectedItem]]);
+		MyAppCallback_setObjectGlobalSettings(MetronomeChannelKey, [NSNumber numberWithInt:(int)[sender indexOfSelectedItem]]);
 	}
 	MyAppCallback_saveGlobalSettings();
 	[self updateDisplay];

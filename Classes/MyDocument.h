@@ -98,71 +98,71 @@ typedef enum MyDocumentModifyMode {
 
 - (NSArray *)getDestinationNames;
 
-- (void)enqueueTrackModifiedNotification: (long)trackNo;
+- (void)enqueueTrackModifiedNotification: (int32_t)trackNo;
 - (void)postTrackModifiedNotification: (NSNotification *)notification;
 - (void)postPlayPositionNotification: (MDTickType)tick;
-//- (void)postSelectionDidChangeNotification: (long)trackNo selectionChange: (IntGroupObject *)set sender: (id)sender;
+//- (void)postSelectionDidChangeNotification: (int32_t)trackNo selectionChange: (IntGroupObject *)set sender: (id)sender;
 //- (void)postStopPlayingNotification;
 
 //  Action methods for undo/redo support
-- (BOOL)insertTrack: (MDTrackObject *)trackObj atIndex: (long)trackNo;
-- (BOOL)deleteTrackAt: (long)trackNo;
+- (BOOL)insertTrack: (MDTrackObject *)trackObj atIndex: (int32_t)trackNo;
+- (BOOL)deleteTrackAt: (int32_t)trackNo;
 
-- (BOOL)setRecordFlagOnTrack: (long)trackNo flag: (int)flag;
-- (BOOL)setMuteFlagOnTrack: (long)trackNo flag: (int)flag;
-- (BOOL)setSoloFlagOnTrack: (long)trackNo flag: (int)flag;
+- (BOOL)setRecordFlagOnTrack: (int32_t)trackNo flag: (int)flag;
+- (BOOL)setMuteFlagOnTrack: (int32_t)trackNo flag: (int)flag;
+- (BOOL)setSoloFlagOnTrack: (int32_t)trackNo flag: (int)flag;
 
-- (BOOL)insertEvent: (MDEventObject *)eventObj toTrack: (long)trackNo;
-- (BOOL)deleteEventAt: (long)position fromTrack: (long)trackNo;
-- (BOOL)replaceEvent: (MDEventObject *)eventObj inTrack: (long)trackNo;
+- (BOOL)insertEvent: (MDEventObject *)eventObj toTrack: (int32_t)trackNo;
+- (BOOL)deleteEventAt: (int32_t)position fromTrack: (int32_t)trackNo;
+- (BOOL)replaceEvent: (MDEventObject *)eventObj inTrack: (int32_t)trackNo;
 
-- (BOOL)insertMultipleEvents: (MDTrackObject *)trackObj at: (IntGroupObject *)pointSet toTrack: (long)trackNo selectInsertedEvents: (BOOL)flag insertedPositions: (IntGroup **)outPtr;
-- (BOOL)deleteMultipleEventsAt: (IntGroupObject *)pointSet fromTrack: (long)trackNo deletedEvents: (MDTrack **)outPtr;
-- (BOOL)duplicateMultipleEventsAt: (IntGroupObject *)pointSet ofTrack: (long)trackNo selectInsertedEvents: (BOOL)flag;
+- (BOOL)insertMultipleEvents: (MDTrackObject *)trackObj at: (IntGroupObject *)pointSet toTrack: (int32_t)trackNo selectInsertedEvents: (BOOL)flag insertedPositions: (IntGroup **)outPtr;
+- (BOOL)deleteMultipleEventsAt: (IntGroupObject *)pointSet fromTrack: (int32_t)trackNo deletedEvents: (MDTrack **)outPtr;
+- (BOOL)duplicateMultipleEventsAt: (IntGroupObject *)pointSet ofTrack: (int32_t)trackNo selectInsertedEvents: (BOOL)flag;
 
 //  Modify action methods; theData is one of the following, NSNumber, NSData (an array of MDTickType, short or float) or NSArray.
-- (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions;
+- (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (int32_t)trackNo mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions;
 + (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (id)doc mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions;
-- (BOOL)modifyCodes: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode;
+- (BOOL)modifyCodes: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (int32_t)trackNo mode: (MyDocumentModifyMode)mode;
 + (BOOL)modifyCodes: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (MyDocument *)doc mode: (MyDocumentModifyMode)mode;
-- (BOOL)modifyDurations: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode;
+- (BOOL)modifyDurations: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (int32_t)trackNo mode: (MyDocumentModifyMode)mode;
 + (BOOL)modifyDurations: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (MyDocument *)doc mode: (MyDocumentModifyMode)mode;
-- (BOOL)modifyData: (id)theData forEventKind: (unsigned char)eventKind ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (long)trackNo mode: (MyDocumentModifyMode)mode;
+- (BOOL)modifyData: (id)theData forEventKind: (unsigned char)eventKind ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (int32_t)trackNo mode: (MyDocumentModifyMode)mode;
 + (BOOL)modifyData: (id)theData forEventKind: (unsigned char)eventKind ofMultipleEventsAt: (IntGroupObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (MyDocument *)doc mode: (MyDocumentModifyMode)mode;
 
-- (const MDEvent *)eventAtPosition: (long)position inTrack: (long)trackNo;
+- (const MDEvent *)eventAtPosition: (int32_t)position inTrack: (int32_t)trackNo;
 
-- (long)changeTick: (long)tick atPosition: (long)position inTrack: (long)trackNo originalPosition: (long)pos1;
-- (BOOL)changeChannel: (int)channel atPosition: (long)position inTrack: (long)trackNo;
-- (BOOL)changeDuration: (long)duration atPosition: (long)position inTrack: (long)trackNo;
-- (BOOL)changeTrackDuration: (long)duration ofTrack: (long)trackNo;
-- (BOOL)changeValue: (MDEventFieldDataWhole)wholeValue ofType: (int)code atPosition: (long)position inTrack: (long)trackNo;
-- (BOOL)changeMessage: (NSData *)data atPosition: (long)position inTrack: (long)trackNo;
+- (int32_t)changeTick: (int32_t)tick atPosition: (int32_t)position inTrack: (int32_t)trackNo originalPosition: (int32_t)pos1;
+- (BOOL)changeChannel: (int)channel atPosition: (int32_t)position inTrack: (int32_t)trackNo;
+- (BOOL)changeDuration: (int32_t)duration atPosition: (int32_t)position inTrack: (int32_t)trackNo;
+- (BOOL)changeTrackDuration: (int32_t)duration ofTrack: (int32_t)trackNo;
+- (BOOL)changeValue: (MDEventFieldDataWhole)wholeValue ofType: (int)code atPosition: (int32_t)position inTrack: (int32_t)trackNo;
+- (BOOL)changeMessage: (NSData *)data atPosition: (int32_t)position inTrack: (int32_t)trackNo;
 
-- (BOOL)changeDevice: (NSString *)deviceName forTrack: (long)trackNo;
-//- (BOOL)changeDeviceNumber: (long)deviceNumber forTrack: (long)trackNo;
-- (BOOL)changeTrackChannel: (int)channel forTrack: (long)trackNo;
-- (BOOL)changeTrackName: (NSString *)trackName forTrack: (long)trackNo;
+- (BOOL)changeDevice: (NSString *)deviceName forTrack: (int32_t)trackNo;
+//- (BOOL)changeDeviceNumber: (int32_t)deviceNumber forTrack: (int32_t)trackNo;
+- (BOOL)changeTrackChannel: (int)channel forTrack: (int32_t)trackNo;
+- (BOOL)changeTrackName: (NSString *)trackName forTrack: (int32_t)trackNo;
 
-- (BOOL)setSelection: (MDSelectionObject *)set inTrack: (long)trackNo sender: (id)sender;
-- (BOOL)toggleSelection: (MDSelectionObject *)set inTrack: (long)trackNo sender: (id)sender; 
-- (BOOL)selectEventAtPosition: (long)position inTrack: (long)trackNo sender: (id)sender;
-- (BOOL)unselectEventAtPosition: (long)position inTrack: (long)trackNo sender: (id)sender;
-- (BOOL)selectAllEventsInTrack: (long)trackNo sender: (id)sender;
-- (BOOL)unselectAllEventsInTrack: (long)trackNo sender: (id)sender;
+- (BOOL)setSelection: (MDSelectionObject *)set inTrack: (int32_t)trackNo sender: (id)sender;
+- (BOOL)toggleSelection: (MDSelectionObject *)set inTrack: (int32_t)trackNo sender: (id)sender; 
+- (BOOL)selectEventAtPosition: (int32_t)position inTrack: (int32_t)trackNo sender: (id)sender;
+- (BOOL)unselectEventAtPosition: (int32_t)position inTrack: (int32_t)trackNo sender: (id)sender;
+- (BOOL)selectAllEventsInTrack: (int32_t)trackNo sender: (id)sender;
+- (BOOL)unselectAllEventsInTrack: (int32_t)trackNo sender: (id)sender;
 - (BOOL)unselectAllEventsInAllTracks: (id)sender;
-- (BOOL)addSelection: (IntGroupObject *)set inTrack: (long)trackNo sender: (id)sender;
-- (BOOL)isSelectedAtPosition: (long)position inTrack: (long)trackNo;
+- (BOOL)addSelection: (IntGroupObject *)set inTrack: (int32_t)trackNo sender: (id)sender;
+- (BOOL)isSelectedAtPosition: (int32_t)position inTrack: (int32_t)trackNo;
 
 //- (void)setNeedsUpdateEditingRange: (BOOL)flag;
 - (void)getEditingRangeStart: (MDTickType *)startTick end: (MDTickType *)endTick;
 - (void)setEditingRangeStart: (MDTickType)startTick end: (MDTickType)endTick;
 - (void)getSelectionStartTick: (MDTickType *)startTickPtr endTick: (MDTickType *)endTickPtr editableTracksOnly: (BOOL)flag;
 
-- (MDSelectionObject *)selectionOfTrack: (long)trackNo;
+- (MDSelectionObject *)selectionOfTrack: (int32_t)trackNo;
 
-- (MDSelectionObject *)eventSetInTrack: (long)trackNo eventKind: (int)eventKind eventCode: (int)eventCode fromTick: (MDTickType)fromTick toTick: (MDTickType)toTick fromData: (float)fromData toData: (float)toData inPointSet: (IntGroupObject *)pointSet;
-- (long)countMIDIEventsForTrack: (long)index inSelection: (MDSelectionObject *)sel;
+- (MDSelectionObject *)eventSetInTrack: (int32_t)trackNo eventKind: (int)eventKind eventCode: (int)eventCode fromTick: (MDTickType)fromTick toTick: (MDTickType)toTick fromData: (float)fromData toData: (float)toData inPointSet: (IntGroupObject *)pointSet;
+- (int32_t)countMIDIEventsForTrack: (int32_t)index inSelection: (MDSelectionObject *)sel;
 - (BOOL)isSelectionEmptyInEditableTracks:(BOOL)editableOnly;
 
 - (float)timebase;
@@ -176,10 +176,10 @@ typedef enum MyDocumentModifyMode {
 //  Track attributes
 - (NSData *)getTrackAttributes;
 - (void)setTrackAttributes: (NSData *)data;
-- (MDTrackAttribute)trackAttributeForTrack: (long)trackNo;
-- (void)setTrackAttribute: (MDTrackAttribute)attr forTrack: (long)trackNo;
-- (BOOL)isTrackSelected: (long)trackNo;
-- (void)setIsTrackSelected: (long)trackNo flag: (BOOL)flag;
+- (MDTrackAttribute)trackAttributeForTrack: (int32_t)trackNo;
+- (void)setTrackAttribute: (MDTrackAttribute)attr forTrack: (int32_t)trackNo;
+- (BOOL)isTrackSelected: (int32_t)trackNo;
+- (void)setIsTrackSelected: (int32_t)trackNo flag: (BOOL)flag;
 
 //  Pasteboard supports
 - (BOOL)copyWithSelections: (MDSelectionObject **)selArray rangeStart: (MDTickType)startTick rangeEnd: (MDTickType)endTick;

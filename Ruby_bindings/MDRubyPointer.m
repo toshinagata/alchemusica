@@ -667,10 +667,10 @@ MRPointer_GetDataSub(const MDEvent *ep)
 		case kMDEventMetaMessage:
 		case kMDEventSysex:
 		case kMDEventSysexCont: {
-			long messageLength;
+			int32_t messageLength;
 			const char *cp = (const char *)MDGetMessageConstPtr(ep, &messageLength);
 			if (kind == kMDEventSysex || kind == kMDEventSysexCont) {
-				long i;
+				int32_t i;
 				vals[0] = rb_ary_new2(messageLength);
 				for (i = 0; i < messageLength; i++) {
 					rb_ary_store(vals[0], i, INT2FIX((unsigned char)cp[i]));
@@ -734,7 +734,7 @@ s_MRPointer_Data(VALUE self)
 }
 
 void
-MRPointer_SetDataSub(VALUE val, MDEvent *ep, MyDocument *doc, int trackNo, long position)
+MRPointer_SetDataSub(VALUE val, MDEvent *ep, MyDocument *doc, int trackNo, int32_t position)
 {
 	int kind, data, mode;
 	MDEventFieldData ed;
@@ -744,11 +744,11 @@ MRPointer_SetDataSub(VALUE val, MDEvent *ep, MyDocument *doc, int trackNo, long 
 		case kMDEventMetaMessage:
 		case kMDEventSysex:
 		case kMDEventSysexCont: {
-			long messageLength;
+			int32_t messageLength;
 			const unsigned char *cp;
 			StringValue(val);
 			cp = (const unsigned char *)RSTRING_PTR(val);
-			messageLength = RSTRING_LEN(val);
+			messageLength = (int)RSTRING_LEN(val);
 			if (doc != nil) {
 				[doc changeMessage: [NSData dataWithBytes: cp length: messageLength] atPosition: position inTrack: trackNo];
 			} else {
@@ -763,7 +763,7 @@ MRPointer_SetDataSub(VALUE val, MDEvent *ep, MyDocument *doc, int trackNo, long 
 				data = -8192;
 			else if (data >= 8192)
 				data = 8191;
-			ed.longValue = data;
+			ed.intValue = data;
 			mode = kMDEventFieldData;
 			break;
 		case kMDEventPortNumber:
@@ -776,7 +776,7 @@ MRPointer_SetDataSub(VALUE val, MDEvent *ep, MyDocument *doc, int trackNo, long 
 				data = 0;
 			else if (data >= 128)
 				data = 127;
-			ed.longValue = data;
+			ed.intValue = data;
 			mode = kMDEventFieldData;
 			break;
 		case kMDEventTempo:
@@ -851,7 +851,7 @@ MRPointer_SetDataSub(VALUE val, MDEvent *ep, MyDocument *doc, int trackNo, long 
 	} else {
 		switch (mode) {
 			case kMDEventFieldData:
-				MDSetData1(ep, ed.longValue);
+				MDSetData1(ep, ed.intValue);
 				break;
 			case kMDEventFieldSMPTE:
 				*(MDGetSMPTERecordPtr(ep)) = ed.smpte;

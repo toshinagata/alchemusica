@@ -19,7 +19,7 @@
 
 @class MyDocument;
 
-@interface RemapDevicePanelController : NSWindowController
+@interface RemapDevicePanelController : NSWindowController <NSTableViewDataSource>
 {
 	IBOutlet id myTableView;
 	BOOL stopModalFlag;

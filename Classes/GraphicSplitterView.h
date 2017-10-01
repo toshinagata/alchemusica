@@ -25,7 +25,7 @@
 	NSTextField *codeText;
 }
 
-- (void)setKindAndCode: (long)kindAndCode;
-//- (long)kindAndCode;
+- (void)setKindAndCode: (int32_t)kindAndCode;
+//- (int32_t)kindAndCode;
 
 @end

@@ -38,7 +38,7 @@ VALUE MREventSymbolFromEventKindAndCode(int kind, int code, int *is_generic);
 int MREventKindAndCodeFromEventSymbol(VALUE sym, int *code, int *is_generic);
 
 VALUE MRPointer_GetDataSub(const MDEvent *ep);
-void MRPointer_SetDataSub(VALUE val, MDEvent *ep, MyDocument *doc, int trackNo, long position);
+void MRPointer_SetDataSub(VALUE val, MDEvent *ep, MyDocument *doc, int trackNo, int32_t position);
 
 MDPointer *MDPointerFromMRPointerValue(VALUE val);
 VALUE MRPointerValueFromTrackInfo(MDTrack *track, MyDocument *doc, int num, int position);

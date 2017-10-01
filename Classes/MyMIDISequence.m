@@ -133,8 +133,8 @@ NSString
 	return mySequence;
 }
 
-- (long)lookUpTrack:(MDTrack *)track {
-	long count;
+- (int32_t)lookUpTrack:(MDTrack *)track {
+	int32_t count;
 	if (mySequence != NULL) {
 		for (count = MDSequenceGetNumberOfTracks(mySequence) - 1; count >= 0; count--) {
 			if (MDSequenceGetTrack(mySequence, count) == track)
@@ -150,7 +150,7 @@ NSString
 	else return NULL;
 }
 
-- (long)trackCount {
+- (int32_t)trackCount {
 	if (mySequence != NULL)
 		return MDSequenceGetNumberOfTracks(mySequence);
 	else return 0;
@@ -171,7 +171,7 @@ NSString
 }
 
 /*
-- (void)updateTrackName:(long)index {
+- (void)updateTrackName:(int32_t)index {
 	if (mySequence != NULL) {
 		MDTrack *track = MDSequenceGetTrack(mySequence, index);
 		if (track != NULL) {
@@ -183,7 +183,7 @@ NSString
 }
 */
 
-- (NSString *)trackName:(long)index {
+- (NSString *)trackName:(int32_t)index {
     if (mySequence != NULL) {
         MDTrack *track;
 		char buf[256];
@@ -196,7 +196,7 @@ NSString
 	return nil;
 }
 
-- (NSString *)deviceName:(long)index {
+- (NSString *)deviceName:(int32_t)index {
     if (mySequence != NULL) {
         MDTrack *track;
 		char buf[256];
@@ -204,7 +204,7 @@ NSString
 		if (track != NULL) {
 		//	if (MDTrackGetNumberOfChannelEvents(track, -1) + MDTrackGetNumberOfSysexEvents(track) > 0) {
 			//	MDTrackGuessDeviceName(track, buf, sizeof buf);
-			//	long dev = MDTrackGetDevice(track);
+			//	int32_t dev = MDTrackGetDevice(track);
 			//	if (dev < 0 || MDPlayerGetDestinationName(dev, buf, sizeof buf) != kMDNoError)
 			MDTrackGetDeviceName(track, buf, sizeof buf);
 			return [NSString stringWithUTF8String: buf];
@@ -214,7 +214,7 @@ NSString
 	return nil;
 }
 
-- (int)trackChannel:(long)index {
+- (int)trackChannel:(int32_t)index {
     if (mySequence != NULL) {
         MDTrack *track = MDSequenceGetTrack(mySequence, index);
         if (track != NULL) {
@@ -225,7 +225,7 @@ NSString
     return -1;
 }
 
-- (MDTrackAttribute)trackAttributeAtIndex: (long)index
+- (MDTrackAttribute)trackAttributeAtIndex: (int32_t)index
 {
 	if (mySequence != NULL) {
 		MDTrack *track = MDSequenceGetTrack(mySequence, index);
@@ -236,7 +236,7 @@ NSString
 	return 0;
 }
 
-- (void)setTrackAttribute: (MDTrackAttribute)attribute atIndex: (long)index
+- (void)setTrackAttribute: (MDTrackAttribute)attribute atIndex: (int32_t)index
 {
 	if (mySequence != NULL) {
 		MDTrack *track = MDSequenceGetTrack(mySequence, index);
@@ -391,7 +391,7 @@ MyRecordingInfoFileExtensionForFormat(int format)
 
 - (MDStatus)startMIDIRecording
 {
-	long dev;
+	int32_t dev;
 	int ch;
 	MDTickType tick;
 	NSString *destDevice;
@@ -416,13 +416,13 @@ MyRecordingInfoFileExtensionForFormat(int format)
     return kMDNoError;
 }
 
-- (long)collectRecordedEvents
+- (int32_t)collectRecordedEvents
 {
     MDEvent *eventBuf;
 	int eventBufSize;
     MDStatus result = kMDNoError;
 	int count;
-    long n = 0;
+    int32_t n = 0;
 //    if (recordTrack == NULL || recordNoteOffTrack == NULL)
 //        return kMDErrorInternalError;
 	if (recordTrack == NULL)
@@ -455,12 +455,12 @@ MyRecordingInfoFileExtensionForFormat(int format)
     return n;
 }
 
-//- (MDStatus)finishMIDIRecordingAndGetTrack: (MDTrackObject **)outTrack andTrackIndex: (long *)outIndex
+//- (MDStatus)finishMIDIRecordingAndGetTrack: (MDTrackObject **)outTrack andTrackIndex: (int32_t *)outIndex
 
 - (MDTrackObject *)finishMIDIRecording
 {
 //    MDStatus result;
-	long n;
+	int32_t n;
 	MDTrackObject *trackObj;
     if (mySequence == NULL || myPlayer == NULL)
         return nil;

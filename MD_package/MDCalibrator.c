@@ -23,13 +23,13 @@
 /*  Internal struct: data for individual meta-event  */
 typedef union MDCalibratorData {
 	MDTimeType	time;
-	long		bar;
+	int32_t		bar;
 	short		key;
 	short		data1;
 } MDCalibratorData;
 
 struct MDCalibrator {
-	long				refCount;
+	int32_t				refCount;
 	MDSequence *		parent;
 	MDTrack *			track;
 	MDCalibrator *		next;			/*  List of individual MDCalibrators  */
@@ -51,13 +51,13 @@ struct MDCalibrator {
    -------------------------------------- */
 static void
 MDCalibratorTickToMeasureWithoutJump(MDCalibrator *inCalib, MDTickType inTick,
-long *outMeasure, long *outBeat, long *outTick)
+int32_t *outMeasure, int32_t *outBeat, int32_t *outTick)
 {
 	MDEvent *eptr;
-	long tickPerBeat, beatPerMeasure, beat;
+	int32_t tickPerBeat, beatPerMeasure, beat;
 	MDTickType theTickBefore;
-	long theBarBefore;
-	long timebase;
+	int32_t theBarBefore;
+	int32_t timebase;
 
 	eptr = MDPointerCurrent(inCalib->before);
 	timebase = MDSequenceGetTimebase(inCalib->parent);
@@ -82,7 +82,7 @@ long *outMeasure, long *outBeat, long *outTick)
 		
 		beat = (inTick - theTickBefore) / tickPerBeat;
 		if (outTick != NULL)
-			*outTick = (long)(inTick - theTickBefore) - beat * tickPerBeat;
+			*outTick = (int32_t)(inTick - theTickBefore) - beat * tickPerBeat;
 		if (outBeat != NULL)
 			*outBeat = beat % beatPerMeasure + 1;
 		if (outMeasure != NULL)
@@ -98,7 +98,7 @@ MDCalibratorCalculateTime(MDCalibrator *inCalib, MDTickType inTick)
 {
 	MDTickType tick_before;
 	MDTimeType time_before;
-	long timebase;
+	int32_t timebase;
 	float tempo;
 	if (inCalib->tick_before >= 0) {
 		tick_before = inCalib->tick_before;
@@ -184,7 +184,7 @@ static int
 MDCalibratorForward(MDCalibrator *inCalib)
 {
 	MDEvent *eref;
-	long measure, beat, tick;
+	int32_t measure, beat, tick;
 
 	if (inCalib->track == NULL || inCalib->after == NULL)
         return 0;
@@ -236,7 +236,7 @@ static int
 MDCalibratorBackward(MDCalibrator *inCalib)
 {
 	MDEvent *eref;
-	long measure, beat, tick;
+	int32_t measure, beat, tick;
 	MDTimeType time;
 
     if (inCalib->track == NULL || inCalib->before == NULL)
@@ -361,7 +361,7 @@ MDCalibratorAppend(MDCalibrator *inCalib, MDTrack *inTrack, MDEventKind inKind, 
     if (inCalib->kind == kMDEventNull) {
         /*  In-place substitution  */
         MDCalibrator *next, *chain;
-        long refCount;
+        int32_t refCount;
         next = inCalib->next;
         chain = inCalib->chain;
         refCount = inCalib->refCount;
@@ -543,7 +543,7 @@ MDCalibratorJumpToTick(MDCalibrator *inCalib, MDTickType inTick)
 
 /*  Do 'jump to position in track' for a single calibrator unit  */
 static void
-MDCalibratorJumpToPositionInTrackSub(MDCalibrator *inCalib, MDTickType inTick, long inPosition, MDTrack *inTrack)
+MDCalibratorJumpToPositionInTrackSub(MDCalibrator *inCalib, MDTickType inTick, int32_t inPosition, MDTrack *inTrack)
 {
     if (inCalib->track == NULL || inCalib->before == NULL)
         return;
@@ -582,7 +582,7 @@ MDCalibratorJumpToPositionInTrackSub(MDCalibrator *inCalib, MDTickType inTick, l
 	･ MDCalibratorJumpToPositionInTrack
  -------------------------------------- */
 void
-MDCalibratorJumpToPositionInTrack(MDCalibrator *inCalib, long inPosition, MDTrack *inTrack)
+MDCalibratorJumpToPositionInTrack(MDCalibrator *inCalib, int32_t inPosition, MDTrack *inTrack)
 {
     MDTickType tick;
     MDPointer *pt;
@@ -611,10 +611,10 @@ MDCalibratorJumpToPositionInTrack(MDCalibrator *inCalib, long inPosition, MDTrac
 	･ MDCalibratorMeasureToTick
    -------------------------------------- */
 MDTickType
-MDCalibratorMeasureToTick(MDCalibrator *inCalib, long inMeasure, long inBeat, long inTick)
+MDCalibratorMeasureToTick(MDCalibrator *inCalib, int32_t inMeasure, int32_t inBeat, int32_t inTick)
 {
 	MDEvent *eptr;
-	long tickPerBeat, beatPerMeasure, timebase, theBarBefore;
+	int32_t tickPerBeat, beatPerMeasure, timebase, theBarBefore;
 	double theTick, theTickBefore;
 	
 	while (inCalib != NULL) {
@@ -628,7 +628,7 @@ MDCalibratorMeasureToTick(MDCalibrator *inCalib, long inMeasure, long inBeat, lo
 	/*  小節が範囲外の場合  */
 	if (inMeasure < 1)
 		return kMDNegativeTick;
-	if (inMeasure >= LONG_MAX)
+	if (inMeasure >= INT32_MAX)
 		return kMDMaxTick;
 	if (inMeasure >= inCalib->data_after.bar) {
 		/*  末尾に向かって探す  */
@@ -665,7 +665,7 @@ MDCalibratorMeasureToTick(MDCalibrator *inCalib, long inMeasure, long inBeat, lo
 	･ MDCalibratorTickToMeasure
    -------------------------------------- */
 void
-MDCalibratorTickToMeasure(MDCalibrator *inCalib, MDTickType inTick, long *outMeasure, long *outBeat, long *outTick)
+MDCalibratorTickToMeasure(MDCalibrator *inCalib, MDTickType inTick, int32_t *outMeasure, int32_t *outBeat, int32_t *outTick)
 {
 	MDCalibratorJumpToTick(inCalib, inTick);
 	while (inCalib != NULL) {
@@ -705,7 +705,7 @@ MDCalibratorTimeToTick(MDCalibrator *inCalib, MDTimeType inTime)
 {
 	MDTickType	tick_before;
 	MDTimeType	time_before;
-	long timebase;
+	int32_t timebase;
 
 	while (inCalib != NULL) {
 		if (inCalib->kind == kMDEventTempo)
@@ -770,7 +770,7 @@ MDCalibratorGetEvent(MDCalibrator *inCalib, MDTrack *inTrack, MDEventKind inKind
 /* --------------------------------------
 	･ MDCalibratorGetEventPosition
    -------------------------------------- */
-long
+int32_t
 MDCalibratorGetEventPosition(MDCalibrator *inCalib, MDTrack *inTrack, MDEventKind inKind, short inCode)
 {
 	while (inCalib != NULL) {

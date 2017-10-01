@@ -30,16 +30,17 @@
 /* --------------------------------------
 	･ MDReadStreamFormat
    -------------------------------------- */
-long
+int32_t
 MDReadStreamFormat(STREAM stream, const char *format, ...)
 {
 	va_list ap;
 	char *p = (char *)format;
 	unsigned char c, star, s[4];
-	long count, n, numResult;
+	int32_t count, n, numResult;
+    size_t len;
 	char *cp;
 	short *sp;
-	long *lp;
+	int32_t *lp;
 	
 	va_start(ap, format);
 	numResult = 0;
@@ -55,7 +56,7 @@ MDReadStreamFormat(STREAM stream, const char *format, ...)
 			count = 1;
 			p++;
 		} else if (*p != 0) {
-			count = strtol(p, &p, 0);
+			count = (int)strtol(p, &p, 0);
 			if (count == 0)
 				count = 1;
 		} else count = 1;
@@ -66,9 +67,9 @@ MDReadStreamFormat(STREAM stream, const char *format, ...)
 							/*  Does not care if encountered null bytes from stream  */
 					cp = va_arg(ap, char *);
 					if (star)
-						count = va_arg(ap, long);
-					n = FREAD_(cp, count, stream);
-					if (n < count)
+						count = va_arg(ap, int32_t);
+					len = FREAD_(cp, count, stream);
+					if (len < count)
 						memset(cp + n, (c == 'a' ? 0 : ' '), count - n);
 					cp[count] = 0;	/*  terminate  */
 					count = 1;	/*  one time only  */
@@ -83,22 +84,22 @@ MDReadStreamFormat(STREAM stream, const char *format, ...)
 					break;
 				case 'n':	/*  signed short, big-endian  */
 					sp = va_arg(ap, short *);
-					n = FREAD_(s, 2, stream);
-					if (n < 2)
+					len = FREAD_(s, 2, stream);
+					if (len < 2)
 						goto end;
 					*sp = (s[0] << 8) + s[1];
 					break;
-				case 'N':	/*  signed long, big-endian  */
-					lp = va_arg(ap, long *);
-					n = FREAD_(s, 4, stream);
-					if (n < 4)
+				case 'N':	/*  signed int32_t, big-endian  */
+					lp = va_arg(ap, int32_t *);
+					len = FREAD_(s, 4, stream);
+					if (len < 4)
 						goto end;
 					*lp = (s[0] << 24) + (s[1] << 16) + (s[2] << 8) + s[3];
 					break;
 				case 'w':	/*  BER compressed integer --- 'variable length number' in SMF */
 				{
-					long val = 0;
-					lp = va_arg(ap, long *);
+					int32_t val = 0;
+					lp = va_arg(ap, int32_t *);
 					while ((n = GETC(stream)) != EOF) {
 						val = (val << 7) + (n & 0x7f);
 						if ((n & 0x80) == 0)
@@ -124,13 +125,13 @@ MDReadStreamFormat(STREAM stream, const char *format, ...)
 /* --------------------------------------
 	･ MDReadStreamFormat
    -------------------------------------- */
-long
+int32_t
 MDWriteStreamFormat(STREAM stream, const char *format, ...)
 {
 	va_list ap;
 	char *p = (char *)format;
 	unsigned char c, star, s[4];
-	long count, n, numResult;
+	int32_t count, n, numResult;
 	int i;
 	char *cp;
 	
@@ -148,7 +149,7 @@ MDWriteStreamFormat(STREAM stream, const char *format, ...)
 			count = 1;
 			p++;
 		} else if (*p != 0) {
-			count = strtol(p, &p, 0);
+			count = (int)strtol(p, &p, 0);
 			if (count == 0)
 				count = 1;
 		} else count = 1;
@@ -158,8 +159,8 @@ MDWriteStreamFormat(STREAM stream, const char *format, ...)
 				case 'A':	/*  ASCII string, space padded  */
 					cp = va_arg(ap, char *);
 					if (star)
-						count = va_arg(ap, long);
-					n = FWRITE_(cp, count, stream);
+						count = va_arg(ap, int32_t);
+					n = (int)FWRITE_(cp, count, stream);
 					count = 1;	/*  one time only  */
 					break;
 				case 'c':	/*  signed char */
@@ -173,24 +174,24 @@ MDWriteStreamFormat(STREAM stream, const char *format, ...)
 					i = va_arg(ap, int);
 					s[0] = (i >> 8);
 					s[1] = i;
-					n = FWRITE_(s, 2, stream);
+					n = (int)FWRITE_(s, 2, stream);
 					if (n < 2)
 						goto end;
 					break;
-				case 'N':	/*  signed long, big-endian  */
-					n = va_arg(ap, long);
+				case 'N':	/*  signed int32_t, big-endian  */
+					n = va_arg(ap, int32_t);
 					s[0] = (n >> 24);
 					s[1] = (n >> 16);
 					s[2] = (n >> 8);
 					s[3] = n;
-					n = FWRITE_(s, 4, stream);
+					n = (int)FWRITE_(s, 4, stream);
 					if (n < 4)
 						goto end;
 					break;
 				case 'w':	/*  BER compressed integer --- 'variable length number' in SMF */
 				{
-					unsigned long un;
-					un = va_arg(ap, unsigned long);
+					uint32_t un;
+					un = va_arg(ap, uint32_t);
 					s[3] = (un & 0x7f);
 					i = 3;
 					while (i > 0) {
@@ -199,7 +200,7 @@ MDWriteStreamFormat(STREAM stream, const char *format, ...)
 							break;
 						s[--i] = ((un & 0x7f) | 0x80);
 					}
-					n = FWRITE_(s + i, 4 - i, stream);
+					n = (int)FWRITE_(s + i, 4 - i, stream);
 					if (n < 4 - i)
 						goto end;
 					break;
@@ -470,9 +471,9 @@ _dprintf(const char *fname, int lineno, int level, const char *fmt, ...)
 	･ MDArrayCallDestructor
    -------------------------------------- */
 static void
-MDArrayCallDestructor(MDArray *arrayRef, long startIndex, long endIndex)
+MDArrayCallDestructor(MDArray *arrayRef, int32_t startIndex, int32_t endIndex)
 {
-	long i;
+	int32_t i;
 	if (arrayRef == NULL || arrayRef->destructor == NULL)
 		return;
 	if (startIndex < 0)
@@ -489,10 +490,10 @@ MDArrayCallDestructor(MDArray *arrayRef, long startIndex, long endIndex)
 	･ MDArrayAdjustStorage
    -------------------------------------- */
 static MDStatus
-MDArrayAdjustStorage(MDArray *arrayRef, long inLength)
+MDArrayAdjustStorage(MDArray *arrayRef, int32_t inLength)
 {
-	long theNewSize;
-	long page = arrayRef->pageSize;
+	int32_t theNewSize;
+	int32_t page = arrayRef->pageSize;
 
 	theNewSize = ((inLength + page - 1) / page) * page;
 	if (theNewSize == arrayRef->maxIndex)
@@ -527,7 +528,7 @@ MDArrayAdjustStorage(MDArray *arrayRef, long inLength)
 	･ MDArrayNew
    -------------------------------------- */
 MDArray *
-MDArrayNew(long elementSize)
+MDArrayNew(int32_t elementSize)
 {
 	return MDArrayNewWithPageSize(elementSize, kMDArrayDefaultPageSize);
 }
@@ -536,7 +537,7 @@ MDArrayNew(long elementSize)
 	･ MDArrayNewWithPageSize
    -------------------------------------- */
 MDArray *
-MDArrayNewWithPageSize(long elementSize, long pageSize)
+MDArrayNewWithPageSize(int32_t elementSize, int32_t pageSize)
 {
 	MDArray *arrayRef = (MDArray *)malloc(sizeof(*arrayRef));
 	if (arrayRef == NULL)
@@ -555,7 +556,7 @@ MDArrayNewWithPageSize(long elementSize, long pageSize)
 	･ MDArrayNewWithDestructor
    -------------------------------------- */
 MDArray *
-MDArrayNewWithDestructor(long elementSize, void (*destructor)(void *))
+MDArrayNewWithDestructor(int32_t elementSize, void (*destructor)(void *))
 {
 	MDArray *arrayRef = MDArrayNew(elementSize);
 	if (arrayRef != NULL) {
@@ -568,7 +569,7 @@ MDArrayNewWithDestructor(long elementSize, void (*destructor)(void *))
 	･ MDArrayInit
    -------------------------------------- */
 MDArray *
-MDArrayInit(MDArray *arrayRef, long elementSize)
+MDArrayInit(MDArray *arrayRef, int32_t elementSize)
 {
 	return MDArrayInitWithPageSize(arrayRef, elementSize, kMDArrayDefaultPageSize);
 }
@@ -577,7 +578,7 @@ MDArrayInit(MDArray *arrayRef, long elementSize)
 	･ MDArrayInitWithPageSize
    -------------------------------------- */
 MDArray *
-MDArrayInitWithPageSize(MDArray *arrayRef, long elementSize, long pageSize)
+MDArrayInitWithPageSize(MDArray *arrayRef, int32_t elementSize, int32_t pageSize)
 {
 	arrayRef->data = NULL;
 	arrayRef->num = arrayRef->maxIndex = 0;
@@ -628,14 +629,14 @@ MDArrayEmpty(MDArray *arrayRef)
 /* --------------------------------------
 	･ MDArrayCount
    -------------------------------------- */
-long
+int32_t
 MDArrayCount(const MDArray *arrayRef)
 {
 	return arrayRef->num;
 }
 
 MDStatus
-MDArraySetCount(MDArray *arrayRef, long inCount)
+MDArraySetCount(MDArray *arrayRef, int32_t inCount)
 {
 	MDStatus result;
 	if (inCount < 0)
@@ -661,10 +662,10 @@ MDArraySetCount(MDArray *arrayRef, long inCount)
 	･ MDArrayInsert
    -------------------------------------- */
 MDStatus
-MDArrayInsert(MDArray *arrayRef, long inIndex, long inLength, const void *inData)
+MDArrayInsert(MDArray *arrayRef, int32_t inIndex, int32_t inLength, const void *inData)
 {
 	MDStatus result;
-	long moveAmount;
+	int32_t moveAmount;
 
 	if (inIndex < 0 || inIndex > arrayRef->num)
 		return kMDErrorBadArrayIndex;
@@ -694,9 +695,9 @@ MDArrayInsert(MDArray *arrayRef, long inIndex, long inLength, const void *inData
 	･ MDArrayDelete
    -------------------------------------- */
 MDStatus
-MDArrayDelete(MDArray *arrayRef, long inIndex, long inLength)
+MDArrayDelete(MDArray *arrayRef, int32_t inIndex, int32_t inLength)
 {
-	long moveAmount;
+	int32_t moveAmount;
 
 	if (inIndex + inLength > arrayRef->num)
 		inLength = arrayRef->num - inIndex;
@@ -719,7 +720,7 @@ MDArrayDelete(MDArray *arrayRef, long inIndex, long inLength)
 	･ MDArrayReplace
    -------------------------------------- */
 MDStatus
-MDArrayReplace(MDArray *arrayRef, long inIndex, long inLength, const void *inData)
+MDArrayReplace(MDArray *arrayRef, int32_t inIndex, int32_t inLength, const void *inData)
 {
 	MDStatus result;
 	MDArrayCallDestructor(arrayRef, inIndex, inIndex + inLength - 1);
@@ -740,8 +741,8 @@ MDArrayReplace(MDArray *arrayRef, long inIndex, long inLength, const void *inDat
 /* --------------------------------------
 	･ MDArrayFetch
    -------------------------------------- */
-long
-MDArrayFetch(const MDArray *arrayRef, long inIndex, long inLength, void *outData)
+int32_t
+MDArrayFetch(const MDArray *arrayRef, int32_t inIndex, int32_t inLength, void *outData)
 {
 	if (inIndex + inLength > arrayRef->num)
 		inLength = arrayRef->num - inIndex;
@@ -758,7 +759,7 @@ MDArrayFetch(const MDArray *arrayRef, long inIndex, long inLength, void *outData
 	･ MDArrayFetchPtr
    -------------------------------------- */
 void *
-MDArrayFetchPtr(const MDArray *arrayRef, long inIndex)
+MDArrayFetchPtr(const MDArray *arrayRef, int32_t inIndex)
 {
 	if (inIndex < 0 || inIndex >= arrayRef->num)
 		return NULL;

@@ -21,7 +21,7 @@
 
 @interface MDEventObject : NSObject {
 @public
-	long	position;
+	int32_t	position;
 	MDEvent	event;
 }
 - (id)initWithMDEvent: (const MDEvent *)ep;

@@ -93,7 +93,7 @@ typedef struct data_stream_record {
 #define re_malloc(p, size)				((p) != NULL ? realloc(p, size) : malloc(size))
 
 /*  エラーコード  */
-typedef long			MDStatus;
+typedef int32_t			MDStatus;
 enum {
 	kMDNoError = 0,
 	kMDErrorOutOfMemory,

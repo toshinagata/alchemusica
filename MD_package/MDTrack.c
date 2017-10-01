@@ -35,24 +35,24 @@ static MDBlock *sFreeBlocks = NULL;		/*  The pool of free MDBlock's  */
 struct MDBlock {
 	MDBlock *		next;		/*  the next MDBlock in the linked list  */
 	MDBlock *		last;		/*  the last MDBlock in the linked list  */
-	long			size;		/*  the number of allocated MDEvent's  */
-	long			num;		/*  the number of actually containing MDEvent's */
+	int32_t			size;		/*  the number of allocated MDEvent's  */
+	int32_t			num;		/*  the number of actually containing MDEvent's */
 	MDEvent *		events;		/*  the array of MDEvent's  */
     MDTickType		largestTick;  /* the max value of (MDGetTick(&events[i]) + MDHasDuration(&events[i]) ? MDGetDuration(&event[i]) : 0); may be kMDNegativeTick after modification, in which case it should be recached */
 };
 
 struct MDTrack {
-	long			refCount;	/*  the reference count  */
-	long			num;		/*  the number of events  */
-	long			numBlocks;	/*  the number of blocks  */
+	int32_t			refCount;	/*  the reference count  */
+	int32_t			num;		/*  the number of events  */
+	int32_t			numBlocks;	/*  the number of blocks  */
 	char *			name;		/*  the track name  */
 	char *			devname;	/*  the device name  */
     MDTrackAttribute	attribute;  /*  the track attribute (Rec/Solo/Mute)  */
 	MDBlock *		first;		/*  the first MDBlock  */
 	MDBlock *		last;		/*  the last MDBlock  */
 	MDTickType		duration;	/*  the track duration in ticks  */
-	long			nch[18];	/*  the number of channel events (16: sysex, 17: non-MIDI)  */
-	long			dev;		/*  the device number */
+	int32_t			nch[18];	/*  the number of channel events (16: sysex, 17: non-MIDI)  */
+	int32_t			dev;		/*  the device number */
     short			channel;	/*  the MIDI channel for this track  */
                                 /*  (meaningful only if the parent MDSequence is single-channel mode) */
 	MDPointer *		pointer;	/*  the first MDPointer related to this track
@@ -63,12 +63,12 @@ struct MDTrack {
 };
 
 struct MDPointer {
-	long			refCount;	/*  the reference count  */
+	int32_t			refCount;	/*  the reference count  */
 	MDTrack *		parent;		/*  The parent sequence. */
 	MDBlock *		block;		/*  The current block. */
-	long			position;	/*  The current position. Can be -1, which means
+	int32_t			position;	/*  The current position. Can be -1, which means
 								    "before the beginning". */
-	long			index;		/*  The current index in the current block. */
+	int32_t			index;		/*  The current index in the current block. */
 	MDPointer *		next;
 	char			removed;	/*  True if the 'current' event has been removed.  */
 	char			allocated;	/*  True if allocated by malloc() */
@@ -76,7 +76,7 @@ struct MDPointer {
 };
 
 struct MDTrackMerger {
-    long            refCount;   /*  the reference count  */
+    int32_t            refCount;   /*  the reference count  */
     MDPointer **    pointers;   /*  array of MDPointers  */
     int             npointers;  /*  number of MDPointers in pointers[]  */
     int             idx;        /*  the index of the 'current' track  */
@@ -95,7 +95,7 @@ struct MDTrackMerger {
 	･ MDTrackAllocateBlock
    -------------------------------------- */
 static MDBlock *
-MDTrackAllocateBlock(MDTrack *inTrack, MDBlock *inBlock, long inSize)
+MDTrackAllocateBlock(MDTrack *inTrack, MDBlock *inBlock, int32_t inSize)
 {
 	MDBlock *aBlock;
 
@@ -169,7 +169,7 @@ MDTrackDeallocateBlock(MDTrack *inTrack, MDBlock *inBlock)
 static void
 MDTrackClearBlock(MDTrack *inTrack, MDBlock *inBlock)
 {
-	long i;
+	int32_t i;
 
 	for (i = 0; i < inBlock->num; i++) {
 		/*  パートナー、メッセージなどのポインタを処理して、メモリリーク・
@@ -211,11 +211,11 @@ MDTrackUpdateLargestTickForBlock(MDTrack *inTrack, MDBlock *inBlock)
 /* --------------------------------------
 	･ MDTrackInsertBlanks
    -------------------------------------- */
-static long
-MDTrackInsertBlanks(MDTrack *inTrack, MDPointer *inPointer, long count)
+static int32_t
+MDTrackInsertBlanks(MDTrack *inTrack, MDPointer *inPointer, int32_t count)
 {
 	MDBlock *block1, *block2;
-	long index, room, num2, tail;
+	int32_t index, room, num2, tail;
 	MDPointer *ptr;
 
 	if (count <= 0)
@@ -332,11 +332,11 @@ MDTrackInsertBlanks(MDTrack *inTrack, MDPointer *inPointer, long count)
 /* --------------------------------------
 	･ MDTrackDeleteEvents
    -------------------------------------- */
-static long
-MDTrackDeleteEvents(MDTrack *inTrack, MDPointer *inPointer, long count)
+static int32_t
+MDTrackDeleteEvents(MDTrack *inTrack, MDPointer *inPointer, int32_t count)
 {
 	MDBlock *block, *block2;
-	long index, remain, i, n, tail;
+	int32_t index, remain, i, n, tail;
 	MDPointer *ptr;
 
 	if (inTrack == NULL || inPointer == NULL || inPointer->parent != inTrack)
@@ -522,7 +522,7 @@ MDTrackNewFromTrack(const MDTrack *inTrack)
 {
 	MDPointer *src, *dest;
 	MDEvent *eventSrc, *eventDest;
-	long count, noteCount;
+	int32_t count, noteCount;
 	MDTrack *newTrack;
 	int i;
 	
@@ -593,7 +593,7 @@ MDTrackExchange(MDTrack *inTrack1, MDTrack *inTrack2)
 /* --------------------------------------
 	･ MDTrackGetNumberOfEvents
    -------------------------------------- */
-long
+int32_t
 MDTrackGetNumberOfEvents(const MDTrack *inTrack)
 {
 	return inTrack->num;
@@ -602,10 +602,10 @@ MDTrackGetNumberOfEvents(const MDTrack *inTrack)
 /* --------------------------------------
 	･ MDTrackGetNumberOfChannelEvents
    -------------------------------------- */
-long
+int32_t
 MDTrackGetNumberOfChannelEvents(const MDTrack *inTrack, short channel)
 {
-	long n;
+	int32_t n;
 	if (channel >= 0 && channel < 16)
 		return inTrack->nch[channel];
 	else {
@@ -619,7 +619,7 @@ MDTrackGetNumberOfChannelEvents(const MDTrack *inTrack, short channel)
 /* --------------------------------------
 	･ MDTrackGetNumberOfSysexEvents
    -------------------------------------- */
-long
+int32_t
 MDTrackGetNumberOfSysexEvents(const MDTrack *inTrack)
 {
 	return inTrack->nch[16];
@@ -628,7 +628,7 @@ MDTrackGetNumberOfSysexEvents(const MDTrack *inTrack)
 /* --------------------------------------
 	･ MDTrackGetNumberOfNonMIDIEvents
    -------------------------------------- */
-long
+int32_t
 MDTrackGetNumberOfNonMIDIEvents(const MDTrack *inTrack)
 {
 	return inTrack->nch[17];
@@ -659,11 +659,11 @@ MDTrackSetDuration(MDTrack *inTrack, MDTickType inDuration)
 /* --------------------------------------
 	･ MDTrackAppendEvents
    -------------------------------------- */
-long
-MDTrackAppendEvents(MDTrack *inTrack, const MDEvent *inEvent, long count)
+int32_t
+MDTrackAppendEvents(MDTrack *inTrack, const MDEvent *inEvent, int32_t count)
 {
 	MDBlock *block;
-	long index, i, n, nn;
+	int32_t index, i, n, nn;
 	if (inTrack == NULL)
 		return 0;
 
@@ -713,9 +713,9 @@ MDTrackMerge(MDTrack *inTrack1, const MDTrack *inTrack2, IntGroup **ioSet)
 	MDPointer *src2;	/*  The source position in inTrack2  */
 	MDPointer *dest;	/*  The destination position  */
 	MDEvent *eventSrc1, *eventSrc2, *eventDest;
-	long	noteCount;	/*  The number of note-on's that have partners  */
-	long	destPosition;
-	long	i;
+	int32_t	noteCount;	/*  The number of note-on's that have partners  */
+	int32_t	destPosition;
+	int32_t	i;
 	MDTickType tick1, duration1, duration2;
 	IntGroup *pset = NULL;
 	MDStatus result = kMDNoError;
@@ -838,10 +838,10 @@ sMDTrackUnmergeSub(MDTrack *inTrack, MDTrack **outTrack, const IntGroup *inSet, 
 	MDPointer *src;
 	MDPointer *dest;
 	MDEvent *eventSrc, *eventDest;
-	long	ptCount;	/*  The number of points in inSet  */
-	long	noteCount;	/*  The number of note-on's that have partners  */
-	long	destPosition;
-	long	index, start, length;
+	int32_t	ptCount;	/*  The number of points in inSet  */
+	int32_t	noteCount;	/*  The number of note-on's that have partners  */
+	int32_t	destPosition;
+	int32_t	index, start, length;
 	int i;
 	MDTickType duration;
 	MDTrack *newTrack;
@@ -961,7 +961,7 @@ MDTrackExtract(MDTrack *inTrack, MDTrack **outTrack, const IntGroup *inSet)
 int
 MDTrackSplitByMIDIChannel(MDTrack *inTrack, MDTrack **outTracks)
 {
-	long count[16];
+	int32_t count[16];
 	int i, n, nn;
 	MDPointer *pt;
 	MDEvent *ep;
@@ -1125,7 +1125,7 @@ MDTrackChangeTick(MDTrack *inTrack, MDTickType *newTick)
 {
 	MDBlock *block;
 /*	int index, i; */
-	long n, count;
+	int32_t n, count;
 	MDTickType largestTick;
 /*	MDTickType oldTick, tick; */
 	MDEvent *tempEvents;
@@ -1252,7 +1252,7 @@ IntGroup *
 MDTrackSearchEventsWithDurationCrossingTick(MDTrack *inTrack, MDTickType inTick)
 {
     IntGroup *pset;
-    long position, i;
+    int32_t position, i;
     MDTickType tick, largestTick;
     MDBlock *block;
     MDEvent *ep;
@@ -1322,8 +1322,8 @@ MDTrackSearchEventsWithSelector(MDTrack *inTrack, MDEventSelector inSelector, vo
 void
 MDTrackRemapChannel(MDTrack *inTrack, const unsigned char *newch)
 {
-    long nnch[16];
-    long n;
+    int32_t nnch[16];
+    int32_t n;
     MDBlock *block;
 	static unsigned char allzero[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     if (inTrack == NULL)
@@ -1351,7 +1351,7 @@ MDTrackRemapChannel(MDTrack *inTrack, const unsigned char *newch)
 	･ MDTrackSetDevice
    -------------------------------------- */
 void
-MDTrackSetDevice(MDTrack *inTrack, long dev)
+MDTrackSetDevice(MDTrack *inTrack, int32_t dev)
 {
     if (inTrack != NULL)
         inTrack->dev = dev;
@@ -1360,7 +1360,7 @@ MDTrackSetDevice(MDTrack *inTrack, long dev)
 /* --------------------------------------
 	･ MDTrackGetDevice
    -------------------------------------- */
-long
+int32_t
 MDTrackGetDevice(const MDTrack *inTrack)
 {
     if (inTrack != NULL)
@@ -1414,7 +1414,7 @@ MDTrackSetName(MDTrack *inTrack, const char *inName)
 	･ MDTrackGetName
    -------------------------------------- */
 void
-MDTrackGetName(const MDTrack *inTrack, char *outName, long length)
+MDTrackGetName(const MDTrack *inTrack, char *outName, int32_t length)
 {
 	if (inTrack->name == NULL) {
 		outName[0] = 0;
@@ -1449,7 +1449,7 @@ MDTrackSetDeviceName(MDTrack *inTrack, const char *inName)
 	･ MDTrackGetDeviceName
    -------------------------------------- */
 void
-MDTrackGetDeviceName(const MDTrack *inTrack, char *outName, long length)
+MDTrackGetDeviceName(const MDTrack *inTrack, char *outName, int32_t length)
 {
 	if (inTrack->devname == NULL) {
 		outName[0] = 0;
@@ -1463,11 +1463,11 @@ MDTrackGetDeviceName(const MDTrack *inTrack, char *outName, long length)
 	･ MDTrackGuessName
    -------------------------------------- */
 void
-MDTrackGuessName(MDTrack *inTrack, char *outName, long length)
+MDTrackGuessName(MDTrack *inTrack, char *outName, int32_t length)
 {
 	MDPointer *ptr;
 	MDEvent *eref, *stopref;
-	long len;
+	int32_t len;
 
 	ptr = MDPointerNew(inTrack);
 	
@@ -1507,7 +1507,7 @@ MDTrackGuessName(MDTrack *inTrack, char *outName, long length)
 	･ MDTrackGuessDeviceName
    -------------------------------------- */
 void
-MDTrackGuessDeviceName(MDTrack *inTrack, char *outName, long length)
+MDTrackGuessDeviceName(MDTrack *inTrack, char *outName, int32_t length)
 {
 	MDPointer *ptr;
 	MDEvent *eref, *stopref;
@@ -1515,7 +1515,7 @@ MDTrackGuessDeviceName(MDTrack *inTrack, char *outName, long length)
 	char c;
 	char *p;
 	int n, port;
-	long len;
+	int32_t len;
 
 	ptr = MDPointerNew(inTrack);
 	
@@ -1631,10 +1631,10 @@ MDTrackDump(const MDTrack *inTrack)
 		fp = stdout;
 	pt = MDPointerNew((MDTrack *)inTrack);
 	while ((ev = MDPointerForward(pt)) != NULL) {
-		fprintf(fp, "%12ld ", (long)MDGetTick(ev));
+		fprintf(fp, "%12d ", (int)MDGetTick(ev));
 		MDEventToKindString(ev, buf, sizeof buf);
 		fprintf(fp, "%s ", buf);
-		fprintf(fp, "%d %d %d %ld ", (int)MDGetCode(ev), (int)MDGetChannel(ev), (int)MDGetData1(ev), (long)MDGetDuration(ev));
+		fprintf(fp, "%d %d %d %d ", (int)MDGetCode(ev), (int)MDGetChannel(ev), (int)MDGetData1(ev), (int)MDGetDuration(ev));
 		fprintf(fp, "(@%p)\n", ev);
 	}
 	if (fp != NULL)
@@ -1646,8 +1646,8 @@ MDTrackRecache(MDTrack *inTrack, int check)
 {
 	MDPointer *pt1, *pt2;
 	MDEvent *ev1;
-	long nch[18];
-	long i, pos;
+	int32_t nch[18];
+	int32_t i, pos;
 	MDTickType tick, lastTick;
     MDBlock *block;
 	int errcnt = 0;
@@ -1664,18 +1664,18 @@ MDTrackRecache(MDTrack *inTrack, int check)
 	while ((ev1 = MDPointerForward(pt1)) != NULL) {
 		pos = MDPointerGetPosition(pt1);
 		if (check && (MDGetKind(ev1) < 1 || MDGetKind(ev1) > kMDEventStop)) {
-			fprintf(stderr, "#%ld: invalid event kind %d\n", pos, (int)MDGetKind(ev1));
+			fprintf(stderr, "#%d: invalid event kind %d\n", (int)pos, (int)MDGetKind(ev1));
 			errcnt++;
 		}
 		tick = MDGetTick(ev1);
 		if (check && tick < lastTick) {
-			fprintf(stderr, "#%ld: tick disorder %qd (last tick = %qd)\n", pos, (long long)tick, (long long)lastTick);
+			fprintf(stderr, "#%d: tick disorder %d (last tick = %d)\n", (int)pos, (int)tick, (int)lastTick);
 			errcnt++;
 		}
 		lastTick = tick;
 		if (MDIsChannelEvent(ev1)) {
 			if (check && (unsigned)(MDGetChannel(ev1)) >= 16) {
-				fprintf(stderr, "#%ld: channel number (%ud) >= 16\n", pos, (unsigned)MDGetChannel(ev1));
+				fprintf(stderr, "#%d: channel number (%ud) >= 16\n", (int)pos, (unsigned int)MDGetChannel(ev1));
 				errcnt++;
 			} else
 				nch[MDGetChannel(ev1)]++;
@@ -1685,18 +1685,18 @@ MDTrackRecache(MDTrack *inTrack, int check)
 	}
 	++pos;
 	if (check && pos != inTrack->num) {
-		fprintf(stderr, "The track->num (%ld) does not match the number of events (%ld)\n", pos, inTrack->num);
+		fprintf(stderr, "The track->num (%d) does not match the number of events (%d)\n", pos, inTrack->num);
 		errcnt++;
 	}
 	inTrack->num = pos;
 	if (check && lastTick >= inTrack->duration) {
 		fprintf(stderr, "The tick of the last event (%qd) exceeds the track duration (%qd)\n",
-			(long long)lastTick, (long long)inTrack->duration);
+			(int64_t)lastTick, (int64_t)inTrack->duration);
 		errcnt++;
 	}
 	for (i = 0; i < 18; i++) {
 		if (check && nch[i] != inTrack->nch[i]) {
-			fprintf(stderr, "The track->nch[%d] (%ld) does not seem correct (%ld)\n", (int)i, inTrack->nch[i], nch[i]);
+			fprintf(stderr, "The track->nch[%d] (%d) does not seem correct (%d)\n", (int)i, inTrack->nch[i], nch[i]);
 			errcnt++;
 		}
 		inTrack->nch[i] = nch[i];
@@ -1715,7 +1715,7 @@ MDTrackRecache(MDTrack *inTrack, int check)
                 tick = tick2;
         }
         if (check && (block->largestTick >= 0 && tick != block->largestTick)) {
-            fprintf(stderr, "The largestTick(%qd) does not match the largest tick(%qd) in block %p\n", (long long)block->largestTick, (long long)tick, block);
+            fprintf(stderr, "The largestTick(%d) does not match the largest tick(%d) in block %p\n", (int)block->largestTick, (int)tick, block);
 			errcnt++;
         }
 		block->largestTick = tick;
@@ -1724,7 +1724,7 @@ MDTrackRecache(MDTrack *inTrack, int check)
     }
 	if (lastTick >= inTrack->duration) {
 		if (check) {
-            fprintf(stderr, "The track duration (%qd) is not greater than the largest tick (%qd)\n", (long long)inTrack->duration, (long long)lastTick);
+            fprintf(stderr, "The track duration (%d) is not greater than the largest tick (%d)\n", (int)inTrack->duration, (int)lastTick);
 			errcnt++;
 		}
 		inTrack->duration = lastTick + 1;
@@ -1878,8 +1878,8 @@ MDPointerGetTrack(const MDPointer *inPointer)
 static int
 MDPointerUpdateBlock(MDPointer *inPointer)
 {
-	long num;
-	long position;
+	int32_t num;
+	int32_t position;
 
 	num = inPointer->parent->num;
 	position = inPointer->position;
@@ -1911,7 +1911,7 @@ MDPointerUpdateBlock(MDPointer *inPointer)
 			inPointer->position = num;
 			return 0;
 		} else {
-			long offset = num - position;
+			int32_t offset = num - position;
 			while (offset > inPointer->block->num) {
 				offset -= inPointer->block->num;
 				inPointer->block = inPointer->block->last;
@@ -1926,7 +1926,7 @@ MDPointerUpdateBlock(MDPointer *inPointer)
 	･ MDPointerSetPosition
    -------------------------------------- */
 int
-MDPointerSetPosition(MDPointer *inPointer, long inPos)
+MDPointerSetPosition(MDPointer *inPointer, int32_t inPos)
 {
 	if (inPointer->parent == NULL)
 		return 0;	/*  always false  */
@@ -1940,9 +1940,9 @@ MDPointerSetPosition(MDPointer *inPointer, long inPos)
 	･ MDPointerSetRelativePosition
    -------------------------------------- */
 int
-MDPointerSetRelativePosition(MDPointer *inPointer, long inOffset)
+MDPointerSetRelativePosition(MDPointer *inPointer, int32_t inOffset)
 {
-	long num;
+	int32_t num;
 
 	if (inPointer->parent == NULL)
 		return 0;	/*  always false  */
@@ -1989,7 +1989,7 @@ MDPointerSetRelativePosition(MDPointer *inPointer, long inOffset)
 /* --------------------------------------
 	･ MDPointerGetPosition
    -------------------------------------- */
-long
+int32_t
 MDPointerGetPosition(const MDPointer *inPointer)
 {
 	return inPointer->position;
@@ -2028,7 +2028,7 @@ MDPointerIsRemoved(const MDPointer *inPointer)
 int
 MDPointerJumpToTick(MDPointer *inPointer, MDTickType inTick)
 {
-	long num;
+	int32_t num;
 	MDEvent event;
 
 	if (inPointer->parent == NULL)
@@ -2122,7 +2122,7 @@ MDPointerJumpToLast(MDPointer *inPointer)
 int
 MDPointerLookForEvent(MDPointer *inPointer, const MDEvent *inEvent)
 {
-	long savePos;
+	int32_t savePos;
 	MDBlock *saveBlock;
 	MDTickType tick;
 
@@ -2172,7 +2172,7 @@ MDPointerLookForEvent(MDPointer *inPointer, const MDEvent *inEvent)
 	
 found:
 	/*  Found  */
-	inPointer->index = inEvent - inPointer->block->events;
+    inPointer->index = (int)(inEvent - inPointer->block->events);
 	inPointer->position += inPointer->index;
 	inPointer->removed = 0;
 	return 1;
@@ -2278,7 +2278,7 @@ MDEvent *
 MDPointerForwardWithSelector(MDPointer *inPointer, MDEventSelector inSelector, void *inUserData)
 {
 	MDEvent *ep;
-	long position;
+	int32_t position;
 	while ((ep = MDPointerForward(inPointer)) != NULL) {
 		position = MDPointerGetPosition(inPointer);
 		if ((*inSelector)(ep, position, inUserData))
@@ -2294,7 +2294,7 @@ MDEvent *
 MDPointerBackwardWithSelector(MDPointer *inPointer, MDEventSelector inSelector, void *inUserData)
 {
 	MDEvent *ep;
-	long position;
+	int32_t position;
 	while ((ep = MDPointerBackward(inPointer)) != NULL) {
 		position = MDPointerGetPosition(inPointer);
 		if ((*inSelector)(ep, position, inUserData))
@@ -2307,9 +2307,9 @@ MDPointerBackwardWithSelector(MDPointer *inPointer, MDEventSelector inSelector, 
 	･ MDPointerSetPositionWithPointSet
    -------------------------------------- */
 int
-MDPointerSetPositionWithPointSet(MDPointer *inPointer, IntGroup *inPointSet, long offset, int *outIndex)
+MDPointerSetPositionWithPointSet(MDPointer *inPointer, IntGroup *inPointSet, int32_t offset, int *outIndex)
 {
-    long index, position, pos, len;
+    int32_t index, position, pos, len;
     if (inPointSet == NULL)
         return 0;
     index = position = 0;
@@ -2336,7 +2336,7 @@ MDPointerSetPositionWithPointSet(MDPointer *inPointer, IntGroup *inPointSet, lon
 MDEvent *
 MDPointerForwardWithPointSet(MDPointer *inPointer, IntGroup *inPointSet, int *index)
 {
-    long pt;
+    int32_t pt;
 	int n;
 	if (index == NULL) {
 		n = -1;
@@ -2379,7 +2379,7 @@ MDPointerForwardWithPointSet(MDPointer *inPointer, IntGroup *inPointSet, int *in
 MDEvent *
 MDPointerBackwardWithPointSet(MDPointer *inPointer, IntGroup *inPointSet, int *index)
 {
-    long pt;
+    int32_t pt;
 	int n;
 	if (index == NULL) {
 		n = -1;
@@ -2534,7 +2534,7 @@ MDPointerReplaceAnEvent(MDPointer *inPointer, const MDEvent *inEvent, MDEvent *o
 	･ MDPointerChangeTick
    -------------------------------------- */
 MDStatus
-MDPointerChangeTick(MDPointer *inPointer, MDTickType inTick, long inPosition)
+MDPointerChangeTick(MDPointer *inPointer, MDTickType inTick, int32_t inPosition)
 {
 	MDTrack *track;
 	MDEvent *ep, *ep1;
@@ -2645,7 +2645,7 @@ MDPointerCheck(const MDPointer *inPointer)
 {
 	MDTrack *track;
 	MDBlock *block;
-	long pos;
+	int32_t pos;
 	int err = 0;
 	if (inPointer == NULL)
 		return kMDNoError;
@@ -2667,10 +2667,10 @@ MDPointerCheck(const MDPointer *inPointer)
 	} else {
 		block = track->first;
 		if (block == NULL) {
-			fprintf(stderr, "MDPointerCheck: position (%ld) >= 0 but track has no data\n", pos);
+			fprintf(stderr, "MDPointerCheck: position (%d) >= 0 but track has no data\n", pos);
 			err++;
 		} else if (inPointer->block == NULL) {
-			fprintf(stderr, "MDPointerCheck: position (%ld) >= 0 but block is NULL\n", pos);
+			fprintf(stderr, "MDPointerCheck: position (%d) >= 0 but block is NULL\n", pos);
 			err++;
 		} else {
 			while (block != NULL && pos >= block->num) {
@@ -2680,10 +2680,10 @@ MDPointerCheck(const MDPointer *inPointer)
 				block = block->next;
 			}
 			if (block == NULL) {
-				fprintf(stderr, "MDPointerCheck: block exhausts before position (%ld)\n", inPointer->position);
+				fprintf(stderr, "MDPointerCheck: block exhausts before position (%d)\n", (int)inPointer->position);
 				err++;
 			} else if (block != inPointer->block || pos != inPointer->index) {
-				fprintf(stderr, "MDPointerCheck: position (%ld) is index %d in block %p but inPointer claims index %d in block %p\n", inPointer->position, (int)(pos), block, (int)inPointer->index, inPointer->block);
+				fprintf(stderr, "MDPointerCheck: position (%d) is index %d in block %p but inPointer claims index %d in block %p\n", (int)inPointer->position, (int)(pos), block, (int)inPointer->index, inPointer->block);
 				err++;
 			}
 		}

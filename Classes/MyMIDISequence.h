@@ -79,15 +79,15 @@ extern NSString *MyRecordingInfoFileExtensionForFormat(int format);
 - (MyDocument *)myDocument;
 - (MDSequence *)mySequence;
 - (MDTrack *)getTrackAtIndex: (int)index;
-- (long)lookUpTrack:(MDTrack *)track;
-- (long)trackCount;
+- (int32_t)lookUpTrack:(MDTrack *)track;
+- (int32_t)trackCount;
 - (MDTickType)sequenceDuration;
-//- (void)updateTrackName:(long)index;
-- (NSString *)trackName:(long)index;
-- (NSString *)deviceName:(long)index;
-- (int)trackChannel:(long)index;
-- (MDTrackAttribute)trackAttributeAtIndex: (long)index;
-- (void)setTrackAttribute: (MDTrackAttribute)attribute atIndex: (long)index;
+//- (void)updateTrackName:(int32_t)index;
+- (NSString *)trackName:(int32_t)index;
+- (NSString *)deviceName:(int32_t)index;
+- (int)trackChannel:(int32_t)index;
+- (MDTrackAttribute)trackAttributeAtIndex: (int32_t)index;
+- (void)setTrackAttribute: (MDTrackAttribute)attribute atIndex: (int32_t)index;
 
 - (MDCalibrator *)sharedCalibrator;
 
@@ -105,12 +105,12 @@ extern NSString *MyRecordingInfoFileExtensionForFormat(int format);
 //- (float)playingBeat;
 
 - (MDStatus)startMIDIRecording;
-- (long)collectRecordedEvents;
+- (int32_t)collectRecordedEvents;
 - (MDTrackObject *)finishMIDIRecording;
 - (MDTrack *)recordTrack;
 - (MDStatus)startAudioRecordingWithName: (NSString *)filename;
 - (MDStatus)finishAudioRecordingByMIDISequence;
 
-//- (MDStatus)finishMIDIRecordingAndGetTrack: (MDTrackObject **)outTrack andTrackIndex: (long *)outIndex;
+//- (MDStatus)finishMIDIRecordingAndGetTrack: (MDTrackObject **)outTrack andTrackIndex: (int32_t *)outIndex;
 
 @end

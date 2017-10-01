@@ -70,14 +70,14 @@ static RubyConsoleWindowController *shared;
 	range.location = [[consoleView textStorage] length];
 	range.length = 0;
 	[consoleView replaceCharactersInRange: range withString: string];
-	range.length = len = [string length];
+	range.length = len = (int)[string length];
 	if (color == nil)
 		color = defaultColor;
 	[consoleView setTextColor: color range: range];
 	range.location += range.length;
 	range.length = 0;
 	[consoleView scrollRangeToVisible: range];
-	return [string length];
+	return (int)[string length];
 }
 
 - (int)appendMessage: (NSString *)string
@@ -88,7 +88,7 @@ static RubyConsoleWindowController *shared;
 - (void)showRubyPrompt
 {
 	NSString *str = [[consoleView textStorage] string];
-	int len = [str length];
+	int len = (int)[str length];
 	if (len > 0 && [str characterAtIndex: len - 1] != '\n')
 		[self appendMessage: @"\n% "];
 	else
@@ -108,21 +108,21 @@ static RubyConsoleWindowController *shared;
 	NSMutableString *script = [NSMutableString string];
 	NSRange range, selectedLineRange;
 	int start, end;
-	int strLen = [str length];
+	int strLen = (int)[str length];
 
 	//  Get the block of script to be executed
 	range = [str lineRangeForRange: [[[consoleView selectedRanges] objectAtIndex: 0] rangeValue]];
 	//  Look forwards
-	end = range.location + range.length;
+    end = (int)(range.location + range.length);
 	while (end < strLen && [str characterAtIndex: end] == '>') {
 		NSRange range1 = [str lineRangeForRange: NSMakeRange(end + 1, 0)];
-		end = range1.location + range1.length;
+        end = (int)(range1.location + range1.length);
 	}
 	//  Look backwards
-	start = range.location;
+	start = (int)range.location;
 	while (start > 0 && start < strLen && [str characterAtIndex: start] != '%') {
 		NSRange range2 = [str lineRangeForRange: NSMakeRange(start - 1, 0)];
-		start = range2.location;
+		start = (int)range2.location;
 	}
 	if (start < strLen && [str characterAtIndex: start] == '%')
 		start++;
@@ -195,7 +195,7 @@ static RubyConsoleWindowController *shared;
 	if (commandHistoryIndex == -1 && valueHistoryIndex == -1) {
 		if (!up)
 			return NO;
-		historyPos = [storage length];
+		historyPos = (int)[storage length];
 	}
 	if (option) {
 		if (up) {

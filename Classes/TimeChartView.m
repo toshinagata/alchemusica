@@ -32,7 +32,7 @@ typedef struct TimeScalingRecord {
 	MDTickType newEndTick; /*  End tick after scaling the time region  */
 	int ntracks;           /*  Number of editable tracks  */
 	int *trackNums;        /*  Track numbers  */
-	long *startPos;        /*  Start positions for each track to modify ticks  */
+	int32_t *startPos;        /*  Start positions for each track to modify ticks  */
 	MDTickType **originalTicks;  /*  Arrays of original ticks for each track  */
 } TimeScalingRecord;
 
@@ -118,7 +118,7 @@ typedef struct TimeScalingRecord {
             if (i % majorCount == 0) {
                 /*  Draw label  */
                 NSString *label;
-                long n1, n2, n3;
+                int32_t n1, n2, n3;
                 [dataSource convertTick: (MDTickType)floor((startx + i * interval) / ppt + 0.5) toMeasure: &n1 beat: &n2 andTick: &n3];
                 widthPerBeat = [(MyDocument *)[dataSource document] timebase] * ppt * 4 / sigDenominator;
                 widthPerMeasure = widthPerBeat * sigNumerator;
@@ -290,7 +290,7 @@ typedef struct TimeScalingRecord {
 		if (n == 1 && ([theEvent modifierFlags] & (NSAlternateKeyMask | NSShiftKeyMask)) && startTick < endTick) {
 			/*  Scale selected time: initialize the internal information  */
 			int i, j;
-			long trackNo;
+			int32_t trackNo;
 			MDTrack *track;
 			MDSequence *seq = [[[dataSource document] myMIDISequence] mySequence];
 			timeScaling = (TimeScalingRecord *)calloc(sizeof(TimeScalingRecord), 1);
@@ -305,7 +305,7 @@ typedef struct TimeScalingRecord {
 				timeScaling->ntracks++;
 			}
 			timeScaling->trackNums = (int *)realloc(timeScaling->trackNums, sizeof(int) * timeScaling->ntracks);
-			timeScaling->startPos = (long *)calloc(sizeof(long), timeScaling->ntracks);
+			timeScaling->startPos = (int32_t *)calloc(sizeof(int32_t), timeScaling->ntracks);
 			timeScaling->originalTicks = (MDTickType **)calloc(sizeof(MDTickType *), timeScaling->ntracks);
 			for (i = 0; i < timeScaling->ntracks; i++) {
 				MDPointer *pt;
@@ -390,7 +390,7 @@ typedef struct TimeScalingRecord {
 	float ppt;
 	MDTickType tick1, tick2;
 	int i;
-	long trackNo;
+	int32_t trackNo;
 	GraphicClientView *view;
 	BOOL shiftDown = (([theEvent modifierFlags] & NSShiftKeyMask) != 0);
 	MyDocument *document = (MyDocument *)[dataSource document];
@@ -470,7 +470,7 @@ typedef struct TimeScalingRecord {
 			MDPointer *pt;
 			IntGroup *pset;
 			MDSelectionObject *obj;
-			long pos1, pos2;
+			int32_t pos1, pos2;
 			if (![dataSource isFocusTrack: trackNo])
 				continue;
 			track = [[document myMIDISequence] getTrackAtIndex: trackNo];

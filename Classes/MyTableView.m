@@ -34,12 +34,12 @@
 	underlineRow = -1;
 }
 
-- (void)editColumn:(int)columnIndex row:(int)rowIndex withEvent:(NSEvent *)theEvent select:(BOOL)flag
+- (void)editColumn:(NSInteger)columnIndex row:(NSInteger)rowIndex withEvent:(NSEvent *)theEvent select:(BOOL)flag
 {
 	//  If the delegate implements special editing feature, call it.
 	id delegate = [self delegate];
 	if ([delegate respondsToSelector:@selector(myTableView:shouldEditColumn:row:)]) {
-		if (![(MyTableView *)delegate myTableView:self shouldEditColumn:columnIndex row:rowIndex])
+		if (![(MyTableView *)delegate myTableView:self shouldEditColumn:(int)columnIndex row:(int)rowIndex])
 			return;
 	}
 	//  If it does not, then do the usual thing
@@ -78,12 +78,12 @@
 	NSEvent *theEvent = [[self window] currentEvent];
 //	unichar charCode;
 //	charCode = [[theEvent charactersIgnoringModifiers] characterAtIndex: 0];
-	column = [self editedColumn];
-	row = [self editedRow];
+	column = (int)[self editedColumn];
+	row = (int)[self editedRow];
 	dColumn = dRow = 0;
-	numRows = [self numberOfRows];
+	numRows = (int)[self numberOfRows];
 	visibleRect = [self visibleRect];
-	pageRows = ([self rowsInRect: visibleRect]).length - 1;
+	pageRows = (int)([self rowsInRect: visibleRect]).length - 1;
     if (aSelector == @selector(insertNewline:)) {
         if ([[theEvent charactersIgnoringModifiers] characterAtIndex: 0] == NSEnterCharacter) {
             endEditing = YES;
@@ -133,12 +133,13 @@
 		return YES;
 
 	/*  Continue edit  */
-	newRow = [self selectedRow];	/*  May have changed during confirmation  */
+	newRow = (int)[self selectedRow];	/*  May have changed during confirmation  */
 	oldRow = row;
 
 	/*  Adjust the column position  */
 	column += dColumn;
-	if (column > (n = [self numberOfColumns] - 1)) {
+    n = (int)[self numberOfColumns] - 1;
+	if (column > n) {
 		column = 0;
 		dRow = 1;
 	}
@@ -159,7 +160,7 @@
 	}
 	if (row < 0)
 		row = 0;
-	else if (row >= (n = [[self dataSource] numberOfRowsInTableView: self]))
+	else if (row >= (n = (int)[[self dataSource] numberOfRowsInTableView: self]))
 		row = n - 1;
 
 	if (pageScroll) {
@@ -173,7 +174,7 @@
 	
 	if (insertNewline) {
 		/*  Insert an empty event with the same tick (TODO: or advance the tick by some specified value?)  */
-		long position = [(ListWindowController *)[self dataSource] eventPositionForTableRow: row];
+		int32_t position = [(ListWindowController *)[self dataSource] eventPositionForTableRow: row];
 		[(ListWindowController *)[self dataSource] startEditAtColumn: column creatingEventWithTick: kMDNegativeTick atPosition: position + 1];
 	} else {
 		[(ListWindowController *)[self dataSource] startEditAtColumn: column row: row];
@@ -207,8 +208,8 @@
 	if ((modifierFlags & NSCommandKeyMask) != 0 && (charCode == NSCarriageReturnCharacter || charCode == NSEnterCharacter)) {
 		/*  Enter edit mode  */
 		if ([self numberOfSelectedRows] == 1) {
-			long position;
-			row = [self selectedRow];
+			int32_t position;
+			row = (int)[self selectedRow];
 			if (charCode == NSCarriageReturnCharacter) {
 				insertFlag = YES;
 				if (row < [self numberOfRows] - 1)
@@ -232,8 +233,8 @@
 - (NSMenu *)menuForEvent:(NSEvent *)theEvent
 {
 	NSPoint pt = [self convertPoint: [theEvent locationInWindow] fromView: nil];
-	int row = [self rowAtPoint: pt];
-	int column = [self columnAtPoint: pt];
+	int row = (int)[self rowAtPoint: pt];
+	int column = (int)[self columnAtPoint: pt];
 	NSRect cellFrame = [self frameOfCellAtColumn: column row: row];
 	if (cellFrame.size.height > 0 && cellFrame.size.width > 0) {
 		return [[[[self tableColumns] objectAtIndex: column] dataCell] menuForEvent: theEvent inRect: cellFrame ofView: self];

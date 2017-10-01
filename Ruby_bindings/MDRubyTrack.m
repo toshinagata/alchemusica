@@ -166,7 +166,7 @@ s_MRTrack_SetDuration(VALUE self, VALUE val)
 	MDTickType duration = floor(NUM2DBL(val) + 0.5);
 	MDTickType largestTick = MDTrackGetLargestTick(ip->track);
 	if (duration <= largestTick)
-		rb_raise(rb_eRangeError, "duration value (%ld) out of limit, must be >= %ld", (long)duration, (long)largestTick + 1);
+		rb_raise(rb_eRangeError, "duration value (%d) out of limit, must be >= %d", (int)duration, (int)largestTick + 1);
 	if (ip->doc != nil) {
 		[ip->doc changeTrackDuration: duration ofTrack: ip->num];
 	} else {
@@ -421,7 +421,7 @@ s_MRTrack_EventSet(int argc, VALUE *argv, VALUE self)
 {
 	IntGroup *pset;
 	VALUE val, rval;
-	long max, n;
+	int32_t max, n;
 
 	const MyDocumentTrackInfo *ip = TrackInfoFromMRTrackValue(self);
 	if (ip == NULL || ip->track == NULL)
@@ -450,7 +450,7 @@ s_MRTrack_EventSet(int argc, VALUE *argv, VALUE self)
 		VALUE pval;
 		MRPointerInfo *pvalinfo;
 		IntGroup *ps_to_remove = IntGroupNew();
-		long i;
+		int32_t i;
 		pval = s_MRTrack_Pointer(self, Qnil);
 		Data_Get_Struct(pval, MRPointerInfo, pvalinfo);
 		for (i = 0; (n = IntGroupGetNthPoint(pset, i)) >= 0; i++) {
@@ -760,7 +760,7 @@ s_MRTrack_Add(VALUE self, VALUE sval)
 	char *p;
 	const MyDocumentTrackInfo *ip = TrackInfoFromMRTrackValue(self);
 	sval = rb_ary_to_ary(sval);
-	argc = RARRAY_LEN(sval);
+	argc = (int)RARRAY_LEN(sval);
 	argv = RARRAY_PTR(sval);
 	if (argc < 2)
 		rb_raise(rb_eArgError, "at least 2 parameters should be present");
@@ -861,7 +861,7 @@ s_MRTrack_Add(VALUE self, VALUE sval)
 				rb_raise(rb_eArgError, "text kind number (%d) is out of range", code);
 			MDSetCode(ep, code);
 			StringValue(argv[0]);
-			MDSetMessageLength(ep, RSTRING_LEN(argv[0]));
+			MDSetMessageLength(ep, (int)RSTRING_LEN(argv[0]));
 			MDSetMessage(ep, (unsigned char *)(RSTRING_PTR(argv[0])));
 			break;
 		case kMDEventMetaMessage:
@@ -879,11 +879,11 @@ s_MRTrack_Add(VALUE self, VALUE sval)
 				s_raise_if_missing_parameter(argc, 1, "string or array of integers");
 			}
 			if ((n1 = TYPE(argv[0])) == T_STRING) {
-				n2 = RSTRING_LEN(argv[0]);
+				n2 = (int)RSTRING_LEN(argv[0]);
 				ucp = (unsigned char *)(RSTRING_PTR(argv[0]));
 			} else {
 				val = rb_ary_to_ary(argv[0]);
-				n2 = RARRAY_LEN(val);
+				n2 = (int)RARRAY_LEN(val);
 				ucp = (unsigned char *)malloc(n2);
 				for (n3 = 0; n3 < n2; n3++)
 					ucp[n3] = NUM2INT(rb_Integer(RARRAY_PTR(val)[n3]));

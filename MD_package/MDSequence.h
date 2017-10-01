@@ -23,7 +23,7 @@
 typedef struct MDSequence		MDSequence;
 
 /*  シーケンス中の全トラック中の全イベントをティック順に取り出すための仕掛け。 */
-typedef struct MDMerger			MDMerger;
+/* typedef struct MDMerger			MDMerger; */
 
 /*  コピー／ペースト実装のための内部データ  */
 typedef struct MDCatalogTrack {
@@ -68,48 +68,48 @@ void	MDSequenceRelease(MDSequence *inSequence);
 void	MDSequenceClear(MDSequence *inSequence);
 
 /*  タイムベースを変更する。（イベントの内部データは変更されない） */
-void	MDSequenceSetTimebase(MDSequence *inSequence, long inTimebase);
+void	MDSequenceSetTimebase(MDSequence *inSequence, int32_t inTimebase);
 
 /*  タイムベースを得る。 */
-long	MDSequenceGetTimebase(const MDSequence *inSequence);
+int32_t	MDSequenceGetTimebase(const MDSequence *inSequence);
 
 /*  含まれているトラックの数を返す（コンダクタートラックを含む）。 */
-long	MDSequenceGetNumberOfTracks(const MDSequence *inSequence);
+int32_t	MDSequenceGetNumberOfTracks(const MDSequence *inSequence);
 
 /*  シーケンスの長さ（tick 単位）を返す。 */
 MDTickType	MDSequenceGetDuration(const MDSequence *inSequence);
 
 /*  index 番目のトラック（先頭＝コンダクタートラックが０）を返す */
-MDTrack *	MDSequenceGetTrack(const MDSequence *inSequence, long index);
+MDTrack *	MDSequenceGetTrack(const MDSequence *inSequence, int32_t index);
 
 /*  index 番目にトラックを挿入する。index が大きすぎるかまたは -1 の場合にはトラック
     リストの末尾に挿入する。実際に挿入した位置を返す。 */
-long	MDSequenceInsertTrack(MDSequence *inSequence, long index, MDTrack *inTrack);
+int32_t	MDSequenceInsertTrack(MDSequence *inSequence, int32_t index, MDTrack *inTrack);
 
 /*  index 番目のトラックを削除する。削除されたトラックは MDTrackRelease() される。
     実際に挿入したトラックの番号を返す。 */
-long	MDSequenceDeleteTrack(MDSequence *inSequence, long index);
+int32_t	MDSequenceDeleteTrack(MDSequence *inSequence, int32_t index);
 
 /*  index 番目のトラックを新しいトラックで置き換える。置き換えられたトラックは
     MDTrackRelease() される。index が大きすぎる場合には何もせず -1 を返す。 */
-long	MDSequenceReplaceTrack(MDSequence *inSequence, long index, MDTrack *inTrack);
+int32_t	MDSequenceReplaceTrack(MDSequence *inSequence, int32_t index, MDTrack *inTrack);
 
 /*  index 番目のトラックの Record フラグをセットする。flag = 0: OFF, 1: ON, -1: toggle。Record フラグが変更された場合は non-zero, 変更されなかった場合は 0 を返す。
     トラックの Record フラグが新たにセットされた場合は、他のトラックの Record フラグは自動的にリセットされる。 */
-int		MDSequenceSetRecordFlagOnTrack(MDSequence *inSequence, long index, int flag);
+int		MDSequenceSetRecordFlagOnTrack(MDSequence *inSequence, int32_t index, int flag);
 
 /*  index 番目のトラックの Solo フラグをセットする。flag = 0: OFF, 1: ON, -1: toggle
     この他のトラックの MuteBySolo フラグも更新される。  */
-int		MDSequenceSetSoloFlagOnTrack(MDSequence *inSequence, long index, int flag);
+int		MDSequenceSetSoloFlagOnTrack(MDSequence *inSequence, int32_t index, int flag);
 
 /*  index 番目のトラックの Mute フラグをセットする。flag = 0: OFF, 1: ON, -1: toggle  */
-int		MDSequenceSetMuteFlagOnTrack(MDSequence *inSequence, long index, int flag);
+int		MDSequenceSetMuteFlagOnTrack(MDSequence *inSequence, int32_t index, int flag);
 
 /*  MuteBySolo フラグを更新する。Solo フラグを変更したあと呼び出す。  */
 void	MDSequenceUpdateMuteBySoloFlag(MDSequence *inSequence);
 
 /*  Record フラグが立っているトラックの番号を得る。なければ -1 を返す。  */
-long	MDSequenceGetIndexOfRecordingTrack(MDSequence *inSequence);
+int32_t	MDSequenceGetIndexOfRecordingTrack(MDSequence *inSequence);
 
 /*  Single channel mode に移行する。Single channel mode では、すべての MIDI イベントのチャンネルは０になり、実際に MIDI チャンネルが必要な時（MIDI入出力時、およびSMFのインポート／エキスポート時）にはトラックチャンネルの値が使われる。 */
 /* separate が non-zero ならば、すべてのトラックの内容がチェックされ、複数のチャンネルにまたがっているトラックはチャンネルごとに分割される。各トラックごとのMIDIチャンネルが一つになったあと、その値がトラックチャンネルがセットされ、MIDIイベントのチャンネルの値は０になる。 */
@@ -155,6 +155,7 @@ void		MDSequenceLock(MDSequence *inSequence);
 void		MDSequenceUnlock(MDSequence *inSequence);
 int			MDSequenceTryLock(MDSequence *inSequence);
 
+#if 0
 /* -------------------------------------------------------------------
     MDMerger functions
    -------------------------------------------------------------------  */
@@ -194,13 +195,15 @@ MDEvent *		MDMergerForward(MDMerger *inMerger);
 MDEvent *		MDMergerBackward(MDMerger *inMerger);
 
 /*  現在のイベントが属するトラック番号を得る。 */
-long			MDMergerGetCurrentTrack(MDMerger *inMerger);
+int32_t			MDMergerGetCurrentTrack(MDMerger *inMerger);
 
 /*  現在のイベントのトラック内での位置（番号）を得る。  */
-long			MDMergerGetCurrentPositionInTrack(MDMerger *inMerger);
+int32_t			MDMergerGetCurrentPositionInTrack(MDMerger *inMerger);
 
 /*  現在のイベントのティックを得る。  */
 MDTickType		MDMergerGetTick(MDMerger *inMerger);
+
+#endif
 
 #ifdef __cplusplus
 }

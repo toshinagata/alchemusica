@@ -28,8 +28,8 @@
 	char **valueHistory, **commandHistory;
 	int nValueHistory, nCommandHistory;
 	int valueHistoryIndex, commandHistoryIndex;
-	long historyPos;
-	long keyInputPos;
+	int32_t historyPos;
+	int32_t keyInputPos;
 }
 + (RubyConsoleWindowController *)sharedRubyConsoleWindowController;
 

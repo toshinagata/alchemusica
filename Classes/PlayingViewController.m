@@ -119,7 +119,7 @@
 	MDTickType tick;
 	MDTimeType time;
 	double d, slider;
-	long bar, beat, count, marker, ntime;
+	int32_t bar, beat, count, marker, ntime;
 	int hour, min, sec, status;
 	NSString *countString, *timeString;
 	BOOL playingOrRecording = NO;
@@ -164,11 +164,11 @@
 			time = currentTime;
 			tick = MDCalibratorTimeToTick(calibrator, time);
 			MDCalibratorTickToMeasure(calibrator, tick, &bar, &beat, &count);
-			countString = [NSString stringWithFormat: @"%4ld:%2ld:%4ld", bar, beat, count];
+			countString = [NSString stringWithFormat: @"%4d:%2d:%4d", bar, beat, count];
 			if (totalTime > 0) {
 				slider = (double)time / totalTime * 100.0;
 			} else slider = 0.0;
-			marker = [tickArray count];
+			marker = (int)[tickArray count];
 			if (marker >= 1) {
 				d = (double)tick;
 				while (--marker >= 0) {
@@ -179,7 +179,7 @@
 					marker = 0;
 			} else marker = -1;
 		}
-		ntime = (long)(time / 1000000);
+		ntime = (int32_t)(time / 1000000);
 		hour = ntime / 3600;
 		min = (ntime / 60) % 60;
 		sec = ntime % 60;
@@ -258,7 +258,7 @@
         MDEvent *ep;
         MDTickType tick;
         NSString *name;
-        long length;
+        int32_t length;
         n = 0;
         while ((ep = MDPointerForward(pos)) != NULL) {
             if (MDIsTextMetaEvent(ep) && MDGetCode(ep) == kMDMetaMarker) {
@@ -290,7 +290,7 @@
 //	MDPointer *pos;
 //	MDEvent *ep;
 //	MDTickType tick;
-//	long length;
+//	int32_t length;
 //	NSString *name;
 //	int n;
 
@@ -703,7 +703,7 @@
 	if (player == NULL)
 		return;
 	status = MDPlayerGetStatus(player);
-	index = [sender indexOfSelectedItem];
+	index = (int)[sender indexOfSelectedItem];
 	if (index >= 0 && index < [tickArray count]) {
 		if (status == kMDPlayer_playing || status == kMDPlayer_exhausted) {
 			shouldContinuePlay = YES;
@@ -725,7 +725,7 @@
 
 - (IBAction)tickTextEdited: (id)sender
 {
-	long bar, beat, subtick;
+	int32_t bar, beat, subtick;
 	MDTickType tick;
 	if (MDEventParseTickString([[sender stringValue] UTF8String], &bar, &beat, &subtick) < 3)
 		return;
@@ -735,12 +735,12 @@
 
 - (IBAction)timeTextEdited: (id)sender
 {
-	long hour, min, sec;
+	int hour, min, sec;
 	MDTimeType time;
 	const char *s;
 	int n;
 	s = [[sender stringValue] UTF8String];
-	n = sscanf(s, "%ld%*[^-0-9]%ld%*[^-0-9]%ld", &hour, &min, &sec);
+	n = sscanf(s, "%d%*[^-0-9]%d%*[^-0-9]%d", &hour, &min, &sec);
 	switch (n) {
 		case 1: hour = min = 0; break;
 		case 2: hour = 0; break;

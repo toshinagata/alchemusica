@@ -27,16 +27,17 @@
 #endif
 
 struct MDSequence {
-	long			refCount;	/*  the reference count  */
-	long			timebase;	/*  the timebase  */
-	long			num;		/*  the number of tracks (including the conductor track)  */
+	int32_t			refCount;	/*  the reference count  */
+	int32_t			timebase;	/*  the timebase  */
+	int32_t			num;		/*  the number of tracks (including the conductor track)  */
     unsigned char	single;		/*  non-zero if single channel mode  */
 	MDArray *		tracks;		/*  the array of tracks (the 0-th is the conductor track)  */
 	MDCalibrator *	calib;		/*  the first MDCalibrator related to this sequence  */
-	MDMerger *		merger;		/*  the first MDMerger related to this sequence  */
+/*	MDMerger *		merger;		*//*  the first MDMerger related to this sequence  */
 	pthread_mutex_t *mutex;		/*  the mutex for lock/unlock  */
 };
 
+#if 0
 /*  A private struct for MDMerger  */
 typedef struct MDMergerInfo {
 	MDTrack *		track;
@@ -47,14 +48,15 @@ typedef struct MDMergerInfo {
 } MDMergerInfo;
 
 struct MDMerger {
-	long			refCount;
+	int32_t			refCount;
 	MDSequence *	sequence;
 	MDMerger *		next;
-	long			currentTrack;
+	int32_t			currentTrack;
 	MDEvent *		eptr;
 	MDTickType		tick;
 	MDArray			*info;			//  MDMergerInfo の array
 };
+#endif
 
 #ifdef __MWERKS__
 #pragma mark -
@@ -198,7 +200,7 @@ MDSequenceDetachCalibrator(MDSequence *inSequence, MDCalibrator *inCalib)
 	･ MDSequenceSetTimebase
    -------------------------------------- */
 void
-MDSequenceSetTimebase(MDSequence *inSequence, long inTimebase)
+MDSequenceSetTimebase(MDSequence *inSequence, int32_t inTimebase)
 {
 	inSequence->timebase = inTimebase;
 }
@@ -206,7 +208,7 @@ MDSequenceSetTimebase(MDSequence *inSequence, long inTimebase)
 /* --------------------------------------
 	･ MDSequenceGetTimebase
    -------------------------------------- */
-long
+int32_t
 MDSequenceGetTimebase(const MDSequence *inSequence)
 {
 	return inSequence->timebase;
@@ -215,7 +217,7 @@ MDSequenceGetTimebase(const MDSequence *inSequence)
 /* --------------------------------------
 	･ MDSequenceGetNumberOfTracks
    -------------------------------------- */
-long
+int32_t
 MDSequenceGetNumberOfTracks(const MDSequence *inSequence)
 {
 	return inSequence->num;
@@ -228,7 +230,7 @@ MDTickType
 MDSequenceGetDuration(const MDSequence *inSequence)
 {
 	MDTrack *track;
-	long n;
+	int32_t n;
 	MDTickType duration, maxDuration;
 	maxDuration = 0;
 	for (n = inSequence->num - 1; n >= 0; n--) {
@@ -246,7 +248,7 @@ MDSequenceGetDuration(const MDSequence *inSequence)
 	･ MDSequenceGetTrack
    -------------------------------------- */
 MDTrack *
-MDSequenceGetTrack(const MDSequence *inSequence, long index)
+MDSequenceGetTrack(const MDSequence *inSequence, int32_t index)
 {
 	MDTrack *track;
 	if (MDArrayFetch(inSequence->tracks, index, 1, &track) == 1)
@@ -262,7 +264,7 @@ void
 MDSequenceUpdateMuteBySoloFlag(MDSequence *inSequence)
 {
 	MDTrack *track;
-	long n, solo;
+	int32_t n, solo;
     MDTrackAttribute attr;
     solo = 0;
 	for (n = inSequence->num - 1; n >= 0; n--) {
@@ -291,10 +293,10 @@ MDSequenceUpdateMuteBySoloFlag(MDSequence *inSequence)
 	･ MDSequenceSetRecordFlagOnTrack
    -------------------------------------- */
 int
-MDSequenceSetRecordFlagOnTrack(MDSequence *inSequence, long index, int flag)
+MDSequenceSetRecordFlagOnTrack(MDSequence *inSequence, int32_t index, int flag)
 {
     MDTrack *track;
-    long n;
+    int32_t n;
     MDTrackAttribute attr, newAttr;
     if (index < 0 || index >= inSequence->num || (track = MDSequenceGetTrack(inSequence, index)) == NULL)
         return 0;
@@ -324,7 +326,7 @@ MDSequenceSetRecordFlagOnTrack(MDSequence *inSequence, long index, int flag)
 	･ MDSequenceSetSoloFlagOnTrack
    -------------------------------------- */
 int
-MDSequenceSetSoloFlagOnTrack(MDSequence *inSequence, long index, int flag)
+MDSequenceSetSoloFlagOnTrack(MDSequence *inSequence, int32_t index, int flag)
 {
     MDTrack *track;
     MDTrackAttribute attr, newAttr;
@@ -348,7 +350,7 @@ MDSequenceSetSoloFlagOnTrack(MDSequence *inSequence, long index, int flag)
 	･ MDSequenceSetMuteFlagOnTrack
    -------------------------------------- */
 int
-MDSequenceSetMuteFlagOnTrack(MDSequence *inSequence, long index, int flag)
+MDSequenceSetMuteFlagOnTrack(MDSequence *inSequence, int32_t index, int flag)
 {
     MDTrack *track;
     MDTrackAttribute attr, newAttr;
@@ -370,10 +372,10 @@ MDSequenceSetMuteFlagOnTrack(MDSequence *inSequence, long index, int flag)
 /* --------------------------------------
 	･ MDSequenceGetIndexOfRecordingTrack
    -------------------------------------- */
-long
+int32_t
 MDSequenceGetIndexOfRecordingTrack(MDSequence *inSequence)
 {
-    long index;
+    int32_t index;
     for (index = 0; index < inSequence->num; index++) {
         MDTrack *track = MDSequenceGetTrack(inSequence, index);
         if (track != NULL && (MDTrackGetAttribute(track) & kMDTrackAttributeRecord) != 0)
@@ -389,8 +391,8 @@ MDSequenceGetIndexOfRecordingTrack(MDSequence *inSequence)
 /* --------------------------------------
 	･ MDSequenceInsertTrack
    -------------------------------------- */
-long
-MDSequenceInsertTrack(MDSequence *inSequence, long index, MDTrack *inTrack)
+int32_t
+MDSequenceInsertTrack(MDSequence *inSequence, int32_t index, MDTrack *inTrack)
 {
 	if (index < -1)
 		index = 0;
@@ -412,8 +414,8 @@ MDSequenceInsertTrack(MDSequence *inSequence, long index, MDTrack *inTrack)
 /* --------------------------------------
 	･ MDSequenceDeleteTrack
    -------------------------------------- */
-long
-MDSequenceDeleteTrack(MDSequence *inSequence, long index)
+int32_t
+MDSequenceDeleteTrack(MDSequence *inSequence, int32_t index)
 {
 	MDTrack *track;
 	if (index < 0 || index >= inSequence->num)
@@ -432,10 +434,10 @@ MDSequenceDeleteTrack(MDSequence *inSequence, long index)
 /* --------------------------------------
 	･ MDSequenceReplaceTrack
    -------------------------------------- */
-long
-MDSequenceReplaceTrack(MDSequence *inSequence, long index, MDTrack *inTrack)
+int32_t
+MDSequenceReplaceTrack(MDSequence *inSequence, int32_t index, MDTrack *inTrack)
 {
-    long n;
+    int32_t n;
 	if (index < 0 || index >= inSequence->num)
 		return -1;
     n = MDSequenceDeleteTrack(inSequence, index);
@@ -466,8 +468,8 @@ MDSequenceResetCalibrators(MDSequence *inSequence)
 MDStatus
 MDSequenceSingleChannelMode(MDSequence *inSequence, int separate)
 {
-    long n;
-    long nch[16];
+    int32_t n;
+    int32_t nch[16];
     MDStatus sts = kMDNoError;
 
     if (inSequence == NULL)
@@ -577,7 +579,7 @@ MDSequenceSingleChannelMode(MDSequence *inSequence, int separate)
 MDStatus
 MDSequenceMultiChannelMode(MDSequence *inSequence)
 {
-    long n;
+    int32_t n;
     MDTrack *track;
     unsigned char newch[16];
     if (inSequence == NULL)
@@ -606,44 +608,6 @@ MDSequenceIsSingleChannelMode(const MDSequence *inSequence)
     if (inSequence != NULL)
         return (inSequence->single != 0);
     else return 0;
-}
-
-#ifdef __MWERKS__
-#pragma mark ====== MDMerger manipulations ======
-#endif
-
-static void
-MDSequenceAttachMerger(const MDSequence *inSequence, MDMerger *inMerger)
-{
-	if (inSequence == NULL || inMerger == NULL)
-		return;
-	inMerger->next = inSequence->merger;
-
-	/*  merger is a 'mutable' member, so this cast is acceptable  */
-	((MDSequence *)inSequence)->merger = inMerger;
-}
-
-static void
-MDSequenceDetachMerger(const MDSequence *inSequence, MDMerger *inMerger)
-{
-	MDMerger *currRef, *prevRef;
-	if (inSequence == NULL || inMerger == NULL)
-		return;
-	currRef = inSequence->merger;
-	prevRef = NULL;
-	while (currRef != NULL) {
-		if (currRef == inMerger) {
-			if (prevRef == NULL) {
-				/*  merger is a 'mutable' member, so this cast is acceptable  */
-				((MDSequence *)inSequence)->merger = currRef->next;
-			} else {
-				prevRef->next = currRef->next;
-			}
-			break;
-		}
-		prevRef = currRef;
-		currRef = currRef->next;
-	}
 }
 
 #pragma mark ======   MDSequence Lock/Unlock  ======
@@ -714,6 +678,45 @@ MDSequenceTryLock(MDSequence *inSequence)
 }
 
 #ifdef __MWERKS__
+#pragma mark ====== MDMerger manipulations ======
+#endif
+
+#if 0
+static void
+MDSequenceAttachMerger(const MDSequence *inSequence, MDMerger *inMerger)
+{
+    if (inSequence == NULL || inMerger == NULL)
+        return;
+    inMerger->next = inSequence->merger;
+    
+    /*  merger is a 'mutable' member, so this cast is acceptable  */
+    ((MDSequence *)inSequence)->merger = inMerger;
+}
+
+static void
+MDSequenceDetachMerger(const MDSequence *inSequence, MDMerger *inMerger)
+{
+    MDMerger *currRef, *prevRef;
+    if (inSequence == NULL || inMerger == NULL)
+        return;
+    currRef = inSequence->merger;
+    prevRef = NULL;
+    while (currRef != NULL) {
+        if (currRef == inMerger) {
+            if (prevRef == NULL) {
+                /*  merger is a 'mutable' member, so this cast is acceptable  */
+                ((MDSequence *)inSequence)->merger = currRef->next;
+            } else {
+                prevRef->next = currRef->next;
+            }
+            break;
+        }
+        prevRef = currRef;
+        currRef = currRef->next;
+    }
+}
+
+#ifdef __MWERKS__
 #pragma mark -
 #pragma mark ======   MDMerger functions   ======
 #endif
@@ -755,7 +758,7 @@ MDMergerRetain(MDMerger *inMerger)
 void
 MDMergerRelease(MDMerger *inMerger)
 {
-	long i, num;
+	int32_t i, num;
 	if (--inMerger->refCount == 0) {
 		if (inMerger->info != NULL) {
 			num = MDArrayCount(inMerger->info);
@@ -785,7 +788,7 @@ MDMerger *
 MDMergerDuplicate(const MDMerger *inSrc)
 {
 	MDMergerInfo anInfo, aSrcInfo;
-	long n;
+	int32_t n;
 	MDMerger *dest = MDMergerNew(NULL);
 	if (dest != NULL) {
 		dest->info = MDArrayNew(sizeof(MDMergerInfo));
@@ -860,7 +863,7 @@ MDMergerGetSequence(MDMerger *inMerger)
 void
 MDMergerReset(MDMerger *inMerger)
 {
-	long num;
+	int32_t num;
 	MDMergerInfo info;
 	if (inMerger == NULL || inMerger->sequence == NULL)
 		return;
@@ -907,7 +910,7 @@ MDMergerReset(MDMerger *inMerger)
 int
 MDMergerJumpToTick(MDMerger *inMerger, MDTickType inTick)
 {
-	long i, num, minIndex;
+	int32_t i, num, minIndex;
 	MDTickType minTick;
 	MDEvent *eptr;
 	if (inMerger == NULL || inMerger->info == NULL)
@@ -960,7 +963,7 @@ MDMergerForward(MDMerger *inMerger)
 {
 	MDMergerInfo info;
 	MDTickType minTick;
-	long minIndex, i, num;
+	int32_t minIndex, i, num;
 	MDEvent *eptr;
 
 	if (inMerger == NULL || inMerger->tick == kMDMaxTick)
@@ -1013,7 +1016,7 @@ MDMergerBackward(MDMerger *inMerger)
 {
 	MDMergerInfo info;
 	MDTickType maxLastTick;
-	long maxIndex, i, num;
+	int32_t maxIndex, i, num;
 	MDEvent *eptr;
 	
 	if (inMerger == NULL || inMerger->info == NULL || inMerger->tick == kMDNegativeTick)
@@ -1063,7 +1066,7 @@ MDMergerBackward(MDMerger *inMerger)
 /* --------------------------------------
 	･ MDMergerGetCurrentTrack
    -------------------------------------- */
-long
+int32_t
 MDMergerGetCurrentTrack(MDMerger *inMerger)
 {
 	if (inMerger != NULL)
@@ -1074,7 +1077,7 @@ MDMergerGetCurrentTrack(MDMerger *inMerger)
 /* --------------------------------------
 	･ MDMergerGetCurrentPositionInTrack
    -------------------------------------- */
-long
+int32_t
 MDMergerGetCurrentPositionInTrack(MDMerger *inMerger)
 {
 	MDMergerInfo info;
@@ -1096,3 +1099,4 @@ MDMergerGetTick(MDMerger *inMerger)
 		return inMerger->tick;
 	else return kMDNegativeTick;
 }
+#endif

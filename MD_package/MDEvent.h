@@ -109,8 +109,8 @@ enum {
 };
 
 /*  tick および絶対時間を扱う型。絶対時間の単位はマイクロ秒。  */
-typedef long		MDTickType;
-typedef long long	MDTimeType;
+typedef int32_t		MDTickType;
+typedef int64_t	MDTimeType;
 
 #define kMDMaxTick		((MDTickType)0x7ffffff0)
 #define kMDNegativeTick	((MDTickType)-1)
@@ -158,7 +158,7 @@ struct MDEvent {
 			short		data2;		/*  for other MIDI events  */
 			short		data3;
 		} d;
-		long			ldata;		/*  for internal note-off event  */
+		int32_t			ldata;		/*  for internal note-off event  */
 		unsigned char	metadata[4];	/*  meta events  */
 		MDSMPTERecord	smpte;		/*  SMPTE  */
 		float			tempo;
@@ -171,7 +171,7 @@ struct MDEvent {
 typedef union MDEventDisplayValue {
 	const char *	ccp;
 	char *			cp;
-	long			l;
+	int32_t			l;
 	float			f;
 } MDEventDisplayValue;
 
@@ -265,13 +265,13 @@ void	MDEventClear(MDEvent *eventRef);
 void	MDEventDefault(MDEvent *eventRef, int kind);
 
 /*  イベントをコピーする。メッセージデータはポインタだけがコピーされ Retain される。 */
-void	MDEventCopy(MDEvent *destRef, const MDEvent *sourceRef, long count);
+void	MDEventCopy(MDEvent *destRef, const MDEvent *sourceRef, int32_t count);
 
 /*  イベントを移動させる。sourceRef は０で初期化される。 */
-void	MDEventMove(MDEvent *destRef, MDEvent *sourceRef, long count);
+void	MDEventMove(MDEvent *destRef, MDEvent *sourceRef, int32_t count);
 
 /*　メッセージの長さを得る。メッセージイベントでない場合は -1 を返す。  */
-long	MDGetMessageLength(const MDEvent *eventRef);
+int32_t	MDGetMessageLength(const MDEvent *eventRef);
 
 /*  srcRef から destRef にメッセージデータだけをコピーする。  */
 void	MDCopyMessage(MDEvent *destRef, MDEvent *srcRef);
@@ -279,17 +279,17 @@ void	MDCopyMessage(MDEvent *destRef, MDEvent *srcRef);
 /*　渡されたバッファアドレスにメッセージデータをコピーする。outBuffer はメッセージを
     格納するのに十分な大きさがなければならない。
     メッセージの長さを返す。メッセージイベントでない場合は -1 を返す。 */
-long	MDGetMessage(const MDEvent *eventRef, unsigned char *outBuffer);
+int32_t	MDGetMessage(const MDEvent *eventRef, unsigned char *outBuffer);
 
 /*　メッセージデータの inOffset 目のバイト（先頭が０）から inLength バイトを outBuffer 
     にコピーする。outBuffer は最大 inLength バイトのデータを格納できる大きさがなければ
     ならない。実際にコピーしたバイト数を返す。メッセージイベントでない場合は -1 を返す。 */
-long	MDGetMessagePartial(const MDEvent *eventRef, unsigned char *outBuffer, long inOffset, long inLength);
+int32_t	MDGetMessagePartial(const MDEvent *eventRef, unsigned char *outBuffer, int32_t inOffset, int32_t inLength);
 
 /*	メッセージデータの長さとデータへのポインタを返す。この関数で得たポインタには
     書き込みをしてはならない。 */
 const unsigned char *
-		MDGetMessageConstPtr(const MDEvent *eventRef, long *outLength);
+		MDGetMessageConstPtr(const MDEvent *eventRef, int32_t *outLength);
 
 /*  注意：MDGetMessagePtr, MDSetMessageLength, MDSetMessage, MDSetMessagePartial を
     呼び出した時、一見必要がないように見えても内部的にメモリ確保が行われることがある。
@@ -298,24 +298,24 @@ const unsigned char *
 
 /*	メッセージデータの長さとデータへのポインタを返す。データに書き込んでも構わないが、
 	決められた長さの外側に書き込まないよう注意すること。 */
-unsigned char *	MDGetMessagePtr(MDEvent *eventRef, long *outLength);
+unsigned char *	MDGetMessagePtr(MDEvent *eventRef, int32_t *outLength);
 
 /*　メッセージの長さを変更する。メッセージイベントでない場合は何もしない。inLength と
     同じ値が返されるが、メモリ不足の場合は負の値が返される。 */
-long	MDSetMessageLength(MDEvent *eventRef, long inLength);
+int32_t	MDSetMessageLength(MDEvent *eventRef, int32_t inLength);
 
 /*　渡されたバッファのデータをメッセージデータにコピーする。
     メッセージの長さはあらかじめセットされている値が使われる。
     メッセージの長さが返される。メモリ不足が起こった場合は負の値が返される。
     メッセージイベントでない場合は何もしない。 */
-long	MDSetMessage(MDEvent *eventRef, const unsigned char *inBuffer);
+int32_t	MDSetMessage(MDEvent *eventRef, const unsigned char *inBuffer);
 
 /*　メッセージデータの inOffset 目のバイト（先頭が０）から inLength バイトを inBuffer 
     のデータで置き換える。inOffset + inLength がメッセージの長さより長い場合は、メッ
     セージの長さちょうどで打ち切られる。
     メッセージの長さが返される。メモリ不足が起こった場合は負の値が返される。
     メッセージイベントでない場合は何もしない。 */
-long	MDSetMessagePartial(MDEvent *eventRef, const unsigned char *inBuffer, long inOffset, long inLength);
+int32_t	MDSetMessagePartial(MDEvent *eventRef, const unsigned char *inBuffer, int32_t inOffset, int32_t inLength);
 
 /*  イベントデータと表示データの相互変換。  */
 
@@ -329,9 +329,9 @@ int		MDEventNoteNameToNoteNumber(const char *p);
 int		MDEventStaffIndexToNoteNumber(int staff);
 
 /*  イベントを表示用文字列に変換する。length は buf[] に格納できる最大の文字数（最後のヌル文字を含む） */
-long	MDEventToKindString(const MDEvent *eref, char *buf, long length);
-long	MDEventToDataString(const MDEvent *eref, char *buf, long length);
-long	MDEventToGTString(const MDEvent *eref, char *buf, long length);
+int32_t	MDEventToKindString(const MDEvent *eref, char *buf, int32_t length);
+int32_t	MDEventToDataString(const MDEvent *eref, char *buf, int32_t length);
+int32_t	MDEventToGTString(const MDEvent *eref, char *buf, int32_t length);
 
 /*  表示用文字列からイベントデータを得る。code はイベントのどの部分に対応するかをあらわす定数。  */
 typedef short MDEventFieldCode;
@@ -354,12 +354,12 @@ enum {
 typedef intptr_t MDEventFieldDataWhole;
 typedef union MDEventFieldData {
 	MDEventFieldDataWhole whole;			
-	long			longValue;		/*  code, data1  */
+	int32_t			intValue;		/*  code, data1  */
 	float			floatValue;		/*  tempo  */
 	MDSMPTERecord	smpte;			/*  SMPTE  */
 	MDTickType      tickValue;      /*  tick  */
 	unsigned char	ucValue[4];		/*  metaData, KindAndCode ([0] が kind, [1] が code)  */
-	unsigned char *	binaryData;		/*  malloc() されたメモリへのポインタ。先頭の sizeof(long) バイトはデータの長さで、そのあとにデータ本体が続く。 */
+	unsigned char *	binaryData;		/*  malloc() されたメモリへのポインタ。先頭の sizeof(int32_t) バイトはデータの長さで、そのあとにデータ本体が続く。 */
 	void *          anyPointer;     /*  任意のポインタ  */
 } MDEventFieldData;
 
@@ -374,12 +374,12 @@ int		MDEventToMIDIMessage(const MDEvent *eventRef, unsigned char *buf);
 MDStatus	MDEventFromMIDIMessage(MDEvent *eventRef, unsigned char firstByte, unsigned char lastStatusByte, int (*getCharFunc)(void *), void *funcArgument, unsigned char *outStatusByte);
 
 /*  拍子記号イベントから、１小節の拍数、１拍の tick 数を求める  */
-int		MDEventParseTimeSignature(const MDEvent *eptr, long timebase, long *outTickPerBeat, long *outBeatPerMeasure);
+int		MDEventParseTimeSignature(const MDEvent *eptr, int32_t timebase, int32_t *outTickPerBeat, int32_t *outBeatPerMeasure);
 
-char *	MDEventToString(const MDEvent *eptr, char *buf, long bufsize);
+char *	MDEventToString(const MDEvent *eptr, char *buf, int32_t bufsize);
 
-/*  Parse "bar:beat:tick" string to three long integers  */
-int     MDEventParseTickString(const char *s, long *bar, long *beat, long *tick);
+/*  Parse "bar:beat:tick" string to three int32_t integers  */
+int     MDEventParseTickString(const char *s, int32_t *bar, int32_t *beat, int32_t *tick);
 
 int		MDEventSMFMetaNumberToEventKind(int smfMetaNumber);
 int		MDEventMetaKindCodeToSMFMetaNumber(int kind, int code);

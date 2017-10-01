@@ -101,7 +101,7 @@ NSLayoutManager *gSharedLayoutManager = nil;
 
 @implementation NSWindowController (viewWithTag)
 
-- (id)viewWithTag: (int)tag
+- (id)viewWithTag: (NSInteger)tag
 {
 	return [[[self window] contentView] viewWithTag: tag];
 }

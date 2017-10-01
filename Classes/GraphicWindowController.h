@@ -160,11 +160,11 @@ enum {
 
 - (void)setFocusFlag: (BOOL) flag onTrack: (int)trackNum extending: (BOOL)extendFlag;
 - (BOOL)isFocusTrack: (int)trackNum;
-- (BOOL)isTrackSelected: (long)trackNo;
-- (void)setIsTrackSelected: (long)trackNo flag: (BOOL)flag;
+- (BOOL)isTrackSelected: (int32_t)trackNo;
+- (void)setIsTrackSelected: (int32_t)trackNo flag: (BOOL)flag;
 
-- (long)trackCount;
-- (long)visibleTrackCount;
+- (int32_t)trackCount;
+- (int32_t)visibleTrackCount;
 - (int)sortedTrackNumberAtIndex: (int)index;  // For clientViews; focus track comes first
 
 - (float)pixelsPerQuarter;
@@ -211,7 +211,7 @@ enum {
 - (void)mouseEvent:(NSEvent *)theEvent receivedByClientView:(GraphicClientView *)cView;
 - (GraphicClientView *)lastMouseClientView;
 
-- (void)convertTick: (MDTickType)aTick toMeasure: (long *)measure beat: (long *)beat andTick: (long *)tick;
+- (void)convertTick: (MDTickType)aTick toMeasure: (int32_t *)measure beat: (int32_t *)beat andTick: (int32_t *)tick;
 
 //  Action method for GraphicSplitterView
 - (void)splitterViewStartedDragging: (GraphicSplitterView *)theView;
@@ -241,8 +241,8 @@ enum {
 - (IBAction)remapDevice: (id)sender;
 
 //  Action methods for graphic views
-- (IBAction)changeControlNumber:(id)sender;
-- (IBAction)shiftSelectedEvents:(id)sender;
+//- (IBAction)changeControlNumber:(id)sender;
+//- (IBAction)shiftSelectedEvents:(id)sender;
 
 //  Accessor for the subview controller
 - (id)playingViewController;

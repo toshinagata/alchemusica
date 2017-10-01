@@ -100,8 +100,8 @@ enum {
 
 - (int)modifyLocalGraphicTool:(int)originalGraphicTool;
 
-- (void)convertFromPoint:(NSPoint)pt toY:(float *)y andTick:(long *)tick;
-- (NSPoint)convertToPointFromY:(float)y andTick:(long)tick;
+- (void)convertFromPoint:(NSPoint)pt toY:(float *)y andTick:(int32_t *)tick;
+- (NSPoint)convertToPointFromY:(float)y andTick:(int32_t)tick;
 
 - (void)setVisibleRangeMin:(float)min max:(float)max;
 - (void)getVisibleRangeMin:(float *)min max:(float *)max;

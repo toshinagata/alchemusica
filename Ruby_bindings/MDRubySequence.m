@@ -67,7 +67,7 @@ MRSequenceFromMyDocument(MyDocument *doc)
 	VALUE *valp;
 	int len, i;
 	MRSequenceRecord *rp;
-	len = RARRAY_LEN(gMRSequences);
+	len = (int)RARRAY_LEN(gMRSequences);
 	valp = RARRAY_PTR(gMRSequences);
 	for (i = 0; i < len; i++) {
 		Data_Get_Struct(valp[i], MRSequenceRecord, rp);
@@ -160,7 +160,7 @@ s_MRSequence_TickToMeasure(VALUE self, VALUE tval)
 	MyDocument *doc = MyDocumentFromMRSequenceValue(self);
 	MDCalibrator *calib = [[doc myMIDISequence] sharedCalibrator];
 	MDTickType tick = (MDTickType)floor(NUM2DBL(tval) + 0.5);
-	long bar, beat, subtick;
+	int32_t bar, beat, subtick;
 	VALUE vals[3];
 	MDCalibratorTickToMeasure(calib, tick, &bar, &beat, &subtick);
 	vals[0] = INT2NUM(bar);
@@ -184,7 +184,7 @@ s_MRSequence_MeasureToTick(int argc, VALUE *argv, VALUE self)
 	MDCalibrator *calib = [[doc myMIDISequence] sharedCalibrator];
 	MDTickType tick;
 	VALUE val1, val2, val3;
-	long bar, beat, subtick;
+	int32_t bar, beat, subtick;
 	rb_scan_args(argc, argv, "12", &val1, &val2, &val3);
 	if (NIL_P(val2) && NIL_P(val3)) {
 		bar = NUM2INT(Ruby_ObjectAtIndex(val1, 0));

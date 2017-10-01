@@ -169,7 +169,7 @@
 {
 }
 
-- (void)convertFromPoint:(NSPoint)pt toY:(float *)y andTick:(long *)tick
+- (void)convertFromPoint:(NSPoint)pt toY:(float *)y andTick:(int32_t *)tick
 {
 	NSRect frame = [self frame];
 	float pixelsPerTick = [[self dataSource] pixelsPerTick];
@@ -177,7 +177,7 @@
 	*tick = (pt.x - frame.origin.x) / pixelsPerTick;
 }
 
-- (NSPoint)convertToPointFromY:(float)y andTick:(long)tick
+- (NSPoint)convertToPointFromY:(float)y andTick:(int32_t)tick
 {
 	NSPoint pt;
 	NSRect frame = [self frame];
@@ -355,10 +355,10 @@
 - (NSString *)infoTextForMousePoint:(NSPoint)pt dragging:(BOOL)flag
 {
 	MDTickType theTick;
-	long measure, beat, tick;
+	int32_t measure, beat, tick;
 	theTick = [dataSource quantizedTickFromPixel:pt.x];
 	[dataSource convertTick:theTick toMeasure:&measure beat:&beat andTick:&tick];
-	return [NSString stringWithFormat:@"%ld.%ld.%ld", measure, beat, tick];
+	return [NSString stringWithFormat:@"%d.%d.%d", measure, beat, tick];
 }
 
 - (int)modifyLocalGraphicTool:(int)originalGraphicTool

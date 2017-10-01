@@ -857,7 +857,7 @@ s_MREventSet_ModifyTick(int argc, VALUE *argv, VALUE self)
 		VALUE *nvalp;
 		int i;
 		nval = rb_ary_to_ary(nval);
-		n1 = RARRAY_LEN(nval);
+		n1 = (int)RARRAY_LEN(nval);
 		if (n1 == 0)
 			return self;
 		theData = [NSMutableData dataWithLength: sizeof(MDTickType) * n2];
@@ -952,7 +952,7 @@ s_MREventSet_ModifyCode(int argc, VALUE *argv, VALUE self)
 	} else {
 		int i;
 		nval = rb_ary_to_ary(nval);
-		n1 = RARRAY_LEN(nval);
+		n1 = (int)RARRAY_LEN(nval);
 		if (n1 == 0)
 			return self;
 		theData = [NSMutableData dataWithLength: sizeof(short) * n2];
@@ -1027,7 +1027,7 @@ s_MREventSet_ModifyDataSub(int argc, VALUE *argv, VALUE self, int kind)
 				MDEventToKindString(ep, name1, sizeof name1);
 			} else if (kind != MDGetKind(ep)) {
 				MDEventToKindString(ep, name2, sizeof name2);
-				rb_raise(rb_eStandardError, "event at %ld is of different kind (%s) from the first event (%s)", (long)MDPointerGetPosition(pt), name1, name2);
+				rb_raise(rb_eStandardError, "event at %d is of different kind (%s) from the first event (%s)", (int)MDPointerGetPosition(pt), name1, name2);
 			}
 		}
 	}
@@ -1039,7 +1039,7 @@ s_MREventSet_ModifyDataSub(int argc, VALUE *argv, VALUE self, int kind)
 	else if (rb_obj_is_kind_of(nval, rb_cString) || rb_obj_is_kind_of(nval, rb_cNumeric))
 		n3 = 1; /* single value */
 	else if (rb_obj_is_kind_of(nval, rb_cArray)) {
-		n1 = RARRAY_LEN(nval);
+		n1 = (int)RARRAY_LEN(nval);
 		nvalp = RARRAY_PTR(nval);
 		if ((kind == kMDEventTimeSignature && n1 >= 2 && rb_obj_is_kind_of(nvalp[0], rb_cNumeric))
 			|| (kind == kMDEventSMPTE && n1 == 5 && rb_obj_is_kind_of(nvalp[0], rb_cNumeric))
@@ -1048,7 +1048,7 @@ s_MREventSet_ModifyDataSub(int argc, VALUE *argv, VALUE self, int kind)
 		else n3 = 2; /* array */
 	} else {
 		nval = rb_ary_to_ary(nval);
-		n1 = RARRAY_LEN(nval);
+		n1 = (int)RARRAY_LEN(nval);
 		nvalp = RARRAY_PTR(nval);
 		n3 = 2; /* array */
 	}
@@ -1245,13 +1245,13 @@ s_MREventSet_ModifyDuration(int argc, VALUE *argv, VALUE self)
 		if (mode == MyDocumentModifyMultiply)
 			theData = [NSNumber numberWithFloat: NUM2DBL(rb_Float(nval))];
 		else
-			theData = [NSNumber numberWithLong: (long)(NUM2INT(rb_Integer(nval)))];
+			theData = [NSNumber numberWithLong: (int32_t)(NUM2INT(rb_Integer(nval)))];
 		[MyDocument modifyDurations: theData ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: mode];
 		return self;
 	} else {
 		int i;
 		nval = rb_ary_to_ary(nval);
-		n1 = RARRAY_LEN(nval);
+		n1 = (int)RARRAY_LEN(nval);
 		if (n1 == 0)
 			return self;
 		theData = [NSMutableData dataWithLength: sizeof(MDTickType) * n2];

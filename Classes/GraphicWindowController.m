@@ -254,12 +254,12 @@ sTableColumnIDToInt(id identifier)
 	else return NO; */
 }
 
-- (BOOL)isTrackSelected: (long)trackNo
+- (BOOL)isTrackSelected: (int32_t)trackNo
 {
 	return [myTableView isRowSelected: trackNo];
 }
 
-- (void)setIsTrackSelected: (long)trackNo flag: (BOOL)flag
+- (void)setIsTrackSelected: (int32_t)trackNo flag: (BOOL)flag
 {
 	if (flag)
 		[myTableView selectRowIndexes: [NSIndexSet indexSetWithIndex: trackNo] byExtendingSelection: YES];
@@ -267,7 +267,7 @@ sTableColumnIDToInt(id identifier)
 		[myTableView deselectRow: trackNo];
 }
 
-- (long)trackCount
+- (int32_t)trackCount
 {
 	return [[[self document] myMIDISequence] trackCount];
 }
@@ -314,7 +314,7 @@ sTableColumnIDToInt(id identifier)
 	else return -1;
 }
 
-- (long)visibleTrackCount
+- (int32_t)visibleTrackCount
 {
 	if (sortedTrackNumbers == NULL || visibleTrackCount < 0)
 		[self sortedTrackNumberAtIndex: 0];  /*  Rebuild the internal cache; the returned value is discarded  */
@@ -468,7 +468,7 @@ sTableColumnIDToInt(id identifier)
 	MDTickType tick = pixel / ppt;
 	MDTickType basetick;  /*  The tick at the beginning of the bar  */
 	MDTickType qtick;
-	long measure, beat, mtick;
+	int32_t measure, beat, mtick;
 	if (tickQuantum == 0.0)
 		return tick;
 	MDCalibratorTickToMeasure(calib, tick, &measure, &beat, &mtick);
@@ -767,7 +767,7 @@ sTableColumnIDToInt(id identifier)
         *majorCount = mjCount;
 }
 
-- (void)convertTick: (MDTickType)aTick toMeasure: (long *)measure beat: (long *)beat andTick: (long *)tick
+- (void)convertTick: (MDTickType)aTick toMeasure: (int32_t *)measure beat: (int32_t *)beat andTick: (int32_t *)tick
 {
 	MDCalibratorTickToMeasure(calib, aTick, measure, beat, tick);
 }
@@ -783,12 +783,12 @@ sTableColumnIDToInt(id identifier)
 		[tx1 setStringValue: @""];
 		[tx2 setStringValue: @""];
 	} else {
-		long startMeasure, startBeat, startSubTick;
-		long endMeasure, endBeat, endSubTick;
+		int32_t startMeasure, startBeat, startSubTick;
+		int32_t endMeasure, endBeat, endSubTick;
 		MDCalibratorTickToMeasure(calib, startTick, &startMeasure, &startBeat, &startSubTick);
 		MDCalibratorTickToMeasure(calib, endTick, &endMeasure, &endBeat, &endSubTick);
-		[tx1 setStringValue: [NSString stringWithFormat: @"%4ld:%2ld:%4ld", startMeasure, startBeat, startSubTick]];
-		[tx2 setStringValue: [NSString stringWithFormat: @"%4ld:%2ld:%4ld", endMeasure, endBeat, endSubTick]];
+		[tx1 setStringValue: [NSString stringWithFormat: @"%4d:%2d:%4d", startMeasure, startBeat, startSubTick]];
+		[tx2 setStringValue: [NSString stringWithFormat: @"%4d:%2d:%4d", endMeasure, endBeat, endSubTick]];
 	}
 //	[tx setNeedsDisplay: YES];
 	[self setNeedsReloadClientViews];
@@ -1537,7 +1537,7 @@ sTableColumnIDToInt(id identifier)
 
 - (void)setStripChartAtIndex: (int)index kind: (int)kind code: (int)code
 {
-	long kindAndCode;
+	int32_t kindAndCode;
 	MDSequence *sequence;
 	int newKind;
     dprintf(1, "setStripChartAtIndex: %d %d %d\n", index, kind, code);
@@ -1586,7 +1586,7 @@ sTableColumnIDToInt(id identifier)
 	int i, kind;
 	for (i = 1; i < myClientViewsCount; i++) {
 		if (records[i].splitter == (GraphicSplitterView *)[sender superview]) {
-			kind = [[sender selectedItem] tag];
+			kind = (int)[[sender selectedItem] tag];
 			[self setStripChartAtIndex: i kind: kind code: -1];
 			break;
 		}
@@ -1597,7 +1597,7 @@ sTableColumnIDToInt(id identifier)
 {
 	int i, code;
 	NSView *focus;
-	code = [sender tag];
+	code = (int)[sender tag];
 	focus = [NSView focusView];
 	for (i = 1; i < myClientViewsCount; i++) {
 		if ([focus isDescendantOf: records[i].splitter]) {
@@ -1978,7 +1978,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 		[myPopUpButton setBezelStyle: NSShadowlessSquareBezelStyle];
 		[myPopUpButton setImagePosition: NSNoImage];
 		/*  Set images  */
-		for (i = [myPopUpButton numberOfItems] - 1; i >= 0; i--) {
+		for (i = (int)[myPopUpButton numberOfItems] - 1; i >= 0; i--) {
 			menuItem = [myPopUpButton itemAtIndex: i];
 			switch ([menuItem tag]) {
 				case kLinearMenuTag: imageName = @"linear.png"; break;
@@ -2289,7 +2289,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 
 - (IBAction)quantizeSelected: (id)sender
 {
-	int i = [sender tag] - kQuantizeMenuTag;
+	int i = (int)[sender tag] - kQuantizeMenuTag;
 	if (i <= 0) {
 		quantize = 0;
 	} else {
@@ -2374,7 +2374,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 - (IBAction)editingRangeTextModified: (id)sender
 {
 	BOOL startFlag;
-	long bar, beat, subtick;
+	int32_t bar, beat, subtick;
 	MDTickType tick, duration, endtick;
 	const char *s;
 	if ([sender tag] == kEditingRangeStartTextTag)
@@ -2570,7 +2570,7 @@ row:(int)rowIndex
 	NSLog(@"tableClicked invoked");
 	if ([@"color" isEqualToString: [column identifier]]) {
 		int row = [sender clickedRow];
-	//	long trackNum = [self trackNumberAtIndex: row];
+	//	int32_t trackNum = [self trackNumberAtIndex: row];
 	//	BOOL shiftFlag = (([[NSApp currentEvent] modifierFlags] & NSShiftKeyMask) != 0);
 	//	if (![self isFocusTrack: trackNum]) {
 	//		[self setFocusFlag: YES onTrack: trackNum extending: shiftFlag];
@@ -2597,8 +2597,8 @@ row:(int)rowIndex
 	BOOL editableTrackWasHidden = NO;
 	BOOL shiftFlag = (([[NSApp currentEvent] modifierFlags] & NSShiftKeyMask) != 0);
 
-    row = [myTableView clickedRow];
-    column = [myTableView clickedColumn];
+    row = (int)[myTableView clickedRow];
+    column = (int)[myTableView clickedColumn];
 
 	if (column < 0)
 		return;
@@ -2737,8 +2737,8 @@ row:(int)rowIndex
     int column, row, idnum;
     NSTableColumn *tableColumn;
 
-    row = [myTableView clickedRow];
-    column = [myTableView clickedColumn];
+    row = (int)[myTableView clickedRow];
+    column = (int)[myTableView clickedColumn];
 
 	if (column < 0)
 		return;
@@ -2781,7 +2781,7 @@ row:(int)rowIndex
 //		id cell = [aTableColumn dataCell];
 		[(id)cell removeAllItems];
 		n1 = MDPlayerGetNumberOfDestinations();
-		n2 = [array count];
+		n2 = (int)[array count];
 		for (i = 0; i < n2; i++) {
 			id obj = [array objectAtIndex:i];
 			if (i > n1)
@@ -2809,7 +2809,7 @@ row:(int)rowIndex
 
 - (IBAction)createNewTrack: (id)sender
 {
-	int index = [myTableView selectedRow];
+	int index = (int)[myTableView selectedRow];
 	if (index < 0)
 		index = [[[self document] myMIDISequence] trackCount];
 	[(MyDocument *)[self document] insertTrack: nil atIndex: index];
@@ -2827,7 +2827,7 @@ row:(int)rowIndex
     id object;
     en = [array reverseObjectEnumerator];
     while ((object = [en nextObject]) != nil) {
-        long n = [object intValue];
+        int32_t n = [object intValue];
         [(MyDocument *)[self document] deleteTrackAt: n];
     } */
 }
@@ -2900,7 +2900,7 @@ row:(int)rowIndex
 - (void)trackInserted: (NSNotification *)notification {
 /*	int i;
 	TrackInfo info;
-	long track = [[[notification userInfo] objectForKey: @"track"] longValue];
+	int32_t track = [[[notification userInfo] objectForKey: @"track"] intValue];
 	for (i = [trackInfo count] - 1; i >= 0; i--) {
 		info = [self trackInfoAtIndex: i];
 		if (info.trackNum >= track) {
@@ -2917,7 +2917,7 @@ row:(int)rowIndex
 }
 
 - (void)trackDeleted: (NSNotification *)notification {
-/*	long track = [[[notification userInfo] objectForKey: @"track"] longValue];
+/*	int32_t track = [[[notification userInfo] objectForKey: @"track"] intValue];
 	[self removeTrackAndFill: track]; */
 	visibleTrackCount = -1;
 	[myTableView reloadData];
@@ -3111,7 +3111,7 @@ row:(int)rowIndex
 {
 	id firstResponder;
 	SEL sel = [anItem action];
-	if (sel == @selector(copy:) || sel == @selector(cut:) || sel == @selector(delete:) || sel == @selector(shiftSelectedEvents:)) {
+	if (sel == @selector(copy:) || sel == @selector(cut:) || sel == @selector(delete:)) {
 		if ([self countTracksToCopyWithSelectionList: NULL rangeStart: NULL rangeEnd: NULL] > 0)
 			return YES;
 		else return NO;
@@ -3124,8 +3124,8 @@ row:(int)rowIndex
 		return NO;
 	} else if (sel == @selector(openEventListWindow:) || sel == @selector(deleteSelectedTracks:)) {
 		return [myTableView numberOfSelectedRows] > 0;
-	} else if (sel == @selector(shiftSelectedEvents:)) {
-		return [[self document] isSelectionEmptyInEditableTracks:YES] == NO;
+/*	} else if (sel == @selector(shiftSelectedEvents:)) {
+		return [[self document] isSelectionEmptyInEditableTracks:YES] == NO; */
 	} else if ([self respondsToSelector:sel]) {
 		return YES;
 	} else return NO;
