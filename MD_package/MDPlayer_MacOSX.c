@@ -1166,7 +1166,7 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
             }
 
             /*  Registered note-off?  */
-            if (info->noteOffTick < currentTick) {
+            if (info->noteOffTick <= currentTick) {
                 scheduleType = kNoteOffScheduleType;
                 currentTick = info->noteOffTick;
             }
