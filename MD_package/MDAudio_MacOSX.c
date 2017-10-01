@@ -279,6 +279,8 @@ sMDAudioSendMIDIProc(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, 
     int dataSize = (writeOffset + kMDAudioMaxMIDIBytesToSendPerDevice - readOffset) % kMDAudioMaxMIDIBytesToSendPerDevice;
     int numChannelEvents = 0;
     int readPos = readOffset;
+    if ((*ioActionFlags & kAudioUnitRenderAction_PreRender) != kAudioUnitRenderAction_PreRender)
+        return noErr;  /*  No action  */
     if (ip->requestFlush) {
         /*  Flush is requested: skip all unread bytes  */
         ip->requestFlush = 0;
@@ -350,10 +352,13 @@ sMDAudioSendMIDIProc(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, 
 int
 MDAudioScheduleMIDIToStream(MDAudioIOStreamInfo *ip, UInt64 timeStamp, int length, unsigned char *midiData, int isSysEx)
 {
-    int readOffset = ip->midiBufferReadOffset;
-    int writeOffset = ip->midiBufferWriteOffset;
-    int spaceSize = (readOffset + kMDAudioMaxMIDIBytesToSendPerDevice - 1 - writeOffset) % kMDAudioMaxMIDIBytesToSendPerDevice + 1;
+    int readOffset, writeOffset, spaceSize;
     int i, length2;
+    if (ip->midiBuffer == NULL)
+        return 0;  /*  Not active  */
+    readOffset = ip->midiBufferReadOffset;
+    writeOffset = ip->midiBufferWriteOffset;
+    spaceSize = (readOffset + kMDAudioMaxMIDIBytesToSendPerDevice - 1 - writeOffset) % kMDAudioMaxMIDIBytesToSendPerDevice + 1;
     if (isSysEx) {
         /*  Schedule sysex  */
         if (ip->sysexData != NULL)
@@ -568,7 +573,7 @@ sMDAudioUpdateSoftwareDeviceInfo(void)
 		/*  Get the component information  */
         AudioComponentCopyName(cmp, &nameRef);
         cName = CFStringGetCStringPtr(nameRef, kCFStringEncodingUTF8);
-        len = strlen(cName);
+        len = (int)strlen(cName);
         memset(&info, 0, sizeof(info));
         AudioComponentGetDescription(cmp, &ccd);
 		info.code = (((UInt64)ccd.componentSubType) << 32) + ((UInt64)ccd.componentManufacturer);
@@ -883,7 +888,7 @@ MDAudioSelectIOStreamDevice(int idx, int deviceIndex)
 				CHECK_ERR(result, AudioUnitSetProperty(ip->converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &mp->format, sizeof(AudioStreamBasicDescription)));
 				CHECK_ERR(result, AudioUnitSetProperty(ip->converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription)));
 				/*  Create the MIDI controller name  */
-				len = strlen(mp->name) + 5;
+				len = (int)strlen(mp->name) + 5;
 				ip->midiControllerName = (char *)malloc(len);
 				strcpy(ip->midiControllerName, mp->name);
 				/*  Check the duplicate  */
@@ -1266,8 +1271,8 @@ MDAudioInitialize(void)
 	CHECK_ERR(err, AudioUnitSetProperty(gAudio->mixerUnit, kAudioUnitProperty_MeteringMode, kAudioUnitScope_Global, 0, &unum, sizeof(UInt32)));
 	
 	CHECK_ERR(err, AUGraphInitialize(gAudio->graph));	
-
-
+    CHECK_ERR(err, AUGraphStart(gAudio->graph));
+    
 	{
 		int deviceIndex;
 		MDStatus sts;
@@ -1288,8 +1293,6 @@ MDAudioInitialize(void)
 	/*  Set built-in output as the audio output  */
 	CHECK_ERR(err, MDAudioSelectIOStreamDevice(kMDAudioFirstIndexForOutputStream, 0));
 	
-    CHECK_ERR(err, AUGraphStart(gAudio->graph));
-    
 	return 0;
 
 exit:
