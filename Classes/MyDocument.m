@@ -983,7 +983,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
             [[[self undoManager] prepareWithInvocationTarget: self]
                 setTrackAttributes: attr];
        //     [self enqueueTrackModifiedNotification: trackNo];
-            [self updateTrackDestinations];
+       //     [self updateTrackDestinations];
             return YES;
         }
     }
@@ -999,7 +999,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
             [[[self undoManager] prepareWithInvocationTarget: self]
                 setTrackAttributes: attr];
         //    [self enqueueTrackModifiedNotification: trackNo];
-            [self updateTrackDestinations];
+        //    [self updateTrackDestinations];
             return YES;
         }
     }
