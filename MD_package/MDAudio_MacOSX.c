@@ -760,7 +760,7 @@ MDAudioSelectIOStreamDevice(int idx, int deviceIndex)
 		return kMDErrorCannotSetupAudio;
 	
 	/*  No change required?  */
-	if (ip->deviceIndex == deviceIndex && ip->busIndex == (idx % kMDAudioFirstIndexForOutputStream))
+	if (ip->deviceIndex == deviceIndex && ip->busIndex == idx)
 		return kMDNoError;
 
 	CHECK_ERR(result, AUGraphStop(gAudio->graph));
@@ -780,7 +780,7 @@ MDAudioSelectIOStreamDevice(int idx, int deviceIndex)
 				result = AudioUnitSetProperty(gAudio->outputUnit, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0, &audioDeviceID, sizeof(AudioDeviceID));
 				if (result == noErr) {
 					gAudio->isAudioThruEnabled = 1;
-					ip->busIndex = (idx % kMDAudioFirstIndexForOutputStream);
+                    ip->busIndex = idx;
 					ip->deviceID = (UInt64)(dp->deviceID);
 					ip->deviceIndex = deviceIndex;
 				} else {
@@ -789,7 +789,7 @@ MDAudioSelectIOStreamDevice(int idx, int deviceIndex)
 				}
 			} else {
 				gAudio->isAudioThruEnabled = 1;
-				ip->busIndex = (idx % kMDAudioFirstIndexForOutputStream);
+                ip->busIndex = idx;
 				ip->deviceIndex = deviceIndex;
 			}
 		}
@@ -967,7 +967,7 @@ MDAudioSelectIOStreamDevice(int idx, int deviceIndex)
 			}
 			ip->deviceID = newDeviceID;
 			ip->deviceIndex = deviceIndex;
-			ip->busIndex = (idx % kMDAudioNumberOfOutputStreams);
+            ip->busIndex = idx;
             ip->format = format;
 		}
 	}
