@@ -53,7 +53,7 @@
 	NSRect bounds;
 	[super drawRect: rect];
 	bounds = [self bounds];
-	if ([[self window] firstResponder] == self) {
+	if ([[self window] isMainWindow] && [[self window] firstResponder] == self) {
 		NSSetFocusRingStyle(NSFocusRingOnly);
 		NSRectFill(bounds);
 	}

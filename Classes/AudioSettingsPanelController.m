@@ -30,7 +30,8 @@ enum {
 	kLeftLevelIndicatorBase = 400,
 	kRightLevelIndicatorBase = 500,
 	kCustomViewButtonBase = 600,
-	kBusIndexTextBase = 700
+    kEffectButtonBase = 700,
+	kBusIndexTextBase = 800
 };
 #define kOutputTagOffset 50
 
@@ -113,6 +114,9 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 					[view setEnabled: NO];
 					[view setState: NSOffState];
 				}
+                view = [self viewWithTag: kEffectButtonBase + tagOffset];
+                [view setEnabled: YES];
+                [view setState: NSOnState];
 			}
 		} else {
 			[[self viewWithTag: kPanKnobBase + tagOffset] setEnabled: NO];
@@ -122,6 +126,9 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 			view = [self viewWithTag: kCustomViewButtonBase + tagOffset];
 			[view setEnabled: NO];
 			[view setState: NSOffState];
+            view = [self viewWithTag: kEffectButtonBase + tagOffset];
+            [view setEnabled: NO];
+            [view setState: NSOffState];
 		}
 	}
 }
@@ -243,7 +250,7 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 		static int sTagsToCopy[] = {
 			kDevicePopUpBase, kPanKnobBase, kVolumeSliderBase,
 			kLeftLevelIndicatorBase, kRightLevelIndicatorBase, kCustomViewButtonBase,
-			kBusIndexTextBase,
+            kEffectButtonBase, kBusIndexTextBase,
 			0  /*  This is dummy to copy the horizontal line  */
 		};
 		int i, count;

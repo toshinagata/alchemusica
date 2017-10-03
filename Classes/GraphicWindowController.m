@@ -2345,7 +2345,13 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 - (void)mouseMoved: (NSEvent *)theEvent
 {
     int i;
+    NSWindow *window = [self window];
 //    NSLog(@"GraphicWindowController.mouseMoved");
+    if ([NSWindow windowNumberAtPoint:[window convertBaseToScreen:[theEvent locationInWindow]] belowWindowWithWindowNumber:0] != [[self window] windowNumber]) {
+        [[NSCursor arrowCursor] set];
+        return;
+    }
+
 	[self setInfoText:@""];
     for (i = 0; i < myClientViewsCount; i++) {
         if ([self mouseMoved:theEvent inView:records[i].client]) {
