@@ -18,6 +18,7 @@
 
 #import "AudioSettingsPanelController.h"
 #import "NSWindowControllerAdditions.h"
+#import "AudioEffectPanelController.h"
 #import "AUViewWindowController.h"
 #import "MDHeaders.h"
 
@@ -241,9 +242,26 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 	}
 }
 
+- (IBAction)effectButtonPressed: (id)sender
+{
+    int idx = (int)[sender tag] - kEffectButtonBase;
+    if (idx >= 0 && idx < kMDAudioNumberOfInputStreams) {
+        AudioEffectPanelController *cont = (AudioEffectPanelController *)effectControllers[idx];
+        if (cont != nil) {
+            [[cont window] makeKeyAndOrderFront:self];
+        } else {
+            cont = [[AudioEffectPanelController alloc] initWithBusIndex:idx];
+            [[cont window] makeKeyAndOrderFront:self];
+            effectControllers[idx] = cont;
+        }
+    }
+}
+
 - (void)windowDidLoad
 {
-	[super windowDidLoad];
+    int i, count;
+
+    [super windowDidLoad];
 	
 	//  Create bus controller list
 	{
@@ -253,7 +271,6 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
             kEffectButtonBase, kBusIndexTextBase,
 			0  /*  This is dummy to copy the horizontal line  */
 		};
-		int i, count;
 		NSPoint pt = [separatorLine frame].origin;
 		NSRect frame = [busListView frame];
 		float busHeight = frame.size.height - pt.y;
@@ -287,6 +304,9 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 	if (timer == nil) {
 		timer = [[NSTimer scheduledTimerWithTimeInterval: 0.1 target: self selector:@selector(timerCallback:) userInfo:nil repeats:YES] retain];
 	}
+    if (effectControllers == NULL) {
+        effectControllers = (id *)calloc(sizeof(id), kMDAudioNumberOfInputStreams);
+    }
 	[self updateDisplay];
 }
 

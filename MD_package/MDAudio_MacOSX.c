@@ -48,7 +48,7 @@ struct MDAudio {
 	
 	/*  Audio/Music device infos  */
 	MDArray *inputDeviceInfos, *outputDeviceInfos;
-	MDArray *musicDeviceInfos;
+    MDArray *musicDeviceInfos, *effectDeviceInfos;
 	
 	/*  IO information (the mixer input/output)  */
 	MDAudioIOStreamInfo ioStreamInfos[kMDAudioNumberOfStreams];
@@ -545,26 +545,28 @@ exit:
 }
 
 static MDStatus
-sMDAudioUpdateSoftwareDeviceInfo(void)
+sMDAudioUpdateSoftwareDeviceInfo(int music_or_effect)
 {
 	AudioComponentDescription ccd, fcd;
 	AudioComponent cmp = NULL;
 	const char *cName;
 	int len, n, i;
 	UInt32 propSize;
-	MDAudioMusicDeviceInfo info, *ip;
+    MDAudioMusicDeviceInfo info, *ip;
+    MDArray **basep;
 	OSStatus err;
 	MDStatus status = kMDNoError;
 
-	if (gAudio->musicDeviceInfos == NULL) {
-		gAudio->musicDeviceInfos = MDArrayNewWithDestructor(sizeof(MDAudioMusicDeviceInfo), sMDAudioMusicDeviceInfoDestructor);
-		if (gAudio->musicDeviceInfos == NULL) {
+    basep = (music_or_effect ? &(gAudio->musicDeviceInfos) : &(gAudio->effectDeviceInfos));
+	if (*basep == NULL) {
+		*basep = MDArrayNewWithDestructor(sizeof(MDAudioMusicDeviceInfo), sMDAudioMusicDeviceInfoDestructor);
+		if (*basep == NULL) {
 			return kMDErrorOutOfMemory;
 		}
 	}
 	
 	memset(&fcd, 0, sizeof(fcd));
-	fcd.componentType = kAudioUnitType_MusicDevice;
+    fcd.componentType = (music_or_effect ? kAudioUnitType_MusicDevice : kAudioUnitType_Effect);
 	n = 0;
 	while ((cmp = AudioComponentFindNext(cmp, &fcd)) != 0) {
 		AudioUnit unit;
@@ -579,7 +581,7 @@ sMDAudioUpdateSoftwareDeviceInfo(void)
 		info.code = (((UInt64)ccd.componentSubType) << 32) + ((UInt64)ccd.componentManufacturer);
         info.name = strdup(cName);
 
-        for (i = 0; (ip = MDArrayFetchPtr(gAudio->musicDeviceInfos, i)) != NULL; i++) {
+        for (i = 0; (ip = MDArrayFetchPtr(*basep, i)) != NULL; i++) {
 			if (ip->code == info.code && strncmp(ip->name, cName, len) == 0) {
 				free(info.name);
 				info.name = NULL;
@@ -618,7 +620,7 @@ sMDAudioUpdateSoftwareDeviceInfo(void)
             }
 		}
 		if (err == noErr) {
-			status = MDArrayInsert(gAudio->musicDeviceInfos, MDArrayCount(gAudio->musicDeviceInfos), 1, &info);
+			status = MDArrayInsert(*basep, MDArrayCount(*basep), 1, &info);
 		} else {
 			status = kMDErrorCannotSetupAudio;
 		}
@@ -641,9 +643,11 @@ MDAudioUpdateDeviceInfo(void)
 {
 	MDStatus err;
 	err = sMDAudioUpdateHardwareDeviceInfo();
-	if (err != kMDNoError)
-		return err;
-	return sMDAudioUpdateSoftwareDeviceInfo();
+	if (err == kMDNoError)
+        err = sMDAudioUpdateSoftwareDeviceInfo(1);  /*  Music device  */
+    if (err == kMDNoError)
+        err = sMDAudioUpdateSoftwareDeviceInfo(0);  /*  Effects  */
+    return err;
 }
 
 int
@@ -735,6 +739,41 @@ MDAudioMusicDeviceInfoForCode(UInt64 code, int *outIndex)
 	return NULL;
 }
 
+int
+MDAudioEffectDeviceCountInfo(void)
+{
+    if (gAudio->effectDeviceInfos != NULL)
+        return MDArrayCount(gAudio->effectDeviceInfos);
+    else return 0;
+}
+
+MDAudioMusicDeviceInfo *
+MDAudioEffectDeviceInfoAtIndex(int idx)
+{
+    if (gAudio->effectDeviceInfos == NULL)
+        return NULL;
+    return MDArrayFetchPtr(gAudio->effectDeviceInfos, idx);
+}
+
+MDAudioMusicDeviceInfo *
+MDAudioEffectDeviceInfoForCode(UInt64 code, int *outIndex)
+{
+    MDAudioMusicDeviceInfo *ip;
+    int i;
+    if (gAudio->effectDeviceInfos == NULL)
+        return NULL;
+    for (i = 0; (ip = MDArrayFetchPtr(gAudio->effectDeviceInfos, i)) != NULL; i++) {
+        if (ip->code == code) {
+            if (outIndex != NULL)
+                *outIndex = i;
+            return ip;
+        }
+    }
+    if (outIndex != NULL)
+        *outIndex = -1;
+    return NULL;
+}
+
 MDAudioIOStreamInfo *
 MDAudioGetIOStreamInfoAtIndex(int idx)
 {
@@ -743,14 +782,158 @@ MDAudioGetIOStreamInfoAtIndex(int idx)
 	return &(gAudio->ioStreamInfos[idx]);
 }
 
+#if 0
+#pragma mark ====== Managing Audio Graph ======
+#endif
+
+/*
+   MDAudioIOStreamInfo *ip;
+   MDAudioEffectChain *cp;
+   MDAudioEffect *ep;
+
+   ip->unit
+    |
+    +- cp->converterUnit
+    |   |--> [ ep->effect 
+    |   |       |--> {ep->converterUnit --->} ]n--+-->ip->effectMixerUnit
+    |   |              (optional)                 |    (optional) |
+    |   |--> [ ep->effect                         |               |
+    |   |       |--> {ep->converterUnit --->} ]n--+               |
+    |   ...            (optional)                                 |
+    +- cp->converterUnit
+    |   |--> [ ep->effect                                         |
+    |   |       |--> {ep->converterUnit --->} ]n--+-->ip->effectMixerUnit
+    |   |              (optional)                 |    (optional) |
+    |   |--> [ ep->effect                         |               |
+    |   |       |--> {ep->converterUnit --->} ]n--+               |
+    |   ...            (optional)                                 |
+    |                                                             v
+                                                        gAudio->mixer
+                                                                  v
+                                                        gAudio->output
+*/
+
+/*  Connect the device output within the graph  */
+static int
+sMDAudioConnectDeviceOutput(int streamIndex)
+{
+    int i, result;
+    AURenderCallbackStruct callback;
+    MDAudioIOStreamInfo *ip = MDAudioGetIOStreamInfoAtIndex(streamIndex);
+    MDAudioEffectChain *cp;
+    if (ip == NULL)
+        return -1;
+    if (ip->deviceIndex >= kMDAudioMusicDeviceIndexOffset) {
+        MDAudioMusicDeviceInfo *mp = MDAudioMusicDeviceInfoAtIndex(ip->deviceIndex - kMDAudioMusicDeviceIndexOffset);
+        /*  If effect chains are active, then connect input->chain-converter
+         and chain-mixer->mixer  */
+        /*  Otherwise, connect input->converter->mixer  */
+        if (ip->nchains > 0) {
+            for (i = 0; i < ip->nchains; i++) {
+                cp = ip->chains + i;
+                result = AUGraphConnectNodeInput(gAudio->graph, ip->node, i, cp->converterNode, 0);
+                cp->alive = (result == noErr);
+                if (cp->alive) {
+                    /*  Set input format  */
+                    CHECK_ERR(result, AudioUnitSetProperty(cp->converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &mp->format, sizeof(AudioStreamBasicDescription)));
+                }
+            }
+        } else {
+            AudioComponentDescription desc;
+            /*  Create converter  */
+            desc.componentType = kAudioUnitType_FormatConverter;
+            desc.componentSubType = kAudioUnitSubType_AUConverter;
+            desc.componentManufacturer = kAudioUnitManufacturer_Apple;
+            desc.componentFlags = desc.componentFlagsMask = 0;
+            CHECK_ERR(result, AUGraphAddNode(gAudio->graph, &desc, &ip->converterNode));
+            /*  Connect input node -> converter -> mixer  */
+            CHECK_ERR(result, AUGraphOpen(gAudio->graph));
+            CHECK_ERR(result, AUGraphConnectNodeInput(gAudio->graph, ip->node, 0, ip->converterNode, 0));
+            CHECK_ERR(result, AUGraphConnectNodeInput(gAudio->graph, ip->converterNode, 0, gAudio->mixer, streamIndex));
+            CHECK_ERR(result, AUGraphNodeInfo(gAudio->graph, ip->converterNode, NULL, &ip->converterUnit));
+            /*  Input and output audio format for the converter  */
+            CHECK_ERR(result, AudioUnitSetProperty(ip->converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &mp->format, sizeof(AudioStreamBasicDescription)));
+            CHECK_ERR(result, AudioUnitSetProperty(ip->converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription)));
+        }
+    } else {
+        /*  Set the AU callback function (HAL input device)  */
+        callback.inputProc = sMDAudioInputProc;
+        callback.inputProcRefCon = ip;
+        CHECK_ERR(result, AudioUnitSetProperty(ip->unit, kAudioOutputUnitProperty_SetInputCallback, kAudioUnitScope_Global, 0, &callback, sizeof(AURenderCallbackStruct)));
+        /*  Set the AU callback function  */
+        /*  If effect chains are active, then connect to the chain-specific
+         converter to the first chain (other chains are set inactive).
+         Otherwise, connect to the mixer.  */
+        callback.inputProc = sMDAudioPassProc;
+        callback.inputProcRefCon = ip;
+        if (ip->nchains > 0) {
+            for (i = 0; i < ip->nchains; i++) {
+                cp = ip->chains + i;
+                if (i == 0) {
+                    CHECK_ERR(result, AudioUnitSetProperty(cp->converterUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, &callback, sizeof(AURenderCallbackStruct)));
+                    CHECK_ERR(result, AudioUnitSetProperty(cp->converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription)));
+                    cp->alive = (result == noErr);
+                } else cp->alive = 0;
+            }
+        } else {
+            CHECK_ERR(result, AudioUnitSetProperty(gAudio->mixerUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, streamIndex, &callback, sizeof(AURenderCallbackStruct)));
+        }
+    }
+    return kMDNoError;
+exit:
+    return kMDErrorCannotSetupAudio;
+}
+
+/*  Disconnect the device output within the graph  */
+static int
+sMDAudioDisconnectDeviceOutput(int streamIndex)
+{
+    int i, result;
+    AURenderCallbackStruct callback;
+    MDAudioIOStreamInfo *ip = MDAudioGetIOStreamInfoAtIndex(streamIndex);
+    MDAudioEffectChain *cp;
+    if (ip == NULL)
+        return -1;
+    if (ip->deviceIndex >= kMDAudioMusicDeviceIndexOffset) {
+        /*  Music Device  */
+        CHECK_ERR(result, AudioUnitRemoveRenderNotify(ip->unit, sMDAudioSendMIDIProc, ip));
+        for (i = 0; i < ip->nchains; i++) {
+            cp = ip->chains + i;
+            if (cp->alive) {
+                CHECK_ERR(result, AUGraphDisconnectNodeInput(gAudio->graph, cp->converterNode, 0));
+            }
+        }
+    } else {
+        /*  Audio Device  */
+        /*  Disable callback  */
+        callback.inputProc = NULL;
+        callback.inputProcRefCon = NULL;
+        /*  If effect chains are active, then remove the callback from
+         each effect chain; otherwise, from the mixer.  */
+        for (i = 0; i < ip->nchains; i++) {
+            cp = ip->chains + i;
+            if (cp->alive) {
+                CHECK_ERR(result, AudioUnitSetProperty(cp->converterUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, &callback, sizeof(AURenderCallbackStruct)));
+            }
+        }
+        /*  Dispose the input AudioUnit  */
+     //   CHECK_ERR(result, AudioComponentInstanceDispose(ip->unit));
+    }
+    return kMDNoError;
+exit:
+    return kMDErrorCannotSetupAudio;
+}
+
 MDStatus
 MDAudioSelectIOStreamDevice(int idx, int deviceIndex)
 {
+    int i, n, len;
 	OSStatus result = noErr;
 	MDAudioIOStreamInfo *ip;
 	MDAudioDeviceInfo *dp = NULL;
 	MDAudioMusicDeviceInfo *mp = NULL;
-	MDStatus sts;
+    MDAudioEffectChain *cp;
+    MDStatus sts;
 	AudioDeviceID audioDeviceID;
 	AURenderCallbackStruct callback;
 	unsigned char midiSetupChanged = 0;
@@ -809,167 +992,157 @@ MDAudioSelectIOStreamDevice(int idx, int deviceIndex)
             if (dp != NULL)
                 format = dp->format;
 		}
-		/*  Disable the current input  */
-		if (ip->deviceID != kMDAudioMusicDeviceUnknown) {
-			if (ip->deviceIndex >= kMDAudioMusicDeviceIndexOffset) {
-				/*  Music Device  */
-                CHECK_ERR(result, AudioUnitRemoveRenderNotify(ip->unit, sMDAudioSendMIDIProc, ip));
-				CHECK_ERR(result, AUGraphDisconnectNodeInput(gAudio->graph, ip->converterNode, 0));
-				CHECK_ERR(result, AUGraphDisconnectNodeInput(gAudio->graph, gAudio->mixer, idx));
-				CHECK_ERR(result, AUGraphRemoveNode(gAudio->graph, ip->converterNode));
-				CHECK_ERR(result, AUGraphRemoveNode(gAudio->graph, ip->node));
-			/*  It looks like the component is automatically closed when the AUNode is removed  */
-			/*	CHECK_ERR(result, (OSStatus)CloseComponent(ip->unit)); */
-				ip->node = ip->converterNode = 0;
-				ip->unit = ip->converterUnit = NULL;
-				if (ip->midiControllerName != NULL) {
-					free(ip->midiControllerName);
-					ip->midiControllerName = NULL;
-				}
+
+        if (ip->deviceID != kMDAudioMusicDeviceUnknown) {
+            /*  Disable the current input  */
+            CHECK_ERR(result, sMDAudioDisconnectDeviceOutput(idx));
+            if (ip->deviceIndex >= kMDAudioMusicDeviceIndexOffset) {
+                /*  Remove from the graph  */
+                CHECK_ERR(result, AUGraphRemoveNode(gAudio->graph, ip->node));
+                /*  Dispose MIDI controller name and MIDI buffers  */
+                if (ip->midiControllerName != NULL) {
+                    free(ip->midiControllerName);
+                    ip->midiControllerName = NULL;
+                }
                 if (ip->midiBuffer != NULL) {
                     free(ip->midiBuffer);
                     ip->midiBuffer = NULL;
                 }
-			/*	if (ip->midiCon != NULL) {
-					CHECK_ERR(result, AUMIDIControllerDispose(ip->midiCon));
-					ip->midiCon = NULL;
-				} */
-				if (ip->bufferList != NULL) {
-					sMDAudioReleaseMyBufferList(ip->bufferList);
-					ip->bufferList = NULL;
-				}
-				if (ip->ring != NULL) {
-					MDRingBufferDeallocate(ip->ring);
-					ip->ring = NULL;
-				}
-				midiSetupChanged = 1;
-			} else {
-				/*  Audio Device  */
-				/*  Disable callback for the mixer input  */
-				callback.inputProc = NULL;
-				callback.inputProcRefCon = NULL;
-				CHECK_ERR(result, AudioUnitSetProperty(gAudio->mixerUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, idx, &callback, sizeof(AURenderCallbackStruct)));
-				/*  Dispose the input AudioUnit  */
-				CHECK_ERR(result, (OSStatus)CloseComponent(ip->unit));
-			}
-			ip->deviceID = kMDAudioMusicDeviceUnknown;
-			ip->node = 0;
-			ip->unit = NULL;
-			ip->deviceIndex = -1;
-			ip->busIndex = -1;
+                if (ip->bufferList != NULL) {
+                    sMDAudioReleaseMyBufferList(ip->bufferList);
+                    ip->bufferList = NULL;
+                }
+                if (ip->ring != NULL) {
+                    MDRingBufferDeallocate(ip->ring);
+                    ip->ring = NULL;
+                }
+                midiSetupChanged = 1;
+            } else {
+                /*  Dispose the input AudioUnit  */
+                CHECK_ERR(result, AudioComponentInstanceDispose(ip->unit));
+            }
+            ip->deviceID = kMDAudioMusicDeviceUnknown;
+            ip->node = 0;
+            ip->unit = NULL;
+            ip->deviceIndex = -1;
+            ip->busIndex = -1;
 		}
-		if (newDeviceID != kMDAudioMusicDeviceUnknown) {
+
+        if (newDeviceID != kMDAudioMusicDeviceUnknown) {
 			/*  Enable the new input  */
+            /*  Allocate the first converter unit if not present  */
+            if (ip->nchains == 0) {
+                ip->chains = (MDAudioEffectChain *)calloc(sizeof(MDAudioEffectChain), 8);
+                ip->nchains = 1;
+            }
+            if (ip->chains->converterUnit == NULL) {
+                /*  Create converter for the effector chain 0  */
+                cp = ip->chains;
+                desc.componentType = kAudioUnitType_FormatConverter;
+                desc.componentSubType = kAudioUnitSubType_AUConverter;
+                desc.componentManufacturer = kAudioUnitManufacturer_Apple;
+                desc.componentFlags = desc.componentFlagsMask = 0;
+                CHECK_ERR(result, AUGraphAddNode(gAudio->graph, &desc, &cp->converterNode));
+                /*  Open component  */
+                CHECK_ERR(result, AUGraphOpen(gAudio->graph));
+                CHECK_ERR(result, AUGraphNodeInfo(gAudio->graph, cp->converterNode, NULL, &cp->converterUnit));
+                /*  Set output format and connect to the mixer  */
+                CHECK_ERR(result, AudioUnitSetProperty(cp->converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription)));
+                CHECK_ERR(result, AUGraphConnectNodeInput(gAudio->graph, cp->converterNode, 0, gAudio->mixer, idx));
+            }
 			if (deviceIndex >= kMDAudioMusicDeviceIndexOffset) {
-				int i, n, len;
-				MDAudioIOStreamInfo *ip2;
-			//	CFStringRef str;
-				/*  Music Device  */
-				/*  Create input node  */
-				desc.componentType = kAudioUnitType_MusicDevice;
-				desc.componentSubType = (UInt32)(newDeviceID >> 32);
-				desc.componentManufacturer = (UInt32)(newDeviceID);
-				desc.componentFlags = desc.componentFlagsMask = 0;
-				CHECK_ERR(result, AUGraphAddNode(gAudio->graph, &desc, &ip->node));
-				/*  Create converter  */
-				desc.componentType = kAudioUnitType_FormatConverter;
-				desc.componentSubType = kAudioUnitSubType_AUConverter;
-				desc.componentManufacturer = kAudioUnitManufacturer_Apple;
-				desc.componentFlags = desc.componentFlagsMask = 0;
-				CHECK_ERR(result, AUGraphAddNode(gAudio->graph, &desc, &ip->converterNode));
-				/*  Connect input node -> converter -> mixer  */
-				CHECK_ERR(result, AUGraphOpen(gAudio->graph));
-				CHECK_ERR(result, AUGraphConnectNodeInput(gAudio->graph, ip->node, 0, ip->converterNode, 0));
-				CHECK_ERR(result, AUGraphConnectNodeInput(gAudio->graph, ip->converterNode, 0, gAudio->mixer, idx));
-				ip->deviceID = newDeviceID;
-				CHECK_ERR(result, AUGraphNodeInfo(gAudio->graph, ip->node, NULL, &ip->unit));
-				CHECK_ERR(result, AUGraphNodeInfo(gAudio->graph, ip->converterNode, NULL, &ip->converterUnit));
-				/*  Input and output audio format for the converter  */
-				CHECK_ERR(result, AudioUnitSetProperty(ip->converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &mp->format, sizeof(AudioStreamBasicDescription)));
-				CHECK_ERR(result, AudioUnitSetProperty(ip->converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription)));
-				/*  Create the MIDI controller name  */
-				len = (int)strlen(mp->name) + 5;
-				ip->midiControllerName = (char *)malloc(len);
-				strcpy(ip->midiControllerName, mp->name);
-				/*  Check the duplicate  */
-				for (i = 0, n = 2; i < kMDAudioNumberOfInputStreams; i++) {
-					ip2 = MDAudioGetIOStreamInfoAtIndex(i);
-					if (ip == ip2 || ip2->midiControllerName == NULL)
-						continue;
-					if (strcmp(ip->midiControllerName, ip2->midiControllerName) == 0) {
-						snprintf(ip->midiControllerName, len, "%s %d", mp->name, n);
-						n++;
-						i = -1;
-						continue;
-					}
-				}
+                /*  Music Device  */
+                /*  Create input node  */
+                desc.componentType = kAudioUnitType_MusicDevice;
+                desc.componentSubType = (UInt32)(newDeviceID >> 32);
+                desc.componentManufacturer = (UInt32)(newDeviceID);
+                desc.componentFlags = desc.componentFlagsMask = 0;
+                CHECK_ERR(result, AUGraphAddNode(gAudio->graph, &desc, &ip->node));
+                /*  Open component  */
+                CHECK_ERR(result, AUGraphOpen(gAudio->graph));
+                CHECK_ERR(result, AUGraphNodeInfo(gAudio->graph, ip->node, NULL, &ip->unit));
+                /*  Connect the output to the converter unit(s) and set format  */
+                for (i = 0; i < ip->nchains; i++) {
+                    cp = ip->chains + i;
+                    result = AUGraphConnectNodeInput(gAudio->graph, ip->node, i, cp->converterNode, 0);
+                    cp->alive = (result == noErr);
+                    CHECK_ERR(result, AudioUnitSetProperty(cp->converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &format, sizeof(AudioStreamBasicDescription)));
+                }
+                /*  Create the MIDI controller name  */
+                len = (int)strlen(mp->name) + 5;
+                ip->midiControllerName = (char *)malloc(len);
+                strcpy(ip->midiControllerName, mp->name);
+                /*  Check the duplicate  */
+                for (i = 0, n = 2; i < kMDAudioNumberOfInputStreams; i++) {
+                    MDAudioIOStreamInfo *ip2 = MDAudioGetIOStreamInfoAtIndex(i);
+                    if (ip == ip2 || ip2->midiControllerName == NULL)
+                        continue;
+                    if (strcmp(ip->midiControllerName, ip2->midiControllerName) == 0) {
+                        snprintf(ip->midiControllerName, len, "%s %d", mp->name, n);
+                        n++;
+                        i = -1;
+                        continue;
+                    }
+                }
                 /*  Allocate buffer for MIDI scheduling  */
                 ip->midiBuffer = (unsigned char *)malloc(kMDAudioMIDIBufferSize);
                 ip->midiBufferWriteOffset = 0;
                 ip->midiBufferReadOffset = 0;
-
                 /*  Set render notify callback  */
                 CHECK_ERR(result, AudioUnitAddRenderNotify(ip->unit, sMDAudioSendMIDIProc, ip));
-			/*	str = CFStringCreateWithCString(NULL, ip->midiControllerName, kCFStringEncodingUTF8);
-				result = AUMIDIControllerCreate(str, &ip->midiCon);
-				if (result == noErr) {
-					result = AUMIDIControllerMapChannelToAU(ip->midiCon, -1, ip->unit, -1, 0);
-				}
-				CFRelease(str); */
-				midiSetupChanged = 1;
-			} else {
-				/*  Audio Device  */
-				/*  Create HAL input unit (not connected to AUGraph)  */
-				/*  Cf. Apple Technical Note 2091  */
-				AudioComponent comp;
-				UInt32 unum;
-				AURenderCallbackStruct callback;
-				desc.componentType = kAudioUnitType_Output;
-				desc.componentSubType = kAudioUnitSubType_HALOutput;
-				desc.componentManufacturer = kAudioUnitManufacturer_Apple;
-				desc.componentFlags = 0;
-				desc.componentFlagsMask = 0;
-				comp = AudioComponentFindNext(NULL, &desc);
-				if (comp == NULL)
-					return kMDErrorCannotSetupAudio;
-				CHECK_ERR(result, AudioComponentInstanceNew(comp, &ip->unit));
-				/*  Enable input  */
-				unum = 1;
-				CHECK_ERR(result, AudioUnitSetProperty(ip->unit, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input, 1, &unum, sizeof(UInt32)));
-				/*  Disable output  */
-				unum = 0;
-				CHECK_ERR(result, AudioUnitSetProperty(ip->unit, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Output, 0, &unum, sizeof(UInt32)));
-				/*  Set the HAL AU output format to the canonical format   */
-				CHECK_ERR(result, AudioUnitSetProperty(ip->unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription)));
-				/*  Set the AU callback function (HAL input device)  */
-				callback.inputProc = sMDAudioInputProc;
-				callback.inputProcRefCon = ip;
-				CHECK_ERR(result, AudioUnitSetProperty(ip->unit, kAudioOutputUnitProperty_SetInputCallback, kAudioUnitScope_Global, 0, &callback, sizeof(AURenderCallbackStruct)));
-				/*  Set the AU callback function (mixer)  */
-				callback.inputProc = sMDAudioPassProc;
-				callback.inputProcRefCon = ip;
-				CHECK_ERR(result, AudioUnitSetProperty(gAudio->mixerUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, idx, &callback, sizeof(AURenderCallbackStruct)));
-				/*  Set the input device  */
-				audioDeviceID = (AudioDeviceID)newDeviceID;
-				CHECK_ERR(result, AudioUnitSetProperty(ip->unit, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0, &audioDeviceID, sizeof(AudioDeviceID)));
-				/*  Reallocate buffer list  */
-				ip->bufferSizeFrames = dp->bufferSizeFrames;  /*  The buffer size of the underlying audio device; NOTE: dp must be alive until here!  */
-				ip->bufferList = sMDAudioAllocateMyBufferList(gAudio->preferredFormat.mChannelsPerFrame, gAudio->preferredFormat.mBytesPerFrame, ip->bufferSizeFrames);
-				
-				/*  Reallocate ring buffer  */
-				ip->ring = MDRingBufferNew();
-				MDRingBufferAllocate(ip->ring, gAudio->preferredFormat.mChannelsPerFrame, gAudio->preferredFormat.mBytesPerFrame, ip->bufferSizeFrames * 20);
-				
-				ip->firstInputTime = ip->firstOutputTime = -1;
-				/*  Initialize and start the AUHAL  */
-				CHECK_ERR(result, AudioUnitInitialize(ip->unit));
-				CHECK_ERR(result, AudioOutputUnitStart(ip->unit));
-			}
-			ip->deviceID = newDeviceID;
-			ip->deviceIndex = deviceIndex;
+                midiSetupChanged = 1;
+            } else {
+                /*  Audio Device  */
+                /*  Create HAL input unit (not connected to AUGraph)  */
+                /*  Cf. Apple Technical Note 2091  */
+                AudioComponent comp;
+                UInt32 unum;
+                desc.componentType = kAudioUnitType_Output;
+                desc.componentSubType = kAudioUnitSubType_HALOutput;
+                desc.componentManufacturer = kAudioUnitManufacturer_Apple;
+                desc.componentFlags = 0;
+                desc.componentFlagsMask = 0;
+                comp = AudioComponentFindNext(NULL, &desc);
+                if (comp == NULL)
+                    return kMDErrorCannotSetupAudio;
+                CHECK_ERR(result, AudioComponentInstanceNew(comp, &ip->unit));
+                /*  Enable input  */
+                unum = 1;
+                CHECK_ERR(result, AudioUnitSetProperty(ip->unit, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input, 1, &unum, sizeof(UInt32)));
+                /*  Disable output  */
+                unum = 0;
+                CHECK_ERR(result, AudioUnitSetProperty(ip->unit, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Output, 0, &unum, sizeof(UInt32)));
+                /*  Set the HAL AU output format to the canonical format   */
+                CHECK_ERR(result, AudioUnitSetProperty(ip->unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription)));
+                /*  Connect the output to the converter unit(s) and set format  */
+                callback.inputProc = sMDAudioPassProc;
+                callback.inputProcRefCon = ip;
+                for (i = 0; i < ip->nchains; i++) {
+                    cp = ip->chains + i;
+                    result = AudioUnitSetProperty(cp->converterUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, i, &callback, sizeof(AURenderCallbackStruct));
+                    cp->alive = (result == noErr);
+                    CHECK_ERR(result, AudioUnitSetProperty(cp->converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription)));
+                }
+                /*  Set the input device  */
+                audioDeviceID = (AudioDeviceID)newDeviceID;
+                CHECK_ERR(result, AudioUnitSetProperty(ip->unit, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0, &audioDeviceID, sizeof(AudioDeviceID)));
+                /*  Reallocate buffer list  */
+                ip->bufferSizeFrames = dp->bufferSizeFrames;  /*  The buffer size of the underlying audio device; NOTE: dp must be alive until here!  */
+                ip->bufferList = sMDAudioAllocateMyBufferList(gAudio->preferredFormat.mChannelsPerFrame, gAudio->preferredFormat.mBytesPerFrame, ip->bufferSizeFrames);
+                
+                /*  Reallocate ring buffer  */
+                ip->ring = MDRingBufferNew();
+                MDRingBufferAllocate(ip->ring, gAudio->preferredFormat.mChannelsPerFrame, gAudio->preferredFormat.mBytesPerFrame, ip->bufferSizeFrames * 20);
+                
+                ip->firstInputTime = ip->firstOutputTime = -1;
+                /*  Initialize and start the AUHAL  */
+                CHECK_ERR(result, AudioUnitInitialize(ip->unit));
+                CHECK_ERR(result, AudioOutputUnitStart(ip->unit));
+            }
+            ip->deviceIndex = deviceIndex;
             ip->busIndex = idx;
             ip->format = format;
-		}
+        }
 	}
 exit:
 	sts = (result == noErr ? kMDNoError : kMDErrorCannotSetupAudio);
@@ -999,320 +1172,154 @@ MDAudioGetIOStreamDevice(int idx, int *outDeviceIndex)
 	return kMDNoError;
 }
 
-#if 0
-MDStatus
-MDAudioSelectInOutDeviceAtIndices(int inputIndex, int outputIndex)
+#pragma mark ====== Audio Effects ======
+
+int
+MDAudioAppendEffectChain(int streamIndex)
 {
-	MDAudioDeviceInfo *inInfop, *outInfop;
-	OSStatus err;
-	UInt32 size;
-	if (inputIndex == -2) {
-		/*  Disable input  */
-		CHECK_ERR(err, AudioOutputUnitStop(gAudio->inputUnit));
-		gAudio->isInputRunning = 0;
-		gAudio->firstInputTime = -1;
-	}
-	outInfop = MDAudioDeviceInfoAtIndex(outputIndex, 0);
-	inInfop = MDAudioDeviceInfoAtIndex(inputIndex, 1);
-	if (inInfop != NULL || outInfop != NULL) {
+    int sts, result;
+    MDAudioIOStreamInfo *ip;
+    MDAudioEffectChain *cp;
 
-		if (gAudio->isRunning)
-			CHECK_ERR(err, AUGraphStop(gAudio->graph));
-		if (gAudio->isInputRunning)
-			CHECK_ERR(err, AudioOutputUnitStop(gAudio->inputUnit));
-
-		if (inInfop != NULL) {
-
-			/*  Set the input device  */
-			CHECK_ERR(err, AudioUnitSetProperty(gAudio->inputUnit, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0, &(inInfop->deviceID), sizeof(AudioDeviceID)));			
-
-			/*  Copy the device info to internal cache  */
-			gAudio->inputDeviceInfoCache = *inInfop;
-			gAudio->inputDeviceInfoCache.name = NULL;
-
-			/*  Reallocate buffer list  */
-			if (gAudio->inputBufferList != NULL)
-				sMDAudioReleaseMyBufferList(gAudio->inputBufferList);
-			gAudio->inputBufferList = sMDAudioAllocateMyBufferList(gAudio->preferredFormat.mChannelsPerFrame, gAudio->preferredFormat.mBytesPerFrame, inInfop->bufferSizeFrames);
-			
-			/*  Reallocate ring buffer  */
-			if (gAudio->ring != NULL)
-				MDRingBufferDeallocate(gAudio->ring);
-			else gAudio->ring = MDRingBufferNew();
-			MDRingBufferAllocate(gAudio->ring, gAudio->preferredFormat.mChannelsPerFrame, gAudio->preferredFormat.mBytesPerFrame, inInfop->bufferSizeFrames * 20);
-
-			gAudio->firstInputTime = -1;
-
-		}
-
-		if (outInfop != NULL) {
-
-			/*  Set the output device  */
-			CHECK_ERR(err, AudioUnitSetProperty(gAudio->outputUnit, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0, &(outInfop->deviceID), sizeof(AudioDeviceID)));			
-
-			/*  Match the format with mixer  */
-			CHECK_ERR(err, AudioUnitSetProperty(gAudio->outputUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription)));
-
-			/*  Copy the device info to internal cache  */
-			gAudio->outputDeviceInfoCache = *outInfop;
-			gAudio->outputDeviceInfoCache.name = NULL;
-
-			gAudio->firstOutputTime = -1;
-		}
-		
-		if (gAudio->isRunning) {
-			CHECK_ERR(err, AUGraphStart(gAudio->graph));
-			if (inInfop != NULL || gAudio->isInputRunning) {
-				CHECK_ERR(err, AudioOutputUnitStart(gAudio->inputUnit));
-				gAudio->isInputRunning = 1;
-			}
-		}
-	}
-	return 0;
+    if (streamIndex < 0 || streamIndex >= kMDAudioNumberOfInputStreams)
+        return -1;  /*  Invalid streamIndex  */
+    ip = MDAudioGetIOStreamInfoAtIndex(streamIndex);
+    if (ip->nchains >= 8)
+        return -2;  /*  Too many chains  */
+    if (ip->nchains % 8 == 0) {
+        /*  Allocate storage  */
+        void *p = realloc(ip->chains, sizeof(MDAudioEffectChain) * (ip->nchains + 8));
+        if (p == NULL)
+            return -3;  /*  Out of memory  */
+        ip->chains = p;
+    }
+    cp = ip->chains + ip->nchains;
+    memset(cp, 0, sizeof(MDAudioEffectChain));
+    ip->nchains++;
+    
+    CHECK_ERR(result, AUGraphStop(gAudio->graph));
+    
+    if (ip->nchains == 2) {
+        
+    }
+    
 exit:
-	return kMDErrorCannotSetupAudio;
+    sts = (result == noErr ? kMDNoError : kMDErrorCannotSetupAudio);
+    result = AUGraphStart(gAudio->graph);
+    return (result == noErr && sts == kMDNoError ? 0 : kMDErrorCannotSetupAudio);
 }
-
-MDStatus
-MDAudioGetInOutDeviceIndices(int *inputIndex, int *outputIndex)
-{
-	OSStatus err;
-	AudioDeviceID deviceID;
-	int i, idx, isInput;
-	MDAudioDeviceInfo *infop;
-	UInt32 size;
-
-	if (gAudio == NULL)
-		return kMDErrorCannotSetupAudio;
-	
-	for (isInput = 0; isInput <= 1; isInput++) {
-		if ((isInput ? inputIndex : outputIndex) == NULL)
-			continue;
-		if (isInput && gAudio->isInputRunning == 0) {
-			*inputIndex = -1;
-			continue;
-		}
-		size = sizeof(AudioDeviceID);
-		CHECK_ERR(err, AudioUnitGetProperty(
-											(isInput ? gAudio->inputUnit : gAudio->outputUnit),
-											kAudioOutputUnitProperty_CurrentDevice,
-											kAudioUnitScope_Global, 
-											0, &deviceID, &size));
-		idx = -1;
-		for (i = 0; (infop = MDAudioDeviceInfoAtIndex(i, isInput)) != NULL; i++) {
-			if (infop->deviceID == deviceID) {
-				idx = i;
-				break;
-			}
-		}
-		if (isInput) {
-			if (inputIndex != NULL)
-				*inputIndex = idx;
-		} else {
-			if (outputIndex != NULL)
-				*outputIndex = idx;
-		}
-	}
-	return kMDNoError;
-exit:
-	return kMDErrorCannotSetupAudio;
-}
-#endif
-
-#pragma mark ====== Start/Stop Audio input/output ======
-
-#if 0
-static char *
-sOSTypeToString(OSType type, char *buf)
-{
-	UInt32 ui = (UInt32)type;
-	buf[0] = (ui >> 24);
-	buf[1] = (ui >> 16);
-	buf[2] = (ui >> 8);
-	buf[3] = ui;
-	buf[4] = 0;
-	return buf;
-}
-
-static void
-sMDAudioListMusicDevice(void)
-{
-	ComponentDescription ccd, fcd;
-	Component cmp = NULL;
-	Handle pName;
-	char *cName;
-	int len, n;
-	char buf[256], type1[6], type2[6];
-	memset(&fcd, 0, sizeof(fcd));
-	fcd.componentType = kAudioUnitType_MusicDevice;
-	pName = NewHandle(0);
-	n = 0;
-	while((cmp = FindNextComponent(cmp, &fcd)) != 0) {
-		GetComponentInfo(cmp, &ccd, pName, NULL, NULL);
-		HLock(pName);
-		cName = *pName;
-		len = (unsigned char)(*cName++);
-		strncpy(buf, cName, len);
-		buf[len] = 0;
-		fprintf(stderr, "device %d: %s\n", n, buf);
-		fprintf(stderr, "  subtype = \'%s\', manufacturer = \'%s\'\n",
-				sOSTypeToString(ccd.componentSubType, type1), sOSTypeToString(ccd.componentManufacturer, type2));
-		n++;
-		HUnlock(pName);
-	}
-	DisposeHandle(pName);
-}
-
-extern void MDAudioCheckAUViewCallback(AudioUnit);
-
-static OSStatus
-sAudioInitializeTest(void)
-{
-	AUGraph gGraph;
-	AUNode gSynth, gOutput;
-	MusicDeviceComponent gUnit;
-	AUMIDIControllerRef gMIDICon;
-	
-	ComponentDescription desc;
-	OSStatus result;
-	require_noerr(result = NewAUGraph(&gGraph), failed);
-	desc.componentType = kAudioUnitType_MusicDevice;
-	//	desc.componentSubType = kAudioUnitSubType_DLSSynth;
-	//	desc.componentManufacturer = kAudioUnitManufacturer_Apple;
-	desc.componentSubType = FOUR_CHAR_CODE('Nik4');
-	desc.componentManufacturer = FOUR_CHAR_CODE('-NI-');
-	//	 desc.componentSubType = FOUR_CHAR_CODE('PH10');
-	//	 desc.componentManufacturer = FOUR_CHAR_CODE('ikm_');
-	desc.componentFlags = desc.componentFlagsMask = 0;
-	require_noerr(result = AUGraphNewNode(gGraph, &desc, 0, NULL, &gSynth), failed);
-	desc.componentType = kAudioUnitType_Output;
-	desc.componentSubType = kAudioUnitSubType_DefaultOutput;
-	desc.componentManufacturer = kAudioUnitManufacturer_Apple;	
-	require_noerr(result = AUGraphNewNode(gGraph, &desc, 0, NULL, &gOutput), failed);
-	require_noerr(result = AUGraphConnectNodeInput(gGraph, gSynth, 0, gOutput, 0), failed);
-	require_noerr(result = AUGraphOpen(gGraph), failed);	
-	require_noerr(result = AUGraphGetNodeInfo(gGraph, gSynth, NULL, NULL, NULL, &gUnit), failed);
-	require_noerr(result = AUMIDIControllerCreate(CFSTR("Virtual Synth"), &gMIDICon), failed);
-	require_noerr(result = AUMIDIControllerMapChannelToAU(gMIDICon, -1, gUnit, -1, 0), failed);
-	require_noerr(result = AUGraphInitialize(gGraph), failed);	
-	require_noerr(result = AUGraphStart(gGraph), failed);
-	//	require_noerr(result = [self openCarbonUIForAudioUnit:gUnit], failed);
-	MDAudioCheckAUViewCallback(gUnit);
-failed:
-	fprintf(stderr, "result = %d\n", (int)result);
-	return result;
-}
-#endif
 
 MDStatus
 MDAudioInitialize(void)
 {
-	AudioComponentDescription desc;
-	AURenderCallbackStruct	callback;
-	OSStatus err;
-	UInt32 unum;
-	int i;
-
-	if (gAudio != NULL)
-		return kMDNoError;
-	gAudio = (MDAudio *)malloc(sizeof(MDAudio));
-	if (gAudio == NULL)
-		return kMDErrorOutOfMemory;
-	memset(gAudio, 0, sizeof(MDAudio));
-
-	/*  The preferred audio format  */
-	MDAudioFormatSetCanonical(&gAudio->preferredFormat, 44100.0, 2, 0);
-
-	/*  Initialize IOStreamInfo  */
-	for (i = 0; i < kMDAudioNumberOfStreams; i++) {
-		MDAudioIOStreamInfo *ip = &(gAudio->ioStreamInfos[i]);
-		ip->deviceIndex = -1;
-		ip->busIndex = -1;
-	}
-	
-	/*  Load audio device info  */
-	MDAudioUpdateDeviceInfo();
-	
-	MyAppCallback_startupMessage("Creating AudioUnit Graph...");
-
-	/*  Create AUGraph  */
-	CHECK_ERR(err, NewAUGraph(&gAudio->graph));
-
-	/*  Mixer  */
-	desc.componentType = kAudioUnitType_Mixer;
-	desc.componentSubType = kAudioUnitSubType_StereoMixer;
-	desc.componentManufacturer = kAudioUnitManufacturer_Apple;
-	desc.componentFlags = desc.componentFlagsMask = 0;
-	CHECK_ERR(err, AUGraphAddNode(gAudio->graph, &desc, &gAudio->mixer));
-
-	/*  Output  */
-	desc.componentType = kAudioUnitType_Output;
-	desc.componentSubType = kAudioUnitSubType_DefaultOutput;
-	desc.componentManufacturer = kAudioUnitManufacturer_Apple;	
-	CHECK_ERR(err, AUGraphAddNode(gAudio->graph, &desc, &gAudio->output));
-	
-	/*  Open graph and load components  */
-	CHECK_ERR(err, AUGraphOpen(gAudio->graph));
-	CHECK_ERR(err, AUGraphNodeInfo(gAudio->graph, gAudio->mixer, &desc, &gAudio->mixerUnit));
-	CHECK_ERR(err, AUGraphNodeInfo(gAudio->graph, gAudio->output, &desc, &gAudio->outputUnit));
-
-	/*  Set the canonical format to mixer and output units  */
-	CHECK_ERR(err, AudioUnitSetProperty(gAudio->outputUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription)));
-	CHECK_ERR(err, AudioUnitSetProperty(gAudio->mixerUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Global, 0, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription)));
-	
-	/*  Set the AU callback function for the output unit  */
-	/*  (Read output from the mixer and pass to the output _and_ record to the file)  */
-	callback.inputProc = sMDAudioRecordProc;
-	callback.inputProcRefCon = &(gAudio->ioStreamInfos[kMDAudioFirstIndexForOutputStream]);
-	CHECK_ERR(err, AudioUnitSetProperty(gAudio->outputUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, &callback, sizeof(AURenderCallbackStruct)));
-	
-	/*  Enable metering for the stereo mixer  */
-	unum = 1;
-	CHECK_ERR(err, AudioUnitSetProperty(gAudio->mixerUnit, kAudioUnitProperty_MeteringMode, kAudioUnitScope_Global, 0, &unum, sizeof(UInt32)));
-	
-	CHECK_ERR(err, AUGraphInitialize(gAudio->graph));	
+    AudioComponentDescription desc;
+    AURenderCallbackStruct	callback;
+    OSStatus err;
+    UInt32 unum;
+    int i;
+    
+    if (gAudio != NULL)
+        return kMDNoError;
+    gAudio = (MDAudio *)malloc(sizeof(MDAudio));
+    if (gAudio == NULL)
+        return kMDErrorOutOfMemory;
+    memset(gAudio, 0, sizeof(MDAudio));
+    
+    /*  The preferred audio format  */
+    MDAudioFormatSetCanonical(&gAudio->preferredFormat, 44100.0, 2, 0);
+    
+    /*  Initialize IOStreamInfo  */
+    for (i = 0; i < kMDAudioNumberOfStreams; i++) {
+        MDAudioIOStreamInfo *ip = &(gAudio->ioStreamInfos[i]);
+        ip->deviceIndex = -1;
+        ip->busIndex = -1;
+    }
+    
+    /*  Load audio device info  */
+    MDAudioUpdateDeviceInfo();
+    
+    MyAppCallback_startupMessage("Creating AudioUnit Graph...");
+    
+    /*  Create AUGraph  */
+    CHECK_ERR(err, NewAUGraph(&gAudio->graph));
+    
+    /*  Mixer  */
+    desc.componentType = kAudioUnitType_Mixer;
+    desc.componentSubType = kAudioUnitSubType_StereoMixer;
+    desc.componentManufacturer = kAudioUnitManufacturer_Apple;
+    desc.componentFlags = desc.componentFlagsMask = 0;
+    CHECK_ERR(err, AUGraphAddNode(gAudio->graph, &desc, &gAudio->mixer));
+    
+    /*  Output  */
+    desc.componentType = kAudioUnitType_Output;
+    desc.componentSubType = kAudioUnitSubType_DefaultOutput;
+    desc.componentManufacturer = kAudioUnitManufacturer_Apple;
+    CHECK_ERR(err, AUGraphAddNode(gAudio->graph, &desc, &gAudio->output));
+    
+    /*  Open graph and load components  */
+    CHECK_ERR(err, AUGraphOpen(gAudio->graph));
+    CHECK_ERR(err, AUGraphNodeInfo(gAudio->graph, gAudio->mixer, &desc, &gAudio->mixerUnit));
+    CHECK_ERR(err, AUGraphNodeInfo(gAudio->graph, gAudio->output, &desc, &gAudio->outputUnit));
+    
+    /*  Set the canonical format to mixer and output units  */
+    CHECK_ERR(err, AudioUnitSetProperty(gAudio->outputUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription)));
+    CHECK_ERR(err, AudioUnitSetProperty(gAudio->mixerUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Global, 0, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription)));
+    
+    /*  Set the AU callback function for the output unit  */
+    /*  (Read output from the mixer and pass to the output _and_ record to the file)  */
+    callback.inputProc = sMDAudioRecordProc;
+    callback.inputProcRefCon = &(gAudio->ioStreamInfos[kMDAudioFirstIndexForOutputStream]);
+    CHECK_ERR(err, AudioUnitSetProperty(gAudio->outputUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, &callback, sizeof(AURenderCallbackStruct)));
+    
+    /*  Enable metering for the stereo mixer  */
+    unum = 1;
+    CHECK_ERR(err, AudioUnitSetProperty(gAudio->mixerUnit, kAudioUnitProperty_MeteringMode, kAudioUnitScope_Global, 0, &unum, sizeof(UInt32)));
+    
+    CHECK_ERR(err, AUGraphInitialize(gAudio->graph));
     CHECK_ERR(err, AUGraphStart(gAudio->graph));
     
-	{
-		int deviceIndex;
-		MDStatus sts;
-		UInt64 code;
-		/*  Open 2 instances of DLS synthesizer  */
-		MyAppCallback_startupMessage("Initializing Internal Synthesizer...");
-		code = ((UInt64)kAudioUnitSubType_DLSSynth << 32) + (UInt64)kAudioUnitManufacturer_Apple;
-		MDAudioMusicDeviceInfoForCode(code, &deviceIndex);
-		if (deviceIndex >= 0) {
-			sts = MDAudioSelectIOStreamDevice(0, deviceIndex + kMDAudioMusicDeviceIndexOffset);
-			if (sts == 0)
-				sts = MDAudioSelectIOStreamDevice(1, deviceIndex + kMDAudioMusicDeviceIndexOffset);
-			if (sts != 0)
-				return sts;
-		}
-	}
-	
-	/*  Set built-in output as the audio output  */
-	CHECK_ERR(err, MDAudioSelectIOStreamDevice(kMDAudioFirstIndexForOutputStream, 0));
-	
-	return 0;
-
+    {
+        int deviceIndex;
+        MDStatus sts;
+        UInt64 code;
+        /*  Open 2 instances of DLS synthesizer  */
+        MyAppCallback_startupMessage("Initializing Internal Synthesizer...");
+        code = ((UInt64)kAudioUnitSubType_DLSSynth << 32) + (UInt64)kAudioUnitManufacturer_Apple;
+        MDAudioMusicDeviceInfoForCode(code, &deviceIndex);
+        if (deviceIndex >= 0) {
+            sts = MDAudioSelectIOStreamDevice(0, deviceIndex + kMDAudioMusicDeviceIndexOffset);
+            if (sts == 0)
+                sts = MDAudioSelectIOStreamDevice(1, deviceIndex + kMDAudioMusicDeviceIndexOffset);
+            if (sts != 0)
+                return sts;
+        }
+    }
+    
+    /*  Set built-in output as the audio output  */
+    CHECK_ERR(err, MDAudioSelectIOStreamDevice(kMDAudioFirstIndexForOutputStream, 0));
+    
+    return 0;
+    
 exit:
-	return kMDErrorCannotSetupAudio;
+    return kMDErrorCannotSetupAudio;
 }
 
 MDStatus
 MDAudioDispose(void)
 {
-	int idx;
-	OSStatus err;
-	for (idx = 0; idx < kMDAudioNumberOfStreams; idx++)
-		MDAudioSelectIOStreamDevice(idx, -1);
-	CHECK_ERR(err, AUGraphStop(gAudio->graph));	
-	CHECK_ERR(err, AUGraphClose(gAudio->graph));
-	gAudio->graph = NULL;
-	return kMDNoError;
+    int idx;
+    OSStatus err;
+    for (idx = 0; idx < kMDAudioNumberOfStreams; idx++)
+        MDAudioSelectIOStreamDevice(idx, -1);
+    CHECK_ERR(err, AUGraphStop(gAudio->graph));	
+    CHECK_ERR(err, AUGraphClose(gAudio->graph));
+    gAudio->graph = NULL;
+    return kMDNoError;
 exit:
-	return kMDErrorCannotSetupAudio;
+    return kMDErrorCannotSetupAudio;
 }
+
+#pragma mark ====== Start/Stop Audio input/output ======
 
 MDStatus
 MDAudioGetMixerBusAttributes(int idx, float *outPan, float *outVolume, float *outAmpLeft, float *outAmpRight, float *outPeakLeft, float *outPeakRight)

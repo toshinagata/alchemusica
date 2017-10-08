@@ -149,6 +149,8 @@
 		E445919C1413DA2D00F5C20D /* solo_non.png in Resources */ = {isa = PBXBuildFile; fileRef = E445919B1413DA2D00F5C20D /* solo_non.png */; };
 		E46A94AF1F776B23008477D2 /* ContextMenuTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E46A94AE1F776B23008477D2 /* ContextMenuTextFieldCell.m */; };
 		E46A94B21F776E81008477D2 /* EventKindContextMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = E46A94B01F776E81008477D2 /* EventKindContextMenu.xib */; };
+		E47643C21F889F62009A206D /* AudioEffectPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E47643C11F889F62009A206D /* AudioEffectPanelController.m */; };
+		E47643C51F88B29B009A206D /* AudioEffectLayoutView.m in Sources */ = {isa = PBXBuildFile; fileRef = E47643C41F88B29B009A206D /* AudioEffectLayoutView.m */; };
 		E48F300111D8EE7B00491B45 /* AUViewWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E48F2FFF11D8EE7B00491B45 /* AUViewWindow.xib */; };
 		E48F30F111DB8B8D00491B45 /* AUCarbonWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E48F30EF11DB8B8D00491B45 /* AUCarbonWindow.xib */; };
 		E4951EA411D63CD000D827EC /* AUViewWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = E4951EA311D63CD000D827EC /* AUViewWindowController.m */; };
@@ -156,6 +158,7 @@
 		E4C383FC141117F9006F2661 /* AboutWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = E4C383FB141117F9006F2661 /* AboutWindowController.m */; };
 		E4C3844414111D23006F2661 /* lastBuild.txt in Resources */ = {isa = PBXBuildFile; fileRef = E4C3844314111D23006F2661 /* lastBuild.txt */; };
 		E4C384E514112400006F2661 /* Version in Resources */ = {isa = PBXBuildFile; fileRef = E4C384E414112400006F2661 /* Version */; };
+		E4C8B26F1F83DE020003BD42 /* AudioEffectPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4C8B26D1F83DE020003BD42 /* AudioEffectPanel.xib */; };
 		E4D701EB13F540C5005EE5B3 /* RecordPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4D701E913F540C5005EE5B3 /* RecordPanel.xib */; };
 		E4F81DC214C1CBE000F63BA6 /* QuantizePanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4F81DC014C1CBE000F63BA6 /* QuantizePanel.xib */; };
 		E4F81DC714C1CC3100F63BA6 /* QuantizePanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E4F81DC614C1CC3100F63BA6 /* QuantizePanelController.m */; };
@@ -273,6 +276,10 @@
 		E4743AE60456EAE900A80006 /* GraphicFloatingView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GraphicFloatingView.h; path = Classes/GraphicFloatingView.h; sourceTree = "<group>"; };
 		E4743AE70456EAE900A80006 /* GraphicFloatingView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GraphicFloatingView.m; path = Classes/GraphicFloatingView.m; sourceTree = "<group>"; };
 		E476192C0454425A00A80006 /* MenuTags.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MenuTags.h; path = Classes/MenuTags.h; sourceTree = "<group>"; };
+		E47643C01F889F62009A206D /* AudioEffectPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioEffectPanelController.h; path = Classes/AudioEffectPanelController.h; sourceTree = "<group>"; };
+		E47643C11F889F62009A206D /* AudioEffectPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AudioEffectPanelController.m; path = Classes/AudioEffectPanelController.m; sourceTree = "<group>"; };
+		E47643C31F88B29B009A206D /* AudioEffectLayoutView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioEffectLayoutView.h; path = Classes/AudioEffectLayoutView.h; sourceTree = "<group>"; };
+		E47643C41F88B29B009A206D /* AudioEffectLayoutView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AudioEffectLayoutView.m; path = Classes/AudioEffectLayoutView.m; sourceTree = "<group>"; };
 		E481167F071C26C700A80105 /* TrackAttributeCell.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = TrackAttributeCell.h; path = Classes/TrackAttributeCell.h; sourceTree = "<group>"; };
 		E4811680071C26C700A80105 /* TrackAttributeCell.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = TrackAttributeCell.m; path = Classes/TrackAttributeCell.m; sourceTree = "<group>"; };
 		E48885ED04523E4B00A80006 /* plus.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = plus.png; path = icons/plus.png; sourceTree = "<group>"; };
@@ -312,6 +319,7 @@
 		E4C383FB141117F9006F2661 /* AboutWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AboutWindowController.m; path = Classes/AboutWindowController.m; sourceTree = "<group>"; };
 		E4C3844314111D23006F2661 /* lastBuild.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = lastBuild.txt; sourceTree = "<group>"; };
 		E4C384E414112400006F2661 /* Version */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Version; sourceTree = "<group>"; };
+		E4C8B26E1F83DE020003BD42 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/AudioEffectPanel.xib; sourceTree = "<group>"; };
 		E4CD4D710C106B9800AF6017 /* speaker.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = speaker.png; path = icons/speaker.png; sourceTree = "<group>"; };
 		E4CF0D4E0746E734000ADE20 /* MDCalibrator.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MDCalibrator.c; path = MD_package/MDCalibrator.c; sourceTree = "<group>"; };
 		E4CF0D4F0746E734000ADE20 /* MDCalibrator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDCalibrator.h; path = MD_package/MDCalibrator.h; sourceTree = "<group>"; };
@@ -517,6 +525,10 @@
 				F5D2EB1B0244AFAF01A80002 /* RemapDevicePanelController.m */,
 				E4B4C26711C3EDAC00FE7593 /* AudioSettingsPanelController.h */,
 				E4B4C26811C3EDAC00FE7593 /* AudioSettingsPanelController.m */,
+				E47643C01F889F62009A206D /* AudioEffectPanelController.h */,
+				E47643C11F889F62009A206D /* AudioEffectPanelController.m */,
+				E47643C31F88B29B009A206D /* AudioEffectLayoutView.h */,
+				E47643C41F88B29B009A206D /* AudioEffectLayoutView.m */,
 				E4951EA211D63CD000D827EC /* AUViewWindowController.h */,
 				E4951EA311D63CD000D827EC /* AUViewWindowController.m */,
 				F5D2EB0E0244AFAF01A80002 /* ListWindowController.h */,
@@ -611,6 +623,7 @@
 				E40C7A4E140A87FD00969DC3 /* RubyConsoleWindow.xib */,
 				E4D701E913F540C5005EE5B3 /* RecordPanel.xib */,
 				E4B4C25911C3ED4C00FE7593 /* AudioSettingsPanel.xib */,
+				E4C8B26D1F83DE020003BD42 /* AudioEffectPanel.xib */,
 				E48F2FFF11D8EE7B00491B45 /* AUViewWindow.xib */,
 				E48F30EF11DB8B8D00491B45 /* AUCarbonWindow.xib */,
 				E40C7AC5140A94F700969DC3 /* MetronomeSettingsPanel.xib */,
@@ -841,6 +854,7 @@
 				E400BC0E11D627650032B969 /* AudioSettingsPanel.xib in Resources */,
 				E48F300111D8EE7B00491B45 /* AUViewWindow.xib in Resources */,
 				E48F30F111DB8B8D00491B45 /* AUCarbonWindow.xib in Resources */,
+				E4C8B26F1F83DE020003BD42 /* AudioEffectPanel.xib in Resources */,
 				E4D701EB13F540C5005EE5B3 /* RecordPanel.xib in Resources */,
 				E4FB54C313FA851A001C1290 /* horizontal_move_zoom.png in Resources */,
 				E40C7A1F140A85A200969DC3 /* MainMenu.xib in Resources */,
@@ -914,6 +928,7 @@
 				E400BC1611D627730032B969 /* MDUtility.c in Sources */,
 				E400BC1711D627730032B969 /* MDPlayer_MacOSX.c in Sources */,
 				E400BC1811D627730032B969 /* MDAudio_MacOSX.c in Sources */,
+				E47643C21F889F62009A206D /* AudioEffectPanelController.m in Sources */,
 				E400BC1911D627730032B969 /* MDRubyCore.m in Sources */,
 				E400BC1A11D627730032B969 /* MDObjects.m in Sources */,
 				E400BC1B11D627730032B969 /* LoadingPanelController.m in Sources */,
@@ -938,6 +953,7 @@
 				E400BC2E11D627730032B969 /* NSStringAdditions.m in Sources */,
 				E400BC2F11D627730032B969 /* NSEventAdditions.m in Sources */,
 				E400BC3111D627730032B969 /* TrackAttributeCell.m in Sources */,
+				E47643C51F88B29B009A206D /* AudioEffectLayoutView.m in Sources */,
 				E400BC3211D627730032B969 /* NSWindowControllerAdditions.m in Sources */,
 				E400BC3311D627730032B969 /* NSCursorAdditions.m in Sources */,
 				E400BC3411D627730032B969 /* MyPopUpButton.m in Sources */,
@@ -1103,6 +1119,14 @@
 				E4C383F21411124C006F2661 /* English */,
 			);
 			name = AboutPanel.xib;
+			sourceTree = "<group>";
+		};
+		E4C8B26D1F83DE020003BD42 /* AudioEffectPanel.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E4C8B26E1F83DE020003BD42 /* English */,
+			);
+			name = AudioEffectPanel.xib;
 			sourceTree = "<group>";
 		};
 		E4D701E913F540C5005EE5B3 /* RecordPanel.xib */ = {

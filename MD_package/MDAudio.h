@@ -59,6 +59,7 @@ enum {
 };
 
 /*  Cached information for Music Devices (software synthesizers)  */
+/*  Also used for audio effects  */
 typedef struct MDAudioMusicDeviceInfo {
 	UInt64 code;  /*  SubType and Manufacturer  */
 	char *name;   /*  malloc'ed  */
@@ -75,6 +76,24 @@ typedef struct MDAudioMusicDeviceInfo {
 #define kMDAudioMaxMIDIBytesToSendPerDevice 4096
 #define kMDAudioMIDIBufferSize (kMDAudioMaxMIDIBytesToSendPerDevice * 8)
 
+/*  Audio Effect Instance  */
+typedef struct MDAudioEffect {
+    char *name;  /*  malloc'ed  */
+    float xpos;  /*  X position in the layout view  */
+    float width; /*  Width in the layout view  */
+    AudioUnit unit;  /*  Effect unit  */
+    AUNode node;     /*  AUGraph node containing the effect unit  */
+} MDAudioEffect;
+
+/*  Audio Effect Chain (for a single stereo signal)  */
+typedef struct MDAudioEffectChain {
+    AudioUnit converterUnit;  /*  Converter unit (used at the mixer input if necessary) */
+    AUNode converterNode;
+    int alive;   /*  Non-zero if this chain is working  */
+    int neffects;
+    MDAudioEffect *effects;
+} MDAudioEffectChain;
+
 /*  Cached information for audio input (up to 40) and output (one). */
 typedef struct MDAudioIOStreamInfo {
 	
@@ -86,6 +105,13 @@ typedef struct MDAudioIOStreamInfo {
 	AUNode node;      /*  Node in the AUGraph  */
 	AudioUnit converterUnit;  /*  Converter unit (for MusicDevice)  */
 	AUNode converterNode;
+    
+    /*  Effects  */
+    AudioUnit effectMixerUnit;  /*  Mixer for effect outputs (only for nchains>=2)  */
+    AUNode effectMixerNode;
+    int nchains;
+    MDAudioEffectChain *chains;
+    
 	float pan;
 	float volume;
     MDAudioFormat format;  /*  Audio format for the unit  */
@@ -99,7 +125,6 @@ typedef struct MDAudioIOStreamInfo {
 	SInt32 bufferSizeFrames;      /*  buffer size  */
 
 	/*  for MusicDevice only  */
-//	AUMIDIControllerRef midiCon;
 	char *midiControllerName;  /*  malloc'ed  */
     unsigned char *midiBuffer; /*  Ring buffer for MIDI scheduling  */
     int32_t midiBufferWriteOffset;
@@ -124,6 +149,10 @@ MDAudioDeviceInfo *MDAudioDeviceInfoWithName(const char *name, int isInput, int 
 int         MDAudioMusicDeviceCountInfo(void);
 MDAudioMusicDeviceInfo *MDAudioMusicDeviceInfoAtIndex(int idx);
 MDAudioMusicDeviceInfo *MDAudioMusicDeviceInfoForCode(UInt64 code, int *outIndex);
+int         MDAudioEffectDeviceCountInfo(void);
+MDAudioMusicDeviceInfo *MDAudioEffectDeviceInfoAtIndex(int idx);
+MDAudioMusicDeviceInfo *MDAudioEffectDeviceInfoForCode(UInt64 code, int *outIndex);
+
 MDAudioIOStreamInfo *MDAudioGetIOStreamInfoAtIndex(int idx);
 int MDAudioScheduleMIDIToStream(MDAudioIOStreamInfo *ip, UInt64 timeStamp, int length, unsigned char *midiData, int isSysEx);
 

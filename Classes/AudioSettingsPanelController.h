@@ -23,6 +23,7 @@
 	IBOutlet NSView *busListView;  /*  The bus list is inside an NSScrollView  */
 	IBOutlet NSBox *separatorLine; /*  The horizontal line separating the input buses  */
 	NSMutableArray *knobValues;    /*  The current knob values  */
+    id *effectControllers;         /*  Array of AudioEffectPanelControllers  */
 }
 + (void)openAudioSettingsPanel;
 - (void)updateDisplay;
@@ -31,4 +32,5 @@
 - (IBAction)volumeSliderMoved:(id)sender;
 - (IBAction)panKnobMoved:(id)sender;
 - (IBAction)customViewButtonPressed:(id)sender;
+- (IBAction)effectButtonPressed: (id)sender;
 @end

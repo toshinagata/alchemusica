@@ -129,7 +129,7 @@
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <customView id="274">
-                                    <rect key="frame" x="0.0" y="0.0" width="533" height="315"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="537" height="315"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <slider verticalHuggingPriority="750" tag="300" id="19">
@@ -216,7 +216,7 @@
                                                 <font key="font" metaFont="miniSystem"/>
                                             </buttonCell>
                                             <connections>
-                                                <action selector="customViewButtonPressed:" target="-2" id="I76-hP-JvB"/>
+                                                <action selector="effectButtonPressed:" target="-2" id="aft-9o-HER"/>
                                             </connections>
                                         </button>
                                     </subviews>

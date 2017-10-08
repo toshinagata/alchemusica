@@ -1,11 +1,11 @@
 //
-//  MyPopUpButton.h
+//  AudioEffectLayoutView.m
 //  Alchemusica
 //
-//  Created by Toshi Nagata on Sun Jan 1 2006.
+//  Created by Toshi Nagata on 2017/10/09.
+//  Copyright 2006-2017 Toshi Nagata. All rights reserved.
+//
 /*
-    Copyright (c) 2006-2011 Toshi Nagata. All rights reserved.
-
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation version 2 of the License.
@@ -16,17 +16,27 @@
  GNU General Public License for more details.
  */
 
-/*  MyPopUpButton: A compact popup button which shows an image and a small disclosure
-    triangle  */
+#import "AudioEffectLayoutView.h"
 
-#import <Cocoa/Cocoa.h>
+@implementation AudioEffectLayoutView
 
-@interface MyPopUpButton : NSPopUpButton
+- (id)initWithFrame:(NSRect)frame
 {
-    NSColor *textColor;
+    self = [super initWithFrame:frame];
+    if (self) {
+        // Initialization code here.
+    }
+    return self;
 }
-+ (NSImage *)triangleImage;
-- (void)drawRect: (NSRect)aRect;
-- (void)setTextColor: (NSColor *)color;
-- (NSColor *)textColor;
+
+- (BOOL)acceptsFirstResponder
+{
+	return YES;
+}
+
+- (void)drawRect:(NSRect)rect
+{
+    NSDrawWindowBackground(rect);
+}
+
 @end

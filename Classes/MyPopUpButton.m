@@ -33,31 +33,60 @@ static NSImage *sTriangleImage;
 - (void)drawRect: (NSRect)aRect
 {
     NSRect theRect, r;
-	NSPoint center;
 	NSSize size;
 	NSImage *theImage;
-	float fraction;
+    NSString *theTitle;
 	id item = [self selectedItem];
-	theImage = [item image];
-	if (theImage != nil)
-		[[theImage retain] autorelease];
-	[item setImage: nil];
-	[super drawRect: aRect];
-	[item setImage: theImage];
-	theRect = [self bounds];
-	center.x = theRect.origin.x + theRect.size.width / 2;
-	center.y = theRect.origin.y + theRect.size.height / 2;
-	if ([self isEnabled])
-		fraction = 1.0;
-	else fraction = 0.5;
-	if (theImage != nil) {
-		size = [theImage size];
-        r.origin.x = center.x - size.width / 2;
-        r.origin.y = center.y - size.height / 2;
-        r.size = size;
-        [theImage drawInRect:r fromRect:NSZeroRect operation:NSCompositeSourceAtop fraction:fraction respectFlipped:YES hints:nil];
-	}
-//	theRect = NSMakeRect(theRect.origin.x + theRect.size.width - 7, theRect.origin.y + theRect.size.height - 7, 5, 5);
+    theImage = [item image];
+    theTitle = [item title];
+    theRect = [self bounds];
+    if (theImage != nil) {
+        //  Draw only background
+        NSPoint center;
+        float fraction;
+        [[theImage retain] autorelease];
+        if (theTitle != nil)
+            [[theTitle retain] autorelease];
+        [item setImage:nil];
+        [item setTitle:@""];
+        [super drawRect:aRect];
+        [item setTitle:theTitle];
+        [item setImage:theImage];
+        //  And draw the image as we like
+        center.x = theRect.origin.x + theRect.size.width / 2;
+        center.y = theRect.origin.y + theRect.size.height / 2;
+        if ([self isEnabled])
+            fraction = 1.0;
+        else fraction = 0.5;
+        if (theImage != nil) {
+            size = [theImage size];
+            r.origin.x = center.x - size.width / 2;
+            r.origin.y = center.y - size.height / 2;
+            r.size = size;
+            [theImage drawInRect:r fromRect:NSZeroRect operation:NSCompositeSourceAtop fraction:fraction respectFlipped:YES hints:nil];
+        }
+    } else {
+        //  Draw the content as usual
+        NSAttributedString *atitle;
+        if (theTitle != nil && textColor != nil) {
+            //  Set color
+            NSFont *font;
+            NSDictionary *attr;
+            font = [NSFont labelFontOfSize:[NSFont systemFontSizeForControlSize:[self controlSize]]];
+            attr = [NSDictionary dictionaryWithObjectsAndKeys:
+                    textColor, NSForegroundColorAttributeName,
+                    font, NSFontAttributeName,
+                    nil];
+            [theTitle retain];
+            atitle = [[NSAttributedString alloc] initWithString:theTitle attributes: attr];
+            [item setAttributedTitle:atitle];
+            [super drawRect:aRect];
+            [item setTitle:theTitle];
+            [theTitle release];
+        } else {
+            [super drawRect:aRect];
+        }
+    }
     r.origin.x = theRect.origin.x + theRect.size.width - 7;
     r.origin.y = theRect.origin.y + theRect.size.height - 7;
     r.size.width = 5;
@@ -65,5 +94,16 @@ static NSImage *sTriangleImage;
     [[MyPopUpButton triangleImage] drawInRect:r fromRect:NSZeroRect operation:NSCompositeSourceAtop fraction:fraction respectFlipped:YES hints:nil];
 }
 
+- (void)setTextColor:(NSColor *)color
+{
+    [color retain];
+    [textColor release];
+    textColor = color;
+}
+
+- (NSColor *)textColor
+{
+    return textColor;
+}
 
 @end
