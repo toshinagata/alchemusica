@@ -45,6 +45,8 @@
 + (AUViewWindowController *)windowControllerForAudioUnit:(AudioUnit)unit cocoaView:(BOOL)cocoaView delegate:(id)delegate;
 - (id)initWithAudioUnit:(AudioUnit)unit cocoaView:(BOOL)cocoaView delegate:(id)delegate;
 - (AudioUnit)audioUnit;
++ (BOOL)error:(NSString *)errString status:(OSStatus)err;
++ (NSView *)getCocoaViewForAudioUnit:(AudioUnit)unit defaultViewSize:(NSSize)viewSize;
 @end
 
 @interface NSObject (AUViewWindowControllerProtocol)

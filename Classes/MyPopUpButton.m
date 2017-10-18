@@ -20,7 +20,7 @@
 
 @implementation MyPopUpButton
 
-static NSImage *sTriangleImage;
+static NSImage *sTriangleImage, *sDoubleTriangleImage;
 
 + (NSImage *)triangleImage
 {
@@ -28,6 +28,14 @@ static NSImage *sTriangleImage;
 		sTriangleImage = [[NSImage allocWithZone: [self zone]] initWithContentsOfFile: [[NSBundle mainBundle] pathForResource: @"triangle.png" ofType: nil]];
 	}
 	return sTriangleImage;
+}
+
++ (NSImage *)doubleTriangleImage
+{
+    if (sDoubleTriangleImage == nil) {
+        sDoubleTriangleImage = [[NSImage allocWithZone: [self zone]] initWithContentsOfFile: [[NSBundle mainBundle] pathForResource: @"double_triangle.png" ofType: nil]];
+    }
+    return sDoubleTriangleImage;
 }
 
 - (void)drawRect: (NSRect)aRect

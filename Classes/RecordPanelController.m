@@ -185,6 +185,7 @@ sAllowedExtensionsForTag(int tag)
 {
 	int i, n;
 	NSMenu *menu;
+    NSString *str;
 	char name[64];
 	MyMIDISequence *seq = [myDocument myMIDISequence];
 
@@ -199,8 +200,12 @@ sAllowedExtensionsForTag(int tag)
 	[[menu addItemWithTitle: @"Any MIDI device" action: nil keyEquivalent: @""] setTag: 0];
 	n = MDPlayerGetNumberOfSources();
 	for (i = 1; i <= n; i++) {
+        id item;
 		MDPlayerGetSourceName(i - 1, name, sizeof name);
-		[[menu addItemWithTitle: [NSString stringWithUTF8String: name] action: nil keyEquivalent: @""] setTag: i];
+		item = [menu addItemWithTitle:@"X" action: nil keyEquivalent: @""];
+        str = [NSString stringWithUTF8String:name];
+        [item setTitle:str];
+        [item setTag:i];
 	}
 	
 	[destinationDevicePopUp removeAllItems];

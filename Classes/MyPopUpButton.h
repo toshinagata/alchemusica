@@ -26,6 +26,7 @@
     NSColor *textColor;
 }
 + (NSImage *)triangleImage;
++ (NSImage *)doubleTriangleImage;
 - (void)drawRect: (NSRect)aRect;
 - (void)setTextColor: (NSColor *)color;
 - (NSColor *)textColor;

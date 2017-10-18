@@ -84,6 +84,28 @@ MDAudioShowError(OSStatus sts, const char *file, int line)
 	return (int)sts;
 }
 
+static int
+sMDAudioCompareFormat(const AudioStreamBasicDescription *format1, const AudioStreamBasicDescription *format2)
+{
+    if (format1->mSampleRate != format2->mSampleRate)
+        return 0;
+    if (format1->mFormatID != format2->mFormatID)
+        return 0;
+    if (format1->mFormatFlags != format2->mFormatFlags)
+        return 0;
+    if (format1->mBytesPerPacket != format2->mBytesPerPacket)
+        return 0;
+    if (format1->mFramesPerPacket != format2->mFramesPerPacket)
+        return 0;
+    if (format1->mBytesPerFrame != format2->mBytesPerFrame)
+        return 0;
+    if (format1->mChannelsPerFrame != format2->mChannelsPerFrame)
+        return 0;
+    if (format1->mBitsPerChannel != format2->mBitsPerChannel)
+        return 0;
+    return 1;
+}
+
 static void
 sMDAudioReleaseMyBufferList(AudioBufferList *list)
 {
@@ -596,14 +618,17 @@ sMDAudioUpdateSoftwareDeviceInfo(int music_or_effect)
 		/*  Get the audio output format  */
 		err = AudioComponentInstanceNew(cmp, &unit);
 		if (err == noErr) {
-			propSize = sizeof(MDAudioFormat);
-			err = AudioUnitGetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &info.format, &propSize);
+            err = AudioUnitSetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Global, 0, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription));
+            if (err != noErr) {
+                info.acceptsCanonicalFormat = 0;
+                propSize = sizeof(MDAudioFormat);
+                err = AudioUnitGetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Global, 0, &info.format, &propSize);
+            } else {
+                info.acceptsCanonicalFormat = 1;
+                info.format = gAudio->preferredFormat;
+            }
 		} else {
 			unit = NULL;
-		}
-		if (err == noErr) {
-			propSize = sizeof(MDAudioFormat);
-			err = AudioUnitGetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &info.format, &propSize);
 		}
 		if (err == noErr) {
             err = AudioUnitGetPropertyInfo(unit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global, 0, &propSize, NULL);
@@ -1114,6 +1139,10 @@ MDAudioSelectIOStreamDevice(int idx, int deviceIndex)
                 CHECK_ERR(result, AudioUnitSetProperty(ip->unit, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Output, 0, &unum, sizeof(UInt32)));
                 /*  Set the HAL AU output format to the canonical format   */
                 CHECK_ERR(result, AudioUnitSetProperty(ip->unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription)));
+                /*  Set the AU callback function  */
+                callback.inputProc = sMDAudioInputProc;
+                callback.inputProcRefCon = ip;
+                CHECK_ERR(result, AudioUnitSetProperty(ip->unit, kAudioOutputUnitProperty_SetInputCallback, kAudioUnitScope_Global, 0, &callback, sizeof(AURenderCallbackStruct)));
                 /*  Connect the output to the converter unit(s) and set format  */
                 callback.inputProc = sMDAudioPassProc;
                 callback.inputProcRefCon = ip;
@@ -1174,17 +1203,20 @@ MDAudioGetIOStreamDevice(int idx, int *outDeviceIndex)
 
 #pragma mark ====== Audio Effects ======
 
-int
+MDStatus
 MDAudioAppendEffectChain(int streamIndex)
 {
     int sts, result;
     MDAudioIOStreamInfo *ip;
     MDAudioEffectChain *cp;
-
+    MDAudioEffect *ep;
+    AudioComponentDescription desc;
+    AUNode node;
+    
     if (streamIndex < 0 || streamIndex >= kMDAudioNumberOfInputStreams)
         return -1;  /*  Invalid streamIndex  */
     ip = MDAudioGetIOStreamInfoAtIndex(streamIndex);
-    if (ip->nchains >= 8)
+    if (ip->nchains >= 64)
         return -2;  /*  Too many chains  */
     if (ip->nchains % 8 == 0) {
         /*  Allocate storage  */
@@ -1199,8 +1231,62 @@ MDAudioAppendEffectChain(int streamIndex)
     
     CHECK_ERR(result, AUGraphStop(gAudio->graph));
     
+    /*  Create a converter (which is the entrance of the chain)  */
+    desc.componentType = kAudioUnitType_FormatConverter;
+    desc.componentSubType = kAudioUnitSubType_AUConverter;
+    desc.componentManufacturer = kAudioUnitManufacturer_Apple;
+    desc.componentFlags = desc.componentFlagsMask = 0;
+    CHECK_ERR(result, AUGraphAddNode(gAudio->graph, &desc, &cp->converterNode));
+    /*  Open component  */
+    CHECK_ERR(result, AUGraphOpen(gAudio->graph));
+    CHECK_ERR(result, AUGraphNodeInfo(gAudio->graph, cp->converterNode, NULL, &cp->converterUnit));
+    /*  Set output format  */
+    CHECK_ERR(result, AudioUnitSetProperty(cp->converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription)));
+    /*  Create a mixer for this chain (when nchains == 2)  */
     if (ip->nchains == 2) {
-        
+        desc.componentType = kAudioUnitType_Mixer;
+        desc.componentSubType = kAudioUnitSubType_StereoMixer;
+        desc.componentManufacturer = kAudioUnitManufacturer_Apple;
+        desc.componentFlags = desc.componentFlagsMask = 0;
+        CHECK_ERR(result, AUGraphAddNode(gAudio->graph, &desc, &ip->effectMixerNode));
+        CHECK_ERR(result, AUGraphOpen(gAudio->graph));
+        CHECK_ERR(result, AUGraphNodeInfo(gAudio->graph, ip->effectMixerNode, NULL, &ip->effectMixerUnit));
+        CHECK_ERR(result, AudioUnitSetProperty(ip->effectMixerUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Global, 0, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription)));
+        /*  Disconnect the last unit in chain 0 from gAudio->mixer and
+            reconnect to the ip->effectMixerNode  */
+        CHECK_ERR(result, AUGraphDisconnectNodeInput(gAudio->graph, gAudio->mixer, streamIndex));
+        if (ip->chains->neffects == 0)
+            node = ip->chains->converterNode;
+        else {
+            /*  Last effect entry  */
+            ep = ip->chains->effects + ip->chains->neffects - 1;
+            if (ep->converterUnit != NULL)
+                node = ep->converterNode;
+            else node = ep->node;
+        }
+        CHECK_ERR(result, AUGraphConnectNodeInput(gAudio->graph, node, 0, ip->effectMixerNode, 0));
+        /*  Connect ip->effectMixerNode to gAudio->mixer  */
+        CHECK_ERR(result, AUGraphConnectNodeInput(gAudio->graph, ip->effectMixerNode, 0, gAudio->mixer, streamIndex));
+    }
+    /*  Connect cp->converterNode to ip->effectMixerNode  */
+    CHECK_ERR(result, AUGraphConnectNodeInput(gAudio->graph, cp->converterNode, 0, ip->effectMixerNode, ip->nchains - 1));
+    /*  Connect ip->unit to cp->converterNode  */
+    if (ip->deviceIndex >= kMDAudioMusicDeviceIndexOffset) {
+        /*  Music device  */
+        UInt32 propSize, count;
+        propSize = sizeof(UInt32);
+        CHECK_ERR(result, AudioUnitGetProperty(ip->unit, kAudioUnitProperty_ElementCount, kAudioUnitScope_Output, ip->node, &count, &propSize));
+        if (count >= ip->nchains) {
+            AudioStreamBasicDescription format;
+            cp->alive = 1;
+            CHECK_ERR(result, AUGraphConnectNodeInput(gAudio->graph, ip->node, ip->nchains - 1, cp->converterNode, 0));
+            propSize = sizeof(AudioStreamBasicDescription);
+            CHECK_ERR(result, AudioUnitGetProperty(ip->unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, ip->nchains - 1, &format, &propSize));
+            CHECK_ERR(result, AudioUnitSetProperty(cp->converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &format, propSize));
+        } else cp->alive = 0;
+    } else {
+        /*  HAL: we do not support more than one stereo bus (for now)  */
+        cp->alive = 0;
     }
     
 exit:
@@ -1208,6 +1294,350 @@ exit:
     result = AUGraphStart(gAudio->graph);
     return (result == noErr && sts == kMDNoError ? 0 : kMDErrorCannotSetupAudio);
 }
+
+MDStatus
+MDAudioRemoveLastEffectChain(int streamIndex)
+{
+    int sts, result;
+    MDAudioIOStreamInfo *ip;
+    MDAudioEffectChain *cp;
+    MDAudioEffect *ep;
+    AUNode node;
+    
+    if (streamIndex < 0 || streamIndex >= kMDAudioNumberOfInputStreams)
+        return -1;  /*  Invalid streamIndex  */
+    ip = MDAudioGetIOStreamInfoAtIndex(streamIndex);
+    if (ip->nchains <= 1)
+        return -2;  /*  At least one chain should be present  */
+    cp = ip->chains + (ip->nchains - 1);
+    if (cp->neffects > 0)
+        return -3;  /*  The chain should be empty  */
+    ip->nchains--;
+    
+    CHECK_ERR(result, AUGraphStop(gAudio->graph));
+    
+    /*  Disonnect cp->converterNode from ip->effectMixerNode  */
+    CHECK_ERR(result, AUGraphDisconnectNodeInput(gAudio->graph, ip->effectMixerNode, ip->nchains));
+    /*  Disonnect ip->unit from cp->converterNode  */
+    if (cp->alive != 0) {
+        CHECK_ERR(result, AUGraphDisconnectNodeInput(gAudio->graph, cp->converterNode, 0));
+    }
+    /*  Dispose cp->converterNode  */
+    CHECK_ERR(result, AUGraphRemoveNode(gAudio->graph, cp->converterNode));
+    cp->converterNode = 0;
+    cp->converterUnit = NULL;
+    
+    /*  Dispose the mixer for this chain (when nchains was 2)  */
+    if (ip->nchains == 1) {
+        /*  Disonnect ip->effectMixerNode from gAudio->mixer  */
+        CHECK_ERR(result, AUGraphDisconnectNodeInput(gAudio->graph, gAudio->mixer, streamIndex));
+        /*  Disconnect the last unit in chain 0 from ip->effectMixerNode and
+            reconnect to gAudio->mixer   */
+        CHECK_ERR(result, AUGraphDisconnectNodeInput(gAudio->graph, ip->effectMixerNode, 0));
+        if (ip->chains->neffects == 0)
+            node = ip->chains->converterNode;
+        else {
+            /*  Last effect entry  */
+            ep = ip->chains->effects + ip->chains->neffects - 1;
+            if (ep->converterUnit != NULL)
+                node = ep->converterNode;
+            else node = ep->node;
+        }
+        CHECK_ERR(result, AUGraphConnectNodeInput(gAudio->graph, node, 0, gAudio->mixer, streamIndex));
+        /*  Dispose the mixer  */
+        CHECK_ERR(result, AUGraphRemoveNode(gAudio->graph, ip->effectMixerNode));
+        ip->effectMixerNode = 0;
+        ip->effectMixerUnit = NULL;
+    }
+
+exit:
+    sts = (result == noErr ? kMDNoError : kMDErrorCannotSetupAudio);
+    result = AUGraphStart(gAudio->graph);
+    return (result == noErr && sts == kMDNoError ? 0 : kMDErrorCannotSetupAudio);
+}
+
+MDStatus
+MDAudioChangeEffect(int streamIndex, int chainIndex, int effectIndex, int effectID, int insert)
+{
+    int sts, result;
+    MDAudioIOStreamInfo *ip;
+    MDAudioEffectChain *cp;
+    MDAudioEffect *ep;
+    MDAudioMusicDeviceInfo *mp, *lastmp, *nextmp;
+    AudioComponentDescription desc;
+    AUNode lastNode, nextNode;
+    int nextNodeBus;
+    
+    if (streamIndex < 0 || streamIndex >= kMDAudioNumberOfInputStreams)
+        return -1;  /*  Invalid streamIndex  */
+    ip = MDAudioGetIOStreamInfoAtIndex(streamIndex);
+    if (chainIndex < 0 || chainIndex >= ip->nchains)
+        return -2;  /*  Invalid chainIndex  */
+    mp = MDAudioEffectDeviceInfoAtIndex(effectID);
+    if (mp == NULL)
+        return -3;  /*  effectID out of range  */
+    cp = ip->chains + chainIndex;
+    if (effectIndex < 0 || effectIndex > cp->neffects)
+        return -4;  /*  Invalid effectIndex  */
+    if (effectIndex == cp->neffects && insert == 0)
+        return -4;  /*  Invalid effectIndex  */
+    if (insert) {
+        if (cp->neffects % 8 == 0) {
+            /*  Allocate storage  */
+            void *p = realloc(cp->effects, sizeof(MDAudioEffect) * (cp->neffects + 8));
+            if (p == NULL)
+                return -5;  /*  Out of memory  */
+            cp->effects = p;
+        }
+        ep = cp->effects + effectIndex;
+        if (effectIndex < cp->neffects) {
+            memmove(ep + 1, ep, sizeof(MDAudioEffect) * (cp->neffects - effectIndex));
+        }
+        cp->neffects++;
+        memset(ep, 0, sizeof(MDAudioEffect));
+    } else {
+        ep = cp->effects + effectIndex;
+        if (ep->effectDeviceIndex == effectID)
+            return 0;  /*  Same effect: no action  */
+    }
+
+    CHECK_ERR(result, AUGraphStop(gAudio->graph));
+
+    /*  Specify next nodes and disable the existing connection to it  */
+    if (effectIndex == cp->neffects - 1) {
+        if (ip->effectMixerUnit != NULL) {
+            nextNode = ip->effectMixerNode;
+            nextNodeBus = chainIndex;
+        } else {
+            nextNode = gAudio->mixer;
+            nextNodeBus = streamIndex;
+        }
+    } else {
+        nextNode = ep[1].node;
+        nextNodeBus = 0;
+    }
+    CHECK_ERR(result, AUGraphDisconnectNodeInput(gAudio->graph, nextNode, nextNodeBus));
+
+    if (!insert) {
+        /*  Disable the connection to the converter, if present  */
+        if (ep->converterUnit != NULL) {
+            CHECK_ERR(result, AUGraphDisconnectNodeInput(gAudio->graph, ep->converterNode, 0));
+            /*  Note: the converter unit will be disposed later, if it is unnecessary */
+        }
+        /*  Disable the existing connection to the present node  */
+        CHECK_ERR(result, AUGraphDisconnectNodeInput(gAudio->graph, ep->node, 0));
+        /*  Dispose the present node  */
+        CHECK_ERR(result, AUGraphRemoveNode(gAudio->graph, ep->node));
+        ep->node = 0;
+        ep->unit = NULL;
+    }
+
+    /*  Create a new effect node  */
+    desc.componentType = kAudioUnitType_Effect;
+    desc.componentSubType = (UInt32)(mp->code >> 32);
+    desc.componentManufacturer = (UInt32)(mp->code);
+    desc.componentFlags = desc.componentFlagsMask = 0;
+    CHECK_ERR(result, AUGraphAddNode(gAudio->graph, &desc, &ep->node));
+    CHECK_ERR(result, AUGraphOpen(gAudio->graph));
+    CHECK_ERR(result, AUGraphNodeInfo(gAudio->graph, ep->node, NULL, &ep->unit));
+
+    if (effectIndex == 0) {
+        lastNode = cp->converterNode;
+        lastmp = NULL;
+        /*  Set output format of the converter unit  */
+        CHECK_ERR(result, AudioUnitSetProperty(cp->converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &mp->format, sizeof(AudioStreamBasicDescription)));
+    } else {
+        lastmp = MDAudioEffectDeviceInfoAtIndex(ep[-1].effectDeviceIndex);
+        if (sMDAudioCompareFormat(&mp->format, &lastmp->format)) {
+            /*  We do not need converter in the last effect block  */
+            if (ep[-1].converterUnit != NULL) {
+                CHECK_ERR(result, AUGraphDisconnectNodeInput(gAudio->graph, ep[-1].converterNode, 0));
+                CHECK_ERR(result, AUGraphRemoveNode(gAudio->graph, ep[-1].converterNode));
+                ep[-1].converterNode = 0;
+                ep[-1].converterUnit = NULL;
+            }
+            lastNode = ep[-1].node;
+        } else {
+            /*  We do need converter  */
+            if (ep[-1].converterUnit == NULL) {
+                /*  Create ep->converterNode  */
+                desc.componentType = kAudioUnitType_FormatConverter;
+                desc.componentSubType = kAudioUnitSubType_AUConverter;
+                desc.componentManufacturer = kAudioUnitManufacturer_Apple;
+                desc.componentFlags = desc.componentFlagsMask = 0;
+                CHECK_ERR(result, AUGraphAddNode(gAudio->graph, &desc, &ep[-1].converterNode));
+                /*  Open component  */
+                CHECK_ERR(result, AUGraphOpen(gAudio->graph));
+                CHECK_ERR(result, AUGraphNodeInfo(gAudio->graph, ep[-1].converterNode, NULL, &ep[-1].converterUnit));
+                /*  Set input format  */
+                CHECK_ERR(result, AudioUnitSetProperty(ep[-1].converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &lastmp->format, sizeof(AudioStreamBasicDescription)));
+                /*  Reconnect effect->converter->next  */
+                CHECK_ERR(result, AUGraphConnectNodeInput(gAudio->graph, ep[-1].node, 0, ep[-1].converterNode, 0));
+            }
+            lastNode = ep[-1].converterNode;
+            /*  Set output format of the converter unit  */
+            CHECK_ERR(result, AudioUnitSetProperty(ep[-1].converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &mp->format, sizeof(AudioStreamBasicDescription)));
+        }
+    }
+    /*  Connect last node  */
+    CHECK_ERR(result, AUGraphConnectNodeInput(gAudio->graph, lastNode, 0, ep->node, 0));
+    /*  Do we need a converter after the effect?  */
+    if (effectIndex >= cp->neffects - 1) {
+        nextmp = NULL;
+        result = mp->acceptsCanonicalFormat;
+    } else {
+        nextmp = MDAudioEffectDeviceInfoAtIndex(ep[1].effectDeviceIndex);
+        result = sMDAudioCompareFormat(&mp->format, &nextmp->format);
+    }
+    if (result == 0) {
+        /*  We do need a converter  */
+        if (ep->converterUnit == NULL) {
+            desc.componentType = kAudioUnitType_FormatConverter;
+            desc.componentSubType = kAudioUnitSubType_AUConverter;
+            desc.componentManufacturer = kAudioUnitManufacturer_Apple;
+            desc.componentFlags = desc.componentFlagsMask = 0;
+            CHECK_ERR(result, AUGraphAddNode(gAudio->graph, &desc, &ep->converterNode));
+            /*  Open component  */
+            CHECK_ERR(result, AUGraphOpen(gAudio->graph));
+            CHECK_ERR(result, AUGraphNodeInfo(gAudio->graph, ep->converterNode, NULL, &ep->converterUnit));
+        }
+        /*  Set output format  */
+        CHECK_ERR(result, AudioUnitSetProperty(ep->converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, (nextmp == NULL ? &gAudio->preferredFormat : &nextmp->format), sizeof(AudioStreamBasicDescription)));
+        /*  Set input format  */
+        CHECK_ERR(result, AudioUnitSetProperty(ep->converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &mp->format, sizeof(AudioStreamBasicDescription)));
+        /*  Connect effect to converter  */
+        CHECK_ERR(result, AUGraphConnectNodeInput(gAudio->graph, ep->node, 0, ep->converterNode, 0));
+        /*  Connect converter to the next node  */
+        CHECK_ERR(result, AUGraphConnectNodeInput(gAudio->graph, ep->converterNode, 0, nextNode, nextNodeBus));
+    } else {
+        /*  Connect effect to the next node  */
+        CHECK_ERR(result, AUGraphConnectNodeInput(gAudio->graph, ep->node, 0, nextNode, nextNodeBus));
+        /*  Dispose the existing converter, as we do not need it  */
+        if (ep->converterUnit != NULL) {
+            CHECK_ERR(result, AUGraphRemoveNode(gAudio->graph, ep->converterNode));
+            ep->converterNode = 0;
+            ep->converterUnit = NULL;
+        }
+    }
+    ep->effectDeviceIndex = effectID;
+    ep->name = strdup(mp->name);
+
+exit:
+    sts = (result == noErr ? kMDNoError : kMDErrorCannotSetupAudio);
+    result = AUGraphStart(gAudio->graph);
+    return (result == noErr && sts == kMDNoError ? 0 : kMDErrorCannotSetupAudio);
+}
+
+MDStatus
+MDAudioRemoveEffect(int streamIndex, int chainIndex, int effectIndex)
+{
+    int sts, result;
+    MDAudioIOStreamInfo *ip;
+    MDAudioEffectChain *cp;
+    MDAudioEffect *ep;
+    MDAudioMusicDeviceInfo *mp, *lastmp;
+    AudioStreamBasicDescription *fmtp;
+    AudioComponentDescription desc;
+    AUNode lastNode, nextNode;
+    int nextNodeBus;
+    
+    if (streamIndex < 0 || streamIndex >= kMDAudioNumberOfInputStreams)
+        return -1;  /*  Invalid streamIndex  */
+    ip = MDAudioGetIOStreamInfoAtIndex(streamIndex);
+    if (chainIndex < 0 || chainIndex >= ip->nchains)
+        return -2;  /*  Invalid chainIndex  */
+    cp = ip->chains + chainIndex;
+    if (effectIndex < 0 || effectIndex >= cp->neffects)
+        return -4;  /*  Invalid effectIndex  */
+    ep = cp->effects + effectIndex;
+    
+    CHECK_ERR(result, AUGraphStop(gAudio->graph));
+    
+    /*  Specify next nodes and disable the existing connection to it  */
+    if (effectIndex == cp->neffects - 1) {
+        mp = NULL;
+        if (ip->effectMixerUnit != NULL) {
+            nextNode = ip->effectMixerNode;
+            nextNodeBus = chainIndex;
+        } else {
+            nextNode = gAudio->mixer;
+            nextNodeBus = streamIndex;
+        }
+        fmtp = &gAudio->preferredFormat;
+    } else {
+        nextNode = ep[1].node;
+        nextNodeBus = 0;
+        mp = MDAudioEffectDeviceInfoAtIndex(ep[1].effectDeviceIndex);
+        fmtp = &mp->format;
+    }
+    CHECK_ERR(result, AUGraphDisconnectNodeInput(gAudio->graph, nextNode, nextNodeBus));
+    
+    /*  Disable the connection to the converter, if present  */
+    if (ep->converterUnit != NULL) {
+        CHECK_ERR(result, AUGraphDisconnectNodeInput(gAudio->graph, ep->converterNode, 0));
+        CHECK_ERR(result, AUGraphRemoveNode(gAudio->graph, ep->converterNode));
+    }
+
+    /*  Disable the existing connection to the present node  */
+    CHECK_ERR(result, AUGraphDisconnectNodeInput(gAudio->graph, ep->node, 0));
+    /*  Dispose the present node  */
+    CHECK_ERR(result, AUGraphRemoveNode(gAudio->graph, ep->node));
+    
+    /*  Specify the last node  */
+    if (effectIndex == 0) {
+        lastNode = cp->converterNode;
+        lastmp = NULL;
+        /*  Set output format of the converter unit  */
+        CHECK_ERR(result, AudioUnitSetProperty(cp->converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, fmtp, sizeof(AudioStreamBasicDescription)));
+    } else {
+        lastmp = MDAudioEffectDeviceInfoAtIndex(ep[-1].effectDeviceIndex);
+        if (sMDAudioCompareFormat(fmtp, &lastmp->format)) {
+            /*  We do not need converter in the last effect block  */
+            if (ep[-1].converterUnit != NULL) {
+                CHECK_ERR(result, AUGraphDisconnectNodeInput(gAudio->graph, ep[-1].converterNode, 0));
+                CHECK_ERR(result, AUGraphRemoveNode(gAudio->graph, ep[-1].converterNode));
+                ep[-1].converterNode = 0;
+                ep[-1].converterUnit = NULL;
+            }
+            lastNode = ep[-1].node;
+        } else {
+            /*  We do need converter  */
+            if (ep[-1].converterUnit == NULL) {
+                /*  Create ep->converterNode  */
+                desc.componentType = kAudioUnitType_FormatConverter;
+                desc.componentSubType = kAudioUnitSubType_AUConverter;
+                desc.componentManufacturer = kAudioUnitManufacturer_Apple;
+                desc.componentFlags = desc.componentFlagsMask = 0;
+                CHECK_ERR(result, AUGraphAddNode(gAudio->graph, &desc, &ep[-1].converterNode));
+                /*  Open component  */
+                CHECK_ERR(result, AUGraphOpen(gAudio->graph));
+                CHECK_ERR(result, AUGraphNodeInfo(gAudio->graph, ep[-1].converterNode, NULL, &ep[-1].converterUnit));
+                /*  Set input format  */
+                CHECK_ERR(result, AudioUnitSetProperty(ep[-1].converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &lastmp->format, sizeof(AudioStreamBasicDescription)));
+                /*  Reconnect effect->converter->next  */
+                CHECK_ERR(result, AUGraphConnectNodeInput(gAudio->graph, ep[-1].node, 0, ep[-1].converterNode, 0));
+            }
+            lastNode = ep[-1].converterNode;
+            /*  Set output format of the converter unit  */
+            CHECK_ERR(result, AudioUnitSetProperty(ep[-1].converterUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, fmtp, sizeof(AudioStreamBasicDescription)));
+        }
+    }
+    /*  Connect last node  */
+    CHECK_ERR(result, AUGraphConnectNodeInput(gAudio->graph, lastNode, 0, nextNode, nextNodeBus));
+    
+exit:
+    if (effectIndex < cp->neffects - 1) {
+        memmove(ep, ep + 1, sizeof(MDAudioEffect) * (cp->neffects - effectIndex - 1));
+    }
+    cp->neffects--;
+    sts = (result == noErr ? kMDNoError : kMDErrorCannotSetupAudio);
+    result = AUGraphStart(gAudio->graph);
+    return (result == noErr && sts == kMDNoError ? 0 : kMDErrorCannotSetupAudio);
+}
+
+#if 0
+#pragma mark ====== Initialize Audio ======
+#endif
 
 MDStatus
 MDAudioInitialize(void)

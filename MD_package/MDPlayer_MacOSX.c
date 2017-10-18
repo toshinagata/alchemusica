@@ -287,7 +287,7 @@ MDPlayerReloadDeviceInformationSub(MDDeviceIDRecord **src_dst_p, int32_t *src_ds
 				CFRelease(devname);
 			}
 		}
-		if (!CFStringGetCString(name, buf, 255, CFStringGetSystemEncoding()))
+		if (!CFStringGetCString(name, buf, 255, kCFStringEncodingUTF8))
 			sprintf(buf, "(Device %d)", n);
 		buf[255] = 0;
 		/*  Look up in the existing table whether this device is already there (by uniqueID) */

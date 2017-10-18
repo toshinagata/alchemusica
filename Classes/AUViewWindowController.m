@@ -74,6 +74,11 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 	}
 	cont = [[[AUViewWindowController alloc] initWithAudioUnit:unit cocoaView:cocoaView delegate:delegate] autorelease];
 	if (cont != nil) {
+        //  The present implementation keeps the window controller even after
+        //  the window is closed. This may hog the memory and CPU time. But
+        //  releasing the Cocoa window sometimes caused crash, which
+        //  I were not able to fix. So I will keep this way for a while.
+        //  (Toshi Nagata 2017.10.8)
 		[sAUViewWindowControllers addObject: cont];
 		[[cont window] makeKeyAndOrderFront: nil];
 	}
@@ -86,7 +91,7 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 	[_delegate auViewWindowWillClose: self];
 }
 
-- (BOOL)error:(NSString *)errString status:(OSStatus)err
++ (BOOL)error:(NSString *)errString status:(OSStatus)err
 {
 	NSString *errorString = [NSString stringWithFormat:@"%@ failed with error code %i: %s", errString, (int)err, GetMacOSStatusCommentString(err)];
 	NSLog(@"%@", errorString);
@@ -171,20 +176,24 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 	return (err == noErr && dataSize > 0);
 }
 
-- (NSView *)getCocoaView
++ (NSView *)getCocoaViewForAudioUnit:(AudioUnit)unit defaultViewSize:(NSSize)viewSize
 {
 	NSView *theView = nil;
 	UInt32 dataSize = 0;
 	Boolean isWritable = 0;
-	OSStatus err = AudioUnitGetPropertyInfo(audioUnit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global, 0, &dataSize, &isWritable);
+	OSStatus err = AudioUnitGetPropertyInfo(unit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global, 0, &dataSize, &isWritable);
 	
 	if (err != noErr) {
-		[self error: @"Getting cocoa view info" status: err];
-		return nil;
+        AUGenericView *aView = [[AUGenericView alloc] initWithAudioUnit:unit];
+        if (aView == nil) {
+            [self error: @"Cannot open cocoa view nor generic view" status: err];
+            return nil;
+        }
+        return [aView autorelease];
 	}
 	
 	AudioUnitCocoaViewInfo *cvi = malloc(dataSize);
-	err = AudioUnitGetProperty(audioUnit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global, 0, cvi, &dataSize);
+	err = AudioUnitGetProperty(unit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global, 0, cvi, &dataSize);
 	
 	unsigned numberOfClasses = (dataSize - sizeof(CFURLRef)) / sizeof(CFStringRef);
 	NSString *viewClassName = (NSString *)(cvi->mCocoaAUViewClass[0]);
@@ -194,7 +203,7 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 	
 	if ([AUViewWindowController pluginClassIsValid:viewClass]) {
 		id factory = [[[viewClass alloc] init] autorelease];
-		theView = [factory uiViewForAudioUnit:audioUnit withSize:defaultViewSize];
+		theView = [factory uiViewForAudioUnit:unit withSize:viewSize];
 	}
 	
 	if (cvi != NULL) {
@@ -206,6 +215,12 @@ static NSMutableArray *sAUViewWindowControllers = nil;
     }
 	
 	return theView;
+}
+
+
+- (NSView *)getCocoaView
+{
+    return [AUViewWindowController getCocoaViewForAudioUnit:audioUnit defaultViewSize:defaultViewSize];
 }
 
 #if USE_CARBON
@@ -224,12 +239,12 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 		IBNibRef nibRef;
 		res = CreateNibReference(CFSTR("AUCarbonWindow"), &nibRef);
 		if (res != noErr) {
-			[self error: @"Cannot load nib for carbon window" status: res];
+			[[self class] error: @"Cannot load nib for carbon window" status: res];
 			return nil;
 		}
 		res = CreateWindowFromNib(nibRef, CFSTR("Window"), &carbonWindowRef);
 		if (res != noErr) {
-			[self error: @"Cannot load carbon window from nib" status: res];
+			[[self class] error: @"Cannot load carbon window from nib" status: res];
 			return nil;
 		}
 		DisposeNibReference(nibRef);
@@ -243,7 +258,7 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 	ControlRef rootControl;
 	res = GetRootControl(carbonWindowRef, &rootControl);
 	if (rootControl == nil)  {
-		[self error:@"Getting root control of carbon window" status:res];
+		[[self class] error:@"Getting root control of carbon window" status:res];
 		return nil;
 	}
 	
@@ -270,7 +285,7 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 		EventHandlerUPP	handlerUPP = NewEventHandlerUPP(sWindowEventHandler);
 		res = InstallWindowEventHandler(carbonWindowRef, handlerUPP, sizeof(eventList) / sizeof(eventList[0]), eventList, self, NULL);
 		if (res != noErr) {
-			[self error: @"Installation of WindowClose handler" status: res];
+			[[self class] error: @"Installation of WindowClose handler" status: res];
 			return nil;
 		}
 	}
@@ -352,18 +367,6 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 	}
 	[[self window] makeKeyAndOrderFront: nil];
 	return self;
-}
-
-- (void)dealloc
-{
-	[self setWindow:nil];
-#if USE_CARBON
-	if (auCarbonView)
-		CloseComponent(auCarbonView);
-	if (carbonWindowRef)
-		DisposeWindow(carbonWindowRef);
-#endif
-	[super dealloc];
 }
 
 @end

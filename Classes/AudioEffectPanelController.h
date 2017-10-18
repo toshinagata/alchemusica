@@ -22,7 +22,20 @@
 @interface AudioEffectPanelController : NSWindowController {
     IBOutlet NSSplitView *splitView;
     IBOutlet AudioEffectLayoutView *layoutView;
+    IBOutlet NSView *customContainerView;
+    NSView *customView;
     int busIndex;
+    int selectedEffect;
+    CGFloat xpos_output;  //  X position of the "Stereo Out" box
 }
 - (id)initWithBusIndex:(int)idx;
+- (CGFloat)xpos_output;
+- (int)numberOfChains;
+- (IBAction)addEffect:(id)sender;
+- (IBAction)addEffectChain:(id)sender;
+- (IBAction)removeEffectChain:(id)sender;
+- (IBAction)insertEffect:(id)sender;
+- (IBAction)changeEffect:(id)sender;
+- (IBAction)removeEffect:(id)sender;
+- (IBAction)effectButtonPressed:(id)sender;
 @end

@@ -17,6 +17,7 @@
  */
 
 #import "AudioEffectLayoutView.h"
+#import "AudioEffectPanelController.h"
 
 @implementation AudioEffectLayoutView
 
@@ -36,7 +37,32 @@
 
 - (void)drawRect:(NSRect)rect
 {
+    CGFloat x;
+    int i, n;
     NSDrawWindowBackground(rect);
+    if (dataSource != nil) {
+        NSRect b = [self bounds];
+        x = [dataSource xpos_output];
+        n = [dataSource numberOfChains];
+        [[NSColor blackColor] set];
+        for (i = 0; i < n; i++) {
+            CGFloat xx, ybase;
+            if (i == 0)
+                xx = x;
+            else
+                xx = x - 16;
+            ybase = b.size.height - 20 - 25 * i;
+            [NSBezierPath strokeLineFromPoint:NSMakePoint(122, ybase) toPoint:NSMakePoint(xx, ybase)];
+            if (i == n - 1) {
+                [NSBezierPath strokeLineFromPoint:NSMakePoint(xx, ybase - 1) toPoint:NSMakePoint(xx, b.size.height - 21)];
+            }
+        }
+    }
+}
+
+- (void)setDataSource:(AudioEffectPanelController *)aDataSource
+{
+    dataSource = aDataSource;
 }
 
 @end

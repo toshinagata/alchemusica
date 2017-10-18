@@ -65,6 +65,7 @@ typedef struct MDAudioMusicDeviceInfo {
 	char *name;   /*  malloc'ed  */
 	MDAudioFormat format;
 	unsigned char hasCustomView;
+    unsigned char acceptsCanonicalFormat;  /*  For effects  */
 } MDAudioMusicDeviceInfo;
 
 #define kMDAudioNumberOfInputStreams 40
@@ -81,8 +82,11 @@ typedef struct MDAudioEffect {
     char *name;  /*  malloc'ed  */
     float xpos;  /*  X position in the layout view  */
     float width; /*  Width in the layout view  */
+    int effectDeviceIndex;  /*  Index to gAudio->effectDeviceInfos  */
     AudioUnit unit;  /*  Effect unit  */
     AUNode node;     /*  AUGraph node containing the effect unit  */
+    AudioUnit converterUnit;  /*  Converter unit (optional)  */
+    AUNode converterNode;
 } MDAudioEffect;
 
 /*  Audio Effect Chain (for a single stereo signal)  */
@@ -163,6 +167,11 @@ MDStatus    MDAudioGetIOStreamDevice(int idx, int *outDeviceIndex);
 MDStatus    MDAudioGetMixerBusAttributes(int idx, float *outPan, float *outVolume, float *outAmpLeft, float *outAmpRight, float *outPeakLeft, float *outPeakRight);
 MDStatus    MDAudioSetMixerVolume(int idx, float volume);
 MDStatus    MDAudioSetMixerPan(int idx, float pan);
+
+MDStatus    MDAudioAppendEffectChain(int streamIndex);
+MDStatus    MDAudioRemoveLastEffectChain(int streamIndex);
+MDStatus    MDAudioChangeEffect(int streamIndex, int chainIndex, int effectIndex, int effectID, int insert);
+MDStatus    MDAudioRemoveEffect(int streamIndex, int chainIndex, int effectIndex);
 
 /*MDStatus	MDAudioStartInput(void);
 MDStatus	MDAudioStopInput(void); */

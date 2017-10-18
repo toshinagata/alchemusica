@@ -1,11 +1,11 @@
 //
-//  AudioEffectLayoutView.h
-//  Alchemusica
+//  NSMenuAdditions.h
 //
-//  Created by Toshi Nagata on 2017/10/09.
-//  Copyright 2006-2017 Toshi Nagata. All rights reserved.
+//  Created by Toshi Nagata on 2017/10/12.
 //
 /*
+    Copyright (c) 2004-2017 Toshi Nagata. All rights reserved.
+
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation version 2 of the License.
@@ -18,9 +18,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class AudioEffectPanelController;
-@interface AudioEffectLayoutView : NSView {
-    AudioEffectPanelController *dataSource;
-}
-- (void)setDataSource:(AudioEffectPanelController *)aDataSource;
+@interface NSMenu (MyMenuAddition)
+- (void)changeMenuTitleAttributes:(NSDictionary *)attributes;
 @end
