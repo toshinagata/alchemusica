@@ -39,7 +39,7 @@
 {
     CGFloat x;
     int i, n;
-    NSDrawWindowBackground(rect);
+//    NSDrawWindowBackground(rect);
     if (dataSource != nil) {
         NSRect b = [self bounds];
         x = [dataSource xpos_output];

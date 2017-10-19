@@ -15,4 +15,9 @@
     return YES;
 }
 
+- (void)drawRect:(NSRect)rect
+{
+    NSDrawWindowBackground(rect);
+}
+
 @end

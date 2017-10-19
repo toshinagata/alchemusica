@@ -43,7 +43,7 @@
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <view autoresizesSubviews="NO" misplaced="YES" id="kbx-xr-KMR" customClass="AudioEffectLayoutView">
-                                                    <rect key="frame" x="0.0" y="0.0" width="569" height="60"/>
+                                                    <rect key="frame" x="0.0" y="2" width="569" height="60"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                                     <subviews>
                                                         <box misplaced="YES" boxType="custom" borderType="bezel" titlePosition="noTitle" id="QBw-O4-Dcp">
@@ -161,13 +161,13 @@
                                     <scrollView wantsLayer="YES" misplaced="YES" borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="oDY-U5-xri">
                                         <rect key="frame" x="0.0" y="0.0" width="580" height="377"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                        <clipView key="contentView" id="URJ-QQ-6LP">
+                                        <clipView key="contentView" id="URJ-QQ-6LP" customClass="MyClipView">
                                             <rect key="frame" x="0.0" y="0.0" width="569" height="366"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <view id="flI-Js-u4p">
-                                                    <rect key="frame" x="0.0" y="0.0" width="566" height="363"/>
-                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="570" height="367"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 </view>
                                             </subviews>
                                         </clipView>
