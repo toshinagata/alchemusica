@@ -121,8 +121,8 @@ typedef enum MyDocumentModifyMode {
 - (BOOL)duplicateMultipleEventsAt: (IntGroupObject *)pointSet ofTrack: (int32_t)trackNo selectInsertedEvents: (BOOL)flag;
 
 //  Modify action methods; theData is one of the following, NSNumber, NSData (an array of MDTickType, short or float) or NSArray.
-- (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (int32_t)trackNo mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions;
-+ (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (id)doc mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions;
+- (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (int32_t)trackNo mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions setSelection: (BOOL)setSelection;
++ (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (id)doc mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions setSelection: (BOOL)setSelection;
 - (BOOL)modifyCodes: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (int32_t)trackNo mode: (MyDocumentModifyMode)mode;
 + (BOOL)modifyCodes: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (MyDocument *)doc mode: (MyDocumentModifyMode)mode;
 - (BOOL)modifyDurations: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (int32_t)trackNo mode: (MyDocumentModifyMode)mode;
@@ -138,6 +138,8 @@ typedef enum MyDocumentModifyMode {
 - (BOOL)changeTrackDuration: (int32_t)duration ofTrack: (int32_t)trackNo;
 - (BOOL)changeValue: (MDEventFieldDataWhole)wholeValue ofType: (int)code atPosition: (int32_t)position inTrack: (int32_t)trackNo;
 - (BOOL)changeMessage: (NSData *)data atPosition: (int32_t)position inTrack: (int32_t)trackNo;
+
+- (BOOL)scaleTimeFrom:(MDTickType)startTick to:(MDTickType)endTick newDuration:(MDTickType)newDuration insertTempo:(BOOL)insertTempo setSelection:(BOOL)setSelection;
 
 - (BOOL)changeDevice: (NSString *)deviceName forTrack: (int32_t)trackNo;
 //- (BOOL)changeDeviceNumber: (int32_t)deviceNumber forTrack: (int32_t)trackNo;

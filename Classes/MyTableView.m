@@ -256,6 +256,20 @@
 		[self setNeedsDisplayInRect:[self rectOfRow:underlineRow]];		
 }
 
+- (void)drawRow:(NSInteger)row clipRect:(NSRect)clipRect
+{
+    [super drawRow:row clipRect:clipRect];
+    if (underlineRow == row) {
+        float y;
+        NSRect rowRect;
+        rowRect = [self rectOfRow:underlineRow];
+        y = rowRect.origin.y + rowRect.size.height - 2;
+        [[NSColor grayColor] set];
+        [NSBezierPath strokeLineFromPoint:NSMakePoint(rowRect.origin.x + 1, y) toPoint:NSMakePoint(rowRect.origin.x + rowRect.size.width - 1, y)];
+    }
+}
+
+/*
 - (void)drawRect: (NSRect)aRect
 {
 	NSRect rowRect;
@@ -263,9 +277,10 @@
 	if (underlineRow >= 0) {
 		float y;
 		rowRect = [self rectOfRow:underlineRow];
-		y = rowRect.origin.y + rowRect.size.height - 1;
+        y = rowRect.origin.y + 10;
 		[NSBezierPath strokeLineFromPoint:NSMakePoint(rowRect.origin.x + 1, y) toPoint:NSMakePoint(rowRect.origin.x + rowRect.size.width - 1, y)];
 	}
 }
+*/
 
 @end

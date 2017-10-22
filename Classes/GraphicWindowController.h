@@ -199,6 +199,8 @@ enum {
 
 - (IBAction)quantizeSelected: (id)sender;
 
+- (IBAction)showEditingRange:(id)sender;
+
 - (void)zoomClientViewsWithPixelsPerQuarter:(float)ppq startingPos:(float)pos;
 - (void)unzoomClientViews;
 - (void)rezoomClientViews;

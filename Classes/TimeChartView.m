@@ -18,6 +18,7 @@
 #import "TimeChartView.h"
 #import "GraphicWindowController.h"
 #import "MyDocument.h"
+#import "MyAppController.h"
 #import "MyMIDISequence.h"
 #import "MDObjects.h"
 #import "NSStringAdditions.h"
@@ -252,7 +253,7 @@ typedef struct TimeScalingRecord {
 			if (ep == NULL) {
 				if (undoEnabled) {
 					if (n > 0) {
-						[[dataSource document] modifyTick:dt ofMultipleEventsAt:psobj inTrack:timeScaling->trackNums[i] mode:MyDocumentModifySet destinationPositions:nil];
+                        [[dataSource document] modifyTick:dt ofMultipleEventsAt:psobj inTrack:timeScaling->trackNums[i] mode:MyDocumentModifySet destinationPositions:nil setSelection:NO];
 						[dt release];
 						[psobj release];
 					}
@@ -345,6 +346,7 @@ typedef struct TimeScalingRecord {
 {
 	if (timeScaling != NULL) {
 		[self scaleSelectedTimeWithEvent:theEvent undoEnabled:NO];
+        [(MyDocument *)[dataSource document] setEditingRangeStart:timeScaling->startTick end:timeScaling->newEndTick];
 		return;
 	}
 	
@@ -387,13 +389,13 @@ typedef struct TimeScalingRecord {
 - (void)doMouseUp: (NSEvent *)theEvent
 {
 	NSPoint pt1, pt2;
-	float ppt;
 	MDTickType tick1, tick2;
-	int i;
+    int i;
 	int32_t trackNo;
 	GraphicClientView *view;
 	BOOL shiftDown = (([theEvent modifierFlags] & NSShiftKeyMask) != 0);
 	MyDocument *document = (MyDocument *)[dataSource document];
+    float ppt = [dataSource pixelsPerTick];
 
 	/*  Clear the selection paths for other clientViews  */
 	for (i = 1; (view = [dataSource clientViewAtIndex: i]) != nil; i++) {
@@ -402,20 +404,48 @@ typedef struct TimeScalingRecord {
 	
 	if (timeScaling != NULL) {
 		/*  Time scaling  */
+        /*  If this is the first call since start, ask the user whether
+            she wants to insert tempo.  */
+        static BOOL sFirstInvocation = YES;
+        int insertTempo = 0;
+        NSString *str = MyAppCallback_getObjectGlobalSettings(@"scale_selected_time_dialog.insert_tempo");
+        NSPoint mousePt = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+        if (str == nil) {
+            insertTempo = 0;
+        } else if (strtol([str UTF8String], NULL, 0) == 0) {
+            insertTempo = 0;
+        } else insertTempo = 1;
+        if (sFirstInvocation) {
+            NSAlert *alert = [[NSAlert alloc] init];
+            int response;
+            [alert setMessageText:[NSString stringWithFormat:@"Tempo events %s inserted to keep timings. OK?", (insertTempo ? "ARE" : "are NOT")]];
+            [alert setInformativeText:@"This setting can be changed anytime by 'Scale Selected Time' dialog."];
+            [alert addButtonWithTitle:[NSString stringWithFormat:@"OK, %s insert", (insertTempo ? "do" : "don't")]];
+            [alert addButtonWithTitle:@"Cancel"];
+            [alert addButtonWithTitle:[NSString stringWithFormat:@"NO, %s insert", (insertTempo ? "don't" : "do")]];
+            [alert setAlertStyle:NSWarningAlertStyle];
+            response = [alert runModal];
+            [alert autorelease];
+            if (response == NSAlertThirdButtonReturn) {
+                insertTempo = !insertTempo;
+            } else if (response == NSAlertSecondButtonReturn) {
+                return;
+            }
+            sFirstInvocation = NO;
+        }
 		/*  Register undo for selections and editing range  */
-		[document getEditingRangeStart: &tick1 end: &tick2];
+	/*	[document getEditingRangeStart: &tick1 end: &tick2]; */
 		[[[self undoManager] prepareWithInvocationTarget:document]
-		 setEditingRangeStart:tick1 end:tick2];
-		for (i = 0; (trackNo = [dataSource sortedTrackNumberAtIndex: i]) >= 0; i++) {
-			MDSelectionObject *sel;
-			if (![dataSource isFocusTrack: trackNo])
-				continue;
-			sel = [document selectionOfTrack:trackNo];
-			[[[self undoManager] prepareWithInvocationTarget: document]
-			 setSelection:sel inTrack:trackNo sender:self];
-		}
-		[self scaleSelectedTimeWithEvent:nil undoEnabled:NO];
-		[self scaleSelectedTimeWithEvent:theEvent undoEnabled:YES];
+         setEditingRangeStart:timeScaling->startTick end:timeScaling->endTick];
+
+        /*  Revert temporary scaling  */
+        [self scaleSelectedTimeWithEvent:nil undoEnabled:NO];
+        
+        /*  Scale time with undo registration  */
+        timeScaling->newEndTick = mousePt.x / ppt;
+        if (timeScaling->newEndTick < timeScaling->startTick)
+            return;
+        [document scaleTimeFrom:timeScaling->startTick to:timeScaling->endTick newDuration:timeScaling->newEndTick - timeScaling->startTick insertTempo:insertTempo setSelection:NO];
 		tick1 = timeScaling->startTick;
 		tick2 = timeScaling->newEndTick;
 		for (i = 0; i < timeScaling->ntracks; i++)
@@ -425,7 +455,7 @@ typedef struct TimeScalingRecord {
 		free(timeScaling->trackNums);
 		free(timeScaling);
 		timeScaling = NULL;
-		shiftDown = NO;
+        return;
 		
 	} else {
 		
@@ -439,7 +469,6 @@ typedef struct TimeScalingRecord {
 		if (isDragging) {
 			pt2 = [[selectPoints objectAtIndex: 1] pointValue];
 		} else pt2 = pt1;
-		ppt = [dataSource pixelsPerTick];
 		tick1 = floor(pt1.x / ppt);
 		tick2 = floor(pt2.x / ppt);
 		if (tick1 < 0)

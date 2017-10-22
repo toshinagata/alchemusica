@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="11762" systemVersion="15G1510" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="11762" systemVersion="15G1010" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11762"/>
@@ -184,6 +184,12 @@
                                     <action selector="getEditingRangeFromPasteboard:" target="-1" id="359"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Show Editing Range" keyEquivalent="R" id="IUs-Ew-IUI">
+                                <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                <connections>
+                                    <action selector="showEditingRange:" target="-1" id="hHc-4t-ci6"/>
+                                </connections>
+                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="242">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
@@ -250,20 +256,20 @@ DQ
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="331"/>
-                            <menuItem title="Insert Blank Time" keyEquivalent="I" id="332">
-                                <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                            <menuItem title="Insert Blank Time" keyEquivalent="i" id="332">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
                                     <action selector="insertBlankTime:" target="-1" id="336"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Delete Selected Time" keyEquivalent="X" id="333">
-                                <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                            <menuItem title="Delete Selected Time" keyEquivalent="x" id="333">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
                                     <action selector="deleteSelectedTime:" target="-1" id="337"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Scale Selected Time..." keyEquivalent="S" id="334">
-                                <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                            <menuItem title="Scale Selected Time..." keyEquivalent="s" id="334">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
                                     <action selector="scaleSelectedTime:" target="-1" id="338"/>
                                 </connections>

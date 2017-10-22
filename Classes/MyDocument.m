@@ -1458,17 +1458,17 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	else return 1;
 }
 
-- (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (int32_t)trackNo mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions
+- (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet inTrack: (int32_t)trackNo mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions setSelection: (BOOL)setSelection
 {
 	MDTrack *track = [[self myMIDISequence] getTrackAtIndex: trackNo];
     if (track == NULL)
         return NO;
 	/*  Call the class method version  */
-	return [MyDocument modifyTick: theData ofMultipleEventsAt: pointSet forMDTrack: track inDocument: self mode: mode destinationPositions: destPositions];
+    return [MyDocument modifyTick: theData ofMultipleEventsAt: pointSet forMDTrack: track inDocument: self mode: mode destinationPositions: destPositions setSelection: setSelection];
 }
 
 /*  Implemented as a class method, because in some cases it is necessary to perform this operation for non-document tracks. */
-+ (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (id)doc mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions
++ (BOOL)modifyTick: (id)theData ofMultipleEventsAt: (IntGroupObject *)pointSet forMDTrack: (MDTrack *)track inDocument: (id)doc mode: (MyDocumentModifyMode)mode destinationPositions: (id)destPositions setSelection: (BOOL)setSelection
 {
     MDTrack *tempTrack;
 	int32_t trackNo;
@@ -1658,9 +1658,12 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	MDTrackRelease(tempTrack);
 	
 	if (doc != nil) {
-		/*  Set selection  */
-		newDestPointSet = [[[MDSelectionObject allocWithZone: [doc zone]] initWithMDPointSet: destPset] autorelease];
-		[doc setSelection: newDestPointSet inTrack: trackNo sender: doc];
+        newDestPointSet = [[[MDSelectionObject allocWithZone: [doc zone]] initWithMDPointSet: destPset] autorelease];
+
+        /*  Set selection  */
+        if (setSelection) {
+            [doc setSelection: newDestPointSet inTrack: trackNo sender: doc];
+        }
 
 		/*  Register undo action  */
 		if (oldDuration != MDTrackGetDuration(track)) {
@@ -1673,7 +1676,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 					? (id)[NSNumber numberWithLong: -dataValue]
 					: (id)undoData)
 			ofMultipleEventsAt: newDestPointSet inTrack: trackNo mode: undoMode
-			destinationPositions: undoPositions];
+            destinationPositions: undoPositions setSelection: setSelection];
 
 		/*  Post the notification that this track has been modified  */
 		[doc enqueueTrackModifiedNotification: trackNo];
@@ -2674,7 +2677,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 		if (n2 > 0) {
 			psobj = [[IntGroupObject allocWithZone:[self zone]] init];
 			IntGroupAdd([psobj pointSet], n1, n2);
-			[self modifyTick:[NSNumber numberWithLong:deltaTick] ofMultipleEventsAt:psobj inTrack:trackNo mode:MyDocumentModifyAdd destinationPositions:nil];
+            [self modifyTick:[NSNumber numberWithLong:deltaTick] ofMultipleEventsAt:psobj inTrack:trackNo mode:MyDocumentModifyAdd destinationPositions:nil setSelection:NO];
 			[psobj release];
 		}
 		MDPointerRelease(pt);
@@ -2732,7 +2735,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 			if (n2 > 0) {
 				IntGroupClear([psobj pointSet]);
 				IntGroupAdd([psobj pointSet], n1, n2);
-				[self modifyTick:[NSNumber numberWithLong:-deltaTick] ofMultipleEventsAt:psobj inTrack:trackNo mode:MyDocumentModifyAdd destinationPositions:nil];
+                [self modifyTick:[NSNumber numberWithLong:-deltaTick] ofMultipleEventsAt:psobj inTrack:trackNo mode:MyDocumentModifyAdd destinationPositions:nil setSelection:NO];
 			}
 			[psobj release];
 		}
@@ -2747,18 +2750,18 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	[self setEditingRangeStart:startTick end:startTick];
 }
 
-- (void)scaleTimeFrom:(MDTickType)startTick to:(MDTickType)endTick newDuration:(MDTickType)newDuration insertTempo:(BOOL)insertTempo
+- (BOOL)scaleTimeFrom:(MDTickType)startTick to:(MDTickType)endTick newDuration:(MDTickType)newDuration insertTempo:(BOOL)insertTempo setSelection:(BOOL)setSelection
 {
 	int32_t trackNo;
 	MDTickType deltaTick;
 	MDTrack *track;
 	MDPointer *pt;
 	MDEvent *ep;
-	id psobj, dt;
+    id psobj, dt;
 	NSWindowController *cont = [[NSApp mainWindow] windowController];
 	
 	if (startTick < 0 || startTick >= endTick)
-		return;  /*  Do nothing  */
+		return NO;  /*  Do nothing  */
 	
 	/* Register undo for editing range */
 	[[[self undoManager] prepareWithInvocationTarget:self]
@@ -2815,8 +2818,8 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	}
 	
 	for (trackNo = [[self myMIDISequence] trackCount] - 1; trackNo >= 0; trackNo--) {
-		int32_t n1, n2;
-		MDTickType oldDuration;
+        int32_t n1, n2, n3;
+        MDTickType oldDuration, tick1, tick2;
 
 		if (![cont isFocusTrack:trackNo] && (!insertTempo || trackNo != 0))
 			continue;
@@ -2825,26 +2828,64 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 
 		/*  Register undo for selection change */
 		psobj = [self selectionOfTrack:trackNo];
-		[[[self undoManager] prepareWithInvocationTarget: self]
-		 setSelection:psobj inTrack:trackNo sender:self];
+        if (setSelection) {
+            [[[self undoManager] prepareWithInvocationTarget: self]
+             setSelection:psobj inTrack:trackNo sender:self];
+        }
 
 		/*  Scale events between startTick and endTick  */
 		pt = MDPointerNew(track);
 		n2 = MDTrackGetNumberOfEvents(track);
 		if (MDPointerJumpToTick(pt, startTick)) {
 			n1 = MDPointerGetPosition(pt);
-			n2 -= n1;
 		} else {
 			n1 = n2;
-			n2 = 0;
 		}
-		if (n2 > 0) {
+		if (n1 < n2) {
 			MDTickType *mp;
-			/*  MDSelectionObject is allocated because it will be used also for setting selection */
-			psobj = [[MDSelectionObject allocWithZone:[self zone]] init];
-			IntGroupAdd([psobj pointSet], n1, n2);
-			dt = [[NSMutableData allocWithZone:[self zone]] initWithLength:sizeof(MDTickType) * n2];
-			mp = (MDTickType *)[dt mutableBytes];
+            IntGroup *ig;
+            int n;
+            /*  Modify note durations: should scan from the top of the track  */
+            MDPointerSetPosition(pt, -1);
+            psobj = [[IntGroupObject allocWithZone:[self zone]] init];
+            ig = [psobj pointSet];
+            while ((ep = MDPointerForward(pt)) != NULL) {
+                tick1 = MDGetTick(ep);
+                if (tick1 >= endTick)
+                    break;
+                if (MDIsNoteEvent(ep)) {
+                    if (tick1 + MDGetDuration(ep) >= startTick) {
+                        /*  This note should be processed  */
+                        IntGroupAdd(ig, MDPointerGetPosition(pt), 1);
+                    }
+                }
+            }
+            n3 = IntGroupGetCount(ig);
+            dt = [[NSMutableData allocWithZone:[self zone]] initWithLength:sizeof(MDTickType) * n3];
+            mp = (MDTickType *)[dt mutableBytes];
+            MDPointerSetPosition(pt, -1);
+            n = -1;
+            while ((ep = MDPointerForwardWithPointSet(pt, ig, &n)) != NULL) {
+                tick1 = MDGetTick(ep);
+                tick2 = tick1 + MDGetDuration(ep);
+                if (tick2 >= endTick) {
+                    tick2 = (MDTickType)((double)(endTick - tick1) * newDuration / (endTick - startTick) + (tick2 - endTick));
+                } else {
+                    tick2 = (MDTickType)((double)(tick2 - tick1) * newDuration / (endTick - startTick));
+                }
+                *mp++ = tick2;
+            }
+            [self modifyDurations:dt ofMultipleEventsAt:psobj inTrack:trackNo mode:MyDocumentModifySet];
+            [dt release];
+            [psobj release];
+            
+            /*  The ticks are modified  */
+            psobj = [[IntGroupObject allocWithZone:[self zone]] init];
+            dt = [[NSMutableData allocWithZone:[self zone]] initWithLength:sizeof(MDTickType) * (n2 - n1)];
+            mp = (MDTickType *)[dt mutableBytes];
+            MDPointerSetPosition(pt, n1);
+            IntGroupAdd([psobj pointSet], n1, n2 - n1);
+            mp = (MDTickType *)[dt mutableBytes];
 			for (ep = MDPointerCurrent(pt); ep != NULL; ep = MDPointerForward(pt)) {
 				MDTickType tick = MDGetTick(ep);
 				if (tick < endTick)
@@ -2853,18 +2894,25 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 					tick += newDuration - (endTick - startTick);
 				*mp++ = tick;
 			}
-			[self modifyTick:dt ofMultipleEventsAt:psobj inTrack:trackNo mode:MyDocumentModifySet destinationPositions:nil];
+            [self modifyTick:dt ofMultipleEventsAt:psobj inTrack:trackNo mode:MyDocumentModifySet destinationPositions:nil setSelection:NO];
+            [dt release];
+            [psobj release];
+            
 			/*  Select events in the scaled time region  */
-			MDPointerJumpToTick(pt, startTick + newDuration);
-			n2 = MDPointerGetPosition(pt) - n1;
-			IntGroupClear([psobj pointSet]);
-			IntGroupAdd([psobj pointSet], n1, n2);
-			[self setSelection:psobj inTrack:trackNo sender:self];
-			[dt release];
-			[psobj release];
+            if (setSelection) {
+                psobj = [[MDSelectionObject allocWithZone:[self zone]] init];
+                MDPointerJumpToTick(pt, startTick + newDuration);
+                n2 = MDPointerGetPosition(pt) - n1;
+                IntGroupAdd([psobj pointSet], n1, n2);
+                [self setSelection:psobj inTrack:trackNo sender:self];
+                [psobj release];
+            }
+
 		} else {
 			/*  No events to shift: unselect all events in the track  */
-			[self unselectAllEventsInTrack:trackNo sender:self];
+            if (setSelection) {
+                [self unselectAllEventsInTrack:trackNo sender:self];
+            }
 		}
 		MDPointerRelease(pt);
 		[self changeTrackDuration:oldDuration + (newDuration - deltaTick) ofTrack:trackNo];
@@ -2872,6 +2920,8 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	
 	/*  Set editing range to the scaled time region  */
 	[self setEditingRangeStart:startTick end:startTick + newDuration];
+    
+    return YES;
 }
 
 /* See also: -[TimeChartView scaleSelectedTimeWithEvent:undoEnabled:]  */
@@ -2885,7 +2935,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 		return;
 	}
 	if (n > 0) {
-		[self scaleTimeFrom:dp[0] to:dp[1] newDuration:dp[2] insertTempo:dp[3]];
+        [self scaleTimeFrom:dp[0] to:dp[1] newDuration:dp[2] insertTempo:dp[3] setSelection:YES];
 		free(dp);
 	}
 }
@@ -2964,7 +3014,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 				etick = floor(etick + (targetTick - etick) * strength + 0.5);
 				tptr[n1++] = etick;
 			}
-			[self modifyTick:dt ofMultipleEventsAt:psobj inTrack:trackNo mode:MyDocumentModifySet destinationPositions:nil];
+            [self modifyTick:dt ofMultipleEventsAt:psobj inTrack:trackNo mode:MyDocumentModifySet destinationPositions:nil setSelection:NO];
 			MDPointerRelease(pt);
 		}
 	}

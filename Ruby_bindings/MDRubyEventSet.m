@@ -844,14 +844,14 @@ s_MREventSet_ModifyTick(int argc, VALUE *argv, VALUE self)
 			tickp[n1] = NUM2DBL(rb_yield(pval));
 			n1++;
 		}
-		[MyDocument modifyTick: theData ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: MyDocumentModifySet destinationPositions: nil];
+        [MyDocument modifyTick: theData ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: MyDocumentModifySet destinationPositions: nil setSelection: YES];
 		return self;
 	} else if (rb_obj_is_kind_of(nval, rb_cNumeric)) {
 		if (mode == MyDocumentModifyMultiply)
 			theData = [NSNumber numberWithFloat: NUM2DBL(rb_Float(nval))];
 		else
 			theData = [NSNumber numberWithInt: NUM2INT(rb_Integer(nval))];
-		[MyDocument modifyTick: theData ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: mode destinationPositions: nil];
+        [MyDocument modifyTick: theData ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: mode destinationPositions: nil setSelection: YES];
 		return self;
 	} else {
 		VALUE *nvalp;
@@ -870,7 +870,7 @@ s_MREventSet_ModifyTick(int argc, VALUE *argv, VALUE self)
 			tickp[i] = tickp[n1 - 1];
 			i++;
 		}
-		[MyDocument modifyTick: theData ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: MyDocumentModifySet destinationPositions: nil];
+        [MyDocument modifyTick: theData ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: MyDocumentModifySet destinationPositions: nil setSelection: YES];
 		return self;
 	}
 }

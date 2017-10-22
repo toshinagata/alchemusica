@@ -22,9 +22,11 @@
 @interface ContextMenuTextFieldCell : NSTextFieldCell {
 	//  Implements a text field cell for which the content can be input via a context menu
 	NSPoint lastMenuPoint;
+    BOOL drawsUnderline;  //  Draw underline inside the cell
 }
 - (IBAction)contextMenuSelected:(id)sender;
-
+- (void)setDrawsUnderline:(BOOL)underline;
+- (BOOL)drawsUnderline;
 @end
 
 @interface NSObject(ContextMenuTextFieldCell)

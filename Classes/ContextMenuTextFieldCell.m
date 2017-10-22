@@ -20,6 +20,29 @@
 
 @implementation ContextMenuTextFieldCell
 
+- (void)setDrawsUnderline:(BOOL)underline
+{
+    drawsUnderline = underline;
+}
+
+- (BOOL)drawsUnderline
+{
+    return drawsUnderline;
+}
+
+- (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
+{
+    [super drawWithFrame:cellFrame inView:controlView];
+    if (drawsUnderline) {
+        CGFloat x1, x2, y;
+        y = cellFrame.origin.y + cellFrame.size.height - 1;
+        x1 = cellFrame.origin.x;
+        x2 = x1 + cellFrame.size.width;
+        [[NSColor grayColor] set];
+        [NSBezierPath strokeLineFromPoint:NSMakePoint(x1, y) toPoint:NSMakePoint(x2, y)];
+    }
+}
+
 - (NSMenu *)menuForEvent:(NSEvent *)anEvent inRect:(NSRect)cellFrame ofView:(NSView *)aView
 {
 	id controlView = [self controlView];

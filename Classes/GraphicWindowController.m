@@ -794,6 +794,19 @@ sTableColumnIDToInt(id identifier)
 	[self setNeedsReloadClientViews];
 }
 
+- (IBAction)showEditingRange:(id)sender
+{
+    MDTickType startTick, endTick;
+    float pos, width;
+    [(MyDocument *)[self document] getEditingRangeStart: &startTick end: &endTick];
+    pos = startTick * [self pixelsPerTick];
+    width = [myMainView bounds].size.width / 4;
+    if (pos < width)
+        pos = 0;
+    else pos -= width;
+    [self scrollClientViewsToPosition:pos];
+}
+
 #pragma mark ==== Client views ====
 
 - (void)adjustClientViewsInHeight: (float)aHeight
@@ -2160,7 +2173,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
             pointSet = [document selectionOfTrack: track];
             if (pointSet == nil || IntGroupGetCount([pointSet pointSet]) <= 0)
                 continue;
-            [document modifyTick: deltaTickNum ofMultipleEventsAt: pointSet inTrack: track mode: MyDocumentModifyAdd destinationPositions: nil];
+            [document modifyTick: deltaTickNum ofMultipleEventsAt: pointSet inTrack: track mode: MyDocumentModifyAdd destinationPositions: nil setSelection: YES];
         }
     }
     if (deltaNote != 0) {
@@ -2216,7 +2229,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 				if ([document duplicateMultipleEventsAt: pointSet ofTrack: track selectInsertedEvents: YES])
 					pointSet = [document selectionOfTrack: track];
 			}				
-            [document modifyTick: deltaTickNum ofMultipleEventsAt: pointSet inTrack: track mode: MyDocumentModifyAdd destinationPositions: nil];
+            [document modifyTick: deltaTickNum ofMultipleEventsAt: pointSet inTrack: track mode: MyDocumentModifyAdd destinationPositions: nil setSelection: YES];
         }
     }
     if (deltaValue != 0) {
@@ -3130,8 +3143,12 @@ row:(int)rowIndex
 		return NO;
 	} else if (sel == @selector(openEventListWindow:) || sel == @selector(deleteSelectedTracks:)) {
 		return [myTableView numberOfSelectedRows] > 0;
-/*	} else if (sel == @selector(shiftSelectedEvents:)) {
-		return [[self document] isSelectionEmptyInEditableTracks:YES] == NO; */
+    } else if (sel == @selector(showEditingRange:)) {
+        MDTickType startTick, endTick;
+        [(MyDocument *)[self document] getEditingRangeStart: &startTick end: &endTick];
+        if (startTick < 0 || startTick >= kMDMaxTick)
+            return NO;
+        else return YES;
 	} else if ([self respondsToSelector:sel]) {
 		return YES;
 	} else return NO;

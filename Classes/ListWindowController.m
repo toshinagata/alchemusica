@@ -77,7 +77,7 @@ static NSColor *sMiscColor = nil;
 	n = (int)[array count];
 	font = [NSFont userFixedPitchFontOfSize: 10];
     
-    [myEventTrackView setRowHeight: [[NSWindowController sharedLayoutManager] defaultLineHeightForFont:font]];
+    [myEventTrackView setRowHeight: [[NSWindowController sharedLayoutManager] defaultLineHeightForFont:font] + 2];
 	while (--n >= 0) {
 		column = (NSTableColumn *)[array objectAtIndex: n];
 		[[column dataCell] setFont: font];
@@ -232,6 +232,26 @@ static NSColor *sMiscColor = nil;
 	}
 }
 
+- (int)maxRowBeforeTick:(MDTickType)tick
+{
+    MDPointer *pt;
+    int lastRow, n, row;
+    if (tick < 0)
+        return -1;
+    lastRow = [self numberOfRowsInTableView:myEventTrackView] - 1;
+    pt = MDPointerNew(myTrack);
+    if (tick >= MDTrackGetDuration(myTrack))
+        return lastRow;
+    if (MDPointerJumpToTick(pt, tick + 1)) {
+        n = MDPointerGetPosition(pt) - 1;
+    } else {
+        n = MDTrackGetNumberOfEvents(myTrack) - 1;
+    }
+    [self rowForEventPosition:n nearestRow:&row];
+    MDPointerRelease(pt);
+    return row;
+}
+
 - (void)showPlayPosition:(NSNotification *)notification
 {
 	float beat = [[[notification userInfo] objectForKey: @"position"] floatValue];
@@ -245,60 +265,17 @@ static NSColor *sMiscColor = nil;
 	
 	/*  Look for the event representing tick  */
 	maxRow = [self numberOfRowsInTableView:myEventTrackView] - 1;
-	if (tick < 0)
-		nearestRow = -1;
-	else {
-		MDPointer *pt = MDPointerNew(myTrack);
-		if (tick >= MDTrackGetDuration(myTrack))
-			nearestRow = maxRow;
-		else {
-			if (MDPointerJumpToTick(pt, tick)) {
-				n = MDPointerGetPosition(pt);
-			} else {
-				n = MDTrackGetNumberOfEvents(myTrack);
-			}
-			[self rowForEventPosition:n nearestRow:&nearestRow];
-			if (nearestRow < 0)
-				nearestRow = maxRow;
-			else nearestRow--;
-		}
-		MDPointerRelease(pt);
-	/*	NSLog(@"nearestRow = %d", (int)nearestRow); */
-	}
-	if (nearestRow >= 0) {
+    nearestRow = [self maxRowBeforeTick:tick];
+    if (nearestRow >= 0) {
 		NSRange visibleRowRange = [myEventTrackView rowsInRect:[myEventTrackView visibleRect]];
 		if (!NSLocationInRange(nearestRow, visibleRowRange)) {
-			n = nearestRow + (int)visibleRowRange.length - 2;
+			n = nearestRow + (int)visibleRowRange.length - 3;
 			if (n >= maxRow)
 				n = maxRow;
 			[myEventTrackView scrollRowToVisible:n];
 		}
 	}
 	[myEventTrackView setUnderlineRow:nearestRow];
-	/*
-	 if (nearestRow != myPlayingRow) {
-		NSRect rowRect;
-		if (nearestRow >= 0) {
-			NSRange visibleRowRange = [myEventTrackView rowsInRect:[myEventTrackView visibleRect]];
-			float y;
-			if (!NSLocationInRange(nearestRow, visibleRowRange)) {
-				n = nearestRow + visibleRowRange.length / 2;
-				if (n >= maxRow)
-					n = maxRow;
-				[myEventTrackView scrollRowToVisible:n];
-			}
-			rowRect = [myEventTrackView rectOfRow:nearestRow];
-			[myEventTrackView setNeedsDisplayInRect:rowRect];
-			[myEventTrackView displayIfNeeded];
-			[myEventTrackView lockFocus];
-			y = rowRect.origin.y + 1;
-			[NSBezierPath strokeLineFromPoint:NSMakePoint(rowRect.origin.x + 1, y) toPoint:NSMakePoint(rowRect.origin.x + rowRect.size.width - 1, y + rowRect.size.height - 2)];
-			[myEventTrackView unlockFocus];
-		}
-		[myEventTrackView setNeedsDisplayInRect:[myEventTrackView rectOfRow:myPlayingRow]];
-		myPlayingRow = nearestRow;
-	 }
-	*/
 }
 
 #pragma mark ====== NSTableView handling methods ======
@@ -590,6 +567,8 @@ row:(int)rowIndex
 	MDEvent *ep;
 	NSColor *color;
 
+    [(ContextMenuTextFieldCell *)aCell setDrawsUnderline:(rowIndex == myPlayingRow)];
+    
     if ([@"bar" isEqualToString: identifier]
 	||  [@"sec" isEqualToString: identifier]
 	||  [@"msec" isEqualToString: identifier]
@@ -1410,6 +1389,25 @@ static NSString *sTickIdentifiers[] = { @"bar", @"sec", @"msec", @"count", @"del
 	[[self document] setEditingRangeStart: tick end: endtick];
 }
 
+- (IBAction)showEditingRange:(id)sender
+{
+    MDTickType startTick, endTick;
+    int startRow, endRow, n;
+    NSRange visibleRowRange;
+    [[self document] getEditingRangeStart:&startTick end:&endTick];
+    if (startTick < 0 || startTick >= kMDMaxTick)
+        return;  /*  No action  */
+    startRow = [self maxRowBeforeTick:startTick];
+    endRow = [self maxRowBeforeTick:endTick];
+    visibleRowRange = [myEventTrackView rowsInRect:[myEventTrackView visibleRect]];
+    if (!NSLocationInRange(startRow, visibleRowRange)) {
+        n = ((int)visibleRowRange.length - (endRow - startRow)) * 2 / 3;
+        if (n < 0)
+            n = 0;
+        [myEventTrackView scrollRowToVisible:startRow + n];
+    }
+}
+
 - (void)sheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo
 {
 	ListWindowFilterRecord *filter;
@@ -1649,6 +1647,12 @@ static NSString *sTickIdentifiers[] = { @"bar", @"sec", @"msec", @"count", @"del
 		if ([[self document] isSequenceInPasteboard])
 			return YES;
 		else return NO;
+    } else if (sel == @selector(showEditingRange:)) {
+        MDTickType startTick, endTick;
+        [(MyDocument *)[self document] getEditingRangeStart: &startTick end: &endTick];
+        if (startTick < 0 || startTick >= kMDMaxTick)
+            return NO;
+        else return YES;
 	} else return YES;
 }
 

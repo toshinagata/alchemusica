@@ -1269,6 +1269,26 @@ s_RubyDialog_Item(int argc, VALUE *argv, VALUE self)
 		s_RubyDialog_SetAttr(2, vals, self);
 	}
 	
+    /*  If @bind_global_settings is given and the value is not given,
+        then try to get the value from the global settings  */
+    {
+        VALUE gsetval = rb_ivar_get(self, rb_intern("@bind_global_settings"));
+        if (gsetval != Qnil) {
+            VALUE tag = rb_ivar_get(val, SYM2ID(sTagSymbol));
+            if (tag != Qnil) {
+                char *path;
+                VALUE arg, resval;
+                asprintf(&path, "%s.%s", StringValuePtr(gsetval), StringValuePtr(tag));
+                arg = rb_str_new2(path);
+                resval = rb_funcall(rb_mKernel, rb_intern("get_global_settings"), 1, arg);
+                if (resval != Qnil) {
+                    s_RubyDialogItem_SetAttr(val, sValueSymbol, resval);
+                }
+                free(path);
+            }
+        }
+    }
+    
 	/*  Set internal attributes  */
 	rb_ivar_set(new_item, SYM2ID(sIsProcessingActionSymbol), Qfalse);
 	
@@ -1398,6 +1418,7 @@ s_RubyDialog_EndModal(int argc, VALUE *argv, VALUE self)
 {
 	int flag;
 	VALUE retval = Qundef;
+    VALUE gsetval = rb_ivar_get(self, rb_intern("@bind_global_settings"));
 	if (argc == 0) {
 		flag = 0;
 	} else {
@@ -1409,25 +1430,38 @@ s_RubyDialog_EndModal(int argc, VALUE *argv, VALUE self)
 		if (argc > 1)
 			retval = argv[1];
 	}
-	if (retval == Qundef) {
-		/*  The default return value  */
+
+    if (retval == Qundef || gsetval != Qnil) {
+        /*  Scan the dialog items and get values of tagged items  */
+        VALUE hash = (retval == Qundef ? rb_hash_new() : Qnil);
 		VALUE items = rb_iv_get(self, "_items");
 		int len = (int)RARRAY_LEN(items);
 		VALUE *ptr = RARRAY_PTR(items);
 		int i;
-		retval = rb_hash_new();
-		/*  Get values for controls with defined tags  */
+		/*  Set values for controls with defined tags  */
 		for (i = 2; i < len; i++) {
 			/*  Items 0, 1 are OK/Cancel buttons  */
 			/*	VALUE type = rb_hash_aref(ptr[i], sTypeSymbol); */
 			VALUE tag = rb_ivar_get(ptr[i], SYM2ID(sTagSymbol));
 			if (tag != Qnil) {
-				VALUE val;
+                VALUE val;
 				val = s_RubyDialogItem_Attr(ptr[i], sValueSymbol);
-				rb_hash_aset(retval, tag, val);
+                if (hash != Qnil)
+                    rb_hash_aset(hash, tag, val);
+                if (gsetval != Qnil) {
+                    char *path;
+                    VALUE pathval;
+                    asprintf(&path, "%s.%s", StringValuePtr(gsetval), StringValuePtr(tag));
+                    pathval = rb_str_new2(path);
+                    rb_funcall(rb_mKernel, rb_intern("set_global_settings"), 2, pathval, val);
+                    free(path);
+                }
 			}
 		}
-		rb_hash_aset(retval, ID2SYM(rb_intern("status")), INT2NUM(flag));
+        if (hash != Qnil)
+            rb_hash_aset(hash, ID2SYM(rb_intern("status")), INT2NUM(flag));
+        if (retval == Qundef)
+            retval = hash;
 	}
 	rb_iv_set(self, "_retval", retval);
 	RubyDialogCallback_endModal(s_RubyDialog_GetController(self), (flag ? 1 : 0));
