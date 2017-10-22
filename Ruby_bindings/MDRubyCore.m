@@ -1005,7 +1005,7 @@ Ruby_showError(int status)
 			msg = RSTRING_PTR(val);
 		else msg = "(message not available)";
 	}
-	asprintf(&msg2, "%s¥n%s", msg, RSTRING_PTR(backtrace));
+	asprintf(&msg2, "%s\n%s", msg, RSTRING_PTR(backtrace));
 	MyAppCallback_messageBox(msg2, (interrupted == 0 ? "Ruby script error" : "Ruby script interrupted"), 0, 3);
 	free(msg2);
 	gRubyRunLevel--;

@@ -560,6 +560,7 @@ s_MRPointer_SetKind(VALUE self, VALUE val)
 	MRPointerInfo *ip = s_MRPointerInfoFromValue(self);
 	MDPointer *pt = ip->pointer;
 	MDEvent *ep = MDPointerCurrent(pt);
+    MDEvent event;
 	if (ep == NULL)
 		s_MRPointer_OutOfBoundsError(pt);
 	kind = MREventKindAndCodeFromEventSymbol(val, &code, NULL);
@@ -567,22 +568,24 @@ s_MRPointer_SetKind(VALUE self, VALUE val)
 		rb_raise(rb_eArgError, "the value to set must be a symbol (:meta, :tempo, etc.)");
 	if (kind == MDGetKind(ep) && (code == MDGetCode(ep) || (kind != kMDEventMetaText && kind != kMDEventControl)))
 		return val; // No operation
+    MDEventClear(&event);
+    MDEventDefault(&event, kind);
+    if (code != 0)
+        MDSetCode(&event, code);
+    MDSetTick(&event, MDGetTick(ep));
+    if (kind == kMDEventMetaText && ep->kind == kMDEventMetaText) {
+        MDCopyMessage(&event, ep);
+    } else if (kind == kMDEventControl && ep->kind == kMDEventControl) {
+        MDSetData1(&event, MDGetData1(ep));
+    }
 	if (ip->trackInfo.doc != nil) {
 		MDEventObject *newEvent = [[[MDEventObject alloc] init] autorelease];
-		MDEvent *ep1 = &newEvent->event;
-		MDEventDefault(ep1, kind);
-		if (code != 0)
-			MDSetCode(ep1, code);
-		MDSetTick(ep1, MDGetTick(ep));
+        MDEventMove(&newEvent->event, &event, 1);
 		newEvent->position = MDPointerGetPosition(pt);
 		[ip->trackInfo.doc replaceEvent: newEvent inTrack: ip->trackInfo.num];
 	} else {
-		MDTickType tick = MDGetTick(ep);
-		MDEventClear(ep);
-		MDEventDefault(ep, kind);
-		if (code != 0)
-			MDSetCode(ep, code);
-		MDSetTick(ep, tick);
+        MDEventClear(ep);
+        MDEventMove(ep, &event, 1);
 	}
 	return val;
 }
@@ -647,6 +650,52 @@ s_MRPointer_SetCode(VALUE self, VALUE val)
 	return val;
 }
 
+/*
+ *  call-seq:
+ *     pointer.control_kind
+ *
+ *  If the event is a control event, then returns the symbol representing the
+ *  event.code. Otherwise, returns nil.
+ */
+static VALUE
+s_MRPointer_ControlKind(VALUE self)
+{
+    int kind;
+    int code;
+    MDPointer *pt = MDPointerFromMRPointerValue(self);
+    MDEvent *ep = MDPointerCurrent(pt);
+    if (ep == NULL)
+        s_MRPointer_OutOfBoundsError(pt);
+    kind = MDGetKind(ep);
+    code = MDGetCode(ep);
+    if (kind == kMDEventControl)
+        return MREventSymbolFromEventKindAndCode(kind, code, NULL);
+    else return Qnil;
+}
+
+/*
+ *  call-seq:
+ *     pointer.text_kind
+ *
+ *  If the event is a text meta event, then returns the symbol representing the
+ *  event.code. Otherwise, returns nil.
+ */
+static VALUE
+s_MRPointer_TextKind(VALUE self)
+{
+    int kind;
+    int code;
+    MDPointer *pt = MDPointerFromMRPointerValue(self);
+    MDEvent *ep = MDPointerCurrent(pt);
+    if (ep == NULL)
+        s_MRPointer_OutOfBoundsError(pt);
+    kind = MDGetKind(ep);
+    code = MDGetCode(ep);
+    if (kind == kMDEventMetaText)
+        return MREventSymbolFromEventKindAndCode(kind, code, NULL);
+    else return Qnil;
+}
+
 VALUE
 MRPointer_GetDataSub(const MDEvent *ep)
 {
@@ -668,15 +717,23 @@ MRPointer_GetDataSub(const MDEvent *ep)
 		case kMDEventSysex:
 		case kMDEventSysexCont: {
 			int32_t messageLength;
+            int32_t i;
 			const char *cp = (const char *)MDGetMessageConstPtr(ep, &messageLength);
 			if (kind == kMDEventSysex || kind == kMDEventSysexCont) {
-				int32_t i;
 				vals[0] = rb_ary_new2(messageLength);
 				for (i = 0; i < messageLength; i++) {
 					rb_ary_store(vals[0], i, INT2FIX((unsigned char)cp[i]));
 				}
 				return vals[0];
 			} else {
+                if (kind == kMDEventMetaText) {
+                    /*  Chop at the first null byte  */
+                    for (i = 0; i < messageLength; i++) {
+                        if (cp[i] == 0)
+                            break;
+                    }
+                    messageLength = i;
+                }
 				return rb_str_new(cp, messageLength);
 			}
 		}
@@ -1140,6 +1197,8 @@ MRPointerInitClass(void)
 	rb_define_method(rb_cMRPointer, "kind=", s_MRPointer_SetKind, 1);
 	rb_define_method(rb_cMRPointer, "code", s_MRPointer_Code, 0);
 	rb_define_method(rb_cMRPointer, "code=", s_MRPointer_SetCode, 1);
+    rb_define_method(rb_cMRPointer, "control_kind", s_MRPointer_ControlKind, 0);
+    rb_define_method(rb_cMRPointer, "text_kind", s_MRPointer_TextKind, 0);
 	rb_define_method(rb_cMRPointer, "data", s_MRPointer_Data, 0);
 	rb_define_method(rb_cMRPointer, "data=", s_MRPointer_SetData, 1);
 	rb_define_method(rb_cMRPointer, "tick", s_MRPointer_Tick, 0);
