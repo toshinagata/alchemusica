@@ -2823,10 +2823,12 @@ MDTrackMergerJumpToTick(MDTrackMerger *inMerger, MDTickType inTick, MDTrack **ou
         MDPointer *pt = inMerger->pointers[n];
         if (MDPointerJumpToTick(pt, inTick)) {
             MDEvent *ep1 = MDPointerCurrent(pt);
-            if (ep == NULL || MDGetTick(ep) > MDGetTick(ep1)) {
-                ep = ep1;
-                tr = MDPointerGetTrack(pt);
-                idx = n;
+            if (ep1 != NULL) {
+                if (ep == NULL || MDGetTick(ep) > MDGetTick(ep1)) {
+                    ep = ep1;
+                    tr = MDPointerGetTrack(pt);
+                    idx = n;
+                }
             }
         }
         if (++n == inMerger->npointers)
