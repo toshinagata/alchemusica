@@ -428,6 +428,8 @@ typedef struct TimeScalingRecord {
             [alert autorelease];
             if (response == NSAlertThirdButtonReturn) {
                 insertTempo = !insertTempo;
+                MyAppCallback_setObjectGlobalSettings(@"scale_selected_time_dialog.insert_tempo", [NSString stringWithFormat:@"%d", insertTempo]);
+
             } else if (response == NSAlertSecondButtonReturn) {
                 return;
             }
