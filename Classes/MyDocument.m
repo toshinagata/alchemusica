@@ -2868,12 +2868,13 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
             while ((ep = MDPointerForwardWithPointSet(pt, ig, &n)) != NULL) {
                 tick1 = MDGetTick(ep);
                 tick2 = tick1 + MDGetDuration(ep);
-                if (tick2 >= endTick) {
-                    tick2 = (MDTickType)((double)(endTick - tick1) * newDuration / (endTick - startTick) + (tick2 - endTick));
-                } else {
-                    tick2 = (MDTickType)((double)(tick2 - tick1) * newDuration / (endTick - startTick));
-                }
-                *mp++ = tick2;
+                if (tick2 < endTick)
+                    tick2 = startTick + ((double)tick2 - startTick) * newDuration / (endTick - startTick);
+                else
+                    tick2 += newDuration - (endTick - startTick);
+                if (tick1 >= startTick)
+                    tick1 = startTick + ((double)tick1 - startTick) * newDuration / (endTick - startTick);
+                *mp++ = tick2 - tick1;
             }
             [self modifyDurations:dt ofMultipleEventsAt:psobj inTrack:trackNo mode:MyDocumentModifySet];
             [dt release];
