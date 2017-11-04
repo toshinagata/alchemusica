@@ -465,6 +465,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	float ys = [self yScale];
 	MyDocument *document = (MyDocument *)[dataSource document];
 	MDTickType originTick = (MDTickType)(rect.origin.x / ppt);
+	MDTickType limitTick = (MDTickType)((rect.origin.x + rect.size.width) / ppt);
 	MDTickType theTick;
 	int theNote;
 
@@ -478,6 +479,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 		IntGroup *pset;
 		MDPointer *pt;
 		MDEvent *ep;
+		MDTickType duration;
 		trackNum = [dataSource sortedTrackNumberAtIndex: i];
 		if (![dataSource isFocusTrack: trackNum])
 			continue;
@@ -502,6 +504,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 			}
 			if (ep == NULL) {
 				if (pset == NULL && cacheArray != nil && (pset = [[cacheArray objectAtIndex: i] pointSet]) != NULL) {
+					MDPointerForward(pt);  //  We should retry the last 'failed' event
 					n = -1;  //  The next MDPointerBackwardWithPointSet() will give the last event in pset
 					continue;
 				}
@@ -516,9 +519,18 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 			if (outEvent != NULL)
 				*outEvent = ep;
 			MDPointerRelease(pt);
-			if (tick2 < MDGetDuration(ep) / 3)
+			duration = MDGetDuration(ep);
+			//  The return value is determined by the visible part of the note
+			if (MDGetTick(ep) + duration > limitTick) {
+				duration = limitTick - MDGetTick(ep);
+			}
+			if (MDGetTick(ep) < originTick) {
+				tick2 = theTick - originTick;
+				duration = MDGetTick(ep) + duration - originTick;
+			}
+			if (tick2 < duration / 3)
 				return 1;
-			else if (tick2 < MDGetDuration(ep) * 2 / 3)
+			else if (tick2 < duration * 2 / 3)
 				return 2;
 			else return 3;
 		}
