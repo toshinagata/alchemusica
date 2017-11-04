@@ -2355,11 +2355,11 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	if (startTick < 0 && endTick < 0) {
 		startTick = endTick = kMDNegativeTick;
 	} else if (startTick >= 0 && endTick >= startTick) {
-		MDTickType maxTick = [[self myMIDISequence] sequenceDuration];
+	/*	MDTickType maxTick = [[self myMIDISequence] sequenceDuration];
 		if (endTick >= maxTick)
 			endTick = maxTick;
 		if (startTick >= maxTick)
-			startTick = maxTick;
+			startTick = maxTick; */
 	} else return;
 	[self enqueueSelectionUndoerWithKey: sEditingRangeKey value: [[[MDTickRangeObject alloc] initWithStartTick: startEditingRange endTick: endEditingRange] autorelease]];
 	startEditingRange = startTick;

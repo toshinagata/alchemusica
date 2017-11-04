@@ -1370,8 +1370,8 @@ static NSString *sTickIdentifiers[] = { @"bar", @"sec", @"msec", @"count", @"del
 		duration = [[[self document] myMIDISequence] sequenceDuration];
 		if (tick < 0)
 			tick = 0;
-		if (tick > duration)
-			tick = duration;
+	//	if (tick > duration)
+	//		tick = duration;
 		if (startFlag)
 			endtick = tick;
 		else {

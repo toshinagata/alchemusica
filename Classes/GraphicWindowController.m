@@ -2411,8 +2411,8 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 		duration = [[[self document] myMIDISequence] sequenceDuration];
 		if (tick < 0)
 			tick = 0;
-		if (tick > duration)
-			tick = duration;
+	//	if (tick > duration)
+	//		tick = duration;
 		[[self document] getEditingRangeStart: &tick1 end: &tick2];
 		if (startFlag) {
 			if (tick >= tick2)
