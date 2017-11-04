@@ -719,6 +719,7 @@
 			[pauseButton setState:NSOnState];
 		}
 		[self refreshTimeDisplay];
+        [myDocument postPlayPositionNotification:tick];
 		shouldContinuePlay = NO;
 	}
 }

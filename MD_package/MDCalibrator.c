@@ -110,7 +110,7 @@ MDCalibratorCalculateTime(MDCalibrator *inCalib, MDTickType inTick)
 		time_before = 0;
 	}
 	timebase = MDSequenceGetTimebase(inCalib->parent);
-	return time_before + (MDTimeType)((inTick - tick_before) * 60000000.0 / (tempo * timebase));
+	return time_before + (MDTimeType)floor(0.5 + (inTick - tick_before) * 60000000.0 / (tempo * timebase));
 }
 
 static MDCalibrator *
@@ -730,7 +730,7 @@ MDCalibratorTimeToTick(MDCalibrator *inCalib, MDTimeType inTime)
 		time_before = 0;
 	}
 	timebase = MDSequenceGetTimebase(inCalib->parent);
-	return tick_before + (MDTickType)((double)(inTime - time_before) * ((double)timebase * MDCalibratorGetTempo(inCalib) / 60000000.0));
+	return tick_before + (MDTickType)floor(0.5 + (double)(inTime - time_before) * ((double)timebase * MDCalibratorGetTempo(inCalib) / 60000000.0));
 }
 
 /* --------------------------------------
