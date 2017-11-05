@@ -69,6 +69,10 @@ enum {
 - (int32_t)visibleTrackCount;
 - (int)sortedTrackNumberAtIndex: (int)index;
 
+//  Set client-specific focus track. By default, focus track is -1 (i.e. as in the track list)
+- (void)setFocusTrack:(int)aTrack;
+- (int)focusTrack;
+
 //  Drawing
 - (void)drawContentsInRect:(NSRect)aRect;
 

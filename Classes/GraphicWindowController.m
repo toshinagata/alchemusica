@@ -1381,6 +1381,23 @@ sTableColumnIDToInt(id identifier)
 	[records[index].ruler setNeedsDisplay: YES];
 }
 
+- (void)setStripChartAtIndex:(int)index track:(int)track
+{
+    int32_t kindAndCode, kind, code;
+    if (![records[index].client isKindOfClass: [StripChartView class]])
+        return;
+    kindAndCode = [(StripChartView *)records[index].client kindAndCode];
+    kind = (kindAndCode > 16) & 65535;
+    code = kindAndCode & 65535;
+    if (kind == kMDEventTempo) {
+        /*  Only conductor track is allowed  */
+        track = 0;
+    }
+    [(StripChartView *)records[index].client setFocusTrack:track];
+    [records[index].splitter setTrack:track];
+    [records[index].ruler setNeedsDisplay: YES];
+}
+
 - (IBAction)kindPopUpPressed: (id)sender
 {
 	int i, kind;
@@ -1405,6 +1422,18 @@ sTableColumnIDToInt(id identifier)
 			break;
 		}
 	}
+}
+
+- (IBAction)trackPopUpPressedInSplitterView: (id)sender
+{
+    int i, track;
+    for (i = 1; i < myClientViewsCount; i++) {
+        if (records[i].splitter == (GraphicSplitterView *)[sender superview]) {
+            track = [sender indexOfSelectedItem];
+            [self setStripChartAtIndex:i track:track - 1];
+            break;
+        }
+    }
 }
 
 - (IBAction)expandHorizontally: (id)sender
@@ -1455,6 +1484,20 @@ sTableColumnIDToInt(id identifier)
 	if (index >= 0 && index < myClientViewsCount)
 		return records[index].client;
 	else return nil;
+}
+
+- (GraphicSplitterView *)splitterViewAtIndex: (int)index
+{
+    if (index >= 0 && index < myClientViewsCount)
+        return records[index].splitter;
+    else return nil;
+}
+
+- (GraphicRulerView *)rulerViewAtIndex: (int)index
+{
+    if (index >= 0 && index < myClientViewsCount)
+        return records[index].ruler;
+    else return nil;
 }
 
 /*  Used by GraphicBackgroundView to send key events to the active client view  */
@@ -2707,28 +2750,46 @@ row:(int)rowIndex
 //	[self editingRangeChanged: notification];
 }
 
-- (void)trackInserted: (NSNotification *)notification {
-/*	int i;
-	TrackInfo info;
-	int32_t track = [[[notification userInfo] objectForKey: @"track"] intValue];
-	for (i = [trackInfo count] - 1; i >= 0; i--) {
-		info = [self trackInfoAtIndex: i];
-		if (info.trackNum >= track) {
-			info.trackNum++;
-			[self setTrackInfo: info atIndex: i];
-		}
-	}
-	[sortedTrackNumbers release];
-	sortedTrackNumbers = nil; */
+- (void)trackInserted: (NSNotification *)notification
+{
+    int i, track;
+    track = [[[notification userInfo] objectForKey: @"track"] intValue];
+    for (i = 2; i < myClientViewsCount; i++) {
+        /*  If focus track is set in the strip chart view, update it  */
+        GraphicClientView *client = records[i].client;
+        if ([client respondsToSelector:@selector(focusTrack)]) {
+            int ftrack = [(id)client focusTrack];
+            [records[i].splitter rebuildTrackPopup];
+            if (ftrack >= 1 && ftrack >= track) {
+                [(id)client setFocusTrack:ftrack + 1];
+                [records[i].splitter setTrack:ftrack + 1];
+            }
+        }
+    }
 	visibleTrackCount = -1;
 	[myTableView reloadData];
 	[myPlayerView setNeedsDisplay: YES];
 	[self setNeedsReloadClientViews];
 }
 
-- (void)trackDeleted: (NSNotification *)notification {
-/*	int32_t track = [[[notification userInfo] objectForKey: @"track"] intValue];
-	[self removeTrackAndFill: track]; */
+- (void)trackDeleted: (NSNotification *)notification
+{
+    int i, track;
+    track = [[[notification userInfo] objectForKey: @"track"] intValue];
+    for (i = 2; i < myClientViewsCount; i++) {
+        /*  If focus track is set in the strip chart view, update it  */
+        GraphicClientView *client = records[i].client;
+        if ([client respondsToSelector:@selector(focusTrack)]) {
+            int ftrack = [(id)client focusTrack];
+            [records[i].splitter rebuildTrackPopup];
+            if (ftrack >= 1 && ftrack >= track) {
+                if (ftrack >= [self trackCount])
+                    ftrack--;
+                [(id)client setFocusTrack:ftrack];
+                [records[i].splitter setTrack:ftrack];
+            }
+        }
+    }
 	visibleTrackCount = -1;
 	[myTableView reloadData];
 	[myPlayerView setNeedsDisplay: YES];
@@ -2746,13 +2807,21 @@ row:(int)rowIndex
 	id firstResponder = [[self window] firstResponder];
 
 	if (firstResponder == myMainView) {
-
+        int focusTrack;
+        GraphicClientView *client = [self clientViewAtIndex:lastMouseClientViewIndex];
+        focusTrack = [client focusTrack];
+        
 		/*  Copy all selected events in editable tracks  */
 		numberOfSelectedTracks = 0;
 		for (i = 0; i < numberOfTracks; i++) {
 			MDTrackAttribute attr = [[[self document] myMIDISequence] trackAttributeAtIndex: i];
-			if ((attr & kMDTrackAttributeEditable) == 0)
-				continue;
+            if (focusTrack >= 0) {
+                if (focusTrack != i)
+                    continue;
+            } else {
+                if ((attr & kMDTrackAttributeEditable) == 0)
+                    continue;
+            }
 			sel = [doc selectionOfTrack: i];
 			if (selArray != NULL)
 				selArray[i] = sel;

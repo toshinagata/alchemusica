@@ -83,6 +83,15 @@
     return [dataSource sortedTrackNumberAtIndex:index];
 }
 
+- (void)setFocusTrack:(int)aTrack
+{
+}
+
+- (int)focusTrack
+{
+    return -1;
+}
+
 //  Should be overridden in subclasses
 - (void)drawContentsInRect: (NSRect)aRect
 {

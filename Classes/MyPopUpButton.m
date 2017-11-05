@@ -38,34 +38,52 @@ static NSImage *sTriangleImage, *sDoubleTriangleImage;
     return sDoubleTriangleImage;
 }
 
+- (void)dealloc
+{
+    if (textColor != nil)
+        [textColor release];
+    if (backgroundColor != nil)
+        [backgroundColor release];
+    [super dealloc];
+}
+
+- (void)superDrawRect: (NSRect)aRect
+{
+    if (backgroundColor != nil) {
+        [[NSColor lightGrayColor] set];
+        NSFrameRect(aRect);
+        [backgroundColor set];
+        NSRectFill(NSInsetRect(aRect, 1, 1));
+    } else [super drawRect:aRect];
+}
+
 - (void)drawRect: (NSRect)aRect
 {
     NSRect theRect, r;
 	NSSize size;
+    float fraction;
 	NSImage *theImage;
     NSString *theTitle;
 	id item = [self selectedItem];
     theImage = [item image];
     theTitle = [item title];
     theRect = [self bounds];
+    if ([self isEnabled])
+        fraction = 1.0;
+    else fraction = 0.5;
+    if (theTitle != nil)
+        [[theTitle retain] autorelease];
+    [item setTitle:@""];
     if (theImage != nil) {
         //  Draw only background
         NSPoint center;
-        float fraction;
         [[theImage retain] autorelease];
-        if (theTitle != nil)
-            [[theTitle retain] autorelease];
         [item setImage:nil];
-        [item setTitle:@""];
-        [super drawRect:aRect];
-        [item setTitle:theTitle];
+        [self superDrawRect:aRect];
         [item setImage:theImage];
         //  And draw the image as we like
         center.x = theRect.origin.x + theRect.size.width / 2;
         center.y = theRect.origin.y + theRect.size.height / 2;
-        if ([self isEnabled])
-            fraction = 1.0;
-        else fraction = 0.5;
         if (theImage != nil) {
             size = [theImage size];
             r.origin.x = center.x - size.width / 2;
@@ -74,27 +92,24 @@ static NSImage *sTriangleImage, *sDoubleTriangleImage;
             [theImage drawInRect:r fromRect:NSZeroRect operation:NSCompositeSourceAtop fraction:fraction respectFlipped:YES hints:nil];
         }
     } else {
-        //  Draw the content as usual
         NSAttributedString *atitle;
-        if (theTitle != nil && textColor != nil) {
-            //  Set color
-            NSFont *font;
-            NSDictionary *attr;
+        NSFont *font;
+        NSMutableDictionary *attr;
+        [self superDrawRect:aRect];
+        if (theTitle != nil) {
+            //  We draw the title by ourselves and restore title
             font = [NSFont labelFontOfSize:[NSFont systemFontSizeForControlSize:[self controlSize]]];
-            attr = [NSDictionary dictionaryWithObjectsAndKeys:
-                    textColor, NSForegroundColorAttributeName,
+            attr = [NSMutableDictionary dictionaryWithObjectsAndKeys:
                     font, NSFontAttributeName,
                     nil];
-            [theTitle retain];
+            if (textColor != nil) {
+                [attr setObject:textColor forKey:NSForegroundColorAttributeName];
+            }
             atitle = [[NSAttributedString alloc] initWithString:theTitle attributes: attr];
-            [item setAttributedTitle:atitle];
-            [super drawRect:aRect];
-            [item setTitle:theTitle];
-            [theTitle release];
-        } else {
-            [super drawRect:aRect];
+            [atitle drawInRect:NSInsetRect(aRect, 4, 1)];
         }
     }
+    [item setTitle:theTitle];
     r.origin.x = theRect.origin.x + theRect.size.width - 7;
     r.origin.y = theRect.origin.y + theRect.size.height - 7;
     r.size.width = 5;
@@ -112,6 +127,19 @@ static NSImage *sTriangleImage, *sDoubleTriangleImage;
 - (NSColor *)textColor
 {
     return textColor;
+}
+
+- (void)setBackgroundColor:(NSColor *)color
+{
+    [color retain];
+    if (backgroundColor != nil)
+        [backgroundColor release];
+    backgroundColor = color;
+}
+
+- (NSColor *)backgroundColor
+{
+    return backgroundColor;
 }
 
 @end

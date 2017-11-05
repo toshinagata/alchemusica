@@ -16,16 +16,17 @@
  */
 
 #import <Cocoa/Cocoa.h>
-
+#import "MyPopUpButton.h"
 
 @interface GraphicSplitterView : NSView {
-	NSPopUpButton *kindPopup;
-	NSTextField *kindText;
-	NSPopUpButton *codePopup;
-	NSTextField *codeText;
+	MyPopUpButton *kindPopup;
+	MyPopUpButton *codePopup;
+    MyPopUpButton *trackPopup;
+    NSTextField *trackLabelText;
 }
 
 - (void)setKindAndCode: (int32_t)kindAndCode;
-//- (int32_t)kindAndCode;
+- (void)setTrack: (int)track;
+- (void)rebuildTrackPopup;
 
 @end

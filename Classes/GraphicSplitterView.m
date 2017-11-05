@@ -38,27 +38,6 @@ static struct sKindMenuItems {
 	{ kMDEventTempo, @"Tempo" }
 };
 
-/*
-static unsigned char sControlSubmenuCodes[] = { 1, 7, 10, 11, 64, 71, 72, 73, 74 };
-
-static void
-addControlNameToMenu(int code, NSMenu *menu, id target)
-{
-	MDEvent event;
-	char name[64];
-	NSMenuItem *item;
-	MDEventInit(&event);
-	MDSetKind(&event, kMDEventControl);
-	MDSetCode(&event, (code & 0x7f));
-	MDEventToKindString(&event, name, sizeof name);
-	[menu addItemWithTitle: [NSString stringWithCString: name + 1]  //  Chop the "*" at the top
-		action: @selector(codeMenuItemSelected:) keyEquivalent: @""];
-	item = (NSMenuItem *)[menu itemAtIndex: [menu numberOfItems] - 1];
-	[item setTag: (code & 0x7f)];
-	[item setTarget: target];
-}
-*/
-
 static NSMenuItem *
 searchMenuItemWithTag(NSMenu *menu, int tag)
 {
@@ -87,74 +66,88 @@ searchMenuItemWithTag(NSMenu *menu, int tag)
 		rect.size.height--;
 		rect.origin.x = 16.0;
 		rect.size.width = 100.0;
-		kindPopup = [[[NSPopUpButton allocWithZone: [self zone]] initWithFrame: rect] autorelease];
-		kindText = [[[NSTextField allocWithZone: [self zone]] initWithFrame: rect] autorelease];
+		kindPopup = [[[MyPopUpButton allocWithZone: [self zone]] initWithFrame: rect] autorelease];
+        [kindPopup setBezelStyle: NSShadowlessSquareBezelStyle];
+        [kindPopup setBackgroundColor:[NSColor whiteColor]];
+        [kindPopup setControlSize:NSMiniControlSize];
 		rect.origin.x += rect.size.width + 16.0;
-		codePopup = [[[NSPopUpButton allocWithZone: [self zone]] initWithFrame: rect] autorelease];
-		codeText = [[[NSTextField allocWithZone: [self zone]] initWithFrame: rect] autorelease];
+		codePopup = [[[MyPopUpButton allocWithZone: [self zone]] initWithFrame: rect] autorelease];
+        [codePopup setBezelStyle: NSShadowlessSquareBezelStyle];
+        [codePopup setBackgroundColor:[NSColor whiteColor]];
+        [codePopup setControlSize:NSMiniControlSize];
+        rect.origin.x += rect.size.width + 16.0;
+        rect.size.width = 40.0;
+        rect.origin.y -= 2;
+        trackLabelText = [[[NSTextField allocWithZone:[self zone]] initWithFrame:rect] autorelease];
+        rect.origin.y += 2;
+        rect.origin.x += rect.size.width + 4.0;
+        rect.size.width = 100.0;
+        trackPopup = [[[MyPopUpButton allocWithZone:[self zone]] initWithFrame:rect] autorelease];
+        [trackPopup setBezelStyle: NSShadowlessSquareBezelStyle];
+        [trackPopup setBackgroundColor:[NSColor whiteColor]];
+        [trackPopup setControlSize:NSMiniControlSize];
 		font = [NSFont systemFontOfSize: [NSFont smallSystemFontSize]];
 		[kindPopup setFont: font];
-		[kindText setBezeled: YES];
-		[kindText setSelectable: NO];
 		[codePopup setFont: font];
-		[codeText setBezeled: YES];
-		[codeText setSelectable: NO];
-		[self addSubview: kindText];
+        [trackLabelText setBezeled:NO];
+        [trackLabelText setSelectable:NO];
+        [trackLabelText setDrawsBackground:NO];
+        [trackPopup setFont: font];
 		[self addSubview: kindPopup];
-		[self addSubview: codeText];
 		[self addSubview: codePopup];
+        [self addSubview: trackLabelText];
+        [self addSubview: trackPopup];
 		for (i = 0; i < sizeof(sKindMenuItems) / sizeof(sKindMenuItems[0]); i++) {
 			[kindPopup addItemWithTitle: sKindMenuItems[i].title];
 			[[kindPopup itemAtIndex: i] setTag: sKindMenuItems[i].kind];
 		}
 		[kindPopup selectItemAtIndex: [kindPopup indexOfItemWithTag: kMDEventNote]];
-		[kindText setStringValue: [kindPopup titleOfSelectedItem]];
 		[kindPopup setEnabled: YES];
 		[codePopup setEnabled: NO];
-		[kindPopup setTransparent: YES];
-		[codePopup setTransparent: YES];
+        [trackPopup setEnabled: YES];
 		font = [NSFont systemFontOfSize: [NSFont smallSystemFontSize] - 2];
-		[codeText setFont: font];
-		[kindText setFont: font];
+        [trackLabelText setFont: font];
+        [trackLabelText setStringValue:@"Track:"];
     }
     return self;
+}
+
+static NSMenu *
+trackPopUp(int count)
+{
+    NSMenu *menu;
+    int i;
+    menu = [[[NSMenu alloc] initWithTitle: @"tracks"] autorelease];
+    for (i = 0; i <= count; i++) {
+        NSString *s;
+        if (i == 0)
+            s = @"(As Piano Roll)";
+        else if (i == 1)
+            s = @"C";
+        else s = [NSString stringWithFormat:@"%d", i - 1];
+        [menu addItemWithTitle:s action:nil keyEquivalent:@""];
+    }
+    return menu;
 }
 
 //  Initialize target-action relationship
 - (void)viewDidMoveToSuperview
 {
-	id target = [[self window] windowController];
+	id target = [[[self superview] window] windowController];
 	[kindPopup setTarget: target];
 	[kindPopup setAction: @selector(kindPopUpPressed:)];
 	if (sControlSubmenu == nil) {
 		sControlSubmenu = [MDMenuWithControlNames(target, @selector(codeMenuItemSelected:), 0) retain];
-	/*	NSMenu *submenu;
-		sControlSubmenu = [[NSMenu allocWithZone: [self zone]] initWithTitle: @"Control names"];
-		for (i = 0; i < sizeof(sControlSubmenuCodes) / sizeof(sControlSubmenuCodes[0]); i++)
-			addControlNameToMenu(sControlSubmenuCodes[i], sControlSubmenu, target);
-		for (i = 0; i < 127; i++) {
-			if (i % 32 == 0) {
-				[sControlSubmenu addItemWithTitle: [NSString stringWithFormat: @"%d-%d", i, i + 31]
-					action: nil keyEquivalent: @""];
-				submenu = [[[NSMenu allocWithZone: [self zone]] initWithTitle: @""] autorelease];
-				[[sControlSubmenu itemAtIndex: [sControlSubmenu numberOfItems] - 1]
-					setSubmenu: submenu];
-			}
-			for (j = sizeof(sControlSubmenuCodes) / sizeof(sControlSubmenuCodes[0]) - 1; j >= 0; j--) {
-				if (i == sControlSubmenuCodes[j])
-					break;
-			}
-			if (j < 0)
-				addControlNameToMenu(i, submenu, target);
-		} */
 	}
+    [trackPopup setTarget:target];
+    [trackPopup setAction:@selector(trackPopUpPressedInSplitterView:)];
+    [trackPopup setMenu:trackPopUp([target trackCount])];
 }
 
 - (void)drawRect:(NSRect)rect {
 	NSRect bounds = [self bounds];
 	NSPoint pt1, pt2;
 	NSDrawWindowBackground(bounds);
-//	NSEraseRect(bounds);
 	[[NSColor lightGrayColor] set];
 	pt1.x = bounds.origin.x;
 	pt2.x = bounds.origin.x + bounds.size.width;
@@ -200,15 +193,13 @@ searchMenuItemWithTag(NSMenu *menu, int tag)
 	if (kind != 65535) {
 		item = searchMenuItemWithTag([kindPopup menu], kind);
 		if (item != nil) {
-			[kindPopup selectItem: nil];
-			[kindText setStringValue: [item title]];
+			[kindPopup selectItem: item];
 			if (kind == kMDEventControl) {
 				[codePopup setMenu: sControlSubmenu];
 				[codePopup setEnabled: YES];
 			} else {
 				[codePopup setMenu: [[[NSMenu allocWithZone: [self zone]] initWithTitle: @""] autorelease]];
 				[codePopup setEnabled: NO];
-				[codeText setStringValue: @""];
 			}
 		}
 	}
@@ -216,9 +207,23 @@ searchMenuItemWithTag(NSMenu *menu, int tag)
 		item = searchMenuItemWithTag([codePopup menu], code);
 		if (item != nil) {
 			[codePopup selectItem: item];
-			[codeText setStringValue: [item title]];
 		}
 	}
+}
+
+- (void)setTrack:(int)track
+{
+    [trackPopup selectItemAtIndex:track + 1];
+}
+
+- (void)rebuildTrackPopup
+{
+    int i, count;
+    id target = [trackPopup target];
+    i = [trackPopup indexOfSelectedItem];
+    count = [target trackCount];
+    [trackPopup setMenu:trackPopUp(count)];
+    
 }
 
 @end

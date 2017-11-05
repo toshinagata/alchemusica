@@ -24,10 +24,13 @@
 @interface MyPopUpButton : NSPopUpButton
 {
     NSColor *textColor;
+    NSColor *backgroundColor;
 }
 + (NSImage *)triangleImage;
 + (NSImage *)doubleTriangleImage;
 - (void)drawRect: (NSRect)aRect;
 - (void)setTextColor: (NSColor *)color;
+- (void)setBackgroundColor:(NSColor *)color;
 - (NSColor *)textColor;
+- (NSColor *)backgroundColor;
 @end

@@ -16,6 +16,7 @@
  */
 
 #import "StripChartView.h"
+#import "GraphicSplitterView.h"
 #import <math.h>
 #import "GraphicWindowController.h"
 #import "MyDocument.h"
@@ -56,6 +57,7 @@ static float sValueResolution = 1.0;
 		minValue = 0.0;
 		maxValue = 128.0;
 		calib = NULL;
+		focusTrack = -1;
     }
     return self;
 }
@@ -323,7 +325,7 @@ getYValue(const MDEvent *ep, int eventKind)
 
 - (void)setKindAndCode: (int32_t)kindAndCode
 {
-	int newKind, newCode;
+	int newKind, newCode, ftrack;
 	MDSequence *sequence;
 	float minval, maxval;
 	newKind = (kindAndCode >> 16) & 65535;
@@ -374,28 +376,58 @@ getYValue(const MDEvent *ep, int eventKind)
 			}
 		}
 	}
-	[self reloadData];
-	[self setNeedsDisplay: YES];
+	ftrack = focusTrack;
+	if (eventKind == kMDEventTempo)
+		ftrack = 0;  /*  Conductor Track  */
+	else if (ftrack == 0)
+		ftrack = -1;  /*  As piano roll  */
+	if (ftrack != focusTrack)
+		[self setFocusTrack:ftrack];
+	else {
+		[self reloadData];
+		[self setNeedsDisplay: YES];
+	}
 }
 
 - (BOOL)isFocusTrack: (int)trackNum
 {
-	if (eventKind == kMDEventTempo)
-		return (trackNum == 0);
+	if (focusTrack >= 0)
+		return (trackNum == focusTrack);
 	else return [super isFocusTrack:trackNum];
 }
 - (int32_t)visibleTrackCount
 {
-	if (eventKind == kMDEventTempo)
+	if (focusTrack >= 0)
 		return 1;
 	else return [super visibleTrackCount];
 }
 
 - (int)sortedTrackNumberAtIndex: (int)index
 {
-	if (eventKind == kMDEventTempo)
-		return (index == 0 ? 0 : -1);
+	if (focusTrack >= 0)
+		return (index == 0 ? focusTrack : -1);
 	else return [super sortedTrackNumberAtIndex:index];
+}
+
+- (void)setFocusTrack:(int)aTrack
+{
+	/*  TODO: We need to set the first responder to the active client view, rather than to the main view. Otherwise, pasted events will go to the 'editable' track in the track list instead of the focus track.  */
+	int i;
+	id view;
+	focusTrack = aTrack;
+	for (i = 0; (view = [dataSource clientViewAtIndex:i]) != nil; i++) {
+		if (view == self) {
+			[[dataSource splitterViewAtIndex:i] setTrack:aTrack];
+			break;
+		}
+	}
+	[self reloadData];
+	[self setNeedsDisplay:YES];
+}
+
+- (int)focusTrack
+{
+	return focusTrack;
 }
 
 - (int32_t)kindAndCode

@@ -187,6 +187,7 @@ enum {
 - (void)setStripChartAtIndex: (int)index kind: (int)kind code: (int)code;
 - (IBAction)kindPopUpPressed: (id)sender;
 - (IBAction)codeMenuItemSelected: (id)sender;
+- (IBAction)trackPopUpPressedInSplitterView: (id)sender;
 
 - (IBAction)expandHorizontally: (id)sender;
 - (IBAction)shrinkHorizontally: (id)sender;
@@ -235,6 +236,8 @@ enum {
 - (int)graphicEditingMode;
 //- (int)graphicSelectionMode;
 - (GraphicClientView *)clientViewAtIndex: (int)index;
+- (GraphicSplitterView *)splitterViewAtIndex: (int)index;
+- (GraphicRulerView *)rulerViewAtIndex: (int)index;
 
 //  Action methods for track table
 - (IBAction)openEventListWindow: (id)sender;
