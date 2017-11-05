@@ -69,6 +69,20 @@
 	return dataSource;
 }
 
+- (BOOL)isFocusTrack: (int)trackNum
+{
+    return [dataSource isFocusTrack:trackNum];
+}
+- (int32_t)visibleTrackCount
+{
+    return [dataSource visibleTrackCount];
+}
+
+- (int)sortedTrackNumberAtIndex: (int)index
+{
+    return [dataSource sortedTrackNumberAtIndex:index];
+}
+
 //  Should be overridden in subclasses
 - (void)drawContentsInRect: (NSRect)aRect
 {
@@ -159,14 +173,6 @@
 - (float)maxValue
 {
 	return maxValue;
-}
-
-- (void)addTrack: (int)track
-{
-}
-
-- (void)removeTrack: (int)track
-{
 }
 
 - (void)convertFromPoint:(NSPoint)pt toY:(float *)y andTick:(int32_t *)tick

@@ -299,8 +299,8 @@ typedef struct TimeScalingRecord {
 			timeScaling->endTick = endTick;
 			j = MDSequenceGetNumberOfTracks(seq);
 			timeScaling->trackNums = (int *)calloc(sizeof(int), j);
-			for (i = 0; (trackNo = [dataSource sortedTrackNumberAtIndex: i]) >= 0; i++) {
-				if (![dataSource isFocusTrack: trackNo])
+			for (i = 0; (trackNo = [self sortedTrackNumberAtIndex: i]) >= 0; i++) {
+				if (![self isFocusTrack:trackNo])
 					continue;
 				timeScaling->trackNums[timeScaling->ntracks] = trackNo;
 				timeScaling->ntracks++;
@@ -496,13 +496,13 @@ typedef struct TimeScalingRecord {
 	
 	if (tick1 < tick2) {
 		/*  Select all events within this tick range  */
-		for (i = 0; (trackNo = [dataSource sortedTrackNumberAtIndex: i]) >= 0; i++) {
+		for (i = 0; (trackNo = [self sortedTrackNumberAtIndex: i]) >= 0; i++) {
 			MDTrack *track;
 			MDPointer *pt;
 			IntGroup *pset;
 			MDSelectionObject *obj;
 			int32_t pos1, pos2;
-			if (![dataSource isFocusTrack: trackNo])
+			if (![self isFocusTrack:trackNo])
 				continue;
 			track = [[document myMIDISequence] getTrackAtIndex: trackNo];
 			if (track == NULL)

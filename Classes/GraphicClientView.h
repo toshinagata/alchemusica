@@ -60,8 +60,14 @@ enum {
 - (float)minValue;
 - (void)setMaxValue: (float)value;
 - (float)maxValue;
-- (void)addTrack: (int)track;
-- (void)removeTrack: (int)track;
+
+//  The visible/focus track can either be chosen in the track list, or be determined
+//  for each client view. The following methods calls the GraphicWindowController
+//  versions by default, but the subclass can override them to implement client-specific
+//  focus track handling (e.g. 'tempo' view always edits the conductor track)
+- (BOOL)isFocusTrack: (int)trackNum;
+- (int32_t)visibleTrackCount;
+- (int)sortedTrackNumberAtIndex: (int)index;
 
 //  Drawing
 - (void)drawContentsInRect:(NSRect)aRect;

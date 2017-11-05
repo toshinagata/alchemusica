@@ -187,7 +187,7 @@ static CGFloat sDashWidth = 8.0;
 //	MDPointer *pt;
 //	MDEvent *ep;
 	[cacheArray release];
-	num = [dataSource visibleTrackCount];
+	num = [self visibleTrackCount];
 	cacheArray = [[NSMutableArray allocWithZone: [self zone]] initWithCapacity: num + 1];
 	cacheTick = tick;
 	for (i = 0; i <= num; i++) {
@@ -197,7 +197,7 @@ static CGFloat sDashWidth = 8.0;
 				break;
 			trackNum = -1;
 		} else {
-			trackNum = [dataSource sortedTrackNumberAtIndex: i];
+			trackNum = [self sortedTrackNumberAtIndex: i];
 			track = [[[dataSource document] myMIDISequence] getTrackAtIndex: trackNum];
 		}
 	#if 1
@@ -259,7 +259,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	if (draggingMode > 0 && draggingMode < 3 && draggingImage != nil)
 		isDraggingImage = YES;
 
-	num = [dataSource visibleTrackCount];
+	num = [self visibleTrackCount];
 	if (cacheArray == nil || originTick != cacheTick)
 		[self cacheNotesBeforeTick: originTick];
 	normalPath = [[NSBezierPath allocWithZone: [self zone]] init];
@@ -288,7 +288,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 			trackNum = -1;
 			isFocus = NO;
 		} else {
-			trackNum = [dataSource sortedTrackNumberAtIndex: i];
+			trackNum = [self sortedTrackNumberAtIndex: i];
 			track = [[document myMIDISequence] getTrackAtIndex: trackNum];
 			if (track == NULL)
 				continue;
@@ -476,7 +476,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	MDTickType theTick;
 	int theNote;
 
-	num = [dataSource visibleTrackCount];
+	num = [self visibleTrackCount];
 	theTick = (MDTickType)(aPoint.x / ppt);
 	theNote = floor(aPoint.y / ys);
 	for (i = 0; i < num; i++) {
@@ -487,8 +487,8 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 		MDPointer *pt;
 		MDEvent *ep;
 		MDTickType duration;
-		trackNum = [dataSource sortedTrackNumberAtIndex: i];
-		if (![dataSource isFocusTrack: trackNum])
+		trackNum = [self sortedTrackNumberAtIndex: i];
+		if (![self isFocusTrack:trackNum])
 			continue;
 		track = [[document myMIDISequence] getTrackAtIndex: trackNum];
 		if (track == NULL)
@@ -559,7 +559,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	maxNote = -1;
 	ys = [self yScale];
 	ppt = [dataSource pixelsPerTick];
-	for (i = 0; (n = [dataSource sortedTrackNumberAtIndex: i]) >= 0; i++) {
+	for (i = 0; (n = [self sortedTrackNumberAtIndex: i]) >= 0; i++) {
 		int index;
 		MDPointer *pt;
 		MDEvent *ep;
@@ -726,7 +726,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 			tr = track;  // i is ignored
 		else {
 			tr = i;
-			if (![dataSource isFocusTrack: tr])
+			if (![self isFocusTrack:tr])
 				continue;
 		}
 		dev = MDPlayerGetDestinationNumberFromName([[seq deviceName: tr] UTF8String]);
@@ -756,7 +756,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	IntGroup *pset, *pset2, *pset3;
 	MDPointer *pt;
 	MDEvent *ep;
-	num = [dataSource visibleTrackCount];
+	num = [self visibleTrackCount];
 	if (flag) {
 		if (rubbingArray == nil) {
 			/*  Create empty rubbingArray  */
@@ -768,8 +768,8 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 			[self invalidateRubbingTickLine];
 		}
 		for (i = 0; i < num; i++) {
-			trackNum = [dataSource sortedTrackNumberAtIndex:i];
-			if (![dataSource isFocusTrack:trackNum])
+			trackNum = [self sortedTrackNumberAtIndex:i];
+			if (![self isFocusTrack:trackNum])
 				continue;
 			pset = [[rubbingArray objectAtIndex:i] pointSet];
 			track = [[[dataSource document] myMIDISequence] getTrackAtIndex: trackNum];
@@ -800,8 +800,8 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 		if (rubbingArray != nil) {
 			[self invalidateRubbingTickLine];
 			for (i = 0; i < num; i++) {
-				trackNum = [dataSource sortedTrackNumberAtIndex:i];
-				if (![dataSource isFocusTrack:trackNum])
+				trackNum = [self sortedTrackNumberAtIndex:i];
+				if (![self isFocusTrack:trackNum])
 					continue;
 				track = [[[dataSource document] myMIDISequence] getTrackAtIndex: trackNum];
 				pset = [[rubbingArray objectAtIndex:i] pointSet];
@@ -904,7 +904,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 			if (![document isSelectedAtPosition: mouseDownPos inTrack: mouseDownTrack]) {
 			//	int i, n;
 				if (!shiftDown) {
-				//	for (i = 0; (n = [dataSource sortedTrackNumberAtIndex: i]) >= 0; i++)
+				//	for (i = 0; (n = [self sortedTrackNumberAtIndex: i]) >= 0; i++)
 				//		[document unselectAllEventsInTrack: n sender: self];
 					[document unselectAllEventsInAllTracks: self];
 				}
@@ -1037,7 +1037,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 			if (![document isSelectedAtPosition: mouseDownPos inTrack: mouseDownTrack]) {
 			//	int i, n;
 				if (!shiftDown) {
-				//	for (i = 0; (n = [dataSource sortedTrackNumberAtIndex: i]) >= 0; i++)
+				//	for (i = 0; (n = [self sortedTrackNumberAtIndex: i]) >= 0; i++)
 				//		[document unselectAllEventsInTrack: n sender: self];
 					[document unselectAllEventsInAllTracks: self];
 				}
@@ -1112,10 +1112,10 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 			keyCode = 0;
 		if (keyCode > 127)
 			keyCode = 127;
-		for (i = 0; (trackNo = [dataSource sortedTrackNumberAtIndex: i]) >= 0; i++) {
+		for (i = 0; (trackNo = [self sortedTrackNumberAtIndex: i]) >= 0; i++) {
 			MDEventObject *newEvent;
 			MDEvent *ep;
-			if (![dataSource isFocusTrack: trackNo])
+			if (![self isFocusTrack:trackNo])
 				continue;
 			newEvent = [[[MDEventObject allocWithZone: [self zone]] init] autorelease];
 			ep = &(newEvent->event);
@@ -1141,13 +1141,13 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 		minTick = (MDTickType)(bounds.origin.x / ppt);
 		maxTick = (MDTickType)((bounds.origin.x + bounds.size.width) / ppt);
 		document = (MyDocument *)[dataSource document];
-		for (i = 0; (trackNo = [dataSource sortedTrackNumberAtIndex: i]) >= 0; i++) {
+		for (i = 0; (trackNo = [self sortedTrackNumberAtIndex: i]) >= 0; i++) {
 			MDTrack *track;
 			MDPointer *pt;
 			MDEvent *ep;
 			IntGroup *pset;
 			MDSelectionObject *obj;
-			if (![dataSource isFocusTrack: trackNo])
+			if (![self isFocusTrack:trackNo])
 				continue;
 			track = [[document myMIDISequence] getTrackAtIndex: trackNo];
 			if (track == NULL)

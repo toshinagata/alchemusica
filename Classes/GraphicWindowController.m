@@ -158,62 +158,6 @@ sTableColumnIDToInt(id identifier)
 
 #pragma mark ==== Handling track lists ====
 
-/*
-- (TrackInfo)trackInfoAtIndex: (int)index
-{
-	TrackInfo info;
-	if (index < 0 || index >= [trackInfo count]) {
-		info.trackNum = -1;
-	} else {
-		[[trackInfo objectAtIndex: index] getValue: &info];
-	}
-	return info;
-}
-
-- (void)setTrackInfo: (TrackInfo)info atIndex: (int)index
-{
-	NSValue *value = [NSValue valueWithBytes: &info objCType:@encode(TrackInfo)];
-	if (index >= 0 && index < [trackInfo count]) {
-		[trackInfo replaceObjectAtIndex: index withObject: value];
-	} else if (index == [trackInfo count]) {
-		[trackInfo addObject: value];
-	}
-}
-
-- (int)lookupTrack: (int)track
-{
-	int i;
-	TrackInfo info;
-	for (i = [trackInfo count] - 1; i >= 0; i--) {
-		info = [self trackInfoAtIndex: i];
-		if (info.trackNum == track)
-			return i;
-	}
-	return -1;
-}
-
-- (BOOL)containsTrack: (int)track
-{
-	return ([self lookupTrack: track] >= 0);
-}
-
-- (void)addTrack: (int)track
-{
-    int i;
-	TrackInfo info;
-	if (![self containsTrack: track]) {
-		info.trackNum = track;
-		//  If this is the first track, then it gets focus
-		info.focusFlag = ([trackInfo count] == 0 ? 1 : 0);
-		[self setTrackInfo: info atIndex: [trackInfo count]];
-        for (i = 0; i < myClientViewsCount; i++)
-            [records[i].client addTrack: track];
-		[sortedTrackNumbers release];
-		sortedTrackNumbers = nil;
-    }
-}
-*/
-
 - (void)setFocusFlag: (BOOL)flag onTrack: (int)trackNum extending: (BOOL)extendFlag
 {
 	int i;
@@ -246,12 +190,6 @@ sTableColumnIDToInt(id identifier)
 		MDTrackAttribute attr = [[[self document] myMIDISequence] trackAttributeAtIndex: trackNum];
 		return ((attr & kMDTrackAttributeEditable) != 0);
 	} else return NO;
-//	return [myTableView isRowSelected: trackNum];
-/*	int n;
-	n = [self lookupTrack: trackNum];
-	if (n >= 0)
-		return ([self trackInfoAtIndex: n].focusFlag != 0);
-	else return NO; */
 }
 
 - (BOOL)isTrackSelected: (int32_t)trackNo
@@ -272,17 +210,6 @@ sTableColumnIDToInt(id identifier)
 	return [[[self document] myMIDISequence] trackCount];
 }
 
-
-/*
-- (int)trackNumberAtIndex: (int)index
-{
-	TrackInfo info;
-    if (index >= 0 && index < [trackInfo count]) {
-		info = [self trackInfoAtIndex: index];
-		return info.trackNum;
-	} else return -1;
-}
-*/
 
 - (int)sortedTrackNumberAtIndex: (int)index
 {
@@ -320,115 +247,6 @@ sTableColumnIDToInt(id identifier)
 		[self sortedTrackNumberAtIndex: 0];  /*  Rebuild the internal cache; the returned value is discarded  */
 	return visibleTrackCount;
 }
-
-/*
-- (void)addTracksInArray: (NSArray *)array
-{
-	id object;
-	NSEnumerator *enumerator = [array objectEnumerator];
-	while ((object = [enumerator nextObject]) != nil) {
-		[self addTrack: [object intValue]];
-	}
-}
-
-- (void)removeTrack: (int)track
-{
-    int i, index;
-	index = [self lookupTrack: track];
-	if (index >= 0) {
-		TrackInfo info = [self trackInfoAtIndex: index];
-		[trackInfo removeObjectAtIndex: index];
-        for (i = 0; i < myClientViewsCount; i++)
-            [records[i].client removeTrack: track];
-		[sortedTrackNumbers release];
-		sortedTrackNumbers = nil;
-		if (info.focusFlag) {
-			//  One of the tracks acquires focus in place of the removed track
-		//	if (index < [trackInfo count]) {
-		//		[self setFocusOnTrack: index];
-		//	} else if ([trackInfo count] > 0) {
-		//		[self setFocusOnTrack: index - 1];
-		//	}
-		}
-    }
-}
-
-- (void)removeTrackAndFill: (int)track
-{
-	int i;
-	TrackInfo info;
-	for (i = [trackInfo count] - 1; i >= 0; i--) {
-		info = [self trackInfoAtIndex: i];
-		if (info.trackNum > track) {
-			info.trackNum--;
-			[self setTrackInfo: info atIndex: i];
-		}
-	}
-	[self removeTrack: track];
-	//  The following two lines become redundant when removeTrack succeeded,
-	//  but they are still here in case no track is to be removed but some
-	//  tracks get their track numbers changed.
-	[sortedTrackNumbers release];
-	sortedTrackNumbers = nil;
-}
-
-- (void)removeTracksInArray: (NSArray *)array
-{
-	id object;
-	NSEnumerator *enumerator = [array objectEnumerator];
-	while ((object = [enumerator nextObject]) != nil) {
-		[self removeTrack: [object intValue]];
-	}
-}
-
-- (NSMenu *)trackMenu
-{
-	NSMenu *menu;
-	int i, n;
-	NSMenuItem *item;
-	NSString *title;
-	menu = [[[NSMenu allocWithZone: [self zone]] init] autorelease];
-	[menu setAutoenablesItems: NO];
-	n = [[[self document] myMIDISequence] trackCount];
-	for (i = 0; i < n; i++) {
-		title = [NSString stringWithFormat: @"%d:%@", i, [[[self document] myMIDISequence] trackName: i]];
-		item = (NSMenuItem *)[menu addItemWithTitle: title action: @selector(trackMenuItemSelected:) keyEquivalent: @""];
-		[item setTag: i];
-		[item setTarget: self];
-		if ([self containsTrack: i]) {
-//			NSLog(@"[item setEnabled: NO]");
-			[item setEnabled: NO];
-		}
-	}
-	return menu;
-}
-*/
-/*
-- (void)setEditFlags: (NSData *)data
-{
-	int i, n, length;
-	NSMutableData *newEditFlags;
-	n = [[[self document] myMIDISequence] trackCount];
-	if (n == 0)
-		return;
-//	[editFlags release];
-	newEditFlags = [[NSMutableData allocWithZone: [self zone]] initWithLength: n];
-	length = [data length];
-	for (i = 0; i < n; i++) {
-		((unsigned char *)[newEditFlags mutableBytes])[i] =
-			(i < length ? ((const unsigned char *)[data bytes])[i] : 0);
-	}
-//	editFlags = newEditFlags;
-	for (i = 0; i < myClientViewsCount; i++)
-		[records[i].client reloadData];
-}
-*/
-/*
-- (NSData *)editFlags
-{
-	return editFlags;
-}
-*/
 
 #pragma mark ==== Pixel/tick conversion ====
 
@@ -495,16 +313,10 @@ sTableColumnIDToInt(id identifier)
 
 - (NSBezierPath *)timeIndicatorPathAtBeat: (float)beat
 {
-//	float beat;
 	NSRect aRect;
 	NSPoint pt;
 	NSBezierPath *path;
 	int n;
-//	if (![[[self document] myMIDISequence] isPlaying])
-//		return nil;
-//	beat = [[[self document] myMIDISequence] playingBeat];
-//	if (beat < 0)
-//		return nil;
 	aRect = [[records[0].client superview] bounds];
 	pt.x = beat * [self pixelsPerQuarter];
 	if (pt.x < aRect.origin.x || pt.x > aRect.origin.x + aRect.size.width)
@@ -530,10 +342,6 @@ sTableColumnIDToInt(id identifier)
 - (void)showTimeIndicatorAtBeat: (float)beat
 {
     NSBezierPath *path, *bpath;
-//	float beat;
-//	NSWindow *theWindow = [self window];
-//	beat = [[[self document] myMIDISequence] playingBeat];
-//	timeIndicatorPos = beat;
 	if (beat < 0 || ![myMainView canDraw] || ![myFloatingView canDraw])
 		return;
 	path = [self timeIndicatorPathAtBeat: beat];
@@ -601,8 +409,6 @@ sTableColumnIDToInt(id identifier)
 
 - (void)invalidateTimeIndicatorRect
 {
-//	NSRect bounds;
-//	NSBezierPath *path;
 	int n;
 	NSView *view;
 	if (!NSIsEmptyRect(timeIndicatorRect)) {
@@ -613,25 +419,6 @@ sTableColumnIDToInt(id identifier)
             view = records[n].splitter;
             [view setNeedsDisplayInRect: [view convertRect: timeIndicatorRect fromView: nil]];
 		}
-#if 0
-        /*  Calculate the 'current' position of the time indicator  */
-		path = [self timeIndicatorPathAtBeat: timeIndicatorPos];
-		if (path != nil)
-			bounds = [path bounds];
-		else bounds = NSMakeRect(0, 0, 0, 0);
-		path = [self bouncingBallPathAtBeat: timeIndicatorPos];
-		if (path != nil)
-			bounds = NSUnionRect(bounds, [path bounds]);
-		bounds = NSInsetRect(bounds, -1, -1);
-		/*  Redraw the 'current' time indicator portion of each client view  */
-		for (n = 0; n < myClientViewsCount; n++) {
-			view = records[n].client;
-			[view setNeedsDisplayInRect: [view convertRect: bounds fromView: myFloatingView]];
-		}
-		[[self window] discardCachedImage];
-		timeIndicatorPos = -1.0;
-		timeIndicatorRect = NSMakeRect(0, 0, 0, 0);
-#endif
 	}
 }
 

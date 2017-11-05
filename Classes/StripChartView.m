@@ -109,18 +109,18 @@ getYValue(const MDEvent *ep, int eventKind)
 		beginTick = (MDTickType)floor((aRect.origin.x - (dx > 0 ? dx : -dx)) / ppt);
 		endTick = (MDTickType)ceil((aRect.origin.x + aRect.size.width + (dx > 0 ? dx : -dx)) / ppt);
 	}
-	for (n = [dataSource visibleTrackCount] - 1; n >= 0; n--) {
+	for (n = [self visibleTrackCount] - 1; n >= 0; n--) {
 		float x, y, ybase;
 		MDEvent *ep;
 		MDPointer *pt;
 		NSColor *color;
 		MDTrack *track;
 		int32_t trackNo;
-		trackNo = [dataSource sortedTrackNumberAtIndex: n];
+		trackNo = [self sortedTrackNumberAtIndex: n];
 		track = [[[dataSource document] myMIDISequence] getTrackAtIndex: trackNo];
 		if (track == NULL)
 			continue;
-		color = [[dataSource document] colorForTrack: trackNo enabled: [dataSource isFocusTrack: trackNo]];
+		color = [[dataSource document] colorForTrack: trackNo enabled: [self isFocusTrack: trackNo]];
 		[color set];
 		pt = MDPointerNew(track);
 		if (pt == NULL)
@@ -198,7 +198,7 @@ getYValue(const MDEvent *ep, int eventKind)
 	if (eventKind == kMDEventTempo)
 		n = 0;
 	else
-		n = [dataSource visibleTrackCount] - 1;
+		n = [self visibleTrackCount] - 1;
 	for ( ; n >= 0; n--) {
 		float x, y, xlast, ylast;
 		MDEvent *ep;
@@ -211,9 +211,9 @@ getYValue(const MDEvent *ep, int eventKind)
 		if (eventKind == kMDEventTempo)
 			trackNo = 0;
 		else
-			trackNo = [dataSource sortedTrackNumberAtIndex: n];
+			trackNo = [self sortedTrackNumberAtIndex: n];
 		track = [[[dataSource document] myMIDISequence] getTrackAtIndex: trackNo];
-		isFocused = [dataSource isFocusTrack: trackNo];
+		isFocused = [self isFocusTrack: trackNo];
 		color = [[dataSource document] colorForTrack: trackNo enabled: isFocused];
 		shadowColor = (isFocused ? [color shadowWithLevel: 0.1] : color);
 		pt = MDCalibratorCopyPointer(calib, track, eventKind, eventCode);
@@ -364,8 +364,8 @@ getYValue(const MDEvent *ep, int eventKind)
 	if (eventKind != kMDEventTempo && eventKind != kMDEventNote && eventKind != kMDEventInternalNoteOff) {
 		int i;
 		MDTrack *track;
-		for (i = [dataSource visibleTrackCount] - 1; i >= 0; i--) {
-			track = MDSequenceGetTrack(sequence, [dataSource sortedTrackNumberAtIndex: i]);
+		for (i = [self visibleTrackCount] - 1; i >= 0; i--) {
+			track = MDSequenceGetTrack(sequence, [self sortedTrackNumberAtIndex: i]);
 			if (track != NULL) {
 				if (calib == NULL)
 					calib = MDCalibratorNew(sequence, track, eventKind, eventCode);
@@ -378,50 +378,24 @@ getYValue(const MDEvent *ep, int eventKind)
 	[self setNeedsDisplay: YES];
 }
 
-- (void)addTrack: (int)track
+- (BOOL)isFocusTrack: (int)trackNum
 {
-	if (calib != NULL && eventKind != kMDEventTempo && eventKind != kMDEventNote && eventKind != kMDEventInternalNoteOff) {
-		MDTrack *aTrack = [[[dataSource document] myMIDISequence] getTrackAtIndex: track];
-		if (aTrack != NULL)
-			MDCalibratorAppend(calib, aTrack, eventKind, eventCode);
-		/*	{  //  debug
-				MDEventKind kind;
-				short code;
-				int n = 0;
-				MDTrack *infoTrack;
-				fprintf(stderr, "%s[%d]: ", __FILE__, __LINE__);
-				while (MDCalibratorGetInfo(calib, n++, &infoTrack, &kind, &code) == kMDNoError) {
-					fprintf(stderr, "track %p kind %d code %d; ", infoTrack, (int)kind, (int)code);
-				}
-				fprintf(stderr, "\n");
-			} */
-	}
+	if (eventKind == kMDEventTempo)
+		return (trackNum == 0);
+	else return [super isFocusTrack:trackNum];
+}
+- (int32_t)visibleTrackCount
+{
+	if (eventKind == kMDEventTempo)
+		return 1;
+	else return [super visibleTrackCount];
 }
 
-- (void)removeTrack: (int)track
+- (int)sortedTrackNumberAtIndex: (int)index
 {
-	if (calib != NULL && eventKind != kMDEventTempo && eventKind != kMDEventNote && eventKind != kMDEventInternalNoteOff) {
-		MDTrack *infoTrack;
-		MDTrack *aTrack = [[[dataSource document] myMIDISequence] getTrackAtIndex: track];
-		if (aTrack != NULL) {
-			int n = 0;
-			while (MDCalibratorGetInfo(calib, n, &infoTrack, NULL, NULL) == kMDNoError) {
-				if (infoTrack == aTrack)
-					MDCalibratorRemoveAtIndex(calib, n);
-				else n++;
-			}
-/*			{  //  debug
-				MDEventKind kind;
-				short code;
-				n = 0;
-				fprintf(stderr, "%s[%d]: ", __FILE__, __LINE__);
-				while (MDCalibratorGetInfo(calib, n++, &infoTrack, &kind, &code) == kMDNoError) {
-					fprintf(stderr, "track %p kind %d code %d; ", infoTrack, (int)kind, (int)code);
-				}
-				fprintf(stderr, "\n");
-			} */
-		}
-	}
+	if (eventKind == kMDEventTempo)
+		return (index == 0 ? 0 : -1);
+	else return [super sortedTrackNumberAtIndex:index];
 }
 
 - (int32_t)kindAndCode
@@ -454,7 +428,7 @@ getYValue(const MDEvent *ep, int eventKind)
 //	minY = 10000000.0;
 	maxY = -10000000.0;
 	ppt = [dataSource pixelsPerTick];
-	for (i = 0; (n = [dataSource sortedTrackNumberAtIndex: i]) >= 0; i++) {
+	for (i = 0; (n = [self sortedTrackNumberAtIndex: i]) >= 0; i++) {
 		int index;
 		MDPointer *pt;
 		MDEvent *ep;
@@ -504,7 +478,7 @@ getYValue(const MDEvent *ep, int eventKind)
 	MyDocument *document = (MyDocument *)[dataSource document];
 	MDTickType theTick;
 
-	num = [dataSource visibleTrackCount];
+	num = [self visibleTrackCount];
 	theTick = (MDTickType)((aPoint.x - 1) / ppt);
 	if (calib != NULL)
 		MDCalibratorJumpToTick(calib, theTick);
@@ -512,7 +486,7 @@ getYValue(const MDEvent *ep, int eventKind)
 	for (i = 0; i < num; i++) {
 		MDTrack *track;
 		MDPointer *pt;
-		trackNum = [dataSource sortedTrackNumberAtIndex: i];
+		trackNum = [self sortedTrackNumberAtIndex: i];
 		track = [[document myMIDISequence] getTrackAtIndex: trackNum];
 		if (track == NULL)
 			continue;
@@ -944,13 +918,13 @@ cubicReverseFunc(float x, const float *points, float tt)
 	//	MDTrackCheck([trackObj track]);
 		if (MDTrackGetNumberOfEvents([trackObj track]) == 0)
 			return;
-		for (i = 0; (n = [dataSource sortedTrackNumberAtIndex: i]) >= 0; i++) {
+		for (i = 0; (n = [self sortedTrackNumberAtIndex: i]) >= 0; i++) {
 			IntGroup *insertedPositionSet;
 			if (eventKind == kMDEventTempo && n != 0)
 				continue;
 			if (eventKind != kMDEventTempo && n == 0)
 				continue;
-			if ([dataSource isFocusTrack: n]) {
+			if ([self isFocusTrack:n]) {
 				IntGroupObject *psetObj = [doc eventSetInTrack: n eventKind: eventKind eventCode: eventCode fromTick: fromTick toTick: toTick fromData: kMDMinData toData: kMDMaxData inPointSet: nil];
 				[doc deleteMultipleEventsAt: psetObj fromTrack: n deletedEvents: NULL];
 				if ([doc insertMultipleEvents: trackObj at: nil toTrack: n selectInsertedEvents: YES insertedPositions: &insertedPositionSet] && insertedPositionSet != NULL) {
@@ -964,7 +938,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 		}
 	} else {
 		//  Modify the data of the existing events
-		for (i = 0; (n = [dataSource sortedTrackNumberAtIndex: i]) >= 0; i++) {
+		for (i = 0; (n = [self sortedTrackNumberAtIndex: i]) >= 0; i++) {
 			MDEvent *ep;
 			MDTrack *track;
 			MDSelectionObject *psetObj;
@@ -974,7 +948,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 			NSMutableData *theData;
 			float *fp;
 			float x, y, t, v, v0;
-			if (![dataSource isFocusTrack: n])
+			if (![self isFocusTrack:n])
 				continue;
 			if (eventKind == kMDEventTempo && n != 0)
 				continue;
@@ -1137,7 +1111,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 		MyDocument *document = [dataSource document];
 		if (![document isSelectedAtPosition: pos inTrack: track]) {
 		//	int i, n;
-		//	for (i = 0; (n = [dataSource sortedTrackNumberAtIndex: i]) >= 0; i++)
+		//	for (i = 0; (n = [self sortedTrackNumberAtIndex: i]) >= 0; i++)
 		//		[document unselectAllEventsInTrack: n sender: self];
 			[document unselectAllEventsInAllTracks: self];
 			[document selectEventAtPosition: pos inTrack: track sender: self];
@@ -1271,13 +1245,13 @@ cubicReverseFunc(float x, const float *points, float tt)
 	minTick = (MDTickType)(bounds.origin.x / ppt);
 	maxTick = (MDTickType)((bounds.origin.x + bounds.size.width) / ppt);
 	document = (MyDocument *)[dataSource document];
-	for (i = 0; (trackNo = [dataSource sortedTrackNumberAtIndex: i]) >= 0; i++) {
+	for (i = 0; (trackNo = [self sortedTrackNumberAtIndex: i]) >= 0; i++) {
 		MDTrack *track;
 		MDPointer *pt;
 		MDEvent *ep;
 		IntGroup *pset;
 		MDSelectionObject *obj;
-		if (![dataSource isFocusTrack: trackNo])
+		if (![self isFocusTrack:trackNo])
 			continue;
 		track = [[document myMIDISequence] getTrackAtIndex: trackNo];
 		if (track == NULL)
