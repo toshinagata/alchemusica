@@ -30,11 +30,18 @@
     NSRect limitRect;
 	NSRect selectionRect;
 	BOOL pencilOn;  /* True if drawing with a pencil */
-	
+    
 	/*  Note on during dragging etc.  */
 	short playingNote;
 	short playingVelocity;
 	int32_t playingTrack;
+
+    /*  Rubbing: play the note while dragging with option key down  */
+    BOOL rubbing;
+    NSMutableArray *rubbingArray;  /*  An array of IntGroupObject; the number of objects is the number of editable tracks  */
+    MDTickType rubbingTick;
+
 }
+- (void)mouseExited: (NSEvent *)theEvent;  //  Should stop rubbing
 
 @end

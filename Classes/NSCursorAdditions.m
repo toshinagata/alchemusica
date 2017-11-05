@@ -27,6 +27,7 @@ static NSCursor *sStretchCursor;
 static NSCursor *sMoveAroundCursor;
 static NSCursor *sLoupeCursor;
 static NSCursor *sPencilCursor;
+static NSCursor *sSpeakerCursor;
 
 @implementation NSCursor (MyCursorAddition)
 
@@ -91,6 +92,13 @@ static NSCursor *sPencilCursor;
     if (sPencilCursor == nil)
         sPencilCursor = [[NSCursor alloc] initWithImage: [NSImage imageNamed: @"pencil_cursor.png"] hotSpot: NSMakePoint(4, 15)];
     return sPencilCursor;
+}
+
++ (NSCursor *)speakerCursor
+{
+    if (sSpeakerCursor == nil)
+        sSpeakerCursor = [[NSCursor alloc] initWithImage: [NSImage imageNamed: @"speaker_cursor.png"] hotSpot: NSMakePoint(8, 8)];
+    return sSpeakerCursor;
 }
 
 

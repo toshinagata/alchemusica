@@ -430,6 +430,13 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 		}
 	}
 	[self drawSelectRegion];
+	if (rubbingArray != nil) {
+		NSPoint pt;
+		pt.x = floor(rubbingTick * [dataSource pixelsPerTick]) + 0.5;
+		pt.y = aRect.origin.y;
+		[[NSColor blueColor] set];
+		[NSBezierPath strokeLineFromPoint:pt toPoint:NSMakePoint(pt.x, pt.y + aRect.size.height)];
+	}
 }
 
 - (void)reloadData
@@ -665,6 +672,21 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	[dataSource setInfoText:[NSString stringWithFormat:@"%s, %d.%d.%d", buf, measure, beat, tick]];
 }
 
+- (void)doFlagsChanged: (NSEvent *)theEvent
+{
+	unsigned int flags = [theEvent modifierFlags];
+	localGraphicTool = [self modifyLocalGraphicTool:[[self dataSource] graphicTool]];
+	if (![[[[self dataSource] document] myMIDISequence] isPlaying]) {
+		if ((flags & NSControlKeyMask) != 0) {
+			[[NSCursor speakerCursor] set];
+			rubbing = YES;
+			return;
+		}
+	}
+	rubbing = NO;
+	[super doFlagsChanged: theEvent];
+}
+
 - (void)doMouseMoved: (NSEvent *)theEvent
 {
 	int32_t track;
@@ -672,38 +694,127 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	MDEvent *ep;
 	int n;
 	NSPoint pt;
-
+	unsigned int flags = [theEvent modifierFlags];
 	localGraphicTool = [self modifyLocalGraphicTool:[[self dataSource] graphicTool]];
+	if (![[[[self dataSource] document] myMIDISequence] isPlaying]) {
+		if ((flags & NSControlKeyMask) != 0) {
+			[[NSCursor speakerCursor] set];
+			rubbing = YES;
+			return;
+		}
+	}
+	rubbing = NO;
 	pt = [self convertPoint:[theEvent locationInWindow] fromView: nil];
 	n = [self findNoteUnderPoint: pt track: &track position: &pos mdEvent: &ep];
-	if (n > 0)
+	if (n > 0) {
 		[self setDraggingCursor: n];
-	else if (localGraphicTool == kGraphicPencilTool)
+		return;
+	} else if (localGraphicTool == kGraphicPencilTool) {
 		[[NSCursor pencilCursor] set];
-	else [super doMouseMoved: theEvent];
+		return;
+	}
+	[super doMouseMoved: theEvent];
 }
 
-- (void)playMIDINoteWithVelocity: (int)velocity
+- (void)playMIDINote:(int)note inTrack:(int)track withVelocity: (int)velocity
 {
 	MyMIDISequence *seq = [[[self dataSource] document] myMIDISequence];
-	int track, dev, ch, i;
+	int dev, ch, i, tr;
 	unsigned char data[4];
 	for (i = [dataSource trackCount] - 1; i >= 0; i--) {
-		if (playingTrack >= 0)
-			track = playingTrack;  // i is ignored
+		if (track >= 0)
+			tr = track;  // i is ignored
 		else {
-			track = i;
-			if (![dataSource isFocusTrack: track])
+			tr = i;
+			if (![dataSource isFocusTrack: tr])
 				continue;
 		}
-		dev = MDPlayerGetDestinationNumberFromName([[seq deviceName: track] UTF8String]);
-		ch = [seq trackChannel: track];
+		dev = MDPlayerGetDestinationNumberFromName([[seq deviceName: tr] UTF8String]);
+		ch = [seq trackChannel: tr];
 		data[0] = kMDEventSMFNoteOn | (ch & 15);
-		data[1] = (playingNote & 127);
+		data[1] = (note & 127);
 		data[2] = (velocity & 127);
 		MDPlayerSendRawMIDI(NULL, data, 3, dev, -1);
-		if (playingTrack >= 0)
+		if (track >= 0)
 			break;
+	}
+}
+
+- (void)invalidateRubbingTickLine
+{
+	NSRect rect = [self bounds];
+	rect.origin.x = floor(rubbingTick * [dataSource pixelsPerTick]) - 1;
+	rect.size.width = 3;
+	[self setNeedsDisplayInRect:rect];
+}
+
+- (void)playNotesAtPoint:(CGFloat)xpos noteOn:(BOOL)flag
+{
+	int i, num, trackNum, n;
+	MDTrack *track;
+	MDTickType tick = floor(xpos / [dataSource pixelsPerTick] + 0.5);
+	IntGroup *pset, *pset2, *pset3;
+	MDPointer *pt;
+	MDEvent *ep;
+	num = [dataSource visibleTrackCount];
+	if (flag) {
+		if (rubbingArray == nil) {
+			/*  Create empty rubbingArray  */
+			rubbingArray = [[NSMutableArray allocWithZone:[self zone]] initWithCapacity:num];
+			for (i = 0; i < num; i++) {
+				[rubbingArray addObject: [[[IntGroupObject allocWithZone: [self zone]] init] autorelease]];
+			}
+		} else {
+			[self invalidateRubbingTickLine];
+		}
+		for (i = 0; i < num; i++) {
+			trackNum = [dataSource sortedTrackNumberAtIndex:i];
+			if (![dataSource isFocusTrack:trackNum])
+				continue;
+			pset = [[rubbingArray objectAtIndex:i] pointSet];
+			track = [[[dataSource document] myMIDISequence] getTrackAtIndex: trackNum];
+			pset2 = MDTrackSearchEventsWithDurationCrossingTick(track, tick);
+			pt = MDPointerNew(track);
+			pset3 = IntGroupNew();
+			IntGroupDifference(pset, pset2, pset3);  /*  Notes to be turned off  */
+			n = -1;
+			while ((ep = MDPointerForwardWithPointSet(pt, pset3, &n)) != NULL) {
+				[self playMIDINote:MDGetCode(ep) inTrack:trackNum withVelocity:0];
+			}
+			IntGroupDifference(pset, pset3, pset);  /*  Notes that are on at present  */
+			IntGroupDifference(pset2, pset, pset3);  /*  Notes to be turned on  */
+			MDPointerSetPosition(pt, -1);
+			n = -1;
+			while ((ep = MDPointerForwardWithPointSet(pt, pset3, &n)) != NULL) {
+				[self playMIDINote:MDGetCode(ep) inTrack:trackNum withVelocity:MDGetData1(ep)];
+			}
+			IntGroupCopy(pset, pset2);
+			IntGroupRelease(pset2);
+			IntGroupRelease(pset3);
+			MDPointerRelease(pt);
+		}
+		rubbingTick = tick;
+		[self invalidateRubbingTickLine];
+	} else {
+		/*  Send note off and dispose rubbingArray  */
+		if (rubbingArray != nil) {
+			[self invalidateRubbingTickLine];
+			for (i = 0; i < num; i++) {
+				trackNum = [dataSource sortedTrackNumberAtIndex:i];
+				if (![dataSource isFocusTrack:trackNum])
+					continue;
+				track = [[[dataSource document] myMIDISequence] getTrackAtIndex: trackNum];
+				pset = [[rubbingArray objectAtIndex:i] pointSet];
+				pt = MDPointerNew(track);
+				n = -1;
+				while ((ep = MDPointerForwardWithPointSet(pt, pset, &n)) != NULL) {
+					[self playMIDINote:MDGetCode(ep) inTrack:trackNum withVelocity:0];
+				}
+				MDPointerRelease(pt);
+			}
+			[rubbingArray release];
+			rubbingArray = nil;
+		}
 	}
 }
 
@@ -734,13 +845,17 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 //	shiftDown = (([theEvent modifierFlags] & NSShiftKeyMask) != 0);
 	
 	draggingMode = [self findNoteUnderPoint: pt track: &mouseDownTrack position: &mouseDownPos mdEvent: &ep];
+	if (rubbing) {
+		[self playNotesAtPoint:pt.x noteOn:YES];
+		return;
+	}
 	pt.x = [dataSource quantizedPixelFromPixel: pt.x];
 	draggingStartPoint = draggingPoint = pt;
 	if (draggingMode > 0) {
 		playingTrack = mouseDownTrack;
 		playingNote = MDGetCode(ep);
 		playingVelocity = MDGetNoteOnVelocity(ep);
-		[self playMIDINoteWithVelocity: playingVelocity];
+		[self playMIDINote:playingNote inTrack:playingTrack withVelocity:playingVelocity];
 		return;
 	} else if (localGraphicTool == kGraphicPencilTool) {
 		pencilOn = YES;
@@ -749,7 +864,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 		playingTrack = -1;  //  All editable tracks
 		playingNote = (int)(floor(pt.y / ys) + 0.5);
 		playingVelocity = 64;
-		[self playMIDINoteWithVelocity: playingVelocity];
+		[self playMIDINote:playingNote inTrack:playingTrack withVelocity:playingVelocity];
 		return;
 	} else {
 		[super doMouseDown: theEvent];
@@ -763,6 +878,10 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	id clientView;
 	NSPoint pt = [self convertPoint: [theEvent locationInWindow] fromView: nil];
 	float ys = [self yScale];
+	if (rubbing) {
+		[self playNotesAtPoint:pt.x noteOn:YES];
+		return;
+	}
 	pt.x = [dataSource quantizedPixelFromPixel: pt.x];
 	if (draggingMode > 0) {
 
@@ -881,9 +1000,9 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	if (playingNote >= 0) {
 		int note = (int)(floor(draggingPoint.y / ys) + 0.5);
 		if (note != playingNote) {
-			[self playMIDINoteWithVelocity: 0];
+			[self playMIDINote:playingNote inTrack:playingTrack withVelocity:0];
 			playingNote = note;
-			[self playMIDINoteWithVelocity: playingVelocity];
+			[self playMIDINote:playingNote inTrack:playingTrack withVelocity:playingVelocity];
 		}
 	}	
 }
@@ -898,8 +1017,13 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	MyDocument *document = (MyDocument *)[dataSource document];
 
 	if (playingNote >= 0) {
-		[self playMIDINoteWithVelocity: 0];
+		[self playMIDINote:playingNote inTrack:playingTrack withVelocity:0];
 		playingNote = playingVelocity = playingTrack = -1;
+	}
+
+	if (rubbing) {
+		[self playNotesAtPoint:0.0 noteOn:NO];  /*  0.0 is dummy; all notes off */
+		return;
 	}
 
 	/*  Mouse down on a note  */
@@ -1064,6 +1188,12 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 		[super doMouseUp: theEvent];
 		return;
 	}
+}
+
+//  Called from -[GraphicWindowController mouseExited:]
+- (void)mouseExited: (NSEvent *)theEvent
+{
+	
 }
 
 #if 0

@@ -2348,6 +2348,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 				NSPoint pt2 = [view convertPoint: pt fromView: nil];
 				pt2.x = [self quantizedPixelFromPixel: pt2.x];
 				[self setInfoText:[(id)view infoTextForMousePoint:pt2 dragging:NO]];
+                [self mouseEvent:theEvent receivedByClientView:(id)view];
 			}
             [(id)view doMouseMoved: theEvent];
 		} else [[NSCursor arrowCursor] set];
@@ -2388,6 +2389,9 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 {
 //	NSLog(@"mouseExited");
 	[[NSCursor arrowCursor] set];
+    if (records[1].client != nil) {
+        [(PianoRollView *)records[1].client mouseExited:theEvent];
+    }
 }
 
 - (IBAction)editingRangeTextModified: (id)sender

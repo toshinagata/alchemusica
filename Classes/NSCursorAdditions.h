@@ -28,4 +28,5 @@
 + (NSCursor *)moveAroundCursor;
 + (NSCursor *)loupeCursor;
 + (NSCursor *)pencilCursor;
++ (NSCursor *)speakerCursor;
 @end
