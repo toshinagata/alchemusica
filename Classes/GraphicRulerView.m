@@ -139,6 +139,7 @@ static NSFont *sRulerLabelFont;
 		NSRect newRect = [self frame];
 		newRect.size.height = rect.size.height;
 		[self setFrame: newRect];
+        [self setNeedsDisplay:YES];
 	}
 }
 

@@ -3284,7 +3284,7 @@ isConductorEvent(const MDEvent *ep, int32_t position, void *inUserData)
 		track = MDSequenceGetTrack(seq, 0);
 		n = MDTrackGetNumberOfEvents(track);
 		if (MDTrackGetNumberOfNonMIDIEvents(track) < n)
-			return 1;  /*  Try to insert non-MIDI events to the conductor track  */
+			return 1;  /*  Try to insert MIDI events to the conductor track  */
 	} else {
 		/*  The first target track is the non-conductor track  */
 		IntGroup *pset;
@@ -3303,7 +3303,7 @@ isConductorEvent(const MDEvent *ep, int32_t position, void *inUserData)
 	/*  Delete existing events in the 'editing range'  */
 	if (!mergeFlag) {
 		for (i = 0; i < numberOfTracks; i++) {
-			if (trackList[i] >= trackCount)
+			if (trackList[i] < 0 || trackList[i] >= trackCount)
 				continue;
 			sel = [self eventSetInTrack: trackList[i] eventKind: -1 eventCode: -1 fromTick: startTick + tickOffset toTick: endTick + tickOffset fromData: -32768 toData: 32768 inPointSet: nil];
 			if (sel != nil)

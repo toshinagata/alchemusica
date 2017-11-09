@@ -21,8 +21,10 @@
 @class GraphicRulerView;
 @class GraphicSplitterView;
 @class PlayingViewController;
+@class GraphicBackgroundView;
 
 typedef struct ClientRecord {
+    GraphicBackgroundView *container;
 	GraphicClientView *client;
 	GraphicRulerView  *ruler;
 	GraphicSplitterView *splitter;
@@ -85,7 +87,7 @@ enum {
 
 @interface GraphicWindowController : NSWindowController
 {
-	IBOutlet NSView *myMainView;        //  Main graphic view (containing piano roll, etc.)
+	IBOutlet GraphicBackgroundView *myMainView;        //  Main graphic view (containing piano roll, etc.)
 	IBOutlet NSTableView *myTableView;  //  Track table
 	IBOutlet NSView *myFloatingView;    //  View to draw playing cursor etc.
 	IBOutlet NSView *myToolbarView;     //  The view containing tools for graphic editing
@@ -221,7 +223,8 @@ enum {
 - (void)splitterView: (GraphicSplitterView *)theView isDraggedTo: (float)y confirm: (BOOL)confirm;
 
 //  Customized autoresizing for client views
-- (void)resizeClientViewsWithOldMainViewSize: (NSSize)oldSize;
+//- (void)resizeClientViewsWithOldMainViewSize: (NSSize)oldSize;
+- (BOOL)backgroundView:(NSView *)aView resizedWithOldSize:(NSSize)oldSize;
 
 //  Modify data according to mouse events in the GraphicClientViews
 - (void)dragNotesByTick: (MDTickType)deltaTick andNote: (int)deltaNote sender: (GraphicClientView *)sender optionFlag: (BOOL)optionFlag;
@@ -238,6 +241,7 @@ enum {
 - (GraphicClientView *)clientViewAtIndex: (int)index;
 - (GraphicSplitterView *)splitterViewAtIndex: (int)index;
 - (GraphicRulerView *)rulerViewAtIndex: (int)index;
+- (GraphicBackgroundView *)enclosingContainerForClientView:(id)view;
 
 //  Action methods for track table
 - (IBAction)openEventListWindow: (id)sender;

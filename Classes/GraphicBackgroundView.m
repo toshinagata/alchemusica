@@ -59,11 +59,13 @@
 	}
 }
 
-- (void)resizeSubviewsWithOldSize:(NSSize)oldBoundsSize {
-	/*  Call the window controller's "resizeClientViewsWithOldMainViewSize"  */
+- (void)resizeSubviewsWithOldSize:(NSSize)oldBoundsSize
+{
+	/*  Call the window controller's "backgroundView:resizedWithOldSize:"  */
 	id cont = [[self window] windowController];
-	if ([cont respondsToSelector: @selector(resizeClientViewsWithOldMainViewSize:)]) {
-		[cont resizeClientViewsWithOldMainViewSize: oldBoundsSize];
+    if ([cont respondsToSelector: @selector(backgroundView:resizedWithOldSize:)]) {
+        if (![cont backgroundView:self resizedWithOldSize:oldBoundsSize])
+            [super resizeSubviewsWithOldSize:oldBoundsSize];
 	}
 }
 

@@ -22,6 +22,7 @@
 #import "StripChartView.h"
 #import "StripChartRulerView.h"
 #import "TimeChartView.h"
+#import "GraphicBackgroundView.h"
 #import "MyDocument.h"
 #import "MyMIDISequence.h"
 #import "ColorCell.h"
@@ -112,9 +113,6 @@ sTableColumnIDToInt(id identifier)
 - (id)init {
     self = [super initWithWindowNibName:@"GraphicWindow"];
     [self setShouldCloseDocument: YES];
-//	myTrack = NULL;
-//	trackInfo = [[NSMutableArray allocWithZone: [self zone]] init];
-//	editFlags = nil;
 	lastMouseClientViewIndex = -1;
     lastTimeIndicator = -1;
     return self;
@@ -132,11 +130,7 @@ sTableColumnIDToInt(id identifier)
 		[records[i].client release];
 		[records[i].ruler release];
 		[records[i].splitter release];
-	//	if (records[i].calib != NULL)
-	//		MDCalibratorRelease(records[i].calib);
 	}
-//	[editFlags release];
-//	[trackInfo release];
 	if (sortedTrackNumbers != NULL)
 		free(sortedTrackNumbers);
 	if (zoomUndoBuffer != nil)
@@ -359,14 +353,11 @@ sTableColumnIDToInt(id identifier)
         bounds.size.width = ceil(bounds.origin.x + bounds.size.width - origin.x);
         bounds.size.height = ceil(bounds.origin.y + bounds.size.height - origin.y);
         bounds.origin = origin;
-    //    cachedImage = [[myMainView bitmapImageRepForCachingDisplayInRect:bounds] retain];
-    //    [myMainView cacheDisplayInRect:bounds toBitmapImageRep:cachedImage];
         [myFloatingView lockFocus];
         [path stroke];
         if (bpath)
             [bpath fill];
         [myFloatingView unlockFocus];
-//        bounds = [myFloatingView convertRect: bounds toView: nil];	//  window base coordinate
         timeIndicatorRect = bounds;
 	}
     timeIndicatorPos = beat;
@@ -375,34 +366,13 @@ sTableColumnIDToInt(id identifier)
 
 - (void)hideTimeIndicator
 {
-//	NSWindow *theWindow = [self window];
-//	[theWindow restoreCachedImage];
-//	[theWindow discardCachedImage];
-//	[theWindow flushWindowIfNeeded];
-//   MDTickType epos = [[[self document] myMIDISequence] sequenceDuration];
     if (!NSIsEmptyRect(timeIndicatorRect)) {
         if ([myFloatingView canDraw]) {
             [myFloatingView lockFocus];
             NSEraseRect([myFloatingView convertRect:timeIndicatorRect fromView:myMainView]);
             [myFloatingView unlockFocus];
         }
-        /*
-        if (cachedImage != nil && epos == endOfSequencePos) {
-            if ([myMainView canDraw]) {
-                NSImage *image = [[[NSImage alloc] init] autorelease];
-                [image addRepresentation:cachedImage];
-                [myMainView lockFocus];
-                [image drawInRect:timeIndicatorRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-                [myMainView unlockFocus];
-            }
-        } else {
-            //  If the sequence duration changed during recording, then
-            //  we need to redraw the cached part
-            [myMainView displayRect:timeIndicatorRect];
-        } */
         [myMainView displayRect:timeIndicatorRect];
-    /*    [cachedImage release];
-        cachedImage = nil; */
     }
     timeIndicatorRect = NSZeroRect;
 }
@@ -442,12 +412,10 @@ sTableColumnIDToInt(id identifier)
 			return;
 	}
 	
-//	fprintf(stderr, "showPlayPosition: beat = %f, pos = %f\n", beat, pos);
 	if (pos < 0) {
 		[self hideTimeIndicator];
 		return;
 	}
-//	[myFloatingView setNeedsDisplay: YES];
 	documentRect = [records[0].client frame];
 	visibleRect = [[records[0].client superview] bounds];
 	width = documentRect.size.width - visibleRect.size.width;
@@ -458,18 +426,9 @@ sTableColumnIDToInt(id identifier)
 			pos = width;
 		[myScroller setFloatValue: pos / width];
 		[self scrollClientViewsToPosition: pos];
-	//	visibleRect.origin.x = pos + documentRect.origin.x;
-	//	[records[0].client scrollPoint: visibleRect.origin];
 	}
 	[self showTimeIndicatorAtBeat: beat];
 }
-
-/*
-- (void)didStopPlaying: (NSNotification *)notification
-{
-	[self hideTimeIndicator];
-}
-*/
 
 #pragma mark ==== Time marks ====
 
@@ -596,98 +555,57 @@ sTableColumnIDToInt(id identifier)
 
 #pragma mark ==== Client views ====
 
+/*  Adjust the sizes of the client views so that they are aligned from top of the
+    main view and the total height is aHeight (i.e. there is an empty space below aHeight).
+    The width is resized to fill the current main view  */
 - (void)adjustClientViewsInHeight: (float)aHeight
 {
-	//  Resize the client views (except for the top-most view = TimeChartView) so that
-	// the total height becomes aHeight and the height proportion is preserved
-	int i;
-	float totalHeight, amountToResize, newHeight, splitterHeight;
-	NSScrollView *scrollView;
-//	NSView *rulerView;
-	NSRect aFrame, frame, rFrame;
-	float scrollerWidth, rulerWidth;
+    int i;
+    float proportion;
+    float totalHeight;
+    GraphicBackgroundView *containerView;
+    NSRect aFrame, frame;
 
-	if (myClientViewsCount == 0)
-		return;
+    if (myClientViewsCount == 0)
+        return;
+    
+    aFrame = [myMainView bounds];
+    aFrame.origin.y = aFrame.size.height - aHeight;
+    aFrame.size.height = aHeight;
 
-	scrollerWidth = [NSScroller scrollerWidth];
-	rulerWidth = [self rulerWidth];
+    //  Relocate the TimeChartView
+    containerView = records[0].container;
+    frame = [containerView frame];
+    frame.origin.y = (aFrame.origin.y + aFrame.size.height) - frame.size.height;
+    frame.origin.x = aFrame.origin.x;
+    frame.size.width = aFrame.size.width;
+    [containerView setFrame:frame];
+    
+    if (myClientViewsCount == 1) {
+        [self setNeedsReloadClientViews];
+        return;
+    }
 
-	//  Target rectangle
-	aFrame = [myMainView bounds];
-	aFrame.origin.x += rulerWidth;
-	aFrame.size.width -= rulerWidth;
-	aFrame.origin.y = aFrame.origin.y + aFrame.size.height - aHeight;
-	aFrame.size.height = aHeight;
-	rFrame = aFrame;
-	rFrame.origin.x -= rulerWidth;
-	rFrame.size.width = rulerWidth;
-
-	//  Resize the TimeChartView (horizontal only)
-	scrollView = [records[0].client enclosingScrollView];
-	frame = [scrollView frame];
-	frame.origin.y = (aFrame.origin.y + aFrame.size.height) - frame.size.height;
-	frame.origin.x = aFrame.origin.x;
-	frame.size.width = aFrame.size.width;
-	if (![records[0].client hasVerticalScroller])
-		frame.size.width -= scrollerWidth;
-	[scrollView setFrame: frame];
-//	[records[0].client reloadData];
-
-	if (myClientViewsCount == 1) {
-		[self setNeedsReloadClientViews];
-		return;
-	}
-
-	//  Calculate the total height
-	totalHeight = 0.0;
-	splitterHeight = 0.0;
-	for (i = 0; i < myClientViewsCount; i++) {
-		totalHeight += [[records[i].client enclosingScrollView] frame].size.height;
-		if (i > 0)
-			splitterHeight += [records[i].splitter frame].size.height;
-	}
-	amountToResize = aHeight - (totalHeight + splitterHeight);
-//	NSLog(@"totalHeight=%g, splitterHeight=%g, amountToResize=%g", totalHeight, splitterHeight, amountToResize);
-	frame.size.width = aFrame.size.width;
-	//  Resize
-	for (i = myClientViewsCount - 1; i >= 1; i--) {
-
-		//  Move the splitter view
-		aFrame.origin.x -= rulerWidth;
-		aFrame.size.width += rulerWidth;
-		aFrame.size.height = [records[i].splitter frame].size.height;
-		[records[i].splitter setFrame: aFrame];
-
-		//  Resize the scroll view
-		aFrame.origin.y += aFrame.size.height;
-		aFrame.origin.x += rulerWidth;
-		aFrame.size.width -= rulerWidth;
-		scrollView = [records[i].client enclosingScrollView];
-		if (i == 1) {
-			aFrame.size.height = frame.origin.y - aFrame.origin.y;
-		} else {
-			newHeight = floor([scrollView frame].size.height * (1 + amountToResize / totalHeight) + 0.5);
-			aFrame.size.height = newHeight;
-		}
-		aFrame.size.width = frame.size.width;
-		if (![records[i].client hasVerticalScroller])
-			aFrame.size.width -= scrollerWidth;
-		[scrollView setFrame: aFrame];
-
-		//  Resize the ruler view
-	/*	rFrame.origin.y = aFrame.origin.y;
-		rFrame.size.height = aFrame.size.height;
-		if (records[i].ruler != nil) {
-			[records[i].ruler setFrame: rFrame];
-		} */
-
-//		[records[i].client reloadData];
-	
-		aFrame.origin.y += aFrame.size.height;
-	}
-	
-	[self setNeedsReloadClientViews];
+    //  Calculate the total client size (except for the TimeChartView)
+    totalHeight = 0.0;
+    for (i = 1; i < myClientViewsCount; i++) {
+        containerView = records[i].container;
+        totalHeight += [containerView frame].size.height;
+    }
+    proportion = (aHeight - frame.size.height) / totalHeight;
+    
+    //  Resize other views
+    for (i = 1; i < myClientViewsCount; i++) {
+        containerView = records[i].container;
+        frame.size.height = floor([containerView frame].size.height * proportion + 0.5);
+        frame.origin.y = frame.origin.y - frame.size.height;
+        if (i == myClientViewsCount - 1) {
+            frame.size.height += (frame.origin.y - aFrame.origin.y);
+            frame.origin.y = aFrame.origin.y;
+        }
+        [containerView setFrame:frame];
+    }
+    [self setNeedsReloadClientViews];
 }
 
 - (void)updateTrackingRect
@@ -842,13 +760,19 @@ sTableColumnIDToInt(id identifier)
 - (void)reloadClientViews
 {
 	int i;
+    id firstResponder = [[self window] firstResponder];
 	for (i = 0; i < myClientViewsCount; i++) {
 		[records[i].client reloadData];
 	}
 	[self reflectClientViews];
 
 	/*  Redraw focus ring  */
-    [myMainView setKeyboardFocusRingNeedsDisplayInRect: [myMainView bounds]];
+    for (i = 0; i < myClientViewsCount; i++) {
+        if (firstResponder == records[i].container) {
+            [firstResponder setKeyboardFocusRingNeedsDisplayInRect:[firstResponder bounds]];
+            break;
+        }
+    }
 
 	/*  Remove "NeedsReloadClientView" notifications  */
 	[[NSNotificationQueue defaultQueue] dequeueNotificationsMatching: [NSNotification notificationWithName: sNeedsReloadClientViewNotification object: self] coalesceMask: NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender];
@@ -886,154 +810,15 @@ sTableColumnIDToInt(id identifier)
 	}
 }
 
-/*
-//  Adjust the client view frame when the enclosing scroll view is resized
-- (void)superFrameDidChange: (NSNotification *)aNotification
-{
-	NSRect rect, newRect;
-	int i;
-	GraphicClientView *aView;
-	id object = [aNotification object];
-	return;
-//	NSLog(@"superFrameDidChange from %@", object);
-	for (i = 0; i < myClientViewsCount; i++) {
-		aView = records[i].client;
-		if ([aView superview] == object) {
-			if (![aView hasVerticalScroller]) {
-				rect = [object frame];
-				newRect = [aView frame];
-				newRect.size.height = rect.size.height;
-				[aView setFrame: newRect];
-				[aView reloadData];
-				break;
-			}
-		}
-	}
-	//  Invalidate the cached image under the time indicator (if necessary)
-	[self invalidateTimeIndicatorCachedImage];
-    //  Update the tracking rect
-    [self updateTrackingRect];
-}
-*/
-
-/*
-//  Adjust the scroll positions
-- (void)superBoundsDidChange: (NSNotification *)aNotification
-{
-	NSRect rect, newRect;
-	int i;
-	GraphicClientView *aView;
-	id object = [aNotification object];
-	rect = [object bounds];
-	for (i = 0; i < myClientViewsCount; i++) {
-		aView = records[i].client;
-		if (aView == nil)
-			continue;
-		if ([aView superview] != object) {
-			newRect = [[aView superview] bounds];
-			newRect.origin.x = rect.origin.x;
-			[aView scrollPoint: newRect.origin];
-		}
-	}
-	[self reflectClientViews];
-	
-	//  Invalidate the cached image under the time indicator (if necessary)
-	[self invalidateTimeIndicatorCachedImage];
-}
-*/
-
 /*  Customized autoresizing of clientviews  */
-- (void)resizeClientViewsWithOldMainViewSize: (NSSize)oldSize
+- (BOOL)backgroundView:(NSView *)aView resizedWithOldSize:(NSSize)oldSize
 {
-	NSSize newSize = [myMainView bounds].size;
-//	NSLog(@"resizeClientViewsWithOldMainViewSize: newSize=%@, oldSize=%@", NSStringFromSize(newSize), NSStringFromSize(oldSize));
-	[self adjustClientViewsInHeight: newSize.height];
+    if (aView == myMainView) {
+        NSSize newSize = [myMainView bounds].size;
+        [self adjustClientViewsInHeight: newSize.height];
+        return YES;
+    } else return NO;
 }
-
-/*
-//  myMainView has changed size
-- (void)myMainViewFrameDidChange: (NSNotification *)aNotification
-{
-	//  Vertical
-	
-	//  Horizontal
-	//  Resize the client views if necessary
-//	[self reloadClientViews];
-}
-*/
-
-/*
-//  Adjust the content frame sizes
-- (void)frameDidChange: (NSNotification *)aNotification
-{
-	NSRect rect, newRect;
-	int i;
-//	float newXScale;
-	GraphicClientView *aView;
-	id object = [aNotification object];
-//	NSLog(@"frameDidChange");
-	rect = [object bounds];
-//	if ([object respondsToSelector: @selector(xScale)])
-//		newXScale = [object xScale];
-//	else newXScale = -1;
-	for (i = 0; i < myClientViewsCount; i++) {
-		aView = records[i].client;
-		if (aView != nil && object != aView) {
-		//	if (newXScale != -1 && [aView xScale] != newXScale)
-		//		[aView setXScale: newXScale];
-			newRect = [aView frame];
-			newRect.size.width = rect.size.width;
-			[aView setFrame: newRect];
-		}
-	}
-	[self reflectClientViews];
-}
-*/
-
-/*
-//  Register notification with a client view
-- (void)registerNotificationWithView: (GraphicClientView *)view
-{
-	return;
-	[[NSNotificationCenter defaultCenter]
-		addObserver: self
-		selector: @selector(superBoundsDidChange:)
-		name: NSViewBoundsDidChangeNotification
-		object: [view superview]];
-	[[NSNotificationCenter defaultCenter]
-		addObserver: self
-		selector: @selector(superFrameDidChange:)
-		name: NSViewFrameDidChangeNotification
-		object: [view superview]];
-	[[NSNotificationCenter defaultCenter]
-		addObserver: self
-		selector: @selector(frameDidChange:)
-		name: NSViewFrameDidChangeNotification
-		object: view];
-	
-	[[view superview] setPostsBoundsChangedNotifications: YES];
-//	[[view superview] setPostsFrameChangedNotifications: YES];
-	[view setPostsFrameChangedNotifications: YES];
-}
-*/
-
-/*
-//  Unregister notification with a client view
-- (void)unregisterNotificationWithView: (GraphicClientView *)view
-{
-	return;
-#if 0
-	[[NSNotificationCenter defaultCenter]
-		removeObserver: self
-		name: nil
-		object: [view superview]];
-	[[NSNotificationCenter defaultCenter]
-		removeObserver: self
-		name: nil
-		object: view];
-#endif
-}
-*/
 
 - (void)limitWindowSize
 {
@@ -1059,6 +844,7 @@ sTableColumnIDToInt(id identifier)
 	GraphicClientView *clientView;
 	GraphicRulerView *rulerView;
 	GraphicSplitterView *splitterView;
+    GraphicBackgroundView *containerView;
 	NSRect aRect, rect;
 	float scrollerWidth, rulerWidth, height, splitterHeight, minHeight;
 	unsigned int mask;
@@ -1075,14 +861,16 @@ sTableColumnIDToInt(id identifier)
 		aRect.origin.y += (aRect.size.height - height);
 		aRect.size.height = height;
 		mask = NSViewMinYMargin;
+        splitterHeight = 0.0;
 	} else {
-		scrollView = [records[myClientViewsCount - 1].client enclosingScrollView];
+        rect = [records[myClientViewsCount - 1].container frame];
+	//	scrollView = [records[myClientViewsCount - 1].client enclosingScrollView];
 		if (myClientViewsCount == 1) {
-			rect = [scrollView frame];
+	//		rect = [scrollView frame];
 			splitterHeight = 4.0;
 			mask = NSViewHeightSizable;
 		} else {
-			rect = [records[myClientViewsCount - 1].splitter frame];
+	//		rect = [records[myClientViewsCount - 1].splitter frame];
 			splitterHeight = 16.0;
 			mask = NSViewMaxYMargin;
 		}
@@ -1091,25 +879,32 @@ sTableColumnIDToInt(id identifier)
 			height = minHeight;
 			[self adjustClientViewsInHeight: aRect.size.height - (height + splitterHeight)];
 		}
-		aRect.size.height = height;
-		aRect.origin.y += splitterHeight;
+        aRect.size.height = height + splitterHeight;
 	}
+
+    //  Create the container view
+    rect = aRect;
+    //  Don't autorelease, since we are going to retain it
+    containerView = [[GraphicBackgroundView allocWithZone:[self zone]] initWithFrame:rect];
+    [myMainView addSubview:containerView];
+    [containerView setAutoresizingMask: (NSViewWidthSizable | mask)];
+    [containerView setAutoresizesSubviews:YES];
+    records[myClientViewsCount].container = containerView;
 
 	//  Create the chart view
 	//  NSScrollView
+    mask = NSViewWidthSizable | NSViewHeightSizable;
 	rulerWidth = [self rulerWidth];
-	rect = aRect;
-	rect.size.width -= rulerWidth;
-	rect.origin.x += rulerWidth;
+    rect.origin = NSMakePoint(rulerWidth, splitterHeight);
+    rect.size.width = aRect.size.width - rulerWidth;
+    rect.size.height = aRect.size.height - splitterHeight;
 	scrollView = [[[NSScrollView allocWithZone: [self zone]] initWithFrame: rect] autorelease];
-	[myMainView addSubview: scrollView];
-	[scrollView setAutoresizingMask: (NSViewWidthSizable | mask)];
+	[containerView addSubview: scrollView];
+	[scrollView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
 	[scrollView setHasHorizontalScroller: NO];
-//	[scrollView setHorizontalScroller: myScroller];
 
 	//  The chart view
 	rect.origin.x = rect.origin.y = 0.0;
-//	rect.size.height -= scrollerWidth;
 	//  Don't autorelease, since we are going to retain it
 	clientView = [[chartClass allocWithZone: [self zone]] initWithFrame: rect];
 	[scrollView setDocumentView: clientView];
@@ -1122,23 +917,17 @@ sTableColumnIDToInt(id identifier)
 		[scrollView setFrame: rect];
 	}
 	[clientView setDataSource: self];
-//	if (myClientViewsCount == 0)
-//		[clientView setXScale: 72 / 2.54];  /*  1 cm per quarter note */
-//	else
-//		[clientView setXScale: [records[0].client xScale]];
-//	[self registerNotificationWithView: clientView];
 	records[myClientViewsCount].client = clientView;
 	
 	if (myClientViewsCount > 0 && rulerClass != nil) {
 		//  Create the ruler view
 		//  NSClipView
-		rect = aRect;
-		rect.size.width = rulerWidth;
-	//	rect.origin.y += scrollerWidth;
-	//	rect.size.height -= scrollerWidth;
+        rect.origin = NSMakePoint(0, splitterHeight);
+        rect.size.width = rulerWidth;
+        rect.size.height = aRect.size.height - splitterHeight;
 		clipView = [[[NSClipView allocWithZone: [self zone]] initWithFrame: rect] autorelease];
-		[myMainView addSubview: clipView];
-		[clipView setAutoresizingMask: (NSViewMaxXMargin | mask)];
+		[containerView addSubview: clipView];
+		[clipView setAutoresizingMask:NSViewMaxXMargin | NSViewHeightSizable];
 		
 		//  The chart view
 		rect.origin.x = rect.origin.y = 0.0;
@@ -1150,23 +939,14 @@ sTableColumnIDToInt(id identifier)
 
 	if (myClientViewsCount > 0) {
 		//  Create the splitter view
-		rect = aRect;
-		rect.origin.y -= splitterHeight;
-		rect.size.height = splitterHeight;
+        rect.origin = NSMakePoint(0, 0);
+        rect.size.width = aRect.size.width;
+        rect.size.height = splitterHeight;
 		splitterView = [[GraphicSplitterView allocWithZone: [self zone]] initWithFrame: rect];
-		[myMainView addSubview: splitterView];
+		[containerView addSubview: splitterView];
 		[splitterView setAutoresizingMask: (NSViewWidthSizable | NSViewMaxYMargin)];
 		records[myClientViewsCount].splitter = splitterView;
 	}
-	
-/*
-	if ([clientView isKindOfClass: [TimeChartView class]]) {
-		records[myClientViewsCount].calib =
-			MDCalibratorNew([[[self document] myMIDISequence] mySequence], NULL, kMDEventTimeSignature, -1);
-	} else {
-		records[myClientViewsCount].calib = NULL;
-	}
-*/
 	
 	myClientViewsCount++;
 	
@@ -1184,36 +964,30 @@ sTableColumnIDToInt(id identifier)
 	int i;
 	NSRect frame;
 	float y;
-	frame = [[records[index].client enclosingScrollView] frame];
+	frame = [records[index].container frame];
 	y = frame.origin.y + frame.size.height;
 	[[records[index].client enclosingScrollView] removeFromSuperview];
 	[[records[index].ruler superview] removeFromSuperview];
 	[records[index].splitter removeFromSuperview];
-//	[self unregisterNotificationWithView: records[index].client];
+    [records[index].container removeFromSuperview];
 	[records[index].client autorelease];
 	[records[index].ruler autorelease];
 	[records[index].splitter autorelease];
-/*	if (records[index].calib != NULL)
-		MDCalibratorRelease(records[index].calib); */
+    [records[index].container autorelease];
 	for (i = index; i < myClientViewsCount - 1; i++) {
 		records[i] = records[i + 1];
 	}
 	memset(&records[i], 0, sizeof(records[i]));
 	myClientViewsCount--;
 	if (index < myClientViewsCount) {
-		frame = [[records[index].client enclosingScrollView] frame];
+		frame = [records[index].container frame];
 		frame.size.height = y - frame.origin.y;
-		[[records[index].client enclosingScrollView] setFrame: frame];
+		[records[index].container setFrame:frame];
 	} else if (index > 1) {
-		y = [myMainView bounds].origin.y;
-		frame = [records[index - 1].splitter frame];
-		frame.origin.y = y;
-		[records[index - 1].splitter setFrame: frame];
-		y += frame.size.height;
-		frame = [[records[index - 1].client enclosingScrollView] frame];
-		frame.size.height = frame.origin.y + frame.size.height - y;
-		frame.origin.y = y;
-		[[records[index - 1].client enclosingScrollView] setFrame: frame];
+        frame = [records[index - 1].container frame];
+        frame.size.height += frame.origin.y;
+        frame.origin.y = 0;
+		[records[index - 1].container setFrame:frame];
 	}
 	[self setNeedsReloadClientViews];
 	[myMainView setNeedsDisplay: YES];
@@ -1236,7 +1010,8 @@ sTableColumnIDToInt(id identifier)
 - (void)splitterView: (GraphicSplitterView *)theView isDraggedTo: (float)y confirm: (BOOL)confirm
 {
 	int index;
-	NSScrollView *scrollView;
+//	NSScrollView *scrollView;
+    GraphicBackgroundView *containerView = nil;
 	NSRect frame_above, frame_self, frame_below;
 	float ymax, ymin;
 	for (index = 1; index < myClientViewsCount; index++) {
@@ -1244,12 +1019,11 @@ sTableColumnIDToInt(id identifier)
 			break;
 	}
 	if (index == myClientViewsCount) {
-	//	NSLog(@"splitterView:isDraggedBy:confirm: theView (%@) not found", theView);
 		return;
 	}
-//	[self setInfoText: [NSString stringWithFormat: @"y = %g", y]];
-	frame_above = [[records[index].client enclosingScrollView] frame];
+	frame_above = [records[index].container frame];
 	frame_self  = [records[index].splitter frame];
+    y = floor(y + 0.5);  /*  New position of the container frame  */
 	ymax = frame_above.origin.y + frame_above.size.height - frame_self.size.height;
 	if (index == 1) {
 		//  Piano roll view cannot be collapsed
@@ -1271,11 +1045,12 @@ sTableColumnIDToInt(id identifier)
 		y = ymax - 32.0;
 	}
 	if (index < myClientViewsCount - 1) {
-		scrollView = [records[index + 1].client enclosingScrollView];
-		frame_below = [scrollView frame];
-		ymin = frame_below.origin.y;
+        containerView = records[index + 1].container;
+		frame_below = [containerView frame];
+        ymin = frame_below.origin.y;
+        if (records[index + 1].splitter != nil)
+            ymin += [records[index + 1].splitter frame].size.height;
 	} else {
-		scrollView = nil;
 		ymin = [myMainView bounds].origin.y;
 	}
 	if (y <= ymin) {
@@ -1293,28 +1068,24 @@ sTableColumnIDToInt(id identifier)
 		//  Avoid too narrow strip chart
 		y = ymin + 32.0;
 	}
-	frame_above.origin.y = y + frame_self.size.height;
-	frame_above.size.height = ymax - y;
-	[[records[index].client enclosingScrollView] setFrame: frame_above];
-	[[records[index].client enclosingScrollView] setNeedsDisplay: YES];
+    frame_above.size.height += frame_above.origin.y - y;
+    frame_above.origin.y = y;
+    [records[index].container setFrame:frame_above];
+    [records[index].container setNeedsDisplay:YES];
 	[records[index].client reloadData];
-	frame_self.origin.y = y;
+/*	frame_self.origin.y = y;
 	[records[index].splitter setFrame: frame_self];
-	[records[index].splitter setNeedsDisplay: YES];
-	if (scrollView != nil) {
-		frame_below.size.height = y - ymin;
-		[scrollView setFrame: frame_below];
-		[scrollView setNeedsDisplay: YES];
+	[records[index].splitter setNeedsDisplay: YES]; */
+	if (containerView != nil) {
+		frame_below.size.height = y - frame_below.origin.y;
+		[containerView setFrame:frame_below];
+		[containerView setNeedsDisplay:YES];
 		[records[index + 1].client reloadData];
 	} else if (confirm && y > ymin) {
 		//  Create a new client view
 		[self createClientViewWithClasses: [StripChartView class] : [StripChartRulerView class]];
 		//  Scroll to the current position
 		[self scrollClientViewsToPosition: [self scrollPositionOfClientViews]];
-	//	[self superBoundsDidChange:
-	//		[NSNotification notificationWithName: NSViewBoundsDidChangeNotification
-	//			object: [records[0].client superview]]];
-			//  Simulate scroll to force recalculation of the scroll position
 	}
 	if (confirm) {
 		//  Restore the visible range of this and the next clients
@@ -1324,7 +1095,7 @@ sTableColumnIDToInt(id identifier)
 			[records[index + 1].client restoreVisibleRange];
 		[myMainView display];
 	} else {
-        if (scrollView == nil) {
+        if (containerView == nil) {
             NSRect theRect = [myMainView bounds];
             theRect.size.height = y - ymin;
             [myMainView lockFocus];
@@ -1413,11 +1184,9 @@ sTableColumnIDToInt(id identifier)
 - (IBAction)codeMenuItemSelected: (id)sender
 {
 	int i, code;
-	NSView *focus;
-	code = (int)[sender tag];
-	focus = [NSView focusView];
 	for (i = 1; i < myClientViewsCount; i++) {
-		if ([focus isDescendantOf: records[i].splitter]) {
+		if (records[i].splitter == (GraphicSplitterView *)[sender superview]) {
+            code = (int)[[sender selectedItem] tag];
 			[self setStripChartAtIndex: i kind: -1 code: code];
 			break;
 		}
@@ -1499,6 +1268,17 @@ sTableColumnIDToInt(id identifier)
         return records[index].ruler;
     else return nil;
 }
+
+- (GraphicBackgroundView *)enclosingContainerForClientView:(id)view
+{
+    int i;
+    for (i = 0; i < myClientViewsCount; i++) {
+        if (records[i].client == view || records[i].ruler == view || records[i].splitter == view)
+            return records[i].container;
+    }
+    return nil;
+}
+
 
 /*  Used by GraphicBackgroundView to send key events to the active client view  */
 - (void)mouseEvent:(NSEvent *)theEvent receivedByClientView:(GraphicClientView *)cView
@@ -1624,19 +1404,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 		selector:@selector(windowDidResize:)
 		name:NSWindowDidResizeNotification object:[self window]];
 
-//	[[NSNotificationCenter defaultCenter]
-//		addObserver: self
-//		selector: @selector(myMainViewFrameDidChange:)
-//		name: NSViewFrameDidChangeNotification
-//		object: myMainView];
 	[myMainView setPostsFrameChangedNotifications: YES];
-
-/*	[[NSNotificationCenter defaultCenter]
-		addObserver:self
-		selector:@selector(showPlayPosition:)
-		name:MyDocumentStopPlayingNotification
-		object:[self document]];
-*/
 
 	[[NSNotificationCenter defaultCenter]
 	 addObserver:self
@@ -1914,7 +1682,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 
 - (void)changeFirstResponderWithEvent: (NSEvent *)theEvent
 {
-	/*  myTableView, myMainView, or myPlayerView will be the first responder  */
+	/*  myTableView, one of the container views, or myPlayerView can be the first responder  */
 	NSPoint pt = [theEvent locationInWindow];
 	NSWindow *theWindow = [self window];
 	id obj = [theWindow firstResponder];
@@ -1924,45 +1692,22 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 	} else if (obj == [theWindow fieldEditor: NO forObject: nil]) {
 		obj = [obj delegate];
 	}
-/*	if ([obj isKindOfClass: [NSView class]]) {
-		frame = [[obj superview] convertRect: [obj frame] toView: nil];
-		//  Don't change focus if clicked on itself
-		if (NSPointInRect(pt, frame))
-			return;
-	} */
 	
 	if (NSPointInRect(pt, [[myMainView superview] convertRect: [myMainView frame] toView: nil])) {
-		[theWindow makeFirstResponder: myMainView];
+        /*  Look for the container view  */
+        int i;
+        for (i = 0; i < myClientViewsCount; i++) {
+            GraphicBackgroundView *view = records[i].container;
+            if (NSPointInRect(pt, [[view superview] convertRect:[view frame] toView:nil])) {
+                if (i > 0)  /*  The time chart view does not accept first responder  */
+                    [theWindow makeFirstResponder:view];
+                return;
+            }
+        }
 	} else if (NSPointInRect(pt, [[myPlayerView superview] convertRect: [myPlayerView frame] toView: nil])) {
 		[theWindow makeFirstResponder: myPlayerView];
 	}	
 }
-
-/*
-- (BOOL)shouldResignFirstResponderInWindow: (NSWindow *)theWindow withEvent: (NSEvent *)theEvent
-{
-	//  Unfocus TextField when myMainView or myPlayerView is clicked
-	NSPoint pt = [theEvent locationInWindow];
-	id obj = [theWindow firstResponder];
-	NSRect frame;
-	if ([obj isKindOfClass: [NSTextFieldCell class]]) {
-		obj = [obj controlView];
-	} else if (![obj isKindOfClass: [NSTextField class]] && ![obj isKindOfClass: [NSTextView class]]) {
-		return NO;
-	}
-	frame = [[obj superview] convertRect: [obj frame] toView: nil];
-
-	//  Don't unfocus if clicked on itself
-	if (NSPointInRect(pt, frame))
-		return NO;
-
-	if (NSPointInRect(pt, [[myMainView superview] convertRect: [myMainView frame] toView: nil])
-	|| NSPointInRect(pt, [[myPlayerView superview] convertRect: [myPlayerView frame] toView: nil])
-	|| NSPointInRect(pt, [[myToolbarView superview] convertRect: [myToolbarView frame] toView: nil]))
-		return YES;
-	else return NO;
-}
-*/
 
 - (id)playingViewController
 {
@@ -2722,20 +2467,6 @@ row:(int)rowIndex
 	return YES;
 }
 
-/*
-- (void)splitViewDidResizeSubviews:(NSNotification *)aNotification
-{
-    NSView *theView = [myMainView superview];
-    NSRect rect1 = [theView frame];
-    NSView *theSuperOfScrollView = [myScroller superview];
-    NSRect rect2 = [theSuperOfScrollView frame];
-    rect2.origin.x = rect2.origin.x + rect2.size.width - rect1.size.width;
-    rect2.size.width = rect1.size.width;
-    [theSuperOfScrollView setFrame: rect2];
-    [theSuperOfScrollView setNeedsDisplay: YES];
-}
-*/
-
 #pragma mark ==== Responding to notification from other windows ====
 
 - (void)trackModified: (NSNotification *)notification {
@@ -2806,11 +2537,17 @@ row:(int)rowIndex
 	int numberOfTracks = [[doc myMIDISequence] trackCount];
 	id firstResponder = [[self window] firstResponder];
 
-	if (firstResponder == myMainView) {
+    if ([firstResponder isKindOfClass:[GraphicBackgroundView class]]) {
         int focusTrack;
-        GraphicClientView *client = [self clientViewAtIndex:lastMouseClientViewIndex];
+        GraphicClientView *client = nil;
+        /*  Look for the client view contained in the firstResponder container view  */
+        for (i = 0; i < myClientViewsCount; i++) {
+            if (records[i].container == firstResponder) {
+                client = records[i].client;
+                break;
+            }
+        }
         focusTrack = [client focusTrack];
-        
 		/*  Copy all selected events in editable tracks  */
 		numberOfSelectedTracks = 0;
 		for (i = 0; i < numberOfTracks; i++) {
@@ -2868,8 +2605,10 @@ row:(int)rowIndex
 		return;
 
 	numberOfSelectedTracks = [self countTracksToCopyWithSelectionList: selArray rangeStart: &startTick rangeEnd: &endTick];
-	if (numberOfSelectedTracks == 0)
-		return;
+    if (numberOfSelectedTracks == 0) {
+        free(selArray);
+        return;
+    }
 
 	if (copyFlag)
 		[doc copyWithSelections: selArray rangeStart: startTick rangeEnd: endTick];
@@ -2879,31 +2618,39 @@ row:(int)rowIndex
 		for (i = numberOfTracks - 1; i >= 0; i--) {
 			if (selArray[i] == nil)
 				continue;
-			if (firstResponder == myMainView) {
+            if (firstResponder == myTableView) {
+                [doc deleteTrackAt: i];
+            } else {
 				sel = [doc selectionOfTrack: i];
 				[doc deleteMultipleEventsAt: sel fromTrack: i deletedEvents: NULL];
-			} else if (firstResponder == myTableView) {
-				[doc deleteTrackAt: i];
 			}
-		
 		}
 	}
 	
 	free(selArray);
 }
 
+/*  Paste multiple tracks to multiple tracks
+    Rules:
+    (1) Events from the conductor track should go to the conductor track,
+    and those from non-conductor tracks should go to non-conductor tracks.
+    (2) If the number of tracks in the pasteboard is larger than the number of
+    editable tracks, then new tracks are created after the last track.
+    (3) If the first responder is strip chart view, then only the event type that
+       is visible are pasted. The exception to this is when the TEMPO event is
+       selected, in which all conductor events are pasted.  */
 - (void)doPasteWithMergeFlag: (BOOL)mergeFlag
 {
-//- (BOOL)getPasteboardSequence: (MDSequence **)outSequence catalog: (MDCatalog **)outCatalog;
 	MyDocument *doc = (MyDocument *)[self document];
 	MDSequence *seq;
 	MDCatalog *catalog;
-	int i, j, numberOfTracks, trackCount;
+    int i, j, numberOfTracks, trackCount, hasConductorTrack;
 	int *trackList;
 	id firstResponder;
 
 	if (![doc getPasteboardSequence: &seq catalog: &catalog])
 		return;
+    hasConductorTrack = (catalog->catTrack[0].originalTrackNo == 0);
 	trackCount = [[doc myMIDISequence] trackCount];
 	numberOfTracks = MDSequenceGetNumberOfTracks(seq);
 	trackList = (int *)calloc(sizeof(int), numberOfTracks);
@@ -2912,16 +2659,86 @@ row:(int)rowIndex
 
 	firstResponder = [[self window] firstResponder];
 
-	if (firstResponder == myMainView) {
+	if ([firstResponder isKindOfClass:[GraphicBackgroundView class]]) {
 
+        int focusTrack, kind, code;
+        GraphicClientView *client = nil;
+        /*  Look for the client view contained in the firstResponder container view  */
+        for (i = 0; i < myClientViewsCount; i++) {
+            if (records[i].container == firstResponder) {
+                client = records[i].client;
+                break;
+            }
+        }
+        focusTrack = [client focusTrack];
+        if ([client isKindOfClass:[StripChartView class]]) {
+            /*  Filter the events  */
+            IntGroup *ig;
+            int32_t kindAndCode = [(StripChartView *)client kindAndCode];
+            kind = (kindAndCode >> 16) & 65535;
+            code = kindAndCode & 65535;
+            if (kind == kMDEventTempo) {
+                /*  Only conductor events can be pasted  */
+                if (!hasConductorTrack)
+                    return;  /*  Do nothing  */
+                while (MDSequenceGetNumberOfTracks(seq) > 1)
+                    MDSequenceDeleteTrack(seq, 1);
+                numberOfTracks = 1;
+            } else {
+                /*  Conductor track should be ignored  */
+                if (hasConductorTrack) {
+                    MDSequenceDeleteTrack(seq, 0);
+                    numberOfTracks--;
+                    if (numberOfTracks == 0)
+                        return;  /*  Do nothing  */
+                    hasConductorTrack = 0;
+                }
+                /*  Delete events that do not match the kind and code  */
+                ig = IntGroupNew();
+                if (kind == kMDEventInternalNoteOff || kind == kMDEventInternalDuration)
+                    kind = kMDEventNote;
+                for (i = 0; i < numberOfTracks; i++) {
+                    MDTrack *track = MDSequenceGetTrack(seq, i);
+                    MDPointer *pt = MDPointerNew(track);
+                    MDEvent *ep;
+                    while ((ep = MDPointerForward(pt)) != NULL) {
+                        if (MDGetKind(ep) == kind && (code == 65535 || MDGetCode(ep) == code))
+                            continue;
+                        IntGroupAdd(ig, MDPointerGetPosition(pt), 1);
+                    }
+                    if (IntGroupGetCount(ig) > 0)
+                        MDTrackUnmerge(track, NULL, ig);
+                    IntGroupClear(ig);
+                    MDPointerRelease(pt);
+                }
+                IntGroupRelease(ig);
+            }
+        }
+        
 		/*  Look for the "editing" tracks  */
 		for (i = j = 0; i < trackCount; i++) {
-			MDTrackAttribute attr = [doc trackAttributeForTrack: i];
-			if (attr & kMDTrackAttributeEditable) {
-				trackList[j++] = i;
-				if (j >= numberOfTracks)
-					break;
-			}
+            MDTrackAttribute attr = [doc trackAttributeForTrack: i];
+            if (focusTrack >= 0) {
+                if (i != focusTrack)
+                    continue;
+            } else {
+                if ((attr & kMDTrackAttributeEditable) == 0)
+                    continue;
+            }
+            if (j == 0) {
+                /*  The first editable track: we need to check for the conductor track  */
+                if (!hasConductorTrack && i == 0)
+                    continue;  /*  We should not target the conductor track  */
+                if (hasConductorTrack && i != 0) {
+                    /*  We should target the conductor track  */
+                    trackList[j++] = 0;
+                    if (j >= numberOfTracks)
+                        break;
+                }
+            }
+            trackList[j++] = i;
+            if (j >= numberOfTracks)
+                break;
 		}
 		while (j < numberOfTracks) {
 			trackList[j++] = i++;
@@ -2938,7 +2755,7 @@ row:(int)rowIndex
 			}
 		}
 		while (j < numberOfTracks) {
-			trackList[j++] = i++;
+            trackList[j++] = i++;
 		}
 	
 	} else return;
@@ -2996,7 +2813,7 @@ row:(int)rowIndex
 		else return NO;
 	} else if (sel == @selector(paste:) || sel == @selector(pasteWithReplace:) || sel == @selector(merge:)) {
 		firstResponder = [[self window] firstResponder];
-		if (firstResponder == myMainView || firstResponder == myTableView) {
+		if ([firstResponder isKindOfClass:[GraphicBackgroundView class]] || firstResponder == myTableView) {
 			if ([[self document] isSequenceInPasteboard])
 				return YES;
 		}

@@ -137,8 +137,10 @@ trackPopUp(int count)
 	[kindPopup setTarget: target];
 	[kindPopup setAction: @selector(kindPopUpPressed:)];
 	if (sControlSubmenu == nil) {
-		sControlSubmenu = [MDMenuWithControlNames(target, @selector(codeMenuItemSelected:), 0) retain];
+		sControlSubmenu = [MDMenuWithControlNames(nil, nil, 0) retain];
 	}
+    [codePopup setTarget: target];
+    [codePopup setAction: @selector(codeMenuItemSelected:)];
     [trackPopup setTarget:target];
     [trackPopup setAction:@selector(trackPopUpPressedInSplitterView:)];
     [trackPopup setMenu:trackPopUp([target trackCount])];
@@ -162,8 +164,11 @@ trackPopUp(int count)
 	NSPoint mousePt, startPt, origin;
 	NSEventType type;
 	GraphicWindowController *controller = (GraphicWindowController *)[[self window] windowController];
+    GraphicBackgroundView *container = [controller enclosingContainerForClientView:self];
 	startPt = [theEvent locationInWindow];
-	origin = [self frame].origin;
+    if (container != nil)
+        origin = [container frame].origin;
+	else origin = [self frame].origin;
 	[controller splitterViewStartedDragging:self];
 	do {
 		theEvent = [[self window] nextEventMatchingMask: NSLeftMouseUpMask | NSLeftMouseDraggedMask];
