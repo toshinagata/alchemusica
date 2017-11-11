@@ -81,6 +81,7 @@ MDTimeType	MDPlayerGetTime(MDPlayer *inPlayer);
 MDTickType	MDPlayerGetTick(MDPlayer *inPlayer);
 
 void		MDPlayerSetMIDIThruDeviceAndChannel(int32_t dev, int ch);
+void        MDPlayerSetMIDIThruTranspose(int transpose);
 void        MDPlayerSetCountOffSettings(MDPlayer *inPlayer, MDTimeType duration, MDTimeType bar, MDTimeType beat);
 MDStatus	MDPlayerBacktrackEvents(MDPlayer *inPlayer, MDTickType inTick, const int32_t *inEventType, const int32_t *inEventTypeLastOnly);
 int			MDPlayerSendRawMIDI(MDPlayer *player, const unsigned char *p, int size, int destDevice, MDTimeType scheduledTime);

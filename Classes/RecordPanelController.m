@@ -67,23 +67,12 @@ sAllowedExtensionsForTag(int tag)
 	}
 	
 	if (!isAudio) {
-		[destinationDevicePopUp selectItemWithTitle: [info valueForKey: MyRecordingInfoDestinationDeviceKey]];
-	}
-//	[destinationDevicePopUp selectItemWithTitle: [info valueForKey: (isAudio ? MyRecordingInfoDestinationAudioDeviceKey : MyRecordingInfoDestinationDeviceKey)]];
-/*	if (isAudio) {
-		[playThruCheckbox setState: [[info valueForKey: MyRecordingInfoAudioPlayThroughKey] boolValue]];
-	} */
-		
-	if (!isAudio) {
+        [destinationDevicePopUp selectItemWithTitle: [info valueForKey: MyRecordingInfoDestinationDeviceKey]];
 		ival = [[info valueForKey: MyRecordingInfoTargetTrackKey] intValue];
 		if (ival > 0 && ival < [seq trackCount]) {
 			[destinationTrackPopUp selectItemAtIndex: ival - 1];
-		//	[destinationDevicePopUp setEnabled: NO];
-		//	[midiChannelPopUp setEnabled: NO];
 		} else {
 			[destinationTrackPopUp selectItemAtIndex: [destinationTrackPopUp numberOfItems] - 1];
-		//	[destinationDevicePopUp setEnabled: YES];
-		//	[midiChannelPopUp setEnabled: YES];
 		}
 		ival = [[info valueForKey: MyRecordingInfoDestinationChannelKey] intValue];
 		[midiChannelPopUp selectItemAtIndex: ival];
@@ -98,6 +87,9 @@ sAllowedExtensionsForTag(int tag)
 			[barBeatPopUp setEnabled: NO];
 			[barBeatText setEnabled: NO];
 		}
+        ival = [[info valueForKey: MyRecordingInfoMIDITransposeKey] intValue];
+        [transposeOctavePopUp selectItemAtIndex:8 - ((ival + 48) / 12)];
+        [transposeNotePopUp selectItemAtIndex:((ival + 48) % 12)];
 	}
 	
 	theTick = [[info valueForKey: MyRecordingInfoStartTickKey] doubleValue];
@@ -398,7 +390,12 @@ sAllowedExtensionsForTag(int tag)
 		[info setValue: [NSNumber numberWithInt: tag] forKey: MyRecordingInfoRecordingModeKey];
 	} else if (sender == barBeatPopUp) {
 		[info setValue: [NSNumber numberWithBool: (tag == 0)] forKey: MyRecordingInfoBarBeatFlagKey];
-	} else if (sender == audioFormatPopUp) {
+    } else if (sender == transposeOctavePopUp || sender == transposeNotePopUp) {
+        tag = (4 - [transposeOctavePopUp indexOfSelectedItem]) * 12;
+        tag += [transposeNotePopUp indexOfSelectedItem];
+        [info setValue: [NSNumber numberWithInt: tag] forKey: MyRecordingInfoMIDITransposeKey];
+        MDPlayerSetMIDIThruTranspose(tag);
+    } else if (sender == audioFormatPopUp) {
 		[info setValue: [NSNumber numberWithInt: tag] forKey: MyRecordingInfoAudioRecordingFormatKey];
 	} else if (sender == audioSampleRatePopUp) {
 		float fval = [[sender titleOfSelectedItem] floatValue];
@@ -507,7 +504,7 @@ sAllowedExtensionsForTag(int tag)
 
 - (BOOL)control:(NSControl *)control textShouldBeginEditing:(NSText *)fieldEditor
 {
-    editingText = control;
+    editingText = (NSTextField *)control;
     return YES;
 }
 

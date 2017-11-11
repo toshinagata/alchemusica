@@ -57,9 +57,10 @@ extern NSString
 	*MyRecordingInfoRecordingModeKey,   // int; kRecordingMode{CountOff, WaitForNote}
 	*MyRecordingInfoCountOffNumberKey,  // int; count off number
 	*MyRecordingInfoBarBeatFlagKey,     // bool; countOffNumber is bar (YES) or beat (NO)
+    *MyRecordingInfoMIDITransposeKey,   // int; MIDI transpose
 	*MyRecordingInfoAudioRecordingFormatKey, // int; kAudioRecording{AIFF,WAV}Format
 	*MyRecordingInfoAudioBitRateKey,    // float; audio bit rate
-	*MyRecordingInfoAudioChannelFormatKey; // int; kAudioRecording{Mono,Stereo}Format
+    *MyRecordingInfoAudioChannelFormatKey; // int; kAudioRecording{Mono,Stereo}Format
 
 extern NSString *MyRecordingInfoFileExtensionForFormat(int format);
 

@@ -40,7 +40,8 @@ NSString
 	*MyRecordingInfoRecordingModeKey = @"recordingMode",
 	*MyRecordingInfoCountOffNumberKey = @"countOffNumber",
 	*MyRecordingInfoBarBeatFlagKey = @"barBeatFlag",
-	*MyRecordingInfoAudioRecordingFormatKey = @"audioRecordingFormat",
+    *MyRecordingInfoMIDITransposeKey = @"MIDItranspose",
+    *MyRecordingInfoAudioRecordingFormatKey = @"audioRecordingFormat",
 	*MyRecordingInfoAudioBitRateKey = @"audioBitRate",
 	*MyRecordingInfoAudioChannelFormatKey = @"audioChannelFormat";
 
@@ -104,6 +105,7 @@ NSString
 				[NSNumber numberWithInt: 0], MyRecordingInfoRecordingModeKey,
 				[NSNumber numberWithInt: 0], MyRecordingInfoCountOffNumberKey,
 				[NSNumber numberWithBool: NO], MyRecordingInfoBarBeatFlagKey,
+                [NSNumber numberWithInt: 0], MyRecordingInfoMIDITransposeKey,
 				[NSNumber numberWithInt: kAudioRecordingAIFFFormat], MyRecordingInfoAudioRecordingFormatKey,
 				[NSNumber numberWithFloat: 44100.0], MyRecordingInfoAudioBitRateKey,
 				[NSNumber numberWithInt: kAudioRecordingStereoFormat], MyRecordingInfoAudioChannelFormatKey,
@@ -392,7 +394,7 @@ MyRecordingInfoFileExtensionForFormat(int format)
 - (MDStatus)startMIDIRecording
 {
 	int32_t dev;
-	int ch;
+    int ch, trans;
 	MDTickType tick;
 	NSString *destDevice;
     if (mySequence == NULL || myPlayer == NULL)
@@ -405,6 +407,8 @@ MyRecordingInfoFileExtensionForFormat(int format)
 	else dev = -1;
 	ch = [[recordingInfo valueForKey: MyRecordingInfoDestinationChannelKey] intValue];
 	MDPlayerSetMIDIThruDeviceAndChannel(dev, ch);
+    trans = [[recordingInfo valueForKey: MyRecordingInfoMIDITransposeKey] intValue];
+    MDPlayerSetMIDIThruTranspose(trans);
 	tick = (MDTickType)[[recordingInfo valueForKey: MyRecordingInfoStartTickKey] doubleValue];
 	if (tick >= 0 && tick < kMDMaxTick)
 		MDPlayerJumpToTick(myPlayer, tick);

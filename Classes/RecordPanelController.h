@@ -43,7 +43,9 @@
 	IBOutlet NSSlider *audioVolumeSlider;
 	IBOutlet NSLevelIndicator *audioLeftLevel;
 	IBOutlet NSLevelIndicator *audioRightLevel;
-
+    IBOutlet NSPopUpButton *transposeOctavePopUp;
+    IBOutlet NSPopUpButton *transposeNotePopUp;
+    
 	BOOL stopModalFlag;
 	BOOL isAudio;
 	MyDocument *myDocument;

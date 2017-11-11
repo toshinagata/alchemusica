@@ -20,6 +20,8 @@
                 <outlet property="startTickText" destination="99" id="143"/>
                 <outlet property="stopTickCheckbox" destination="104" id="146"/>
                 <outlet property="stopTickText" destination="101" id="144"/>
+                <outlet property="transposeNotePopUp" destination="rll-Ss-YRR" id="gJa-XR-vin"/>
+                <outlet property="transposeOctavePopUp" destination="c0c-ui-3BP" id="bDn-He-A5m"/>
                 <outlet property="window" destination="7" id="9"/>
             </connections>
         </customObject>
@@ -28,11 +30,11 @@
         <window title="Panel" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="7" userLabel="Panel" customClass="NSPanel">
             <windowStyleMask key="styleMask" titled="YES" closable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="74" y="227" width="359" height="309"/>
+            <rect key="contentRect" x="74" y="227" width="359" height="333"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1024" height="746"/>
             <value key="minSize" type="size" width="213" height="107"/>
-            <view key="contentView" id="8">
-                <rect key="frame" x="0.0" y="0.0" width="359" height="309"/>
+            <view key="contentView" misplaced="YES" id="8">
+                <rect key="frame" x="0.0" y="0.0" width="359" height="333"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <button verticalHuggingPriority="750" id="48">
@@ -63,127 +65,6 @@ Gw
                             <action selector="cancelButtonPressed:" target="-2" id="58"/>
                         </connections>
                     </button>
-                    <box title="Device Settings" id="73">
-                        <rect key="frame" x="17" y="189" width="326" height="114"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                        <view key="contentView" id="zos-cu-qZO">
-                            <rect key="frame" x="2" y="2" width="322" height="97"/>
-                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                            <subviews>
-                                <textField verticalHuggingPriority="750" id="10">
-                                    <rect key="frame" x="11" y="67" width="95" height="14"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Source" id="158">
-                                        <font key="font" metaFont="smallSystem"/>
-                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                    </textFieldCell>
-                                </textField>
-                                <popUpButton verticalHuggingPriority="750" id="11">
-                                    <rect key="frame" x="102" y="62" width="207" height="22"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <popUpButtonCell key="cell" type="push" title="Item1" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="13" id="159">
-                                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                        <font key="font" metaFont="smallSystem"/>
-                                        <menu key="menu" title="OtherViews" id="12">
-                                            <items>
-                                                <menuItem title="Item1" state="on" id="13"/>
-                                                <menuItem title="Item2" id="14"/>
-                                                <menuItem title="Item3" id="15"/>
-                                            </items>
-                                        </menu>
-                                    </popUpButtonCell>
-                                    <connections>
-                                        <action selector="myPopUpAction:" target="-2" id="57"/>
-                                    </connections>
-                                </popUpButton>
-                                <textField verticalHuggingPriority="750" id="22">
-                                    <rect key="frame" x="11" y="41" width="95" height="14"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Destination" id="160">
-                                        <font key="font" metaFont="smallSystem"/>
-                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                    </textFieldCell>
-                                </textField>
-                                <popUpButton verticalHuggingPriority="750" id="23">
-                                    <rect key="frame" x="102" y="37" width="207" height="22"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <popUpButtonCell key="cell" type="push" title="Item1" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="27" id="161">
-                                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                        <font key="font" metaFont="smallSystem"/>
-                                        <menu key="menu" title="OtherViews" id="24">
-                                            <items>
-                                                <menuItem title="Item1" state="on" id="27"/>
-                                                <menuItem title="Item2" id="26"/>
-                                                <menuItem title="Item3" id="25"/>
-                                            </items>
-                                        </menu>
-                                    </popUpButtonCell>
-                                    <connections>
-                                        <action selector="myPopUpAction:" target="-2" id="55"/>
-                                    </connections>
-                                </popUpButton>
-                                <textField verticalHuggingPriority="750" id="28">
-                                    <rect key="frame" x="35" y="14" width="71" height="14"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Channel" id="162">
-                                        <font key="font" metaFont="smallSystem"/>
-                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                    </textFieldCell>
-                                </textField>
-                                <popUpButton verticalHuggingPriority="750" id="29">
-                                    <rect key="frame" x="142" y="10" width="167" height="22"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <popUpButtonCell key="cell" type="push" title="Keep Incoming Channel" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" tag="17" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="154" id="163">
-                                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                        <font key="font" metaFont="smallSystem"/>
-                                        <menu key="menu" title="OtherViews" id="30">
-                                            <items>
-                                                <menuItem title="1" tag="1" id="31"/>
-                                                <menuItem title="2" tag="2" id="33"/>
-                                                <menuItem title="3" tag="3" id="32"/>
-                                                <menuItem title="4" tag="4" id="35"/>
-                                                <menuItem title="5" tag="5" id="36"/>
-                                                <menuItem title="6" tag="6" id="37"/>
-                                                <menuItem title="7" tag="7" id="38"/>
-                                                <menuItem title="8" tag="8" id="39"/>
-                                                <menuItem title="9" tag="9" id="40"/>
-                                                <menuItem title="10" tag="10" id="41"/>
-                                                <menuItem title="11" tag="11" id="42"/>
-                                                <menuItem title="12" tag="12" id="43"/>
-                                                <menuItem title="13" tag="13" id="44"/>
-                                                <menuItem title="14" tag="14" id="45"/>
-                                                <menuItem title="15" tag="15" id="46"/>
-                                                <menuItem title="16" tag="16" id="47"/>
-                                                <menuItem title="Keep Incoming Channel" state="on" tag="17" id="154"/>
-                                            </items>
-                                        </menu>
-                                    </popUpButtonCell>
-                                    <connections>
-                                        <action selector="myPopUpAction:" target="-2" id="54"/>
-                                    </connections>
-                                </popUpButton>
-                                <box horizontalHuggingPriority="750" boxType="separator" id="75">
-                                    <rect key="frame" x="20" y="21" width="5" height="17"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                </box>
-                                <box verticalHuggingPriority="750" boxType="separator" id="81">
-                                    <rect key="frame" x="22" y="19" width="11" height="5"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                </box>
-                                <box horizontalHuggingPriority="750" boxType="separator" id="83">
-                                    <rect key="frame" x="125" y="21" width="5" height="14"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                </box>
-                                <box verticalHuggingPriority="750" boxType="separator" id="85">
-                                    <rect key="frame" x="127" y="19" width="11" height="5"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                </box>
-                            </subviews>
-                        </view>
-                    </box>
                     <box title="Sequence Settings" id="87">
                         <rect key="frame" x="17" y="46" width="325" height="139"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -351,8 +232,230 @@ Gw
                             </subviews>
                         </view>
                     </box>
+                    <box misplaced="YES" title="Device Settings" id="73">
+                        <rect key="frame" x="17" y="189" width="326" height="133"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <view key="contentView" id="zos-cu-qZO">
+                            <rect key="frame" x="2" y="2" width="322" height="116"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            <subviews>
+                                <textField verticalHuggingPriority="750" misplaced="YES" id="10">
+                                    <rect key="frame" x="11" y="90" width="95" height="14"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Source" id="158">
+                                        <font key="font" metaFont="smallSystem"/>
+                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                </textField>
+                                <popUpButton verticalHuggingPriority="750" misplaced="YES" id="11">
+                                    <rect key="frame" x="102" y="85" width="207" height="22"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <popUpButtonCell key="cell" type="push" title="Item1" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="13" id="159">
+                                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                        <font key="font" metaFont="smallSystem"/>
+                                        <menu key="menu" title="OtherViews" id="12">
+                                            <items>
+                                                <menuItem title="Item1" state="on" id="13"/>
+                                                <menuItem title="Item2" id="14"/>
+                                                <menuItem title="Item3" id="15"/>
+                                            </items>
+                                        </menu>
+                                    </popUpButtonCell>
+                                    <connections>
+                                        <action selector="myPopUpAction:" target="-2" id="57"/>
+                                    </connections>
+                                </popUpButton>
+                                <textField verticalHuggingPriority="750" misplaced="YES" id="22">
+                                    <rect key="frame" x="11" y="64" width="95" height="14"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Destination" id="160">
+                                        <font key="font" metaFont="smallSystem"/>
+                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                </textField>
+                                <popUpButton verticalHuggingPriority="750" misplaced="YES" id="23">
+                                    <rect key="frame" x="102" y="60" width="207" height="22"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <popUpButtonCell key="cell" type="push" title="Item1" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="27" id="161">
+                                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                        <font key="font" metaFont="smallSystem"/>
+                                        <menu key="menu" title="OtherViews" id="24">
+                                            <items>
+                                                <menuItem title="Item1" state="on" id="27"/>
+                                                <menuItem title="Item2" id="26"/>
+                                                <menuItem title="Item3" id="25"/>
+                                            </items>
+                                        </menu>
+                                    </popUpButtonCell>
+                                    <connections>
+                                        <action selector="myPopUpAction:" target="-2" id="55"/>
+                                    </connections>
+                                </popUpButton>
+                                <textField verticalHuggingPriority="750" misplaced="YES" id="28">
+                                    <rect key="frame" x="35" y="37" width="71" height="14"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Channel" id="162">
+                                        <font key="font" metaFont="smallSystem"/>
+                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                </textField>
+                                <popUpButton verticalHuggingPriority="750" misplaced="YES" id="29">
+                                    <rect key="frame" x="142" y="33" width="167" height="22"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <popUpButtonCell key="cell" type="push" title="Keep Incoming Channel" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" tag="17" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="154" id="163">
+                                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                        <font key="font" metaFont="smallSystem"/>
+                                        <menu key="menu" title="OtherViews" id="30">
+                                            <items>
+                                                <menuItem title="1" tag="1" id="31"/>
+                                                <menuItem title="2" tag="2" id="33"/>
+                                                <menuItem title="3" tag="3" id="32"/>
+                                                <menuItem title="4" tag="4" id="35"/>
+                                                <menuItem title="5" tag="5" id="36"/>
+                                                <menuItem title="6" tag="6" id="37"/>
+                                                <menuItem title="7" tag="7" id="38"/>
+                                                <menuItem title="8" tag="8" id="39"/>
+                                                <menuItem title="9" tag="9" id="40"/>
+                                                <menuItem title="10" tag="10" id="41"/>
+                                                <menuItem title="11" tag="11" id="42"/>
+                                                <menuItem title="12" tag="12" id="43"/>
+                                                <menuItem title="13" tag="13" id="44"/>
+                                                <menuItem title="14" tag="14" id="45"/>
+                                                <menuItem title="15" tag="15" id="46"/>
+                                                <menuItem title="16" tag="16" id="47"/>
+                                                <menuItem title="Keep Incoming Channel" state="on" tag="17" id="154"/>
+                                            </items>
+                                        </menu>
+                                    </popUpButtonCell>
+                                    <connections>
+                                        <action selector="myPopUpAction:" target="-2" id="54"/>
+                                    </connections>
+                                </popUpButton>
+                                <box horizontalHuggingPriority="750" misplaced="YES" boxType="separator" id="75">
+                                    <rect key="frame" x="20" y="44" width="5" height="17"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </box>
+                                <box verticalHuggingPriority="750" misplaced="YES" boxType="separator" id="81">
+                                    <rect key="frame" x="22" y="42" width="11" height="5"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </box>
+                                <box horizontalHuggingPriority="750" misplaced="YES" boxType="separator" id="83">
+                                    <rect key="frame" x="125" y="44" width="5" height="14"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </box>
+                                <box verticalHuggingPriority="750" misplaced="YES" boxType="separator" id="85">
+                                    <rect key="frame" x="127" y="42" width="11" height="5"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </box>
+                                <textField verticalHuggingPriority="750" misplaced="YES" id="A6c-RA-RIN">
+                                    <rect key="frame" x="11" y="12" width="95" height="14"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Transpose" id="S4J-RO-7gc">
+                                        <font key="font" metaFont="smallSystem"/>
+                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                </textField>
+                                <popUpButton verticalHuggingPriority="750" misplaced="YES" id="c0c-ui-3BP">
+                                    <rect key="frame" x="102" y="7" width="93" height="22"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <popUpButtonCell key="cell" type="push" title="0" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="1Rf-N6-i3I" id="4XA-vt-vSa">
+                                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                        <font key="font" metaFont="smallSystem"/>
+                                        <menu key="menu" title="OtherViews" id="sf7-7Q-TBX">
+                                            <items>
+                                                <menuItem title="+4" tag="4" id="7HK-26-QW2">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                                <menuItem title="+3" tag="3" id="sJ5-TP-o2V">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                                <menuItem title="+2" tag="2" id="V8q-hi-XVU">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                                <menuItem title="+1" tag="1" id="0Fh-tk-Sqg">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                                <menuItem title="0" state="on" id="1Rf-N6-i3I">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                                <menuItem title="-1" tag="-1" id="dx1-6K-SfQ">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                                <menuItem title="-2" tag="-2" id="xCg-Xz-G5O">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                                <menuItem title="-3" tag="-3" id="l2i-Cl-iWn">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                                <menuItem title="-4" tag="-4" id="ZNr-OB-QF6">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                            </items>
+                                        </menu>
+                                    </popUpButtonCell>
+                                    <connections>
+                                        <action selector="myPopUpAction:" target="-2" id="YGZ-Of-HFb"/>
+                                    </connections>
+                                </popUpButton>
+                                <popUpButton verticalHuggingPriority="750" misplaced="YES" id="rll-Ss-YRR">
+                                    <rect key="frame" x="218" y="7" width="91" height="22"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <popUpButtonCell key="cell" type="push" title="C (Do)" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="wZ9-NO-TMj" id="7Sa-mo-IPA">
+                                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                        <font key="font" metaFont="smallSystem"/>
+                                        <menu key="menu" title="OtherViews" id="jjO-14-8Ub">
+                                            <items>
+                                                <menuItem title="C (Do)" id="wZ9-NO-TMj">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                                <menuItem title="C#/Db (Do#)" tag="1" id="XIA-d9-woy">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                                <menuItem title="D (Re)" tag="2" id="iIC-5q-G18">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                                <menuItem title="D#/Eb (Mib)" tag="3" id="ezD-WF-VWa">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                                <menuItem title="E (Mi)" tag="4" id="sU9-Md-MX2">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                                <menuItem title="F (Fa)" tag="5" id="0BZ-g8-8of">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                                <menuItem title="F#/Gb (Fa#)" tag="6" id="Zc9-bO-Pye">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                                <menuItem title="G (Sol)" tag="7" id="UPa-XU-bHx">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                                <menuItem title="G#/Ab (Lab)" tag="8" id="8Ar-xa-AcF">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                                <menuItem title="A (La)" tag="9" id="v5q-ye-ko1">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                                <menuItem title="A#/Bb (Sib)" tag="10" id="pn5-bq-kHs">
+                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                </menuItem>
+                                                <menuItem title="B (Si)" tag="11" id="xaX-3g-LQt"/>
+                                            </items>
+                                        </menu>
+                                    </popUpButtonCell>
+                                    <connections>
+                                        <action selector="myPopUpAction:" target="-2" id="KG5-z6-c9a"/>
+                                    </connections>
+                                </popUpButton>
+                            </subviews>
+                        </view>
+                    </box>
                 </subviews>
             </view>
+            <point key="canvasLocation" x="132.5" y="158.5"/>
         </window>
         <view id="76">
             <rect key="frame" x="0.0" y="0.0" width="1" height="111"/>

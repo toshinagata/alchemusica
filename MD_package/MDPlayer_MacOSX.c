@@ -203,6 +203,7 @@ static MDPlayer *sRecordingPlayer = NULL;	/*  the MDPlayer that receives the inc
 //static MDDestinationInfo *sMIDIThruDestination = NULL;
 static int32_t sMIDIThruDevice = -1;
 static int sMIDIThruChannel = 0; /*  0..15; if 16, then incoming channel number is kept */
+static int sMIDIThruTranspose = 0;
 
 /*  Minimum interval of interrupts  */
 #define	kMDPlayerMinimumInterval	50000   /* 50 msec */
@@ -1050,6 +1051,16 @@ MyMIDIReadProc(const MIDIPacketList *pktlist, void *refCon, void *connRefCon)
     }
     packet = (MIDIPacket *)pktlist->packet;
     for (i = 0; i < pktlist->numPackets; i++, packet = MIDIPacketNext(packet)) {
+        if (sMIDIThruTranspose != 0) {
+            /*  Transpose  */
+            for (j = 0; j < packet->length; j++) {
+                if (packet->data[j] >= 0x80 && packet->data[j] <= 0x9f) {
+                    n = packet->data[j + 1] + sMIDIThruTranspose;
+                    if (n >= 0 && n < 128)
+                        packet->data[j + 1] = n;
+                }
+            }
+        }
         if (recordingFlag) {
             if (packet->timeStamp != 0) {
                 myTimeStamp = ConvertHostTimeToMDTimeType(packet->timeStamp) - sRecordingPlayer->startTime;
@@ -1894,7 +1905,7 @@ MDPlayerStart(MDPlayer *inPlayer)
 	if (MDSequenceCreateMutex(inPlayer->sequence))
 		return kMDErrorOnSequenceMutex;
 	
-	inPlayer->startTime = GetHostTimeInMDTimeType() - inPlayer->time + inPlayer->countOffDuration;
+	inPlayer->startTime = GetHostTimeInMDTimeType() - inPlayer->time;
     inPlayer->countOffEndTime = inPlayer->time;
     if (inPlayer->isRecording && inPlayer->countOffDuration > 0) {
         /*  Look for the earliest metronome tick after start time  */
@@ -1904,6 +1915,7 @@ MDPlayerStart(MDPlayer *inPlayer)
         MDEvent *ep = MDCalibratorGetEvent(inPlayer->calib, NULL, kMDEventTimeSignature, -1);
         MDTickType sigtick = (ep == NULL ? 0 : MDGetTick(ep));
         int32_t timebase = MDSequenceGetTimebase(inPlayer->sequence);
+        inPlayer->startTime += inPlayer->countOffDuration;
         MDEventCalculateMetronomeBarAndBeat(ep, timebase, &bar, &beat);
         tick -= sigtick;
         barnum = tick / bar;
@@ -2152,11 +2164,17 @@ MDPlayerGetTick(MDPlayer *inPlayer)
 void
 MDPlayerSetMIDIThruDeviceAndChannel(int32_t dev, int ch)
 {
- //   if (sMIDIThruDestination != NULL)
- //       MDPlayerReleaseDestinationInfo(sMIDIThruDestination);
- //   sMIDIThruDestination = MDPlayerNewDestinationInfo(dev);
     sMIDIThruDevice = dev;
     sMIDIThruChannel = ch;
+}
+
+/* --------------------------------------
+	･ MDPlayerSetMIDIThruTranspose
+ -------------------------------------- */
+void
+MDPlayerSetMIDIThruTranspose(int transpose)
+{
+    sMIDIThruTranspose = transpose;
 }
 
 /* --------------------------------------
