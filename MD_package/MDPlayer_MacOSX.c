@@ -154,6 +154,14 @@ struct MDPlayer {
 	int             metronomeBeat;     /*  Beat length  */
 	MDTickType      nextTimeSignature; /*  Next time signature change for metronome  */
 
+    /*  Count-off metronome  */
+    MDTimeType      countOffDuration;  /*  Time (in microseconds) for count-off  */
+    MDTimeType      countOffEndTime;   /*  End time for count-off  */
+    MDTimeType      countOffBar;       /*  Bar duration for count-off; if zero, then only beat tap will be sent out  */
+    MDTimeType      countOffBeat;      /*  Beat duration for count-off  */
+    MDTimeType      countOffFirstRing; /*  First time for count-off metronome note  */
+    MDTimeType      countOffNextRing;  /*  Last time for count-off metronome note  */
+    
     /*  Recording info  */
     unsigned char	isRecording;
     MDTickType      recordingStopTick;
@@ -1080,9 +1088,14 @@ PrepareMetronomeForTick(MDPlayer *inPlayer, MDTickType inTick)
 	MDEvent *ep;
 	int32_t timebase = MDSequenceGetTimebase(inPlayer->sequence);
 	MDTickType t, t0;
+    int32_t beat, bar;
 	MDCalibratorJumpToTick(inPlayer->calib, inTick);
 	ep = MDCalibratorGetEvent(inPlayer->calib, NULL, kMDEventTimeSignature, -1);
-	if (ep == NULL) {
+    MDEventCalculateMetronomeBarAndBeat(ep, timebase, &bar, &beat);
+    inPlayer->metronomeBeat = beat;
+    inPlayer->metronomeBar = bar;
+    t = (ep == NULL ? 0 : MDGetTick(ep));
+/*	if (ep == NULL) {
 		t = 0;
 		inPlayer->metronomeBeat = timebase;
 		inPlayer->metronomeBar = timebase * 4;
@@ -1095,7 +1108,7 @@ PrepareMetronomeForTick(MDPlayer *inPlayer, MDTickType inTick)
             inPlayer->metronomeBar = timebase;
         if (inPlayer->metronomeBeat < timebase / 64)
             inPlayer->metronomeBeat = inPlayer->metronomeBar;
-	}
+	} */
 	inPlayer->nextMetronomeBar = t + (inTick - t + inPlayer->metronomeBar - 1) / inPlayer->metronomeBar * inPlayer->metronomeBar;
 	t0 = inPlayer->nextMetronomeBar;
 	if (t0 > inTick)
@@ -1302,6 +1315,31 @@ MyTimerFunc(MDPlayer *player)
 	sequence = player->sequence;
 	
 	now_time = GetHostTimeInMDTimeType() - player->startTime;
+    if (now_time < player->countOffEndTime) {
+        /*  During count-off  */
+        MDTimeType time1, time2;
+        if (player->countOffNextRing < player->countOffEndTime && player->countOffNextRing <  now_time + kMDPlayerPrefetchInterval) {
+            /*  Ring the metronome  */
+            int isBell = 0;
+            if (player->countOffBar > 0 && (player->countOffNextRing - player->countOffFirstRing) % player->countOffBar == 0)
+                isBell = 1;
+            MDPlayerRingMetronomeClick(player, player->countOffNextRing, isBell);
+            /*  Next metronome  */
+            time1 = player->countOffNextRing + player->countOffBeat;
+            if (player->countOffBar > 0) {
+                time2 = ((player->countOffNextRing - player->countOffFirstRing) / player->countOffBar + 1) * player->countOffBar + player->countOffFirstRing;
+                if (time2 < time1)
+                    time1 = time2;
+            }
+            player->countOffNextRing = time1;
+        }
+        time1 = player->countOffNextRing - now_time;
+        time2 = player->countOffEndTime - now_time;
+        time_to_wait = (time1 < time2 ? time1 : time2);
+        if (time_to_wait < kMDPlayerMinimumInterval)
+            time_to_wait = kMDPlayerMinimumInterval;
+        return (int32_t)time_to_wait;
+    }
     player->time = now_time;
 	now_tick = MDCalibratorTimeToTick(player->calib, now_time);
 	prefetch_tick = MDCalibratorTimeToTick(player->calib, now_time + kMDPlayerPrefetchInterval);
@@ -1477,7 +1515,7 @@ MDPlayerSendRawMIDI(MDPlayer *inPlayer, const unsigned char *p, int size, int de
     if (destDevice < 0 || destDevice >= sDeviceInfo.destNum)
 		return -1;
     rp = &(sDeviceInfo.dest[destDevice]);
-    if (inPlayer != NULL && scheduledTime >= 0)
+    if (inPlayer != NULL && scheduledTime + inPlayer->startTime >= 0)
         timeStamp = ConvertMDTimeTypeToHostTime(scheduledTime + inPlayer->startTime);
     else if (scheduledTime >= 0)
         timeStamp = ConvertMDTimeTypeToHostTime(scheduledTime);
@@ -1853,31 +1891,39 @@ MDPlayerStart(MDPlayer *inPlayer)
 	if (inPlayer->status != kMDPlayer_suspended)
 		MDPlayerPreroll(inPlayer, MDCalibratorTimeToTick(inPlayer->calib, inPlayer->time), 0);
 	
-	/*  Schedule special events  */
-    /*  TODO: these events should probably be stored as tick values in inPlayer structure. */
-/*	{
-		MDEvent anEvent;
-		MDTickType tick, duration;
-		duration = MDSequenceGetDuration(sequence);
-		MDSetKind(&anEvent, kMDEventSpecial);
-		if (inPlayer->recordingStopTick < kMDMaxTick)
-			tick = inPlayer->recordingStopTick;
-		else tick = kMDMaxTick - 1;
-		MDSetCode(&anEvent, kMDSpecialStopPlaying);
-		MDSetTick(&anEvent, inPlayer->recordingStopTick);
-		RegisterEventInNoteOffTrack(inPlayer, &anEvent);
-		MDSetCode(&anEvent, kMDSpecialEndOfSequence);
-		MDSetTick(&anEvent, duration);
-		RegisterEventInNoteOffTrack(inPlayer, &anEvent);
-	} */
-	
 	if (MDSequenceCreateMutex(inPlayer->sequence))
 		return kMDErrorOnSequenceMutex;
 	
-	inPlayer->startTime = GetHostTimeInMDTimeType() - inPlayer->time;
+	inPlayer->startTime = GetHostTimeInMDTimeType() - inPlayer->time + inPlayer->countOffDuration;
+    inPlayer->countOffEndTime = inPlayer->time;
+    if (inPlayer->isRecording && inPlayer->countOffDuration > 0) {
+        /*  Look for the earliest metronome tick after start time  */
+        int32_t bar, beat, barnum, beatnum;
+        MDTickType dtick;
+        MDTickType tick = MDCalibratorTimeToTick(inPlayer->calib, inPlayer->time);
+        MDEvent *ep = MDCalibratorGetEvent(inPlayer->calib, NULL, kMDEventTimeSignature, -1);
+        MDTickType sigtick = (ep == NULL ? 0 : MDGetTick(ep));
+        int32_t timebase = MDSequenceGetTimebase(inPlayer->sequence);
+        MDEventCalculateMetronomeBarAndBeat(ep, timebase, &bar, &beat);
+        tick -= sigtick;
+        barnum = tick / bar;
+        dtick = tick % bar;
+        beatnum = dtick / beat;
+        dtick = dtick % beat;
+        if (dtick > 0) {
+            beatnum++;
+            if (beatnum * beat >= bar) {
+                barnum++;
+                beatnum = 0;
+            }
+        }
+        tick = sigtick + barnum * bar;
+        inPlayer->countOffFirstRing = MDCalibratorTickToTime(inPlayer->calib, tick) - inPlayer->countOffDuration;
+        tick += beatnum * beat;
+        inPlayer->countOffNextRing = MDCalibratorTickToTime(inPlayer->calib, tick) - inPlayer->countOffDuration;
+    }
 	inPlayer->status = kMDPlayer_playing;
 	inPlayer->shouldTerminate = 0;
-/*    inPlayer->trackDuration = MDSequenceGetDuration(inPlayer->sequence); */
     
 #if !USE_TIME_MANAGER
 	status = pthread_create(&inPlayer->playThread, NULL, MyThreadFunc, inPlayer);
@@ -2073,7 +2119,10 @@ MDPlayerGetTime(MDPlayer *inPlayer)
 {
 	if (inPlayer != NULL) {
 		if (inPlayer->status == kMDPlayer_playing || inPlayer->status == kMDPlayer_exhausted) {
-			return GetHostTimeInMDTimeType() - inPlayer->startTime;
+            MDTimeType now_time = GetHostTimeInMDTimeType() - inPlayer->startTime;
+            if (now_time < inPlayer->countOffEndTime)
+                return inPlayer->countOffEndTime;
+            else return now_time;
 		} else {
 			return inPlayer->time;
 		}
@@ -2108,6 +2157,19 @@ MDPlayerSetMIDIThruDeviceAndChannel(int32_t dev, int ch)
  //   sMIDIThruDestination = MDPlayerNewDestinationInfo(dev);
     sMIDIThruDevice = dev;
     sMIDIThruChannel = ch;
+}
+
+/* --------------------------------------
+	･ MDPlayerSetCountOffSettings
+ -------------------------------------- */
+void
+MDPlayerSetCountOffSettings(MDPlayer *inPlayer, MDTimeType duration, MDTimeType bar, MDTimeType beat)
+{
+    if (inPlayer != NULL) {
+        inPlayer->countOffDuration = duration;
+        inPlayer->countOffBar = bar;
+        inPlayer->countOffBeat = beat;
+    }
 }
 
 /* --------------------------------------

@@ -32,8 +32,8 @@ enum {
 										metadata[1] = denominator (negative power of 2 as in SMF),
 										metadata[2] = length of one metronome-click
 											(multiples of 1/24 of quarter note)
-										metadata[3] = for notation only; the number of notated
-											32-nd notes per expressed quarter note */
+										metadata[3] = the number of 32-nd notes per
+                                            24 MIDI clocks (usually 8)  */
 	kMDEventKey,					/*  metadata[0] = key (-7 to 7), metadata[1] = major or minor */
 	kMDEventSMPTE,					/*  SMPTE record (hour, min, sec, frame, subframe) */
 	kMDEventPortNumber,				/*  data1 = port number  */
@@ -387,6 +387,9 @@ int		MDEventMetaKindCodeToSMFMetaNumber(int kind, int code);
 /*  Check if the event is allowable in the conductor/non-conductor tracks  */
 int     MDEventIsEventAllowableInConductorTrack(const MDEvent *eptr);
 int     MDEventIsEventAllowableInNonConductorTrack(const MDEvent *eptr);
+
+/*  Get metronome bar and beat length from timebase and kMDEventTimeSignature event  */
+int     MDEventCalculateMetronomeBarAndBeat(const MDEvent *eptr, int32_t timebase, int32_t *outTickPerMeasure, int32_t *outTickPerMetronomeBeat);
 
 #ifdef __cplusplus
 }

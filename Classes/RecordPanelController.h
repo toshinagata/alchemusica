@@ -49,6 +49,8 @@
 	MyDocument *myDocument;
 	MDCalibrator *calib;
 	NSMutableDictionary *info;
+    
+    NSTextField *editingText;   /*  The editing text control  */
 
 	NSTimer *timer;				/*  Refresh the display periodically during playing  */
 }

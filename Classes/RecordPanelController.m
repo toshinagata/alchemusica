@@ -267,15 +267,6 @@ sAllowedExtensionsForTag(int tag)
 		calib = MDCalibratorNew(mds, track, kMDEventTimeSignature, -1);
 	}
 	
-	//  Initialize the start tick
-	{
-		MDPlayer *player = [seq myPlayer];
-		if (player != NULL) {
-			MDTickType tick = MDPlayerGetTick(player);
-			[info setValue: [NSNumber numberWithDouble: tick] forKey: MyRecordingInfoStartTickKey];
-		}
-	}
-	
 	[info setValue: [NSNumber numberWithBool: isAudio] forKey: MyRecordingInfoIsAudioKey];
 
 	str1 = [[myDocument fileURL] path];
@@ -337,6 +328,7 @@ sAllowedExtensionsForTag(int tag)
 
 - (IBAction)cancelButtonPressed: (id)sender
 {
+    editingText = nil;
 	[[NSApplication sharedApplication] endSheet: [self window] returnCode: 0];
 }
 
@@ -419,6 +411,8 @@ sAllowedExtensionsForTag(int tag)
 
 - (IBAction)startButtonPressed: (id)sender
 {
+    if (editingText != nil)
+        [editingText sendAction:[editingText action] to:[editingText target]];
 	[[NSApplication sharedApplication] endSheet: [self window] returnCode: 1];
 }
 
@@ -509,6 +503,18 @@ sAllowedExtensionsForTag(int tag)
 		[info setValue: name forKey: MyRecordingInfoFileNameKey];
 	}
 	[self updateDisplay];
+}
+
+- (BOOL)control:(NSControl *)control textShouldBeginEditing:(NSText *)fieldEditor
+{
+    editingText = control;
+    return YES;
+}
+
+- (BOOL)control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor
+{
+    editingText = nil;
+    return YES;
 }
 
 /*

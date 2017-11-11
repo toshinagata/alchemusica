@@ -574,6 +574,25 @@
 	}
     if (isRecordButton) {
 		BOOL flag;
+        int countOffNumber;
+        NSDictionary *info = [[myDocument myMIDISequence] recordingInfo];
+        countOffNumber = [[info valueForKey: MyRecordingInfoCountOffNumberKey] intValue];
+        if (countOffNumber > 0) {
+            /*  Handle metronome count-off */
+            int bar, beat, barBeatFlag;
+            float timebase = [myDocument timebase];
+            MDEvent *ep = MDCalibratorGetEvent(calibrator, NULL, kMDEventTimeSignature, -1);
+            float tempo = MDCalibratorGetTempo(calibrator);
+            barBeatFlag = [[info valueForKey: MyRecordingInfoBarBeatFlagKey] intValue];
+            MDEventCalculateMetronomeBarAndBeat(ep, (int32_t)timebase, &bar, &beat);
+            bar = floor(bar * 60000000.0 / (tempo * timebase) + 0.5);
+            beat = ceil(beat * 60000000.0 / (tempo * timebase));
+            if (barBeatFlag) {
+                MDPlayerSetCountOffSettings(player, bar * countOffNumber, bar, beat);
+            } else {
+                MDPlayerSetCountOffSettings(player, beat * countOffNumber, 0, beat);
+            }
+        } else MDPlayerSetCountOffSettings(player, 0, 0, 0);
 		if (isAudioRecording)
 			flag = [myDocument startAudioRecording];
 		else
@@ -607,11 +626,6 @@
 {
 	RecordPanelController *controller;
 
-	//  Set the current time as the start tick
-	NSMutableDictionary *info = [NSMutableDictionary dictionaryWithDictionary: [[myDocument myMIDISequence] recordingInfo]];
-	[info setValue: [NSNumber numberWithDouble: MDCalibratorTimeToTick(calibrator, currentTime)] forKey: MyRecordingInfoStartTickKey];
-	[[myDocument myMIDISequence] setRecordingInfo: info];
-		
     controller = [[RecordPanelController allocWithZone: [self zone]] initWithDocument: myDocument audio: audioFlag];
 	[controller reloadInfoFromDocument];
 	if (audioFlag)
