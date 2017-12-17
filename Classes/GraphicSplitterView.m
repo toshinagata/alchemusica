@@ -182,7 +182,13 @@ trackPopUp(int count)
 
 - (void)doMouseMoved:(NSEvent *)theEvent
 {
-	[[NSCursor verticalMoveCursor] set];
+    NSPoint pt = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+    if ((NSPointInRect(pt, [kindPopup frame]) && [kindPopup isEnabled])
+        || (NSPointInRect(pt, [trackPopup frame]) && [trackPopup isEnabled])
+        || (NSPointInRect(pt, [codePopup frame]) && [codePopup isEnabled]))
+        [[NSCursor arrowCursor] set];
+    else
+        [[NSCursor verticalMoveCursor] set];
 }
 
 - (void)createSubmenus
