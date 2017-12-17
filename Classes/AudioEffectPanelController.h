@@ -23,6 +23,8 @@
     IBOutlet NSSplitView *splitView;
     IBOutlet AudioEffectLayoutView *layoutView;
     IBOutlet NSView *customContainerView;
+    IBOutlet NSScrollView *effectLayoutScrollView;
+    IBOutlet NSScrollView *effectContentScrollView;
     NSView *customView;
     int busIndex;
     int selectedEffect;

@@ -10,6 +10,8 @@
         <customObject id="-2" userLabel="File's Owner" customClass="AudioEffectPanelController">
             <connections>
                 <outlet property="customContainerView" destination="flI-Js-u4p" id="fbp-Bx-QFQ"/>
+                <outlet property="effectContentScrollView" destination="oDY-U5-xri" id="Snm-rl-hdQ"/>
+                <outlet property="effectLayoutScrollView" destination="Y1r-hN-Xr8" id="IvQ-7e-nvs"/>
                 <outlet property="layoutView" destination="kbx-xr-KMR" id="Tmn-y4-ll9"/>
                 <outlet property="splitView" destination="dhP-QZ-4YH" id="Mzr-dd-plR"/>
                 <outlet property="window" destination="7" id="79"/>
@@ -43,7 +45,7 @@
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <view autoresizesSubviews="NO" misplaced="YES" id="kbx-xr-KMR" customClass="AudioEffectLayoutView">
-                                                    <rect key="frame" x="0.0" y="2" width="569" height="60"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="569" height="60"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                                     <subviews>
                                                         <box misplaced="YES" boxType="custom" borderType="bezel" titlePosition="noTitle" id="QBw-O4-Dcp">
@@ -166,7 +168,7 @@
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <view id="flI-Js-u4p">
-                                                    <rect key="frame" x="0.0" y="0.0" width="570" height="367"/>
+                                                    <rect key="frame" x="0.0" y="4" width="570" height="367"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 </view>
                                             </subviews>

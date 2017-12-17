@@ -275,6 +275,10 @@ static NSString *sAudioEffectPanelShouldUpdate = @"Audio effect panel should upd
      selector: @selector(updateRequested:)
      name: sAudioEffectPanelShouldUpdate
      object:nil];
+    [effectLayoutScrollView setDrawsBackground:YES];
+    [effectLayoutScrollView setBackgroundColor:[NSColor windowBackgroundColor]];
+    [effectContentScrollView setDrawsBackground:YES];
+    [effectContentScrollView setBackgroundColor:[NSColor windowBackgroundColor]];
     [self updateWindow];
 }
 

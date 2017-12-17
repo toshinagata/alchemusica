@@ -15,9 +15,10 @@
     return YES;
 }
 
-- (void)drawRect:(NSRect)rect
+/*- (void)drawRect:(NSRect)rect
 {
+    NSLog(@"rect=%@, bounds=%@", NSStringFromRect(rect), NSStringFromRect([self bounds]));
     NSDrawWindowBackground(rect);
 }
-
+*/
 @end
