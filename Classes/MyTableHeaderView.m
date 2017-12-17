@@ -30,7 +30,7 @@
 //	NSLog(@"Mouse down at %@ (view coordinate)\n", NSStringFromPoint(point));
 	for (column = (int)[[self tableView] numberOfColumns] - 1; column >= 0; column--) {
 		rect = [self headerRectOfColumn:column];
-		rect = NSInsetRect(rect, 5.0, 0.0);
+		rect = NSInsetRect(rect, 5.0f, 0.0f);
 	//	NSLog(@"Column %d, rect %@\n", column, NSStringFromRect(rect));
 		if (NSPointInRect(point, rect)) {
 		//	NSBeep();

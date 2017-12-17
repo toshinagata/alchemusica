@@ -547,10 +547,10 @@ RubyDialogCallback_createItem(RubyDialog *dref, const char *type, const char *ti
 	font = [NSFont systemFontOfSize: [NSFont smallSystemFontSize]];
 	
 	rect = NSRectFromRDRect(frame);
-	if (rect.size.width == 0.0)
-		rect.size.width = 1.0;
-	if (rect.size.height == 0.0)
-		rect.size.height = 1.0;
+	if (rect.size.width == 0.0f)
+		rect.size.width = 1.0f;
+	if (rect.size.height == 0.0f)
+		rect.size.height = 1.0f;
 	
 	offset = OffsetForItemRect(type);
 	
@@ -588,7 +588,7 @@ RubyDialogCallback_createItem(RubyDialog *dref, const char *type, const char *ti
 		[[sv verticalScroller] setControlSize: NSSmallControlSize];
 		contentSize = [sv contentSize];
 		tv = [[[NSTextView alloc] initWithFrame: NSMakeRect(0, 0, contentSize.width, contentSize.height)] autorelease];
-		[tv setMinSize: NSMakeSize(0.0, contentSize.height)];
+		[tv setMinSize: NSMakeSize(0.0f, contentSize.height)];
 		[tv setMaxSize: NSMakeSize(FLT_MAX, FLT_MAX)];
 		[tv setVerticallyResizable: YES];
 		[tv setHorizontallyResizable: NO];
@@ -596,7 +596,7 @@ RubyDialogCallback_createItem(RubyDialog *dref, const char *type, const char *ti
 		[[tv textContainer] setContainerSize: NSMakeSize(contentSize.width, FLT_MAX)];
 		[[tv textContainer] setWidthTracksTextView: YES];
 		[[tv textContainer] setHeightTracksTextView: NO];
-		font = [NSFont userFixedPitchFontOfSize: 10.0];
+		font = [NSFont userFixedPitchFontOfSize: 10.0f];
 		[tv setFont: font];
 		[tv setDelegate: cont];
 		[tv setRichText: NO];
@@ -621,8 +621,8 @@ RubyDialogCallback_createItem(RubyDialog *dref, const char *type, const char *ti
 		/*  Separator line  */
 		NSBox *box;
 		if (rect.size.width > rect.size.height)
-			rect.size.height = 1.0;
-		else rect.size.width = 1.0;
+			rect.size.height = 1.0f;
+		else rect.size.width = 1.0f;
 		box = [[[NSBox alloc] initWithFrame: rect] autorelease];
 		[box setBoxType:NSBoxSeparator];
 		view = box;
@@ -996,7 +996,7 @@ RubyDialogCallback_setForegroundColorForItem(RDItem *item, const double *col)
 	if ([itemView isKindOfClass:[NSScrollView class]])
 		itemView = [(NSScrollView *)itemView documentView];
 	if ([itemView respondsToSelector:@selector(setTextColor:)]) {
-		NSColor *color = [NSColor colorWithDeviceRed:col[0] green:col[1] blue:col[2] alpha:col[3]];		
+		NSColor *color = [NSColor colorWithDeviceRed:(CGFloat)col[0] green:(CGFloat)col[1] blue:(CGFloat)col[2] alpha:(CGFloat)col[3]];
 		[(id)itemView setTextColor:color];
 	}
 }
@@ -1008,7 +1008,7 @@ RubyDialogCallback_setBackgroundColorForItem(RDItem *item, const double *col)
 	if ([itemView isKindOfClass:[NSScrollView class]])
 		itemView = [(NSScrollView *)itemView documentView];
 	if ([itemView respondsToSelector:@selector(setBackgroundColor:)]) {
-		NSColor *color = [NSColor colorWithDeviceRed:col[0] green:col[1] blue:col[2] alpha:col[3]];		
+		NSColor *color = [NSColor colorWithDeviceRed:(CGFloat)col[0] green:(CGFloat)col[1] blue:(CGFloat)col[2] alpha:(CGFloat)col[3]];
 		[(id)itemView setBackgroundColor:color];
 	}
 }
@@ -1463,17 +1463,17 @@ RubyDialogCallback_drawRectangle(RDDeviceContext *dc, float x, float y, float wi
 {
 	CGContextRef cref = (CGContextRef)dc;
 	if (round * 2 > width)
-		round = width * 0.5;
+		round = width * 0.5f;
 	if (round * 2 > height)
-		round = height * 0.5;
-	if (round < 1.0)
-		round = 0.0;
+		round = height * 0.5f;
+	if (round < 1.0f)
+		round = 0.0f;
 	if (round > 0) {
 		CGContextBeginPath(cref);
-		CGContextAddArc(cref, x + round, y + round, round, 3.1415927, 3.1415927 * 1.5, 0);
-		CGContextAddArc(cref, x + width - round, y + round, round, 3.1415927 * 1.5, 3.1415927 * 2.0, 0);
-		CGContextAddArc(cref, x + width - round, y + height - round, round, 0, 3.1415927 * 0.5, 0);
-		CGContextAddArc(cref, x + round, y + height - round, round, 3.1415927 * 0.5, 3.1415927, 0);
+		CGContextAddArc(cref, x + round, y + round, round, 3.1415927f, 3.1415927f * 1.5f, 0);
+		CGContextAddArc(cref, x + width - round, y + round, round, 3.1415927f * 1.5f, 3.1415927f * 2.0f, 0);
+		CGContextAddArc(cref, x + width - round, y + height - round, round, 0, 3.1415927f * 0.5f, 0);
+		CGContextAddArc(cref, x + round, y + height - round, round, 3.1415927f * 0.5f, 3.1415927f, 0);
 		CGContextClosePath(cref);
 		CGContextStrokePath(cref);
 	} else {
@@ -1518,7 +1518,7 @@ RubyDialogCallback_setPen(RDDeviceContext *dc, void **args)
 	int i;
 	float width;
 	CGContextRef cref = (CGContextRef)dc;
-	width = 1.0;
+	width = 1.0f;
 	if (args != NULL) {
 		for (i = 0; args[i] != NULL; i += 2) {
 			if (strcmp((const char *)args[i], "color") == 0) {

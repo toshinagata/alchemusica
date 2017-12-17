@@ -529,7 +529,7 @@ sMDAudioUpdateHardwareDeviceInfo(void)
 				info.deviceID = devs[i];
 				info.nChannels = sMDAudioDeviceCountChannels(devs[i], isInput);
                 address.mSelector = kAudioDevicePropertyDeviceName;
-                address.mScope = (isInput ? kAudioObjectPropertyScopeInput : kAudioObjectPropertyScopeOutput);
+                address.mScope = (isInput ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput);
                 err = AudioObjectGetPropertyData(devs[i], &address, 0, NULL, &maxlen, buf);
 			//	err = AudioDeviceGetProperty(devs[i], 0, isInput, kAudioDevicePropertyDeviceName, &maxlen, buf);
 				if (err != noErr)
@@ -1585,7 +1585,7 @@ MDAudioInitialize(void)
     memset(gAudio, 0, sizeof(MDAudio));
     
     /*  The preferred audio format  */
-    MDAudioFormatSetCanonical(&gAudio->preferredFormat, 44100.0, 2, 0);
+    MDAudioFormatSetCanonical(&gAudio->preferredFormat, 44100.0f, 2, 0);
     
     /*  Initialize IOStreamInfo  */
     for (i = 0; i < kMDAudioNumberOfStreams; i++) {
@@ -1694,7 +1694,7 @@ MDAudioGetMixerBusAttributes(int idx, float *outPan, float *outVolume, float *ou
 	} else return kMDErrorCannotSetupAudio;
 	if (scope == kAudioUnitScope_Input) {
 		CHECK_ERR(err, AudioUnitGetParameter(gAudio->mixerUnit, kStereoMixerParam_Pan, scope, idx, &f32));
-	} else f32 = 0.5;
+	} else f32 = 0.5f;
 	if (outPan != NULL)
 		*outPan = f32;	
 	CHECK_ERR(err, AudioUnitGetParameter(gAudio->mixerUnit, kStereoMixerParam_Volume, scope, idx, &f32));

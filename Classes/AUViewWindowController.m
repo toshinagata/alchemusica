@@ -263,8 +263,8 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 	}
 	
 	ControlRef viewPane;
-	Float32Point loc  = { 0.0, 0.0 };
-	Float32Point size = { 0.0, 0.0 } ;
+	Float32Point loc  = { 0.0f, 0.0f };
+	Float32Point size = { 0.0f, 0.0f } ;
 	AudioUnitCarbonViewCreate(auCarbonView, audioUnit, carbonWindowRef, 
 							  rootControl, &loc, &size, &viewPane);
 	

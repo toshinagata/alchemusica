@@ -80,7 +80,7 @@ static NSFont *sRulerLabelFont;
 	float x, y;
 	NSRect lrect = [self loupeRect];
 	if (lrect.size.width > 0) {
-		[[[MyDocument colorForSelectingRange] colorWithAlphaComponent: 0.1] set];
+		[[[MyDocument colorForSelectingRange] colorWithAlphaComponent: 0.1f] set];
 		[NSBezierPath fillRect:lrect];
 		x = lrect.origin.x;
 		y = lrect.origin.y;
@@ -181,7 +181,7 @@ static NSFont *sRulerLabelFont;
 {
 	GraphicClientView *cv = (GraphicClientView *)clientView;
 	if ([theEvent clickCount] == 2 && ([theEvent modifierFlags] & NSAlternateKeyMask) != 0) {
-		[cv setVisibleRangeMin:0.0 max:1.0];
+		[cv setVisibleRangeMin:0.0f max:1.0f];
 	} else if (dragStartPoint.x != -10000) {
 		float y1, y2, miny, maxy;
 		int32_t tick;  //  Dummy
@@ -195,12 +195,12 @@ static NSFont *sRulerLabelFont;
 		}
 		miny = [cv minValue];
 		maxy = [cv maxValue];
-		if (y2 - y1 < 2.0) {
-			if (y1 > maxy - 2.0) {
+		if (y2 - y1 < 2.0f) {
+			if (y1 > maxy - 2.0f) {
 				y2 = maxy;
-				y1 = maxy - 2.0;
+				y1 = maxy - 2.0f;
 			} else {
-				y2 = y1 + 2.0;
+				y2 = y1 + 2.0f;
 			}
 		}
 		y1 = (y1 - miny) / (maxy - miny);

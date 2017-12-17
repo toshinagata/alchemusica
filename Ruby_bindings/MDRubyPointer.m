@@ -837,7 +837,7 @@ MRPointer_SetDataSub(VALUE val, MDEvent *ep, MyDocument *doc, int trackNo, int32
 			mode = kMDEventFieldData;
 			break;
 		case kMDEventTempo:
-			ed.floatValue = NUM2DBL(val);
+			ed.floatValue = (float)NUM2DBL(val);
 			mode = kMDEventFieldTempo;
 			break;
 		case kMDEventSMPTE:

@@ -229,7 +229,7 @@ s_RubyDialogItem_SetAttr(VALUE self, VALUE key, VALUE val)
 	} else if (key == sXSymbol || key == sYSymbol || key == sWidthSymbol || key == sHeightSymbol) {
 		/*  Frame components  */
 		RDRect frame;
-		float f = NUM2DBL(rb_Float(val));
+        float f = (float)NUM2DBL(rb_Float(val));
 		frame = RubyDialogCallback_frameOfItem(view);
 		if (key == sXSymbol)
 			frame.origin.x = f;
@@ -243,8 +243,8 @@ s_RubyDialogItem_SetAttr(VALUE self, VALUE key, VALUE val)
 	} else if (key == sOriginSymbol || key == sSizeSymbol) {
 		/*  Frame components  */
 		RDRect frame;
-		float f0 = NUM2DBL(rb_Float(Ruby_ObjectAtIndex(val, 0)));
-		float f1 = NUM2DBL(rb_Float(Ruby_ObjectAtIndex(val, 1)));
+		float f0 = (float)NUM2DBL(rb_Float(Ruby_ObjectAtIndex(val, 0)));
+		float f1 = (float)NUM2DBL(rb_Float(Ruby_ObjectAtIndex(val, 1)));
 		frame = RubyDialogCallback_frameOfItem(view);
 		if (key == sOriginSymbol) {
 			frame.origin.x = f0;
@@ -257,10 +257,10 @@ s_RubyDialogItem_SetAttr(VALUE self, VALUE key, VALUE val)
 	} else if (key == sFrameSymbol) {
 		/*  Frame (x, y, width, height)  */
 		RDRect frame;
-		frame.origin.x = NUM2DBL(rb_Float(Ruby_ObjectAtIndex(val, 0)));
-		frame.origin.y = NUM2DBL(rb_Float(Ruby_ObjectAtIndex(val, 1)));
-		frame.size.width = NUM2DBL(rb_Float(Ruby_ObjectAtIndex(val, 2)));
-		frame.size.height = NUM2DBL(rb_Float(Ruby_ObjectAtIndex(val, 3)));
+		frame.origin.x = (float)NUM2DBL(rb_Float(Ruby_ObjectAtIndex(val, 0)));
+		frame.origin.y = (float)NUM2DBL(rb_Float(Ruby_ObjectAtIndex(val, 1)));
+		frame.size.width = (float)NUM2DBL(rb_Float(Ruby_ObjectAtIndex(val, 2)));
+		frame.size.height = (float)NUM2DBL(rb_Float(Ruby_ObjectAtIndex(val, 3)));
 		RubyDialogCallback_setFrameOfItem(view, frame);
 	} else if (key == sFlexSymbol) {
 		/*  Flex flags: [left, top, right, bottom, width, height] (0: fixed, 1: flex)  */
@@ -623,10 +623,10 @@ s_RubyDialogItem_RefreshRect(int argc, VALUE *argv, VALUE self)
 	rval = rb_ary_to_ary(rval);
 	if (RARRAY_LEN(rval) != 4)
 		rb_raise(rb_eArgError, "The rectangle should be given as an array of four numerics (x, y, width, height)");
-	rect.origin.x = NUM2DBL(rb_Float(RARRAY_PTR(rval)[0]));
-	rect.origin.y = NUM2DBL(rb_Float(RARRAY_PTR(rval)[1]));
-	rect.size.width = NUM2DBL(rb_Float(RARRAY_PTR(rval)[2]));
-	rect.size.height = NUM2DBL(rb_Float(RARRAY_PTR(rval)[3]));
+	rect.origin.x = (float)NUM2DBL(rb_Float(RARRAY_PTR(rval)[0]));
+	rect.origin.y = (float)NUM2DBL(rb_Float(RARRAY_PTR(rval)[1]));
+	rect.size.width = (float)NUM2DBL(rb_Float(RARRAY_PTR(rval)[2]));
+	rect.size.height = (float)NUM2DBL(rb_Float(RARRAY_PTR(rval)[3]));
 	RubyDialogCallback_setNeedsDisplayInRect(view, rect, RTEST(fval));
 	return self;
 }
@@ -937,9 +937,9 @@ s_RubyDialog_Layout(int argc, VALUE *argv, VALUE self)
 	RDItem *layoutView, *ditem;
 	RDSize contentMinSize;
 	RDRect layoutFrame;
-	float col_padding = 8.0;  /*  Padding between columns  */
-	float row_padding = 8.0;  /*  Padding between rows  */
-	float margin = 10.0;
+	float col_padding = 8.0f;  /*  Padding between columns  */
+	float row_padding = 8.0f;  /*  Padding between rows  */
+	float margin = 10.0f;
 
 	dref = s_RubyDialog_GetController(self);
 	contentMinSize = RubyDialogCallback_windowMinSize(dref);
@@ -955,10 +955,10 @@ s_RubyDialog_Layout(int argc, VALUE *argv, VALUE self)
 		argc--;
 		oval1 = rb_hash_aref(oval, sPaddingSymbol);
 		if (rb_obj_is_kind_of(oval1, rb_cNumeric))
-			col_padding = row_padding = NUM2DBL(oval1);
+			col_padding = row_padding = (float)NUM2DBL(oval1);
 		oval1 = rb_hash_aref(oval, sMarginSymbol);
 		if (rb_obj_is_kind_of(oval1, rb_cNumeric))
-			margin = NUM2DBL(oval1);
+			margin = (float)NUM2DBL(oval1);
 	} else {
 		oval = Qnil;
 	}
@@ -1011,16 +1011,16 @@ s_RubyDialog_Layout(int argc, VALUE *argv, VALUE self)
 	
 	/*  Calculate required widths  */
 	for (j = 0; j < col; j++) {
-		fmin = 0.0;
+		fmin = 0.0f;
 		for (i = 0; i < row; i++) {
 			for (n = j; n >= 0; n--) {
 				f = sizes[i * col + n].width;
-				if (f > 0.0) {
-					f += (n > 0 ? widths[n - 1] : 0.0);
+				if (f > 0.0f) {
+					f += (n > 0 ? widths[n - 1] : 0.0f);
 					break;
 				}
 			}
-			if (j < col - 1 && sizes[i * col + j + 1].width == 0.0)
+			if (j < col - 1 && sizes[i * col + j + 1].width == 0.0f)
 				continue;  /*  The next right item is empty  */
 			if (fmin < f)
 				fmin = f;
@@ -1031,13 +1031,13 @@ s_RubyDialog_Layout(int argc, VALUE *argv, VALUE self)
 	}
 
 	/*  Calculate required heights  */
-	fmin = 0.0;
+	fmin = 0.0f;
 	for (i = 0; i < row; i++) {
 		for (j = 0; j < col; j++) {
 			for (n = i; n >= 0; n--) {
 				f = sizes[n * col + j].height;
 				if (f > 0.0) {
-					f += (n > 0 ? heights[n - 1] : 0.0);
+					f += (n > 0 ? heights[n - 1] : 0.0f);
 					break;
 				}
 			}
@@ -1073,10 +1073,10 @@ s_RubyDialog_Layout(int argc, VALUE *argv, VALUE self)
 				item = (RARRAY_PTR(items))[itag];
 				type = rb_ivar_get(item, SYM2ID(sTypeSymbol));
 				if (type == sTextSymbol)
-					offset = 3.0;
-				else offset = 0.0;
-				cell.origin.x = (j > 0 ? widths[j - 1] : 0.0);
-				cell.origin.y = (i > 0 ? heights[i - 1] : 0.0);
+					offset = 3.0f;
+				else offset = 0.0f;
+				cell.origin.x = (j > 0 ? widths[j - 1] : 0.0f);
+				cell.origin.y = (i > 0 ? heights[i - 1] : 0.0f);
 				for (k = j + 1; k < col; k++) {
 					if (itags[i * col + k] != -1)
 						break;
@@ -1087,8 +1087,8 @@ s_RubyDialog_Layout(int argc, VALUE *argv, VALUE self)
 						break;
 				}
 				cell.size.height = heights[k - 1] - cell.origin.y;
-				pt.x = cell.origin.x + col_padding * 0.5;
-				pt.y = cell.origin.y + row_padding * 0.5 + offset;
+				pt.x = cell.origin.x + col_padding * 0.5f;
+				pt.y = cell.origin.y + row_padding * 0.5f + offset;
 				{
 					/*  Handle item-specific options  */
 					/*  They can either be specified as layout options or as item attributes  */
@@ -1115,13 +1115,13 @@ s_RubyDialog_Layout(int argc, VALUE *argv, VALUE self)
 					if (!RTEST(opts[n]) || (oval1 = rb_hash_aref(opts[n], sAlignSymbol)) == Qnil)
 						oval1 = rb_ivar_get(item, SYM2ID(sAlignSymbol));
 					if (oval1 == sCenterSymbol)
-						pt.x += (cell.size.width - sizes[n].width - col_padding) * 0.5;
+						pt.x += (cell.size.width - sizes[n].width - col_padding) * 0.5f;
 					else if (oval1 == sRightSymbol)
 						pt.x += (cell.size.width - sizes[n].width) - col_padding;
 					if (!RTEST(opts[n]) || (oval1 = rb_hash_aref(opts[n], sVerticalAlignSymbol)) == Qnil)
 						oval1 = rb_ivar_get(item, SYM2ID(sVerticalAlignSymbol));
 					if (oval1 == sCenterSymbol)
-						pt.y += (cell.size.height - sizes[n].height - row_padding) * 0.5;
+						pt.y += (cell.size.height - sizes[n].height - row_padding) * 0.5f;
 					else if (oval1 == sBottomSymbol)
 						pt.y += (cell.size.height - sizes[n].height) - row_padding;
 				}
@@ -1192,8 +1192,8 @@ s_RubyDialog_Item(int argc, VALUE *argv, VALUE self)
 		hash = rb_hash_new();
 	else if (TYPE(hash) != T_HASH)
 		rb_raise(rb_eDialogError, "The second argument of Dialog#item must be a hash");
-	rect.size.width = rect.size.height = 1.0;
-	rect.origin.x = rect.origin.y = 0.0;
+	rect.size.width = rect.size.height = 1.0f;
+	rect.origin.x = rect.origin.y = 0.0f;
 
 	val = rb_hash_aref(hash, sTitleSymbol);
 	if (!NIL_P(val)) {
@@ -1214,20 +1214,20 @@ s_RubyDialog_Item(int argc, VALUE *argv, VALUE self)
 	brect.size.width += 8;
 */
 	/*  Set rect if specified  */
-	rect.origin.x = rect.origin.y = 0.0;
-	rect.size.width = rect.size.height = 0.0;
+	rect.origin.x = rect.origin.y = 0.0f;
+	rect.size.width = rect.size.height = 0.0f;
 	val = rb_hash_aref(hash, sXSymbol);
 	if (!NIL_P(val) && (dval = NUM2DBL(rb_Float(val))) > 0.0)
-		rect.origin.x = dval;
+		rect.origin.x = (float)dval;
 	val = rb_hash_aref(hash, sYSymbol);
 	if (!NIL_P(val) && (dval = NUM2DBL(rb_Float(val))) > 0.0)
-		rect.origin.y = dval;
+		rect.origin.y = (float)dval;
 	val = rb_hash_aref(hash, sWidthSymbol);
 	if (!NIL_P(val) && (dval = NUM2DBL(rb_Float(val))) > 0.0)
-		rect.size.width = dval;
+		rect.size.width = (float)dval;
 	val = rb_hash_aref(hash, sHeightSymbol);
 	if (!NIL_P(val) && (dval = NUM2DBL(rb_Float(val))) > 0.0)
-		rect.size.height = dval;
+		rect.size.height = (float)dval;
 
 	/*  Create a new DialogItem  */
 	new_item = rb_class_new_instance(0, NULL, rb_cDialogItem);
@@ -1537,7 +1537,7 @@ s_RubyDialog_StartTimer(int argc, VALUE *argv, VALUE self)
 	if (actval != Qnil)
 		rb_iv_set(self, "_timer_action", actval);
 	dval = NUM2DBL(rb_Float(itval));
-	if (RubyDialogCallback_startIntervalTimer(dref, dval) == 0)
+	if (RubyDialogCallback_startIntervalTimer(dref, (float)dval) == 0)
 		rb_raise(rb_eDialogError, "Cannot start timer for dialog");
 	return self;
 }
@@ -1585,7 +1585,7 @@ static VALUE
 s_RubyDialog_Size(VALUE self)
 {
 	RDSize size = RubyDialogCallback_windowSize(s_RubyDialog_GetController(self));
-	return rb_ary_new3(2, INT2NUM(floor(size.width + 0.5)), INT2NUM(floor(size.height + 0.5)));
+	return rb_ary_new3(2, INT2NUM((int)floor(size.width + 0.5)), INT2NUM((int)floor(size.height + 0.5)));
 }
 
 /*
@@ -1621,7 +1621,7 @@ static VALUE
 s_RubyDialog_MinSize(VALUE self)
 {
 	RDSize size = RubyDialogCallback_windowMinSize(s_RubyDialog_GetController(self));
-	return rb_ary_new3(2, INT2NUM(floor(size.width + 0.5)), INT2NUM(floor(size.height + 0.5)));
+	return rb_ary_new3(2, INT2NUM((int)floor(size.width + 0.5)), INT2NUM((int)floor(size.height + 0.5)));
 }
 
 /*
@@ -1861,7 +1861,7 @@ s_RubyDialog_doTableAction(VALUE val)
 			if (RARRAY_PTR(retval)[0] != Qnil) {
 				cval = rb_ary_to_ary(RARRAY_PTR(retval)[0]);
 				for (i = 0; i < 4 && i < RARRAY_LEN(cval); i++) {
-					fg[i] = NUM2DBL(rb_Float(RARRAY_PTR(cval)[i]));
+					fg[i] = (float)NUM2DBL(rb_Float(RARRAY_PTR(cval)[i]));
 				}
 				n = 1;
 			} else n = 0;
@@ -1869,7 +1869,7 @@ s_RubyDialog_doTableAction(VALUE val)
 		if (RARRAY_LEN(retval) >= 2 && bg != NULL) {
 			cval = rb_ary_to_ary(RARRAY_PTR(retval)[1]);
 			for (i = 0; i < 4 && i < RARRAY_LEN(cval); i++) {
-				bg[i] = NUM2DBL(rb_Float(RARRAY_PTR(cval)[i]));
+				bg[i] = (float)NUM2DBL(rb_Float(RARRAY_PTR(cval)[i]));
 			}
 			n |= 2;
 		}
@@ -2395,7 +2395,7 @@ s_RubyDialog_DrawEllipse(int argc, VALUE *argv, VALUE self)
 	rb_scan_args(argc, argv, "31", &xval, &yval, &rval1, &rval2);
 	if (rval2 == Qnil)
 		rval2 = rval1;
-	RubyDialogCallback_drawEllipse(dc, NUM2DBL(rb_Float(xval)), NUM2DBL(rb_Float(yval)), NUM2DBL(rb_Float(rval1)), NUM2DBL(rb_Float(rval2)));
+	RubyDialogCallback_drawEllipse(dc, (float)NUM2DBL(rb_Float(xval)), (float)NUM2DBL(rb_Float(yval)), (float)NUM2DBL(rb_Float(rval1)), (float)NUM2DBL(rb_Float(rval2)));
 	return Qnil;
 }
 
@@ -2423,14 +2423,14 @@ s_RubyDialog_DrawLine(int argc, VALUE *argv, VALUE self)
 			if (ncoords < 2)
 				rb_raise(rb_eDialogError, "Too few coordinates are given (requires at least two points)");
 			coords = (float *)calloc(sizeof(float), ncoords * 2);
-			coords[0] = NUM2DBL(rb_Float(RARRAY_PTR(aval)[0]));
-			coords[1] = NUM2DBL(rb_Float(RARRAY_PTR(aval)[1]));
+			coords[0] = (float)NUM2DBL(rb_Float(RARRAY_PTR(aval)[0]));
+			coords[1] = (float)NUM2DBL(rb_Float(RARRAY_PTR(aval)[1]));
 			for (i = 1; i < ncoords; i++) {
 				aval = rb_ary_to_ary(argv[i]);
 				if (RARRAY_LEN(aval) < 2)
 					rb_raise(rb_eDialogError, "The coordinate should be an array of two numerics");
-				coords[i * 2] = NUM2DBL(rb_Float(RARRAY_PTR(aval)[0]));
-				coords[i * 2 + 1] = NUM2DBL(rb_Float(RARRAY_PTR(aval)[1]));
+				coords[i * 2] = (float)NUM2DBL(rb_Float(RARRAY_PTR(aval)[0]));
+				coords[i * 2 + 1] = (float)NUM2DBL(rb_Float(RARRAY_PTR(aval)[1]));
 			}
 		} else {
 			/*  The third form  */
@@ -2441,7 +2441,7 @@ s_RubyDialog_DrawLine(int argc, VALUE *argv, VALUE self)
 				rb_raise(rb_eDialogError, "Too few coordinates are given (requires at least two points)");
 			coords = (float *)calloc(sizeof(float), ncoords * 2);
 			for (i = 0; i < ncoords * 2; i++) {
-				coords[i] = NUM2DBL(rb_Float(RARRAY_PTR(aval)[i]));
+				coords[i] = (float)NUM2DBL(rb_Float(RARRAY_PTR(aval)[i]));
 			}
 		}
 	} else {
@@ -2453,7 +2453,7 @@ s_RubyDialog_DrawLine(int argc, VALUE *argv, VALUE self)
 			rb_raise(rb_eDialogError, "An odd number of numerics are given; the coordinate values should be given in pairs");
 		coords = (float *)calloc(sizeof(float), ncoords * 2);
 		for (i = 0; i < ncoords * 2; i++) {
-			coords[i] = NUM2DBL(rb_Float(argv[i]));
+			coords[i] = (float)NUM2DBL(rb_Float(argv[i]));
 		}
 	}
 	RubyDialogCallback_drawLine(dc, ncoords, coords);
@@ -2488,9 +2488,9 @@ s_RubyDialog_DrawRectangle(int argc, VALUE *argv, VALUE self)
 		xval = RARRAY_PTR(xval)[0];
 	}
 	if (rval == Qnil)
-		r = 0.0;
-	else r = NUM2DBL(rb_Float(rval));
-	RubyDialogCallback_drawRectangle(dc, NUM2DBL(rb_Float(xval)), NUM2DBL(rb_Float(yval)), NUM2DBL(rb_Float(wval)), NUM2DBL(rb_Float(hval)), r);
+		r = 0.0f;
+	else r = (float)NUM2DBL(rb_Float(rval));
+	RubyDialogCallback_drawRectangle(dc, (float)NUM2DBL(rb_Float(xval)), (float)NUM2DBL(rb_Float(yval)), (float)NUM2DBL(rb_Float(wval)), (float)NUM2DBL(rb_Float(hval)), r);
 	return Qnil;
 }
 
@@ -2506,8 +2506,8 @@ s_RubyDialog_DrawText(VALUE self, VALUE sval, VALUE xval, VALUE yval)
 {
 	RDDeviceContext *dc = s_RubyDialog_GetDeviceContext(self);
 	const char *s = EncodedStringValuePtr(sval);
-	float x = NUM2DBL(rb_Float(xval));
-	float y = NUM2DBL(rb_Float(yval));
+	float x = (float)NUM2DBL(rb_Float(xval));
+	float y = (float)NUM2DBL(rb_Float(yval));
 	RubyDialogCallback_drawText(dc, s, x, y);
 	return Qnil;
 }
@@ -2542,7 +2542,7 @@ s_RubyDialog_Font(int argc, VALUE *argv, VALUE self)
 			VALUE kval = RARRAY_PTR(keys)[i];
 			VALUE aval = rb_hash_aref(hval, RARRAY_PTR(keys)[i]);
 			if (kval == sSizeSymbol) {
-				width = NUM2DBL(rb_Float(aval));
+				width = (float)NUM2DBL(rb_Float(aval));
 				args[i * 2] = "size";
 				args[i * 2 + 1] = &width;
 				args[i * 2 + 2] = NULL;
@@ -2619,18 +2619,18 @@ s_RubyDialog_Pen(int argc, VALUE *argv, VALUE self)
 			if (kval == sForeColorSymbol || kval == sColorSymbol) {
 				aval = rb_ary_to_ary(aval);
 				for (j = 0; j < RARRAY_LEN(aval) && j < 4; j++) {
-					forecolor[j] = NUM2DBL(rb_Float(RARRAY_PTR(aval)[j]));
+					forecolor[j] = (float)NUM2DBL(rb_Float(RARRAY_PTR(aval)[j]));
 				}
 				if (j < 4) {
 					for (; j < 3; j++)
-						forecolor[j] = 0.0;
-					forecolor[3] = 1.0;
+						forecolor[j] = 0.0f;
+					forecolor[3] = 1.0f;
 				}
 				args[i * 2] = "color";
 				args[i * 2 + 1] = forecolor;
 				args[i * 2 + 2] = NULL;
 			} else if (kval == sWidthSymbol) {
-				width = NUM2DBL(rb_Float(aval));
+				width = (float)NUM2DBL(rb_Float(aval));
 				args[i * 2] = "width";
 				args[i * 2 + 1] = &width;
 				args[i * 2 + 2] = NULL;
@@ -2688,12 +2688,12 @@ s_RubyDialog_Brush(int argc, VALUE *argv, VALUE self)
 			if (kval == sForeColorSymbol || kval == sColorSymbol) {
 				aval = rb_ary_to_ary(aval);
 				for (j = 0; j < RARRAY_LEN(aval) && j < 4; j++) {
-					forecolor[j] = NUM2DBL(rb_Float(RARRAY_PTR(aval)[j]));
+					forecolor[j] = (float)NUM2DBL(rb_Float(RARRAY_PTR(aval)[j]));
 				}
 				if (j < 4) {
 					for (; j < 3; j++)
-						forecolor[j] = 0.0;
-					forecolor[3] = 1.0;
+						forecolor[j] = 0.0f;
+					forecolor[3] = 1.0f;
 				}
 				args[i * 2] = "color";
 				args[i * 2 + 1] = forecolor;

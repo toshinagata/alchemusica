@@ -841,14 +841,14 @@ s_MREventSet_ModifyTick(int argc, VALUE *argv, VALUE self)
 		theData = [NSMutableData dataWithLength: sizeof(MDTickType) * n2];
 		tickp = (MDTickType *)[theData mutableBytes];		
 		while (MDPointerForwardWithPointSet(pt, pset, &idx) != NULL) {
-			tickp[n1] = NUM2DBL(rb_yield(pval));
+			tickp[n1] = (MDTickType)NUM2DBL(rb_yield(pval));
 			n1++;
 		}
         [MyDocument modifyTick: theData ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: MyDocumentModifySet destinationPositions: nil setSelection: YES];
 		return self;
 	} else if (rb_obj_is_kind_of(nval, rb_cNumeric)) {
 		if (mode == MyDocumentModifyMultiply)
-			theData = [NSNumber numberWithFloat: NUM2DBL(rb_Float(nval))];
+			theData = [NSNumber numberWithFloat: (float)NUM2DBL(rb_Float(nval))];
 		else
 			theData = [NSNumber numberWithInt: NUM2INT(rb_Integer(nval))];
         [MyDocument modifyTick: theData ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: mode destinationPositions: nil setSelection: YES];
@@ -944,7 +944,7 @@ s_MREventSet_ModifyCode(int argc, VALUE *argv, VALUE self)
 		return self;
 	} else if (rb_obj_is_kind_of(nval, rb_cNumeric)) {
 		if (mode == MyDocumentModifyMultiply)
-			theData = [NSNumber numberWithFloat: NUM2DBL(rb_Float(nval))];
+			theData = [NSNumber numberWithFloat: (float)NUM2DBL(rb_Float(nval))];
 		else
 			theData = [NSNumber numberWithInt: NUM2INT(rb_Integer(nval))];
 		[MyDocument modifyCodes: theData ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: mode];
@@ -1085,20 +1085,20 @@ s_MREventSet_ModifyDataSub(int argc, VALUE *argv, VALUE self, int kind)
 		theData = [NSMutableData dataWithLength: sizeof(float) * n2];
 		floatp = (float *)[theData mutableBytes];
 		while (MDPointerForwardWithPointSet(pt, pset, &idx) != NULL) {
-			floatp[i] = NUM2DBL(rb_Float(rb_yield(pval)));
+			floatp[i] = (float)NUM2DBL(rb_Float(rb_yield(pval)));
 			i++;
 		}
 		[MyDocument modifyData: theData forEventKind: kind ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: MyDocumentModifySet];
 		return self;
 	} else if (n3 == 1) {
-		theData = [NSNumber numberWithFloat: NUM2DBL(rb_Float(nval))];
+		theData = [NSNumber numberWithFloat: (float)NUM2DBL(rb_Float(nval))];
 		[MyDocument modifyData: theData forEventKind: kind ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: mode];
 		return self;
 	} else {
 		theData = [NSMutableData dataWithLength: sizeof(float) * n2];
 		floatp = (float *)[theData mutableBytes];
 		for (i = 0; i < n1 && i < n2; n1++) {
-			floatp[i] = NUM2DBL(rb_Float(nvalp[i]));
+			floatp[i] = (float)NUM2DBL(rb_Float(nvalp[i]));
 		}
 		while (i < n2) {
 			floatp[i] = floatp[n1 - 1];
@@ -1243,7 +1243,7 @@ s_MREventSet_ModifyDuration(int argc, VALUE *argv, VALUE self)
 		return self;
 	} else if (rb_obj_is_kind_of(nval, rb_cNumeric)) {
 		if (mode == MyDocumentModifyMultiply)
-			theData = [NSNumber numberWithFloat: NUM2DBL(rb_Float(nval))];
+			theData = [NSNumber numberWithFloat: (float)NUM2DBL(rb_Float(nval))];
 		else
 			theData = [NSNumber numberWithLong: (int32_t)(NUM2INT(rb_Integer(nval)))];
 		[MyDocument modifyDurations: theData ofMultipleEventsAt: psobj forMDTrack: ip->track inDocument: ip->doc mode: mode];

@@ -33,7 +33,7 @@ typedef struct ListWindowFilterRecord {
 	} *table;
 } ListWindowFilterRecord;
 
-@interface ListWindowController : NSWindowController
+@interface ListWindowController : NSWindowController <NSTableViewDataSource>
 {
     IBOutlet MyTableView *myEventTrackView;
     IBOutlet NSTextField *myInfoText;
@@ -136,5 +136,11 @@ typedef struct ListWindowFilterRecord {
 
 //- (BOOL)tableHeaderView:(MyTableHeaderView *)headerView mouseDown:(NSEvent *)theEvent;
 - (NSMenu *)tableHeaderView:(NSTableHeaderView *)headerView popUpMenuAtHeaderColumn:(int)column;
+
+//  Tick popup handling
+- (int)tagForTickIdentifier:(NSString *)identifier;
+- (NSString *)tickIdentifierForTag:(int)tag;
+
+- (void)showPlayPosition:(NSNotification *)notification;
 
 @end

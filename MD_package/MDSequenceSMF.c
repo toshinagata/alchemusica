@@ -80,7 +80,7 @@ MDSequenceSMFTempoToTempo(int32_t smfTempo)
         return kMDMaxTempo;
     else if (smfTempo > (int32_t)(60000000.0 / kMDMinTempo))
         return kMDMinTempo;
-    else return 60000000.0 / smfTempo;
+    else return (float)(60000000.0 / smfTempo);
 }
 
 #pragma mark ====== Reading SMF ======
@@ -176,7 +176,7 @@ MDSequenceReadSMFMetaEvent(MDSMFConvert *cref, MDEvent *eref)
 				MDSetData1(eref, s[0]);
 			} else if (n == kMDMetaTempo) {
 				MDSetKind(eref, kMDEventTempo);
-				MDSetTempo(eref, MDSequenceSMFTempoToTempo(s[0] * 65536.0 + s[1] * 256.0 + s[2]));
+				MDSetTempo(eref, MDSequenceSMFTempoToTempo(s[0] * 65536.0f + s[1] * 256.0f + s[2]));
 			} else if (n == kMDMetaSMPTE) {
 				MDSMPTERecord *smp = MDGetSMPTERecordPtr(eref);
 				MDSetKind(eref, kMDEventSMPTE);
@@ -359,7 +359,7 @@ MDSequenceReadSMFTrack(MDSMFConvert *cref)
 	
 		if (++count >= 1000) {
 			if (cref->callback != NULL) {
-				n = (*cref->callback)((double)FTELL(cref->stream) / cref->filesize * 100, cref->cbdata);
+				n = (*cref->callback)((float)FTELL(cref->stream) / cref->filesize * 100, cref->cbdata);
 				if (n == 0) {
 					result = kMDErrorUserInterrupt;
 					break;
@@ -871,7 +871,7 @@ MDSequenceWriteSMFTrackWithSelection(MDSMFConvert *cref, IntGroup *pset, char eo
 			
 		if (++count >= 1000) {
 			if (cref->callback != NULL) {
-				n = (*cref->callback)(100.0 * (cref->track_index + ((double)MDPointerGetPosition(ptr) / nevents)) / cref->trkno, cref->cbdata);
+				n = (*cref->callback)(100.0f * (cref->track_index + ((float)MDPointerGetPosition(ptr) / nevents)) / cref->trkno, cref->cbdata);
 				if (n == 0) {
 					result = kMDErrorUserInterrupt;
 					break;

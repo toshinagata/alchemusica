@@ -125,10 +125,10 @@ drawString(NSString *string, NSDictionary *attr, NSRect frame)
         sGrayTextAttribute = [[NSDictionary dictionaryWithObjectsAndKeys: [NSColor lightGrayColor], NSForegroundColorAttributeName, style, NSParagraphStyleAttributeName, font, NSFontAttributeName, nil] retain];
     }
 //    printf("value=%d\n", value);
-    x0 = floor(frame.origin.x);
-    x1 = x0 + floor(frame.size.width / 3);
-    x2 = x0 + floor(frame.size.width * 2 / 3);
-    x3 = x0 + floor(frame.size.width);    
+    x0 = (float)floor(frame.origin.x);
+    x1 = x0 + (float)floor(frame.size.width / 3);
+    x2 = x0 + (float)floor(frame.size.width * 2 / 3);
+    x3 = x0 + (float)floor(frame.size.width);
     frame.size.width = x1 - x0;
     if (value & kMDTrackAttributeRecord) {
         [[NSColor redColor] set];
@@ -156,12 +156,12 @@ drawString(NSString *string, NSDictionary *attr, NSRect frame)
 //    NSFrameRect(cellFrame);
     y0 = cellFrame.origin.y;
     y1 = cellFrame.origin.y + cellFrame.size.height;
-    [NSBezierPath strokeLineFromPoint: NSMakePoint(x0, y1 - 0.5) toPoint: NSMakePoint(x3, y1 - 0.5)];
-    [NSBezierPath strokeLineFromPoint: NSMakePoint(x0, y0 + 0.5) toPoint: NSMakePoint(x3, y0 + 0.5)];
-    [NSBezierPath strokeLineFromPoint: NSMakePoint(x0 + 0.5, y1) toPoint: NSMakePoint(x0 + 0.5, y0)];
-    [NSBezierPath strokeLineFromPoint: NSMakePoint(x1 + 0.5, y1) toPoint: NSMakePoint(x1 + 0.5, y0)];
-    [NSBezierPath strokeLineFromPoint: NSMakePoint(x2 + 0.5, y1) toPoint: NSMakePoint(x2 + 0.5, y0)];
-    [NSBezierPath strokeLineFromPoint: NSMakePoint(x3 - 0.5, y1) toPoint: NSMakePoint(x3 - 0.5, y0)];
+    [NSBezierPath strokeLineFromPoint: NSMakePoint(x0, y1 - 0.5f) toPoint: NSMakePoint(x3, y1 - 0.5f)];
+    [NSBezierPath strokeLineFromPoint: NSMakePoint(x0, y0 + 0.5f) toPoint: NSMakePoint(x3, y0 + 0.5f)];
+    [NSBezierPath strokeLineFromPoint: NSMakePoint(x0 + 0.5f, y1) toPoint: NSMakePoint(x0 + 0.5f, y0)];
+    [NSBezierPath strokeLineFromPoint: NSMakePoint(x1 + 0.5f, y1) toPoint: NSMakePoint(x1 + 0.5f, y0)];
+    [NSBezierPath strokeLineFromPoint: NSMakePoint(x2 + 0.5f, y1) toPoint: NSMakePoint(x2 + 0.5f, y0)];
+    [NSBezierPath strokeLineFromPoint: NSMakePoint(x3 - 0.5f, y1) toPoint: NSMakePoint(x3 - 0.5f, y0)];
     if (currentPartCode > 0) {
         switch(currentPartCode) {
             case 1: frame.origin.x = x0; frame.size.width = x1 - x0; break;

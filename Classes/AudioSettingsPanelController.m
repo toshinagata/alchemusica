@@ -59,7 +59,7 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 	if (knobValues == nil) {
 		knobValues = [[NSMutableArray arrayWithCapacity:kMDAudioNumberOfStreams] retain];
 		for (idx = 0; idx < kMDAudioNumberOfStreams; idx++) {
-			[knobValues addObject:[NSNumber numberWithFloat:0.0]];
+			[knobValues addObject:[NSNumber numberWithFloat:0.0f]];
 		}
 	}
 	for (idx = 0; idx < kMDAudioNumberOfStreams; idx++) {
@@ -149,20 +149,20 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 		}
 		if (MDAudioGetMixerBusAttributes(idx, &pan, &volume, &ampLeft, &ampRight, &peakLeft, &peakRight) == kMDNoError) {
 			int tagOffset = (idx % kMDAudioFirstIndexForOutputStream) + (idx >= kMDAudioFirstIndexForOutputStream ? kOutputTagOffset : 0);
-			ampLeft = (ampLeft * 1.6667) + 100.0;
-			ampRight = (ampRight * 1.6667) + 100.0;
-			if (ampLeft > 100.0)
-				ampLeft = 100.0;
-			if (ampLeft < 0.0)
-				ampLeft = 0.0;
-			if (ampRight > 100.0)
-				ampRight = 100.0;
-			if (ampRight < 0.0)
-				ampRight = 0.0;
+			ampLeft = (ampLeft * 1.6667f) + 100.0f;
+			ampRight = (ampRight * 1.6667f) + 100.0f;
+			if (ampLeft > 100.0f)
+				ampLeft = 100.0f;
+			if (ampLeft < 0.0f)
+				ampLeft = 0.0f;
+			if (ampRight > 100.0f)
+				ampRight = 100.0f;
+			if (ampRight < 0.0f)
+				ampRight = 0.0f;
 			/*  The pan slider uses 60-100 (for 0 to 0.5) and 0-40 (for 0.5 to 1.0) */
-			[[self viewWithTag: kPanKnobBase + tagOffset] setFloatValue: (pan - 0.5) * 80 + (pan < 0.5 ? 100 : 0)];
+			[[self viewWithTag: kPanKnobBase + tagOffset] setFloatValue: (pan - 0.5f) * 80 + (pan < 0.5f ? 100 : 0)];
 			[knobValues replaceObjectAtIndex:idx withObject:[NSNumber numberWithFloat:pan]];
-			[[self viewWithTag: kVolumeSliderBase + tagOffset] setFloatValue: volume * 100.0];
+			[[self viewWithTag: kVolumeSliderBase + tagOffset] setFloatValue: volume * 100.0f];
 			[[self viewWithTag: kLeftLevelIndicatorBase + tagOffset] setFloatValue: ampLeft];
 			[[self viewWithTag: kRightLevelIndicatorBase + tagOffset] setFloatValue: ampRight];
 		}
@@ -183,7 +183,7 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 	int idx = (int)[sender tag] - kVolumeSliderBase;
 	if (idx >= kOutputTagOffset)
 		idx += (kMDAudioFirstIndexForOutputStream - kOutputTagOffset);
-	MDAudioSetMixerVolume(idx, [sender floatValue] * 0.01);
+	MDAudioSetMixerVolume(idx, [sender floatValue] * 0.01f);
 }
 
 - (IBAction)panKnobMoved:(id)sender
@@ -193,11 +193,11 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 	if (idx >= kOutputTagOffset)
 		idx += (kMDAudioFirstIndexForOutputStream - kOutputTagOffset);
 	pan = [sender floatValue];
-	pan = (pan >= 50.0 ? pan - 100.0 : pan) / 80.0 + 0.5;
+	pan = (pan >= 50.0f ? pan - 100.0f : pan) / 80.0f + 0.5f;
 	opan = [[knobValues objectAtIndex:idx] floatValue];
-	if (pan < 0.0 || pan > 1.0 || (opan < 0.25 && pan > 0.75) || (opan > 0.75 && pan < 0.25)) {
+	if (pan < 0.0f || pan > 1.0f || (opan < 0.25f && pan > 0.75f) || (opan > 0.75f && pan < 0.25f)) {
 		/*  Do not change value  */
-		[sender setFloatValue:(opan - 0.5) * 80 + (opan < 0.5 ? 100 : 0)];
+		[sender setFloatValue:(opan - 0.5f) * 80 + (opan < 0.5f ? 100 : 0)];
 		return;
 	}
 	[knobValues replaceObjectAtIndex:idx withObject:[NSNumber numberWithFloat:pan]];

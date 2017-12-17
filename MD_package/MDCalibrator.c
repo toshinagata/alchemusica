@@ -105,7 +105,7 @@ MDCalibratorCalculateTime(MDCalibrator *inCalib, MDTickType inTick)
 		time_before = inCalib->data_before.time;
 		tempo = MDCalibratorGetTempo(inCalib);
 	} else {
-		tempo = 120.0;
+		tempo = 120.0f;
 		tick_before = 0;
 		time_before = 0;
 	}
@@ -694,7 +694,7 @@ MDCalibratorGetTempo(MDCalibrator *inCalib)
 		}
 		inCalib = inCalib->chain;
 	}
-	return 120.0;
+	return 120.0f;
 }
 
 /* --------------------------------------

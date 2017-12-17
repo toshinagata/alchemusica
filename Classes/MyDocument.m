@@ -425,7 +425,7 @@ callback(float progress, void *data)
 {
 	MDSequence *sequence = [[self myMIDISequence] mySequence];
 	if (sequence == NULL)
-		return 480.0;
+		return 480.0f;
 	else return (float)MDSequenceGetTimebase(sequence);
 }
 
@@ -458,7 +458,7 @@ callback(float progress, void *data)
 - (NSColor *)colorForTrack: (int)track enabled: (BOOL)flag
 {
 	NSColor *color;
-	color = [NSColor colorWithDeviceHue: (float)(track * 2 % 31) / 31.0 saturation: 1.0 brightness: 1.0 - 0.1 * (track / 31) alpha: (flag ? 1.0 : 0.5)];
+	color = [NSColor colorWithDeviceHue: (float)(track * 2 % 31) / 31.0f saturation: 1.0f brightness: 1.0f - 0.1f * (track / 31) alpha: (flag ? 1.0f : 0.5f)];
 //	if (!flag)
 //		color = [color shadowWithLevel: 0.5];
 	return color;
@@ -468,7 +468,7 @@ callback(float progress, void *data)
 {
 	static NSColor *sColorEditingRange;
 	if (sColorEditingRange == nil) {
-		sColorEditingRange = [[NSColor colorWithDeviceRed: 1.0 green: 0.9 blue: 1.0 alpha: 1.0] retain];
+		sColorEditingRange = [[NSColor colorWithDeviceRed: 1.0f green: 0.9f blue: 1.0f alpha: 1.0f] retain];
 	}
 	return sColorEditingRange;
 }
@@ -477,7 +477,7 @@ callback(float progress, void *data)
 {
 	static NSColor *sColorSelectingRange;
 	if (sColorSelectingRange == nil) {
-		sColorSelectingRange = [[NSColor colorWithDeviceRed: 0.5 green: 0.5 blue: 1.0 alpha: 1.0] retain];
+		sColorSelectingRange = [[NSColor colorWithDeviceRed: 0.5f green: 0.5f blue: 1.0f alpha: 1.0f] retain];
 	}
 	return sColorSelectingRange;
 }
@@ -683,6 +683,15 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 			MyAppCallback_messageBox("Track data has some inconsistency", "Internal Error", 0, 0);
 		}
 	}
+}
+
+- (void)trackInserted: (NSNotification *)notification {
+}
+
+- (void)trackDeleted: (NSNotification *)notification {
+}
+
+- (void)documentSelectionDidChange: (NSNotification *)notification {
 }
 
 //- (void)postSelectionDidChangeNotification: (int32_t)trackNo selectionChange: (IntGroupObject *)set sender: (id)sender
@@ -2869,11 +2878,11 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
                 tick1 = MDGetTick(ep);
                 tick2 = tick1 + MDGetDuration(ep);
                 if (tick2 < endTick)
-                    tick2 = startTick + ((double)tick2 - startTick) * newDuration / (endTick - startTick);
+                    tick2 = (MDTickType)(startTick + ((double)tick2 - startTick) * newDuration / (endTick - startTick));
                 else
                     tick2 += newDuration - (endTick - startTick);
                 if (tick1 >= startTick)
-                    tick1 = startTick + ((double)tick1 - startTick) * newDuration / (endTick - startTick);
+                    tick1 = (MDTickType)(startTick + ((double)tick1 - startTick) * newDuration / (endTick - startTick));
                 *mp++ = tick2 - tick1;
             }
             [self modifyDurations:dt ofMultipleEventsAt:psobj inTrack:trackNo mode:MyDocumentModifySet];
@@ -2890,7 +2899,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 			for (ep = MDPointerCurrent(pt); ep != NULL; ep = MDPointerForward(pt)) {
 				MDTickType tick = MDGetTick(ep);
 				if (tick < endTick)
-					tick = startTick + ((double)tick - startTick) * newDuration / (endTick - startTick);
+                    tick = startTick + (MDTickType)(((double)tick - startTick) * newDuration / (endTick - startTick));
 				else
 					tick += newDuration - (endTick - startTick);
 				*mp++ = tick;
@@ -2936,7 +2945,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 		return;
 	}
 	if (n > 0) {
-        [self scaleTimeFrom:dp[0] to:dp[1] newDuration:dp[2] insertTempo:dp[3] setSelection:YES];
+        [self scaleTimeFrom:(float)dp[0] to:(float)dp[1] newDuration:(float)dp[2] insertTempo:(float)dp[3] setSelection:YES];
 		free(dp);
 	}
 }
@@ -2958,9 +2967,9 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 		id obj = MyAppCallback_getObjectGlobalSettings(QuantizeNoteKey);
 		note = (obj ? [obj floatValue] : [self timebase]);
 		obj = MyAppCallback_getObjectGlobalSettings(QuantizeStrengthKey);
-		strength = (obj ? [obj floatValue] : 1.0);
+		strength = (obj ? [obj floatValue] : 1.0f);
 		obj = MyAppCallback_getObjectGlobalSettings(QuantizeSwingKey);
-		swing = (obj ? [obj floatValue] : 0.5);
+		swing = (obj ? [obj floatValue] : 0.5f);
 		for (trackNo = [[self myMIDISequence] trackCount] - 1; trackNo >= 1; trackNo--) {
 			MDTickType *tptr;
 			int32_t n1, n2;
@@ -2998,7 +3007,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 					nextBaseTick = MDCalibratorMeasureToTick(calib, ++baseMeasure, 0, 0);
 				}
 				d = (double)(etick - baseTick) / (note * 2.0);
-				n2 = floor(d);
+				n2 = (int)floor(d);
 				d -= n2;
 				targetTick = baseTick + n2 * note * 2;
 				/*
@@ -3012,7 +3021,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 				} else {
 					targetTick += note * 2;
 				}
-				etick = floor(etick + (targetTick - etick) * strength + 0.5);
+				etick = (int)floor(etick + (targetTick - etick) * strength + 0.5);
 				tptr[n1++] = etick;
 			}
             [self modifyTick:dt ofMultipleEventsAt:psobj inTrack:trackNo mode:MyDocumentModifySet destinationPositions:nil setSelection:NO];
@@ -3364,7 +3373,7 @@ isConductorEvent(const MDEvent *ep, int32_t position, void *inUserData)
     currentTime = MDPlayerGetTime([seq myPlayer]);
     currentTick = MDCalibratorTimeToTick([seq sharedCalibrator], currentTime);
     if ([[info valueForKey: MyRecordingInfoStopFlagKey] boolValue]) {
-        endTick = [[info valueForKey: MyRecordingInfoStopTickKey] doubleValue];
+        endTick = (int)[[info valueForKey: MyRecordingInfoStopTickKey] doubleValue];
         if (currentTick < endTick)
             endTick = currentTick;
     } else endTick = currentTick;
@@ -3373,7 +3382,7 @@ isConductorEvent(const MDEvent *ep, int32_t position, void *inUserData)
 	if (newTrack != nil) {
 		int destChannel;
 		recIndex = [[info valueForKey: MyRecordingInfoTargetTrackKey] intValue];
-		startTick = [[info valueForKey: MyRecordingInfoStartTickKey] doubleValue];
+		startTick = (int)[[info valueForKey: MyRecordingInfoStartTickKey] doubleValue];
 		if (recIndex < 0 || recIndex >= [seq trackCount]) {
 			recIndex = [seq trackCount];
 			destChannel = [[info valueForKey: MyRecordingInfoDestinationChannelKey] intValue];
@@ -3476,7 +3485,7 @@ isConductorEvent(const MDEvent *ep, int32_t position, void *inUserData)
 			}
 		}
 	}
-	startTick = [[info valueForKey: MyRecordingInfoStartTickKey] doubleValue];
+	startTick = (int)[[info valueForKey: MyRecordingInfoStartTickKey] doubleValue];
     if ([[self myMIDISequence] startAudioRecordingWithName: fullname] == kMDNoError)
         return YES;
     else errmsg = @"Failed to record audio";

@@ -46,7 +46,7 @@ typedef struct TimeScalingRecord {
 
 + (float)minHeight
 {
-	return 36.0;
+	return 36.0f;
 }
 
 - (int)clientViewType
@@ -74,7 +74,7 @@ typedef struct TimeScalingRecord {
     NSRect visibleRect = [self visibleRect];
     float editingRangeStartX, editingRangeEndX;
 
-    basey = visibleRect.origin.y + 0.5;
+    basey = visibleRect.origin.y + 0.5f;
 	ppt = [dataSource pixelsPerTick];
 	limitx = [dataSource sequenceDurationInQuarter] * [dataSource pixelsPerQuarter];
 
@@ -86,8 +86,8 @@ typedef struct TimeScalingRecord {
     /*  Draw ticks, labels, and time signatures  */
     maxLabelWidth = [@"0000:00:0000" sizeWithAttributes: nil].width;
     originx = aRect.origin.x - maxLabelWidth;
-    if (originx < 0.0)
-        originx = 0.0;
+    if (originx < 0.0f)
+        originx = 0.0f;
 	beginTick = originx / ppt;
 	endTick = (aRect.origin.x + aRect.size.width) / ppt + 1;
 	while (beginTick < endTick) {
@@ -107,12 +107,12 @@ typedef struct TimeScalingRecord {
         sigNumerator = (sig1 == NULL ? 4 : MDGetMetaDataPtr(sig1)[0]);
         if (sigNumerator == 0)
             sigNumerator = 4;
-        [[NSString stringWithFormat: @"%d/%d", sigNumerator, sigDenominator] drawAtPoint: NSMakePoint(startx, basey + 22.0) withAttributes: nil clippingRect: aRect];
-		numLines = floor((nextSigTick - sigTick) * ppt / interval) + 1;
-		i = (startx >= originx ? 0 : floor((originx - startx) / interval));
+        [[NSString stringWithFormat: @"%d/%d", sigNumerator, sigDenominator] drawAtPoint: NSMakePoint(startx, basey + 22.0f) withAttributes: nil clippingRect: aRect];
+        numLines = (int)floor((nextSigTick - sigTick) * ppt / interval) + 1;
+		i = (startx >= originx ? 0 : (int)floor((originx - startx) / interval));
 		[[NSColor blackColor] set];
 		for ( ; i < numLines; i++) {
-            pt1 = NSMakePoint(floor(startx + i * interval) + 0.5, basey);
+            pt1 = NSMakePoint((CGFloat)(floor(startx + i * interval) + 0.5), basey);
             pt2.x = pt1.x;
 			if (pt1.x > limitx)
 				[[NSColor grayColor] set];
@@ -132,15 +132,15 @@ typedef struct TimeScalingRecord {
                     //  The major tick interval < beat
                     label = [NSString stringWithFormat: @"%d:%d:%d", (int)n1, (int)n2, (int)n3];
                 }
-                [label drawAtPoint: NSMakePoint(floor(pt1.x), floor(pt1.y + 10.0)) withAttributes: nil clippingRect: aRect];
+                [label drawAtPoint: NSMakePoint((CGFloat)floor(pt1.x), (CGFloat)floor(pt1.y + 10.0)) withAttributes: nil clippingRect: aRect];
             }
 			if (pt1.x >= aRect.origin.x && pt1.x <= aRect.origin.x + aRect.size.width) {
                 /*  Draw axis marks */
 				if (i % majorCount == 0) {
-                    pt2.y = pt1.y + 9.0;
+                    pt2.y = pt1.y + 9.0f;
                 } else if (i % mediumCount == 0)
-                    pt2.y = pt1.y + 6.0;
-                else pt2.y = pt1.y + 3.0;
+                    pt2.y = pt1.y + 6.0f;
+                else pt2.y = pt1.y + 3.0f;
                 [NSBezierPath strokeLineFromPoint: pt1 toPoint: pt2];
             }
 		}
@@ -157,14 +157,14 @@ typedef struct TimeScalingRecord {
 		if (sEndEditingImage == nil) {
 			sEndEditingImage = [[NSImage allocWithZone: [self zone]] initWithContentsOfFile: [[NSBundle mainBundle] pathForResource: @"EndEditingRange.png" ofType: nil]];
 		}
-		pt1.x = editingRangeStartX - 5.0;
-		pt1.y = visibleRect.origin.y + 1.0;
+		pt1.x = editingRangeStartX - 5.0f;
+		pt1.y = visibleRect.origin.y + 1.0f;
 		if (pt1.x >= aRect.origin.x && pt1.x < aRect.origin.x + aRect.size.width) {
-            [sStartEditingImage drawAtPoint: pt1 fromRect: NSZeroRect operation: NSCompositeSourceAtop fraction: 1.0];
+            [sStartEditingImage drawAtPoint: pt1 fromRect: NSZeroRect operation: NSCompositeSourceAtop fraction: 1.0f];
 		}
 		pt1.x = editingRangeEndX;
 		if (pt1.x >= aRect.origin.x && pt1.x < aRect.origin.x + aRect.size.width) {
-            [sEndEditingImage drawAtPoint: pt1 fromRect: NSZeroRect operation: NSCompositeSourceAtop fraction: 1.0];
+            [sEndEditingImage drawAtPoint: pt1 fromRect: NSZeroRect operation: NSCompositeSourceAtop fraction: 1.0f];
 		}
 	}
 	
@@ -173,11 +173,11 @@ typedef struct TimeScalingRecord {
 		float defaultLineWidth;
 		pt1.x = pt2.x = limitx;
 		pt1.y = basey;
-		pt2.y = basey + 12.0;
+		pt2.y = basey + 12.0f;
 		[NSBezierPath strokeLineFromPoint: pt1 toPoint: pt2];
 		defaultLineWidth = [NSBezierPath defaultLineWidth];
-		[NSBezierPath setDefaultLineWidth: 2.0];
-		pt1.x = pt2.x += 3.0;
+		[NSBezierPath setDefaultLineWidth: 2.0f];
+		pt1.x = pt2.x += 3.0f;
 		[NSBezierPath strokeLineFromPoint: pt1 toPoint: pt2];
 		[NSBezierPath setDefaultLineWidth: defaultLineWidth];
 	}
@@ -199,8 +199,8 @@ typedef struct TimeScalingRecord {
 		float ppt = [dataSource pixelsPerTick];
 		[(MyDocument *)[dataSource document] getEditingRangeStart: &startTick end: &endTick];
 		if (startTick >= 0 && startTick < kMDMaxTick && endTick >= startTick) {
-			startx = floor(startTick * ppt);
-			endx = floor(endTick * ppt);
+			startx = (float)floor(startTick * ppt);
+			endx = (float)floor(endTick * ppt);
 			if (startx - 5 <= pt.x && pt.x <= startx)
 				return -1;
 			if (endx <= pt.x && pt.x <= endx + 5)
@@ -246,7 +246,7 @@ typedef struct TimeScalingRecord {
 			MDTickType tick = timeScaling->originalTicks[i][j];
 			if (timeScaling->newEndTick != timeScaling->endTick) {
 				if (tick < timeScaling->endTick)
-					tick = timeScaling->startTick + (double)(tick - timeScaling->startTick) * (timeScaling->newEndTick - timeScaling->startTick) / (timeScaling->endTick - timeScaling->startTick);
+                    tick = timeScaling->startTick + (MDTickType)((double)(tick - timeScaling->startTick) * (timeScaling->newEndTick - timeScaling->startTick) / (timeScaling->endTick - timeScaling->startTick));
 				else
 					tick += (timeScaling->newEndTick - timeScaling->endTick);
 			}
@@ -379,8 +379,8 @@ typedef struct TimeScalingRecord {
 		/*  Set the selection paths for other clientViews  */
 		for (i = 1; (view = [dataSource clientViewAtIndex: i]) != nil; i++) {
 			NSRect viewRect = [view bounds];
-			rect.origin.y = viewRect.origin.y - 1.0;
-			rect.size.height = viewRect.size.height + 2.0;
+			rect.origin.y = viewRect.origin.y - 1.0f;
+			rect.size.height = viewRect.size.height + 2.0f;
 			[view setSelectRegion: [NSBezierPath bezierPathWithRect: rect]];
 		}
 	}
@@ -471,8 +471,8 @@ typedef struct TimeScalingRecord {
 		if (isDragging) {
 			pt2 = [[selectPoints objectAtIndex: 1] pointValue];
 		} else pt2 = pt1;
-		tick1 = floor(pt1.x / ppt);
-		tick2 = floor(pt2.x / ppt);
+		tick1 = (MDTickType)floor(pt1.x / ppt);
+		tick2 = (MDTickType)floor(pt2.x / ppt);
 		if (tick1 < 0)
 			tick1 = 0;
 		if (tick2 < 0)

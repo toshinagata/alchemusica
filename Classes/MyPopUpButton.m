@@ -69,8 +69,8 @@ static NSImage *sTriangleImage, *sDoubleTriangleImage;
     theTitle = [item title];
     theRect = [self bounds];
     if ([self isEnabled])
-        fraction = 1.0;
-    else fraction = 0.5;
+        fraction = 1.0f;
+    else fraction = 0.5f;
     if (theTitle != nil)
         [[theTitle retain] autorelease];
     [item setTitle:@""];
@@ -98,7 +98,8 @@ static NSImage *sTriangleImage, *sDoubleTriangleImage;
         [self superDrawRect:aRect];
         if (theTitle != nil) {
             //  We draw the title by ourselves and restore title
-            font = [NSFont labelFontOfSize:[NSFont systemFontSizeForControlSize:[self controlSize]]];
+            NSControlSize controlSize = [[self cell] controlSize];
+            font = [NSFont labelFontOfSize:[NSFont systemFontSizeForControlSize:controlSize]];
             attr = [NSMutableDictionary dictionaryWithObjectsAndKeys:
                     font, NSFontAttributeName,
                     nil];

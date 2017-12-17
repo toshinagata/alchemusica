@@ -52,19 +52,19 @@
 	if (labels == nil)
 		[self recalcLabels];
 	rect = [self bounds];
-	pt = NSMakePoint(rect.origin.x + rect.size.width - 0.5, rect.origin.y);
+	pt = NSMakePoint(rect.origin.x + rect.size.width - 0.5f, rect.origin.y);
 	[NSBezierPath strokeLineFromPoint: pt toPoint: NSMakePoint(pt.x, pt.y + rect.size.height)];
 //	rect.size.height = 0.0;
-	rect.origin.x = rect.origin.x + rect.size.width - 32.0;
+	rect.origin.x = rect.origin.x + rect.size.width - 32.0f;
     rect.size.height = [[NSWindowController sharedLayoutManager] defaultLineHeightForFont:[GraphicRulerView rulerLabelFont]];
-	rect.size.width = 32.0;
+	rect.size.width = 32.0f;
 	scale = [(GraphicClientView *)[self clientView] yScale];
 	for (index = -17; index <= +19; index++) {
 		n = MDEventStaffIndexToNoteNumber(index);
 		if (n < 0 || n >= 128)
 			continue;
         pt = [self convertPoint: NSMakePoint(0, n * scale) fromView: clientView];
-        rect.origin.y = pt.y - rect.size.height * 0.2;
+        rect.origin.y = pt.y - rect.size.height * 0.2f;
         if (NSIntersectsRect(rect, aRect)) {
             [[labels objectAtIndex: index + 17] drawAtPoint: rect.origin withAttributes: nil];
         }

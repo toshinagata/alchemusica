@@ -117,11 +117,11 @@ typedef int64_t	MDTimeType;
 #define kMDMaxTime		((MDTimeType)10000000000000.0)
 #define kMDNegativeTime ((MDTimeType)-1)
 
-#define kMDMaxTempo		100000.0	/*  Somewhat arbitrary (anything less than 60000000)  */
-#define kMDMinTempo		3.60		/*  Quite strict  */
+#define kMDMaxTempo		100000.0f	/*  Somewhat arbitrary (anything less than 60000000)  */
+#define kMDMinTempo		3.60f		/*  Quite strict  */
 
-#define kMDMaxData      80000000.0
-#define kMDMinData      -80000000.0
+#define kMDMaxData      80000000.0f
+#define kMDMinData      -80000000.0f
 
 #define kMDMaxPosition  0x7ffffff0
 #define kMDNegativePosition -1

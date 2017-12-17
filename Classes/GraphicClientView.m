@@ -29,7 +29,7 @@
 
 + (float)minHeight
 {
-	return 32.0;
+	return 32.0f;
 }
 
 - (int)clientViewType
@@ -41,11 +41,11 @@
 {
     self = [super initWithFrame: rect];
     if (self) {
-        minValue = 0.0;
-        maxValue = 128.0;
+        minValue = 0.0f;
+        maxValue = 128.0f;
 		dataSource = nil;
-		visibleRangeMin = 0.0;
-		visibleRangeMax = 1.0;
+		visibleRangeMin = 0.0f;
+		visibleRangeMax = 1.0f;
 		autoScaleOnResizing = YES;
     }
     return self;
@@ -110,8 +110,8 @@
 	float ppt = [dataSource pixelsPerTick];
 	[(MyDocument *)[dataSource document] getEditingRangeStart: &startTick end: &endTick];
 	if (startTick >= 0 && startTick < kMDMaxTick && endTick >= startTick) {
-		startx = floor(startTick * ppt);
-		endx = floor(endTick * ppt);
+		startx = (float)floor(startTick * ppt);
+		endx = (float)floor(endTick * ppt);
 		rect = NSIntersectionRect(aRect, NSMakeRect(startx, aRect.origin.y, endx - startx, aRect.size.height));
 		[[MyDocument colorForEditingRange] set];
 		NSRectFillUsingOperation(rect, NSCompositeSourceAtop);
@@ -150,7 +150,7 @@
     NSRect rect;
     if (maxValue > minValue) {
         rect = [self frame];
-        rect.size.height = floor(y * (maxValue - minValue) + 0.5);
+        rect.size.height = (CGFloat)floor(y * (maxValue - minValue) + 0.5);
         [self setFrame: rect];
     }
 }
@@ -160,7 +160,7 @@
 	float ys;
     if (maxValue > minValue)
         ys = [self frame].size.height / (maxValue - minValue);
-    else ys = 0.0;
+    else ys = 0.0f;
 	return ys;
 }
 
@@ -228,7 +228,7 @@
 {
 	NSRect clipBounds = [[self superview] bounds];
 	NSRect frame = [self frame];
-	frame.size.height = floor(clipBounds.size.height / (visibleRangeMax - visibleRangeMin) + 0.5);
+	frame.size.height = (CGFloat)floor(clipBounds.size.height / (visibleRangeMax - visibleRangeMin) + 0.5);
 	[self setFrame:frame];
 	clipBounds.origin.y = visibleRangeMin * frame.size.height;
 	[self scrollPoint:clipBounds.origin];
@@ -265,7 +265,7 @@
     NSRect rect;
     if (selectionPath != nil) {
         rect = [selectionPath bounds];
-		rect = NSInsetRect(rect, -0.5, -0.5);
+		rect = NSInsetRect(rect, -0.5f, -0.5f);
         rect = [self willInvalidateSelectRect: rect];
 //        NSEraseRect(rect);
         rect = NSIntersectionRect(rect, [self visibleRect]);
@@ -295,10 +295,10 @@
 				}
 			} else {
 				NSRect bounds = [self bounds];
-				rect.origin.y = bounds.origin.y - 1.0;
-				rect.size.height = bounds.size.height + 2.0;
+				rect.origin.y = bounds.origin.y - 1.0f;
+				rect.size.height = bounds.size.height + 2.0f;
 			}
-			rect = NSInsetRect(rect, -0.5, -0.5);
+			rect = NSInsetRect(rect, -0.5f, -0.5f);
             [selectionPath release];
             selectionPath = [[NSBezierPath bezierPathWithRect: rect] retain];
         }
@@ -345,7 +345,7 @@
 - (void)drawSelectRegion
 {
     if (selectionPath != nil) {
-		[[[MyDocument colorForSelectingRange] colorWithAlphaComponent: 0.1] set];
+		[[[MyDocument colorForSelectingRange] colorWithAlphaComponent: 0.1f] set];
 		[selectionPath fill];
         [[NSColor blackColor] set];
         [selectionPath stroke];

@@ -38,7 +38,7 @@ static RubyConsoleWindowController *shared;
 {
 	NSFont *font;
 	[super windowDidLoad];
-	font = [NSFont userFixedPitchFontOfSize:11.0];
+	font = [NSFont userFixedPitchFontOfSize:11.0f];
 	[consoleView setFont:font];
     [consoleView setEnabledTextCheckingTypes:0];  //  Disable "smart=***"
 }

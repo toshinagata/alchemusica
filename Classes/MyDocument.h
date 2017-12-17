@@ -156,6 +156,13 @@ typedef enum MyDocumentModifyMode {
 - (BOOL)addSelection: (IntGroupObject *)set inTrack: (int32_t)trackNo sender: (id)sender;
 - (BOOL)isSelectedAtPosition: (int32_t)position inTrack: (int32_t)trackNo;
 
+//  Notification handlers
+- (void)selectionWillChange: (NSNotification *)notification;
+- (void)trackModified: (NSNotification *)notification;
+- (void)trackInserted: (NSNotification *)notification;
+- (void)trackDeleted: (NSNotification *)notification;
+- (void)documentSelectionDidChange: (NSNotification *)notification;
+
 //- (void)setNeedsUpdateEditingRange: (BOOL)flag;
 - (void)getEditingRangeStart: (MDTickType *)startTick end: (MDTickType *)endTick;
 - (void)setEditingRangeStart: (MDTickType)startTick end: (MDTickType)endTick;

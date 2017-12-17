@@ -52,15 +52,15 @@
 	static NSColor *myColors[] = {NULL, NULL, NULL, NULL, NULL, NULL};
 	NSRect aRect = [self bounds];
 	if (myColors[0] == NULL) {
-		static float myFloatColors[] = {0.5, 0.5, 0.92, 0.92, 0.85, 0.85};
+		static float myFloatColors[] = {0.5f, 0.5f, 0.92f, 0.92f, 0.85f, 0.85f};
 		int i;
 		for (i = 0; i < sizeof(myFloatColors) / sizeof(myFloatColors[0]); i++) {
 			float f = myFloatColors[i];
-			myColors[i] = [[NSColor colorWithDeviceWhite: f alpha: 1.0] retain];
+			myColors[i] = [[NSColor colorWithDeviceWhite: f alpha: 1.0f] retain];
 		}
 	}
 	aRect = NSDrawColorTiledRects(aRect, rect, mySides, myColors, 6);
-	[[NSColor colorWithDeviceWhite: 0.8 alpha: 1.0] set];
+	[[NSColor colorWithDeviceWhite: 0.8f alpha: 1.0f] set];
 	NSRectFill(aRect);
 
 	if ([[self window] firstResponder] == self) {

@@ -277,7 +277,7 @@ MDRingBufferGetTimeBounds(MDRingBuffer *ring, MDSampleTime *startTime, MDSampleT
 int
 MDRingBufferFrameOffset(MDRingBuffer *ring, MDSampleTime frameNumber)
 {
-	return (frameNumber & ring->capacityFramesMask) * ring->bytesPerFrame;
+    return (int)((frameNumber & ring->capacityFramesMask) * ring->bytesPerFrame);
 }
 
 int

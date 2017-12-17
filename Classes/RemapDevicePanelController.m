@@ -128,6 +128,14 @@
     [self updateComboBoxContent];
 }
 
+- (void)sheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo
+{
+    //	NSLog(@"SheetDidEnd invoked with return code %d", returnCode);
+    [[self window] close];
+    if (stopModalFlag)
+        [[NSApplication sharedApplication] stopModalWithCode: returnCode];
+}
+
 - (void)beginSheetForWindow: (NSWindow *)parentWindow invokeStopModalWhenDone: (BOOL)flag
 {
 	NSWindow *window = [self window];
@@ -137,14 +145,6 @@
 		modalDelegate: self
 		didEndSelector: @selector(sheetDidEnd:returnCode:contextInfo:)
 		contextInfo: nil];
-}
-
-- (void)sheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo
-{
-//	NSLog(@"SheetDidEnd invoked with return code %d", returnCode);
-	[[self window] close];
-	if (stopModalFlag)
-		[[NSApplication sharedApplication] stopModalWithCode: returnCode];
 }
 
 - (IBAction)changeAction:(id)sender

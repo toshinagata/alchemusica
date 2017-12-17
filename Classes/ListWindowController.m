@@ -17,6 +17,7 @@
 
 #import "ListWindowController.h"
 #import "NSWindowControllerAdditions.h"
+#import "MyDocument.h"
 #import "MyMIDISequence.h"
 #import "MyTableHeaderView.h"
 #import "MyTableView.h"
@@ -586,21 +587,21 @@ row:(int)rowIndex
 	ep = [self eventPointerForTableRow:rowIndex];
 	if (ep == NULL || MDIsTextMetaEvent(ep)) {
 		if (sTextMetaColor == nil)
-			sTextMetaColor = [[NSColor colorWithDeviceRed: 0.5 green: 0.0 blue: 0.5 alpha: 1.0] retain];
+			sTextMetaColor = [[NSColor colorWithDeviceRed: 0.5f green: 0.0f blue: 0.5f alpha: 1.0f] retain];
 		color = sTextMetaColor;
 	} else if (MDIsMetaEvent(ep)) {
 		if (sMetaColor == nil)
-			sMetaColor = [[NSColor colorWithDeviceRed: 0.0 green: 0.5 blue: 0.2 alpha: 1.0] retain];
+			sMetaColor = [[NSColor colorWithDeviceRed: 0.0f green: 0.5f blue: 0.2f alpha: 1.0f] retain];
 		color = sMetaColor;
 	} else if (MDIsSysexEvent(ep)) {
 		if (sSysexColor == nil)
-			sSysexColor = [[NSColor colorWithDeviceRed: 0.5 green: 0.5 blue: 0.0 alpha: 1.0] retain];
+			sSysexColor = [[NSColor colorWithDeviceRed: 0.5f green: 0.5f blue: 0.0f alpha: 1.0f] retain];
 		color = sSysexColor;
 	} else {
 		switch (MDGetKind(ep)) {
 			case kMDEventProgram:
 				if (sProgramColor == nil)
-					sProgramColor = [[NSColor colorWithDeviceRed: 0.0 green: 0.0 blue: 1.0 alpha: 1.0] retain];
+					sProgramColor = [[NSColor colorWithDeviceRed: 0.0f green: 0.0f blue: 1.0f alpha: 1.0f] retain];
 				color = sProgramColor;
 				break;
 			case kMDEventControl:
@@ -608,7 +609,7 @@ row:(int)rowIndex
 			case kMDEventRPNFine:
 			case kMDEventRPNInc: */
 				if (sControlColor == nil)
-					sControlColor = [[NSColor colorWithDeviceRed: 0.0 green: 0.5 blue: 0.0 alpha: 1.0] retain];
+					sControlColor = [[NSColor colorWithDeviceRed: 0.0f green: 0.5f blue: 0.0f alpha: 1.0f] retain];
 				color = sControlColor;
 				break;
 			case kMDEventNote:
@@ -619,12 +620,12 @@ row:(int)rowIndex
 			case kMDEventKeyPres:
 			case kMDEventChanPres:
 				if (sKeyPresColor == nil)
-					sKeyPresColor = [[NSColor colorWithDeviceRed: 0.5 green: 0.2 blue: 0.0 alpha: 1.0] retain];
+					sKeyPresColor = [[NSColor colorWithDeviceRed: 0.5f green: 0.2f blue: 0.0f alpha: 1.0f] retain];
 				color = sKeyPresColor;
 				break;
 			default:
 				if (sMiscColor == nil)
-					sMiscColor = [[NSColor colorWithDeviceRed: 0.5 green: 0.0 blue: 0.0 alpha: 1.0] retain];
+					sMiscColor = [[NSColor colorWithDeviceRed: 0.5f green: 0.0f blue: 0.0f alpha: 1.0f] retain];
 				color = sMiscColor;
 				break;
 		}
@@ -1013,7 +1014,7 @@ row:(int)rowIndex
         switch (tag) {
             case 2000: /* tempo */
                 MDSetKind(&event, kMDEventTempo);
-                MDSetTempo(&event, 120.0);
+                MDSetTempo(&event, 120.0f);
                 break;
             case 2001: /* meter */
                 MDSetKind(&event, kMDEventTimeSignature);
@@ -1261,7 +1262,7 @@ static NSString *sTickIdentifiers[] = { @"bar", @"sec", @"msec", @"count", @"del
 	if (myTrackNumber == 0 && !MDEventIsEventAllowableInConductorTrack(&myDefaultEvent)) {
 		MDEventClear(&myDefaultEvent);
 		MDSetKind(&myDefaultEvent, kMDEventTempo);
-		MDSetTempo(&myDefaultEvent, 120.0);
+		MDSetTempo(&myDefaultEvent, 120.0f);
 	} else if (myTrackNumber != 0 && !MDEventIsEventAllowableInNonConductorTrack(&myDefaultEvent)) {
 		MDEventClear(&myDefaultEvent);
 		MDSetKind(&myDefaultEvent, kMDEventNote);

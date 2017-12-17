@@ -116,7 +116,7 @@ static NSString *sAudioEffectPanelShouldUpdate = @"Audio effect panel should upd
     NSMutableParagraphStyle *style = [[[NSMutableParagraphStyle alloc] init] autorelease];
     NSDictionary *redTextAttributes;
 
-    [style setAlignment:NSTextAlignmentCenter];
+    [style setAlignment:NSCenterTextAlignment];
     redTextAttributes = [NSDictionary dictionaryWithObjectsAndKeys: font, NSFontAttributeName, [NSColor redColor], NSForegroundColorAttributeName, style, NSParagraphStyleAttributeName, nil];
     
     //  New height of the layout view (width will be updated later)
@@ -207,7 +207,7 @@ static NSString *sAudioEffectPanelShouldUpdate = @"Audio effect panel should upd
             str = [NSString stringWithUTF8String:ip->chains[i].effects[j].name];
             size = [str sizeWithAttributes:glyphAttributes];
             r1.origin = NSMakePoint(xbase + 16, ybase);
-            r1.size = NSMakeSize(ceil(size.width + 10), 17);
+            r1.size = NSMakeSize((float)ceil(size.width + 10), 17);
             bname = (NSButton *)[self viewWithTag:buttonTag + 1];
             bmenu = (NSButton *)[self viewWithTag:buttonTag + 2];
             if (bname == nil) {
@@ -215,7 +215,7 @@ static NSString *sAudioEffectPanelShouldUpdate = @"Audio effect panel should upd
                 bname = [[[NSButton alloc] initWithFrame:r1] autorelease];
                 [bname setBezelStyle:NSShadowlessSquareBezelStyle];
                 [bname setTag:buttonTag + 1];
-                [bname setControlSize:NSSmallControlSize];
+                [[bname cell] setControlSize:NSSmallControlSize];
                 [bname setTarget:self];
                 [bname setAction:@selector(effectButtonPressed:)];
                 bmenu = [[[NSButton alloc] initWithFrame:r1] autorelease];
@@ -360,7 +360,7 @@ hide:
         item = [menu addItemWithTitle:@"Remove this effect" action:@selector(removeEffect:) keyEquivalent:@""];
         [item setTag:chainIndex * 1000000 + effectIndex * 1000 + 999];
     }
-    [menu changeMenuTitleAttributes:[NSDictionary dictionaryWithObject:[NSFont labelFontOfSize:[NSFont systemFontSizeForControlSize:NSControlSizeSmall]] forKey:NSFontAttributeName]];
+    [menu changeMenuTitleAttributes:[NSDictionary dictionaryWithObject:[NSFont labelFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]] forKey:NSFontAttributeName]];
     [NSMenu popUpContextMenu:menu withEvent:[NSApp currentEvent] forView:sender];
 }
 
@@ -466,10 +466,10 @@ hide:
 - (CGFloat)splitView:(NSSplitView *)splitView constrainSplitPosition:(CGFloat)proposedPosition ofSubviewAt:(NSInteger)dividerIndex
 {
     NSSize size = [[[self window] contentView] bounds].size;
-    if (proposedPosition < 42.0)
-        return 42.0;
-    else if (proposedPosition > size.height - 48.0)
-        return size.height - 48.0;
+    if (proposedPosition < 42.0f)
+        return 42.0f;
+    else if (proposedPosition > size.height - 48.0f)
+        return size.height - 48.0f;
     else return proposedPosition;
 }
 

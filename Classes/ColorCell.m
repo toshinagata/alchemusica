@@ -45,12 +45,12 @@
 	if (image != nil && [image isKindOfClass: [NSImage class]]) {
 		NSRect r;
 		NSSize sz = [(NSImage *)image size];
-		r.origin.x = cellFrame.origin.x + floor(cellFrame.size.width / 2 - sz.width / 2);
-		r.origin.y = cellFrame.origin.y + floor(cellFrame.size.height / 2 - sz.height / 2);
+		r.origin.x = cellFrame.origin.x + (CGFloat)floor(cellFrame.size.width / 2 - sz.width / 2);
+		r.origin.y = cellFrame.origin.y + (CGFloat)floor(cellFrame.size.height / 2 - sz.height / 2);
         r.size = sz;
 	//	if ([[NSView focusView] isFlipped])
 	//		pt.y += sz.height;
-        [(NSImage *)image drawInRect: r fromRect: NSZeroRect operation: NSCompositeSourceAtop fraction: 1.0 respectFlipped:YES hints:nil];
+        [(NSImage *)image drawInRect: r fromRect: NSZeroRect operation: NSCompositeSourceAtop fraction: 1.0f respectFlipped:YES hints:nil];
 	}
 }
 

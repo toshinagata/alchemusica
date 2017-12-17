@@ -249,11 +249,18 @@ enum {
 - (IBAction)deleteSelectedTracks:(id)sender;
 - (IBAction)remapDevice: (id)sender;
 
+- (void)trackTableAction:(id)sender;
+- (void)trackTableDoubleAction:(id)sender;
+
 //  Action methods for graphic views
 //- (IBAction)changeControlNumber:(id)sender;
 //- (IBAction)shiftSelectedEvents:(id)sender;
 
 //  Accessor for the subview controller
 - (id)playingViewController;
+
+//  Show/hide time indicator
+- (void)showTimeIndicatorAtBeat: (float)beat;
+- (void)hideTimeIndicator;
 
 @end

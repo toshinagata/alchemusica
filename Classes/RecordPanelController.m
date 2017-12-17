@@ -92,7 +92,7 @@ sAllowedExtensionsForTag(int tag)
         [transposeNotePopUp selectItemAtIndex:((ival + 48) % 12)];
 	}
 	
-	theTick = [[info valueForKey: MyRecordingInfoStartTickKey] doubleValue];
+	theTick = (MDTickType)[[info valueForKey: MyRecordingInfoStartTickKey] doubleValue];
 	if (theTick >= 0 && theTick < kMDMaxTick) {
 		MDCalibratorTickToMeasure(calib, theTick, &bar, &beat, &tick);
 		s = [NSString stringWithFormat: @"%d:%d:%d", (int)bar, (int)beat, (int)tick];
@@ -101,7 +101,7 @@ sAllowedExtensionsForTag(int tag)
 	}
 	[startTickText setStringValue: s];
 
-	theTick = [[info valueForKey: MyRecordingInfoStopTickKey] doubleValue];
+	theTick = (MDTickType)[[info valueForKey: MyRecordingInfoStopTickKey] doubleValue];
 	if (theTick > 0 && theTick < kMDMaxTick) {
 		MDCalibratorTickToMeasure(calib, theTick, &bar, &beat, &tick);
 		s = [NSString stringWithFormat: @"%d:%d:%d", (int)bar, (int)beat, (int)tick];

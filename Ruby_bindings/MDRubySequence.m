@@ -259,7 +259,7 @@ static VALUE
 s_MRSequence_SetTimebase(VALUE self, VALUE tval)
 {
 	MyDocument *doc = MyDocumentFromMRSequenceValue(self);
-	float timebase = NUM2DBL(rb_Float(tval));
+	float timebase = (float)NUM2DBL(rb_Float(tval));
 	[doc setTimebase:timebase];
 	return self;
 }

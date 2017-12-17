@@ -39,8 +39,8 @@
 	center.x = theRect.origin.x + theRect.size.width / 2;
 	center.y = theRect.origin.y + theRect.size.height / 2;
 	if ([self isEnabled])
-		fraction = 1.0;
-	else fraction = 0.5;
+		fraction = 1.0f;
+	else fraction = 0.5f;
 	switch ([self type]) {
 		case NSTextCellType:
 			theString = [self stringValue];

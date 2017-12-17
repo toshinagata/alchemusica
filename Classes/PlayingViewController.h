@@ -53,6 +53,7 @@
 }
 
 //+ (PlayingPanelController *)sharedPlayingPanelController;
+
 - (IBAction)moveSlider:(id)sender;
 - (IBAction)pressFFButton:(id)sender;
 - (IBAction)pressPauseButton:(id)sender;

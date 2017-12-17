@@ -163,7 +163,7 @@ static VALUE
 s_MRTrack_SetDuration(VALUE self, VALUE val)
 {
 	MyDocumentTrackInfo *ip = TrackInfoFromMRTrackValue(self);
-	MDTickType duration = floor(NUM2DBL(val) + 0.5);
+	MDTickType duration = (MDTickType)floor(NUM2DBL(val) + 0.5);
 	MDTickType largestTick = MDTrackGetLargestTick(ip->track);
 	if (duration <= largestTick)
 		rb_raise(rb_eRangeError, "duration value (%d) out of limit, must be >= %d", (int)duration, (int)largestTick + 1);
@@ -809,7 +809,7 @@ s_MRTrack_Add(VALUE self, VALUE sval)
 			break;
 		case kMDEventTempo:
 			s_raise_if_missing_parameter(argc, 1, "tempo");
-			MDSetTempo(ep, NUM2DBL(rb_Float(argv[0])));
+			MDSetTempo(ep, (float)NUM2DBL(rb_Float(argv[0])));
 			break;
 		case kMDEventTimeSignature:
 			s_raise_if_missing_parameter(argc, 2, "n/m");

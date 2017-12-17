@@ -107,7 +107,7 @@ NSString
 				[NSNumber numberWithBool: NO], MyRecordingInfoBarBeatFlagKey,
                 [NSNumber numberWithInt: 0], MyRecordingInfoMIDITransposeKey,
 				[NSNumber numberWithInt: kAudioRecordingAIFFFormat], MyRecordingInfoAudioRecordingFormatKey,
-				[NSNumber numberWithFloat: 44100.0], MyRecordingInfoAudioBitRateKey,
+				[NSNumber numberWithFloat: 44100.0f], MyRecordingInfoAudioBitRateKey,
 				[NSNumber numberWithInt: kAudioRecordingStereoFormat], MyRecordingInfoAudioChannelFormatKey,
 				nil];
 			[recordingInfo retain];
@@ -357,8 +357,8 @@ NSString
 - (float)playingTime
 {
 	if (myPlayer != NULL) {
-		return MDPlayerGetTime(myPlayer);
-	} else return -1.0;
+		return (float)MDPlayerGetTime(myPlayer);
+	} else return -1.0f;
 }
 
 //- (float)playingBeat

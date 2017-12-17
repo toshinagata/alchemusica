@@ -91,7 +91,7 @@
 //	[tunePopup removeAllItems];
 	[markerPopup setEnabled: NO];
 //	[tunePopup setEnabled: NO];
-	font = [NSFont userFixedPitchFontOfSize: 10.0];
+	font = [NSFont userFixedPitchFontOfSize: 10.0f];
 	[timeField setFont: font];
 	[countField setFont: font];
 	[[NSNotificationCenter defaultCenter]
@@ -184,7 +184,7 @@
 		min = (ntime / 60) % 60;
 		sec = ntime % 60;
 		timeString = [NSString stringWithFormat: @"%02d:%02d:%02d", hour, min, sec];
-		[myDocument postPlayPositionNotification: (playingOrRecording ? MDCalibratorTimeToTick(calibrator, currentTime) : -1.0)];
+		[myDocument postPlayPositionNotification: (playingOrRecording ? MDCalibratorTimeToTick(calibrator, currentTime) : -1.0f)];
 	}
 	[timeField setStringValue: timeString];
 	[countField setStringValue: countString];
@@ -438,8 +438,10 @@
 	if (newTick > duration) {
 		newTick = duration;
 		newTime = MDCalibratorTickToTime(calibrator, newTick);
-	} else if (newTick < 0)
-		newTick = newTime = 0;
+    } else if (newTick < 0) {
+        newTick = 0;
+        newTime = 0;
+    }
 	currentTime = newTime;
 	if (status == kMDPlayer_suspended)
 		[self pressStopButton: self];
@@ -585,8 +587,8 @@
             float tempo = MDCalibratorGetTempo(calibrator);
             barBeatFlag = [[info valueForKey: MyRecordingInfoBarBeatFlagKey] intValue];
             MDEventCalculateMetronomeBarAndBeat(ep, (int32_t)timebase, &bar, &beat);
-            bar = floor(bar * 60000000.0 / (tempo * timebase) + 0.5);
-            beat = ceil(beat * 60000000.0 / (tempo * timebase));
+            bar = (int)floor(bar * 60000000.0 / (tempo * timebase) + 0.5);
+            beat = (int)ceil(beat * 60000000.0 / (tempo * timebase));
             if (barBeatFlag) {
                 MDPlayerSetCountOffSettings(player, bar * countOffNumber, bar, beat);
             } else {
@@ -622,6 +624,23 @@
     [self pressPlayButtonWithRecording: NO];
 }
 
+- (void)sheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo
+{
+    RecordPanelController *cont = (RecordPanelController *)[sheet windowController];
+    NSDictionary *info;
+    [cont saveInfoToDocument];
+    [cont close];
+    if (returnCode == 1) {
+        info = [[myDocument myMIDISequence] recordingInfo];
+        currentTime = MDCalibratorTickToTime(calibrator, (float)[[info valueForKey: MyRecordingInfoStartTickKey] doubleValue]);
+        isAudioRecording = [[info valueForKey: MyRecordingInfoIsAudioKey] boolValue];
+        [self pressPlayButtonWithRecording: YES];
+    } else {
+        [recordButton setState:NSOffState];
+    }
+    [cont release];
+}
+
 - (void)recordButtonPressed: (id)sender audioFlag: (BOOL)audioFlag
 {
 	RecordPanelController *controller;
@@ -645,23 +664,6 @@
 	if ([[NSApp currentEvent] modifierFlags] & NSAlternateKeyMask)
 		audioFlag = YES;
 	[self recordButtonPressed: sender audioFlag: audioFlag];
-}
-
-- (void)sheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo
-{
-	RecordPanelController *cont = (RecordPanelController *)[sheet windowController];
-	NSDictionary *info;
-	[cont saveInfoToDocument];
-	[cont close];
-	if (returnCode == 1) {
-		info = [[myDocument myMIDISequence] recordingInfo];
-		currentTime = MDCalibratorTickToTime(calibrator, [[info valueForKey: MyRecordingInfoStartTickKey] doubleValue]);
-		isAudioRecording = [[info valueForKey: MyRecordingInfoIsAudioKey] boolValue];
-		[self pressPlayButtonWithRecording: YES];
-	} else {
-		[recordButton setState:NSOffState];
-	}
-	[cont release];
 }
 
 - (IBAction)pressStopButton:(id)sender

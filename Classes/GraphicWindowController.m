@@ -36,7 +36,7 @@
 #import "RecordPanelController.h"
 #import "MyAppController.h"
 
-const float kMinimumTickIntervalsInPixels = 8.0;
+const float kMinimumTickIntervalsInPixels = 8.0f;
 
 enum {
 	kPlusButtonTag = 1000,
@@ -107,7 +107,7 @@ sTableColumnIDToInt(id identifier)
 
 - (float)rulerWidth
 {
-	return 40.0;
+	return 40.0f;
 }
 
 - (id)init {
@@ -281,11 +281,11 @@ sTableColumnIDToInt(id identifier)
 	MDTickType basetick;  /*  The tick at the beginning of the bar  */
 	MDTickType qtick;
 	int32_t measure, beat, mtick;
-	if (tickQuantum == 0.0)
+	if (tickQuantum == 0.0f)
 		return tick;
 	MDCalibratorTickToMeasure(calib, tick, &measure, &beat, &mtick);
 	basetick = MDCalibratorMeasureToTick(calib, measure, 1, 0);
-	qtick = basetick + floor((float)(tick - basetick) / tickQuantum + 0.5) * tickQuantum;
+    qtick = basetick + (MDTickType)(floor((float)(tick - basetick) / tickQuantum + 0.5) * tickQuantum);
 	return qtick;
 }
 
@@ -299,7 +299,7 @@ sTableColumnIDToInt(id identifier)
 - (float)pixelQuantum
 {
 	if (quantize == 0.0)
-		return 1.0;
+		return 1.0f;
 	else return quantize * [self pixelsPerQuarter];
 }
 
@@ -348,10 +348,10 @@ sTableColumnIDToInt(id identifier)
 			bounds = NSUnionRect(bounds, [bpath bounds]);
         bounds = NSInsetRect(bounds, -2, -1);
         bounds = [myMainView convertRect: bounds fromView: myFloatingView];
-        origin.x = floor(bounds.origin.x);
-        origin.y = floor(bounds.origin.y);
-        bounds.size.width = ceil(bounds.origin.x + bounds.size.width - origin.x);
-        bounds.size.height = ceil(bounds.origin.y + bounds.size.height - origin.y);
+        origin.x = (CGFloat)floor(bounds.origin.x);
+        origin.y = (CGFloat)floor(bounds.origin.y);
+        bounds.size.width = (CGFloat)ceil(bounds.origin.x + bounds.size.width - origin.x);
+        bounds.size.height = (CGFloat)ceil(bounds.origin.y + bounds.size.height - origin.y);
         bounds.origin = origin;
         [myFloatingView lockFocus];
         [path stroke];
@@ -471,18 +471,18 @@ sTableColumnIDToInt(id identifier)
     }
     ppb = [self pixelsPerTick] * [[self document] timebase] * 4 / sig1;
     if (ppb * 0.125 >= kMinimumTickIntervalsInPixels) {
-        interval = ppb * 0.125;
+        interval = ppb * 0.125f;
         mdCount = 4;
         mjCount = 8;
         while (interval >= kMinimumTickIntervalsInPixels * 2) {
-            interval *= 0.5;
+            interval *= 0.5f;
         }
     } else if (ppb * 0.5 >= kMinimumTickIntervalsInPixels) {
-        interval = ppb * 0.5;
+        interval = ppb * 0.5f;
         mdCount = 2;
         mjCount = sig0 * mdCount;
         if (interval >= kMinimumTickIntervalsInPixels * 2) {
-            interval *= 0.5;
+            interval *= 0.5f;
             mdCount *= 2;
             mjCount *= 2;
         }
@@ -496,7 +496,7 @@ sTableColumnIDToInt(id identifier)
             interval *= 10;
         }
         if (interval >= kMinimumTickIntervalsInPixels * 5) {
-            interval *= 0.5;
+            interval *= 0.5f;
             mjCount = 2;
         }
         mdCount = mjCount;
@@ -587,7 +587,7 @@ sTableColumnIDToInt(id identifier)
     }
 
     //  Calculate the total client size (except for the TimeChartView)
-    totalHeight = 0.0;
+    totalHeight = 0.0f;
     for (i = 1; i < myClientViewsCount; i++) {
         containerView = records[i].container;
         totalHeight += [containerView frame].size.height;
@@ -597,7 +597,7 @@ sTableColumnIDToInt(id identifier)
     //  Resize other views
     for (i = 1; i < myClientViewsCount; i++) {
         containerView = records[i].container;
-        frame.size.height = floor([containerView frame].size.height * proportion + 0.5);
+        frame.size.height = (CGFloat)floor([containerView frame].size.height * proportion + 0.5);
         frame.origin.y = frame.origin.y - frame.size.height;
         if (i == myClientViewsCount - 1) {
             frame.size.height += (frame.origin.y - aFrame.origin.y);
@@ -623,7 +623,7 @@ sTableColumnIDToInt(id identifier)
 {
     NSRect visibleRect, documentRect;
 	if (myClientViewsCount == 0)
-		return 0.0;
+		return 0.0f;
 	visibleRect = [[records[0].client superview] bounds];
 	documentRect = [records[0].client frame];
 	return visibleRect.origin.x - documentRect.origin.x;
@@ -678,9 +678,9 @@ sTableColumnIDToInt(id identifier)
 		return;
 	width = documentRect.size.width - visibleRect.size.width;
 	pos *= width;
-	lineWidth = 32.0;
-	if (lineWidth >= visibleRect.size.width * 0.5)
-		lineWidth = visibleRect.size.width * 0.5;
+	lineWidth = 32.0f;
+	if (lineWidth >= visibleRect.size.width * 0.5f)
+		lineWidth = visibleRect.size.width * 0.5f;
 	switch (hitPart) {
 		case NSScrollerDecrementLine: pos -= lineWidth; break;
 		case NSScrollerIncrementLine: pos += lineWidth; break;
@@ -689,11 +689,11 @@ sTableColumnIDToInt(id identifier)
 		default: break;
 	}
 	if (pos < 0)
-		pos = 0.0;
+		pos = 0.0f;
 	if (pos > width)
 		pos = width;
 //	[myScroller setFloatValue: pos / width];
-	pos = floor(pos);
+	pos = (float)floor(pos);
 	[self scrollClientViewsToPosition: pos];
 //	visibleRect.origin.x = pos + documentRect.origin.x;
 //	[records[0].client scrollPoint: visibleRect.origin];
@@ -750,8 +750,8 @@ sTableColumnIDToInt(id identifier)
 
 - (float)clientViewWidth
 {
-	float width = ([self sequenceDurationInQuarter] + 4.0) * [self pixelsPerQuarter];
-	float minWidth = [myMainView bounds].size.width - [self rulerWidth] - [NSScroller scrollerWidth];
+    float width = (float)(([self sequenceDurationInQuarter] + 4.0) * [self pixelsPerQuarter]);
+    float minWidth = (float)([myMainView bounds].size.width - [self rulerWidth] - [NSScroller scrollerWidth]);
 	if (width > minWidth)
 		return width;
 	else return minWidth;
@@ -805,7 +805,7 @@ sTableColumnIDToInt(id identifier)
 		pos = (visibleRect.origin.x - documentRect.origin.x) / (documentRect.size.width - visibleRect.size.width);
 		wid = visibleRect.size.width / documentRect.size.width;
 		[myScroller setEnabled: YES];
-        [myScroller setKnobProportion: wid];
+        [myScroller setKnobProportion: (float)wid];
         [myScroller setDoubleValue: pos];
 	}
 }
@@ -861,17 +861,17 @@ sTableColumnIDToInt(id identifier)
 		aRect.origin.y += (aRect.size.height - height);
 		aRect.size.height = height;
 		mask = NSViewMinYMargin;
-        splitterHeight = 0.0;
+        splitterHeight = 0.0f;
 	} else {
         rect = [records[myClientViewsCount - 1].container frame];
 	//	scrollView = [records[myClientViewsCount - 1].client enclosingScrollView];
 		if (myClientViewsCount == 1) {
 	//		rect = [scrollView frame];
-			splitterHeight = 4.0;
+			splitterHeight = 4.0f;
 			mask = NSViewHeightSizable;
 		} else {
 	//		rect = [records[myClientViewsCount - 1].splitter frame];
-			splitterHeight = 16.0;
+			splitterHeight = 16.0f;
 			mask = NSViewMaxYMargin;
 		}
 		height = rect.origin.y - aRect.origin.y - splitterHeight;
@@ -904,7 +904,7 @@ sTableColumnIDToInt(id identifier)
 	[scrollView setHasHorizontalScroller: NO];
 
 	//  The chart view
-	rect.origin.x = rect.origin.y = 0.0;
+	rect.origin.x = rect.origin.y = 0.0f;
 	//  Don't autorelease, since we are going to retain it
 	clientView = [[chartClass allocWithZone: [self zone]] initWithFrame: rect];
 	[scrollView setDocumentView: clientView];
@@ -930,7 +930,7 @@ sTableColumnIDToInt(id identifier)
 		[clipView setAutoresizingMask:NSViewMaxXMargin | NSViewHeightSizable];
 		
 		//  The chart view
-		rect.origin.x = rect.origin.y = 0.0;
+		rect.origin.x = rect.origin.y = 0.0f;
 		rulerView = [[rulerClass allocWithZone: [self zone]] initWithFrame: rect];
 		[clipView setDocumentView: rulerView];
 		[rulerView setClientView: clientView];
@@ -1023,12 +1023,12 @@ sTableColumnIDToInt(id identifier)
 	}
 	frame_above = [records[index].container frame];
 	frame_self  = [records[index].splitter frame];
-    y = floor(y + 0.5);  /*  New position of the container frame  */
+    y = (float)floor(y + 0.5);  /*  New position of the container frame  */
 	ymax = frame_above.origin.y + frame_above.size.height - frame_self.size.height;
 	if (index == 1) {
 		//  Piano roll view cannot be collapsed
-		if (y >= ymax - 32.0)
-			y = ymax - 32.0;
+		if (y >= ymax - 32.0f)
+			y = ymax - 32.0f;
 	}
 	if (y >= ymax) {
 		y = ymax;
@@ -1040,9 +1040,9 @@ sTableColumnIDToInt(id identifier)
 			return;
 		}
 	}
-	if (confirm && y >= ymax - 32.0) {
+	if (confirm && y >= ymax - 32.0f) {
 		//  Avoid too narrow strip chart
-		y = ymax - 32.0;
+		y = ymax - 32.0f;
 	}
 	if (index < myClientViewsCount - 1) {
         containerView = records[index + 1].container;
@@ -1064,9 +1064,9 @@ sTableColumnIDToInt(id identifier)
 			return;
 		}
 	}
-	if (confirm && index < myClientViewsCount - 1 && y <= ymin + 32.0) {
+	if (confirm && index < myClientViewsCount - 1 && y <= ymin + 32.0f) {
 		//  Avoid too narrow strip chart
-		y = ymin + 32.0;
+		y = ymin + 32.0f;
 	}
     frame_above.size.height += frame_above.origin.y - y;
     frame_above.origin.y = y;
@@ -1426,7 +1426,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
     calib = MDCalibratorNew([[[self document] myMIDISequence] mySequence], NULL, kMDEventTimeSignature, -1);
 
 	/*  Set pixels per tick: about 1 cm per quarter note  */
-	[self setPixelsPerQuarter: 72 / 2.54];
+	[self setPixelsPerQuarter: 72 / 2.54f];
 	
 	/*  Create the time chart ruler  */
 	[self createClientViewWithClasses: [TimeChartView class] : nil];
@@ -1435,12 +1435,12 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 	[self createClientViewWithClasses: [PianoRollView class] : [PianoRollRulerView class]];
 	
 	/*  Create the strip chart view  */
-	[self adjustClientViewsInHeight: floor([myMainView bounds].size.height * 0.75)];
+	[self adjustClientViewsInHeight: (float)floor([myMainView bounds].size.height * 0.75)];
 	[self createClientViewWithClasses: [StripChartView class] : [StripChartRulerView class]];
-	[records[2].client setVisibleRangeMin:0.0 max:1.0];
+	[records[2].client setVisibleRangeMin:0.0f max:1.0f];
 	
 	/*  Set the default scale factor for the piano-roll view  */
-	[records[1].client setYScale: 7.0];        /*  7 pixels per half-tone */
+	[records[1].client setYScale: 7.0f];        /*  7 pixels per half-tone */
 //	[records[1].client reloadData];
 
 	/*  Center the piano-roll view vertically  */
@@ -1495,7 +1495,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 		//	[cell setAction: @selector(trackTableAction:)];
 			[cell setImage: im[i]];
 			if (s[i] == kSoloID) {
-				[cell setRepresentedObject:[NSColor colorWithDeviceRed:1.0 green:1.0 blue:0.3 alpha:1.0]];
+				[cell setRepresentedObject:[NSColor colorWithDeviceRed:1.0f green:1.0f blue:0.3f alpha:1.0f]];
 				[(ColorCell *)cell setStrokesColor:NO];
 			}
 			[tableColumn setDataCell: cell];
@@ -1885,12 +1885,12 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 		n = (i - 1) / 6;
 		m = (i - 1) % 6;
 		if (n == 1)
-			quantize = 6.0;
+			quantize = 6.0f;
 		else if (n == 2)
-			quantize = 8.0 / 3;
-		else quantize = 4.0;
+			quantize = 8.0f / 3;
+		else quantize = 4.0f;
 		while (m-- > 0)
-			quantize *= 0.5;
+			quantize *= 0.5f;
 	}
 }
 
@@ -2453,12 +2453,12 @@ row:(int)rowIndex
 
 - (float)splitView: (NSSplitView *)sender constrainMaxCoordinate: (float)proposedMax ofSubviewAt: (int)offset
 {
-    return [sender bounds].size.width - 160.0;
+    return [sender bounds].size.width - 160.0f;
 }
 
 - (float)splitView: (NSSplitView *)sender constrainMinCoordinate: (float)proposedMin ofSubviewAt: (int)offset
 {
-	return 100.0;
+	return 100.0f;
 //    return proposedMin;
 }
 

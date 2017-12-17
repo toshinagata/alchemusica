@@ -30,16 +30,16 @@
     a parabola y = x^2 in [0, 1].  */
 /* #define ALPHA 0.377009
 #define BETA  0.286601 */
-static const float sParabolaPoints[] = {0, 0, 0.35, 0, 0.7, 0.4, 1, 1, -1};
-static const float sArcPoints[] = {0, 0, 0.15, 0.6, 0.33, 1, 0.5, 1, 0.67, 1, 0.85, 0.6, 1, 0, -1};
-static const float sSigmoidPoints[] = {0, 0, 0.45, 0, 0.55, 1, 1, 1, -1};
+static const float sParabolaPoints[] = {0, 0, 0.35f, 0, 0.7f, 0.4f, 1, 1, -1};
+static const float sArcPoints[] = {0, 0, 0.15f, 0.6f, 0.33f, 1, 0.5f, 1, 0.67f, 1, 0.85f, 0.6f, 1, 0, -1};
+static const float sSigmoidPoints[] = {0, 0, 0.45f, 0, 0.55f, 1, 1, 1, -1};
 
 /*  The resolutions for pencil drawing  */
 /*  New events are generated so that the time/tick/value intervals are no less than
     these values. */
 static MDTimeType sTimeResolution = 5000;
 static MDTickType sTickResolution = 1;
-static float sValueResolution = 1.0;
+static float sValueResolution = 1.0f;
 
 @implementation StripChartView
 
@@ -54,8 +54,8 @@ static float sValueResolution = 1.0;
     if (self) {
 		eventKind = 0;  /*  Undefined  */
 		eventCode = 0;
-		minValue = 0.0;
-		maxValue = 128.0;
+		minValue = 0.0f;
+		maxValue = 128.0f;
 		calib = NULL;
 		focusTrack = -1;
     }
@@ -133,8 +133,8 @@ getYValue(const MDEvent *ep, int eventKind)
 		while ((ep = MDPointerForward(pt)) != NULL && MDGetTick(ep) < endTick) {
 			if (MDGetKind(ep) != kMDEventNote)
 				continue;
-			y = ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * height) - 0.5;
-			x = floor(MDGetTick(ep) * ppt) + 0.5;
+			y = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * height) - 0.5);
+			x = (float)(floor(MDGetTick(ep) * ppt) + 0.5);
 			if (y >= aRect.origin.y) {
 				if ([[dataSource document] isSelectedAtPosition: MDPointerGetPosition(pt) inTrack: trackNo]) {
 					NSFrameRect(NSMakeRect(x - 1, y - 1, 3, 3));
@@ -145,13 +145,13 @@ getYValue(const MDEvent *ep, int eventKind)
 						[draggingPath moveToPoint: NSMakePoint(x + dx, y + dy)];
 						[draggingPath lineToPoint: NSMakePoint(x + dx, ybase)];
 					}
-					y -= 1.0;
+					y -= 1.0f;
 				}
 				[NSBezierPath strokeLineFromPoint: NSMakePoint(x, y) toPoint: NSMakePoint(x, ybase)];
 			}
 		}
 		if (array != nil && draggingPath != nil) {
-			[array addObject:[color colorWithAlphaComponent: 0.5]];
+			[array addObject:[color colorWithAlphaComponent: 0.5f]];
 			[array addObject:draggingPath];
 			draggingPath = nil;
 		}
@@ -217,7 +217,7 @@ getYValue(const MDEvent *ep, int eventKind)
 		track = [[[dataSource document] myMIDISequence] getTrackAtIndex: trackNo];
 		isFocused = [self isFocusTrack: trackNo];
 		color = [[dataSource document] colorForTrack: trackNo enabled: isFocused];
-		shadowColor = (isFocused ? [color shadowWithLevel: 0.1] : color);
+		shadowColor = (isFocused ? [color shadowWithLevel: 0.1f] : color);
 		pt = MDCalibratorCopyPointer(calib, track, eventKind, eventCode);
 		if (pt == NULL)
 			continue;
@@ -226,8 +226,8 @@ getYValue(const MDEvent *ep, int eventKind)
 			xlast = ylast = 0;
 			poslast = -1;
 		} else {
-			ylast = ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * height);
-			xlast = floor(MDGetTick(ep) * ppt);
+			ylast = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * height));
+			xlast = (float)(floor(MDGetTick(ep) * ppt));
 			poslast = MDPointerGetPosition(pt);
 		}
 		while (1) {
@@ -237,8 +237,8 @@ getYValue(const MDEvent *ep, int eventKind)
 					continue;
 				if (eventCode != -1 && MDGetCode(ep) != eventCode)
 					continue;
-				y = ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * height);
-				x = floor(MDGetTick(ep) * ppt);
+				y = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * height));
+				x = (float)(floor(MDGetTick(ep) * ppt));
 			} else {
 				x = [self bounds].size.width;
 			}
@@ -269,7 +269,7 @@ getYValue(const MDEvent *ep, int eventKind)
 			poslast = MDPointerGetPosition(pt);
 		}
 		if (draggingPath != nil) {
-			[array addObject:[color colorWithAlphaComponent: 0.5]];
+			[array addObject:[color colorWithAlphaComponent: 0.5f]];
 			[array addObject:draggingPath];
 			draggingPath = nil;
 		}
@@ -291,10 +291,10 @@ getYValue(const MDEvent *ep, int eventKind)
 	float visibleRange, aRange;
 	frame = [self frame];
 	visibleRect = [(NSClipView *)[self superview] documentVisibleRect];
-	aRange = maxValue - minValue + 1.0;
+	aRange = maxValue - minValue + 1.0f;
 	visibleRange = aRange / frame.size.height * visibleRect.size.height;
-	while (aRange > visibleRange * 0.7)
-		aRange *= 0.5;
+	while (aRange > visibleRange * 0.7f)
+		aRange *= 0.5f;
 	return aRange;
 }
 
@@ -316,7 +316,7 @@ getYValue(const MDEvent *ep, int eventKind)
 	grid = [self horizontalGridInterval];
 	[[NSColor lightGrayColor] set];
 	for (y = minValue + grid; y < maxValue; y += grid) {
-		pt.y = floor(bounds.origin.x + y * (bounds.size.height / (maxValue - minValue))) + 0.5;
+		pt.y = (CGFloat)(floor(bounds.origin.x + y * (bounds.size.height / (maxValue - minValue))) + 0.5);
 		[NSBezierPath strokeLineFromPoint: pt toPoint: NSMakePoint(pt.x + bounds.size.width, pt.y)];
 	}
 	if ([self isDragging])
@@ -335,14 +335,14 @@ getYValue(const MDEvent *ep, int eventKind)
 	if (newKind != 65535) {
 		eventKind = newKind;
 		if (eventKind == kMDEventTempo) {
-			minval = 0.0;
-			maxval = 511.0;
+			minval = 0.0f;
+			maxval = 511.0f;
 		} else if (eventKind == kMDEventPitchBend) {
-			minval = -8192.0;
-			maxval = 8191.0;
+			minval = -8192.0f;
+			maxval = 8191.0f;
 		} else {
-			minval = 0.0;
-			maxval = 127.0;
+			minval = 0.0f;
+			maxval = 127.0f;
 		}
 		[self setMinValue: minval];
 		[self setMaxValue: maxval];
@@ -458,7 +458,7 @@ getYValue(const MDEvent *ep, int eventKind)
 	minTick = kMDMaxTick;
 	maxTick = kMDNegativeTick;
 //	minY = 10000000.0;
-	maxY = -10000000.0;
+	maxY = -10000000.0f;
 	ppt = [dataSource pixelsPerTick];
 	for (i = 0; (n = [self sortedTrackNumberAtIndex: i]) >= 0; i++) {
 		int index;
@@ -538,8 +538,8 @@ getYValue(const MDEvent *ep, int eventKind)
 			xlast = ylast = 0;
 			poslast = -1;
 		} else {
-			ylast = ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * height);
-			xlast = floor(MDGetTick(ep) * ppt);
+			ylast = (float)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * height);
+			xlast = (float)floor(MDGetTick(ep) * ppt);
 			poslast = MDPointerGetPosition(pt);
 		}
 		while (retval == 0) {
@@ -549,8 +549,8 @@ getYValue(const MDEvent *ep, int eventKind)
 					continue;
 				if (eventCode != -1 && MDGetCode(ep) != eventCode)
 					continue;
-				y = ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * height);
-				x = floor(MDGetTick(ep) * ppt);
+				y = (float)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * height);
+				x = (float)floor(MDGetTick(ep) * ppt);
 			} else {
 				x = [self bounds].size.width + 2;
 			}
@@ -642,14 +642,14 @@ getYValue(const MDEvent *ep, int eventKind)
 	}
 
 	saveLineWidth = [NSBezierPath defaultLineWidth];
-	[NSBezierPath setDefaultLineWidth: 1.0];
+	[NSBezierPath setDefaultLineWidth: 1.0f];
 	[NSBezierPath fillRect: NSMakeRect(pt1.x - 1, pt1.y - 1, 2, 2)];
 	[NSBezierPath fillRect: NSMakeRect(pt2.x - 1, pt2.y - 1, 2, 2)];
 
 	if (lineShape == kGraphicLinearShape) {
 		[NSBezierPath strokeLineFromPoint: pt1 toPoint: pt2];
 	} else if (lineShape == kGraphicRandomShape) {
-		[NSBezierPath strokeRect: NSInsetRect(r, -0.5, -0.5)];
+		[NSBezierPath strokeRect: NSInsetRect(r, -0.5f, -0.5f)];
 	} else {
 		const float *p;
 		switch (lineShape) {
@@ -678,8 +678,8 @@ getYValue(const MDEvent *ep, int eventKind)
 		[path stroke];
 		/*  Eye guide  */
 		if (p[0] < 1.0 || p[1] < 1.0) {
-			[[[NSColor cyanColor] colorWithAlphaComponent: 0.5] set];
-			[NSBezierPath strokeLineFromPoint: NSMakePoint(pt1.x + dp.x * p[0] + 0.5, pt1.y + dp.y * p[1] + 0.5) toPoint: NSMakePoint(pt2.x + 0.5, pt2.y + 0.5)];
+			[[[NSColor cyanColor] colorWithAlphaComponent: 0.5f] set];
+			[NSBezierPath strokeLineFromPoint: NSMakePoint(pt1.x + dp.x * p[0] + 0.5f, pt1.y + dp.y * p[1] + 0.5f) toPoint: NSMakePoint(pt2.x + 0.5f, pt2.y + 0.5f)];
 		}
 	}
 	[NSBezierPath setDefaultLineWidth: saveLineWidth];
@@ -714,7 +714,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 	while (1) {
 		dx = a3 + t * (a2 + t * (a1 + t * a0)) - x;
 		if (fabs(dx) < 1e-8)
-			return t;
+			return (float)t;
 		dxdt = a2 + t * (2 * a1 + t * 3 * a0);
 		if (++iter > 10 || fabs(dxdt) < 1e-8 || (t0 = t - dx / dxdt) >= 1.0 || t0 <= 0) {
 			//  Switch to binary search
@@ -732,13 +732,13 @@ cubicReverseFunc(float x, const float *points, float tt)
 					t0 = t;
 				} else if (dx > 1e-8) {
 					t1 = t;
-				} else return t;
+				} else return (float)t;
 				if (fabs(t1 - t0) < 1e-8)
-					return t;
+					return (float)t;
 			}
 		}
 		if (fabs(t - t0) < 1e-8)
-			return t;
+			return (float)t;
 		t = t0;
 	}
 }
@@ -784,10 +784,10 @@ cubicReverseFunc(float x, const float *points, float tt)
 	else pt2 = [[selectPoints objectAtIndex: 1] pointValue];
 	pixelsPerTick = [dataSource pixelsPerTick];
 	height = [self bounds].size.height;
-	t1 = floor(pt1.x / pixelsPerTick + 0.5);
-	t2 = floor(pt2.x / pixelsPerTick + 0.5);
-	v1 = floor(pt1.y * (maxValue - minValue) / height + 0.5 + minValue);
-	v2 = floor(pt2.y * (maxValue - minValue) / height + 0.5 + minValue);
+	t1 = (MDTickType)floor(pt1.x / pixelsPerTick + 0.5);
+	t2 = (MDTickType)floor(pt2.x / pixelsPerTick + 0.5);
+	v1 = (int)floor(pt1.y * (maxValue - minValue) / height + 0.5 + minValue);
+	v2 = (int)floor(pt2.y * (maxValue - minValue) / height + 0.5 + minValue);
 	if (t1 < t2) {
 		fromTick = t1;
 		toTick = t2;
@@ -840,16 +840,16 @@ cubicReverseFunc(float x, const float *points, float tt)
 			while (1) {
 				MDTickType tick2;
 				if (t1 == t2)
-					v = 1.0;
+					v = 1.0f;
 				else if (lineShape == kGraphicRandomShape)
 					v = (random() % 0x10000000) / (float)0x10000000;
 				else
-					v = (double)(tick - fromTick) / (toTick - fromTick);
+					v = (float)((double)(tick - fromTick) / (toTick - fromTick));
 				v = v * (toValue - fromValue) + fromValue;
 				//  Generate an event
 				MDSetTick(&event, tick);
 				if (eventKind == kMDEventTempo)
-					MDSetTempo(&event, floor(v));
+					MDSetTempo(&event, (float)floor(v));
 				else
 					MDSetData1(&event, (int)floor(v));
 				if (v != v0 || tick >= toTick) {
@@ -867,7 +867,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 					if (fabs(toValue - fromValue) < 1e-6)
 						tick3 = toTick;
 					else
-						tick3 = tick + floor(fabs(sValueResolution / (toValue - fromValue) * (toTick - fromTick)));
+						tick3 = tick + (MDTickType)floor(fabs(sValueResolution / (toValue - fromValue) * (toTick - fromTick)));
 					if (tick3 > tick2)
 						tick2 = tick3;
 				}
@@ -879,9 +879,9 @@ cubicReverseFunc(float x, const float *points, float tt)
 			float x, y, v, t;
 			int n;
 			n = 0;
-			while (p[2] >= 0.0) {
+			while (p[2] >= 0.0f) {
 				//  Initial point
-				t = 0.0;
+				t = 0.0f;
 				x = p[0];
 				y = p[1];
 				while (1) {
@@ -889,12 +889,12 @@ cubicReverseFunc(float x, const float *points, float tt)
 					float xa, xb, yc;
 					MDTimeType tm;
 					MDTickType tk;
-					if (n == 0 || t > 0.0) {
+					if (n == 0 || t > 0.0f) {
 						//  Generate an event
 						MDSetTick(&event, (MDTickType)(x * (t2 - t1) + t1));
 						v = y * (v2 - v1) + v1;
 						if (eventKind == kMDEventTempo)
-							MDSetTempo(&event, floor(v));
+							MDSetTempo(&event, (float)floor(v));
 						else
 							MDSetData1(&event, (int)floor(v));
 						MDPointerInsertAnEvent(mdptr, &event);
@@ -902,17 +902,17 @@ cubicReverseFunc(float x, const float *points, float tt)
 					}
 					if (t >= 1.0)
 						break;
-					xa = x + fabs((double)sTickResolution / (t2 - t1));
+					xa = x + (float)fabs((double)sTickResolution / (t2 - t1));
 					if (xa < p[6]) {
 						ta = cubicReverseFunc(xa, p, t);
-					} else ta = 1.0;
+					} else ta = 1.0f;
 					tm = MDCalibratorTickToTime(calib, (MDTickType)(x * (t2 - t1) + t1));
 					if (t2 > t1)
 						tm += sTimeResolution;
 					else
 						tm -= sTimeResolution;
 					tk = MDCalibratorTimeToTick(calib, tm);
-					xb = ((double)(tk - t1)) / (t2 - t1);
+					xb = (float)((double)(tk - t1)) / (t2 - t1);
 //					xb = (double)(MDCalibratorTimeToTick(calib, 
 //						MDCalibratorTickToTime(calib, (MDTickType)(x * (t2 - t1) + t1))
 //						+ sTimeResolution) - t1) / (t2 - t1);
@@ -920,21 +920,21 @@ cubicReverseFunc(float x, const float *points, float tt)
 						tb = t;
 					} else if (xb < p[6]) {
 						tb = cubicReverseFunc(xb, p, t);
-					} else tb = 1.0;
+					} else tb = 1.0f;
 					if (v1 == v2 || p[1] == p[7]) {
-						tc = 1.0;
+						tc = 1.0f;
 					} else {
-						yc = (double)sValueResolution / (v2 - v1);
+						yc = (float)((double)sValueResolution / (v2 - v1));
 						if (p[1] < p[7]) {
-							yc = y + fabs(yc);
+							yc = y + (float)fabs(yc);
 							if (yc < p[7])
 								tc = cubicReverseFunc(yc, p + 1, t);
-							else tc = 1.0;
+							else tc = 1.0f;
 						} else {
-							yc = y - fabs(yc);
+							yc = y - (float)fabs(yc);
 							if (yc > p[7])
 								tc = cubicReverseFunc(yc, p + 1, t);
-							else tc = 1.0;
+							else tc = 1.0f;
 						}
 					}
 					t = (ta < tb ? tb : ta);
@@ -1010,7 +1010,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 				if (t1 == t2) {
 					v = toValue;
 				} else {
-					x = ((double)MDGetTick(ep) - t1) / (t2 - t1);
+					x = (float)(((double)MDGetTick(ep) - t1) / (t2 - t1));
 					if (lineShape == kGraphicLinearShape)
 						y = x;
 					else if (lineShape == kGraphicRandomShape)
@@ -1026,7 +1026,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 							y = cubicFunc(t, pp + 1);
 						} else break;
 					} else break;
-					v = floor(y * (v2 - v1) + v1 + 0.5);
+					v = (float)floor(y * (v2 - v1) + v1 + 0.5);
 				}
 				switch (eventKind) {
 					case kMDEventNote:
@@ -1044,10 +1044,10 @@ cubicReverseFunc(float x, const float *points, float tt)
 				}
 				if (editingMode == kGraphicAddMode) {
 					/*  The vertical center will be zero  */
-					v = v0 + v - (maxValue - minValue + 1) * 0.5;
+					v = v0 + v - (maxValue - minValue + 1) * 0.5f;
 				} else if (editingMode == kGraphicScaleMode) {
 					/*  The full scale is 0..200%  */
-					v = v0 * (v - minValue) / (maxValue - minValue + 1) * 2.0;
+					v = v0 * (v - minValue) / (maxValue - minValue + 1) * 2.0f;
 				} else if (editingMode == kGraphicLimitMaxMode) {
 					if (v0 < v)
 						v = v0;
@@ -1075,7 +1075,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 {
 	int yval;
 	NSString *s;
-	yval = floor((maxValue - minValue) * pt.y / [self frame].size.height + minValue + 0.5);
+	yval = (int)floor((maxValue - minValue) * pt.y / [self frame].size.height + minValue + 0.5);
 	s = [[NSString stringWithFormat:@"%d, ", yval] stringByAppendingString:[super infoTextForMousePoint:pt dragging:flag]];
 	if (!flag) {
 		return s;
@@ -1163,7 +1163,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 		limitRect.origin.x = [dataSource quantizedPixelFromPixel: limitRect.origin.x];
 		if (limitRect.origin.x < 0.0)
 			limitRect.origin.x += pixelQuantum;
-		limitRect.size.width = floor(limitRect.size.width / pixelQuantum) * pixelQuantum;
+		limitRect.size.width = (CGFloat)(floor(limitRect.size.width / pixelQuantum) * pixelQuantum);
 		if (limitRect.size.width + limitRect.origin.x > bounds.origin.x + bounds.size.width)
 			limitRect.size.width -= pixelQuantum;
 	//	[super doMouseDown: theEvent];
@@ -1196,8 +1196,8 @@ cubicReverseFunc(float x, const float *points, float tt)
 		if (stripDraggingMode == 1) {
 			/*  horizontal or vertical, depending on the mouse position  */
 			NSSize delta;
-			delta.width = fabs(pt.x - draggingStartPoint.x);
-			delta.height = fabs(pt.y - draggingStartPoint.y);
+			delta.width = (CGFloat)fabs(pt.x - draggingStartPoint.x);
+			delta.height = (CGFloat)fabs(pt.y - draggingStartPoint.y);
 			if (delta.width > 3 || delta.height > 3)
 				horizontal = (delta.width > delta.height);
 			if (horizontal) {
@@ -1259,8 +1259,8 @@ cubicReverseFunc(float x, const float *points, float tt)
 		[self invalidateDraggingRegion];
 		pt.x = draggingPoint.x - draggingStartPoint.x;
 		pt.y = draggingPoint.y - draggingStartPoint.y;
-		deltaTick = floor(pt.x / [dataSource pixelsPerTick] + 0.5);
-		deltaValue = floor(pt.y * (maxValue - minValue) / [self bounds].size.height + 0.5);
+		deltaTick = (MDTickType)floor(pt.x / [dataSource pixelsPerTick] + 0.5);
+		deltaValue = (MDTickType)floor(pt.y * (maxValue - minValue) / [self bounds].size.height + 0.5);
 		[dataSource dragEventsOfKind: eventKind andCode: eventCode byTick: deltaTick andValue: deltaValue sender: self optionFlag: optionDown];
 		stripDraggingMode = 0;
 		[self displayIfNeeded];
@@ -1302,8 +1302,8 @@ cubicReverseFunc(float x, const float *points, float tt)
 				continue;
 			if (eventCode != -1 && MDGetCode(ep) != eventCode)
 				continue;
-			point.y = ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * height);
-			point.x = floor(MDGetTick(ep) * ppt);
+			point.y = (CGFloat)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * height);
+			point.x = (CGFloat)floor(MDGetTick(ep) * ppt);
 		//	point.x = floor(MDGetTick(ep) * ppt);
 		//	point.y = floor(MDGetCode(ep) * ys + 0.5) + 0.5 * ys;
 			if ([self isPointInSelectRegion: point]) {

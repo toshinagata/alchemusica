@@ -144,7 +144,7 @@ MDEventDefault(MDEvent *eventRef, int kind)
 	MDSetKind(eventRef, kind);
 	switch (kind) {
 		case kMDEventTempo:
-			MDSetTempo(eventRef, 120.0); break;
+			MDSetTempo(eventRef, 120.0f); break;
 		case kMDEventTimeSignature:
 			ucp = MDGetMetaDataPtr(eventRef);
 			ucp[0] = 4; ucp[1] = 2; ucp[2] = 24; ucp[3] = 8; break;
@@ -892,7 +892,7 @@ MDEventDataStringToEvent(const MDEvent *epin, const char *buf, MDEventFieldData 
 			dbl = atof(buf);
 			if (dbl == 0.0)
 				return kMDEventFieldNone;
-			epout->floatValue = dbl;
+			epout->floatValue = (float)dbl;
 			return kMDEventFieldTempo;
 		case kMDEventTimeSignature:
 			if (sscanf(buf, "%d/%d%n", &d1, &d2, &d3) == 2) {
