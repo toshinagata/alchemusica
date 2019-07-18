@@ -28,6 +28,14 @@
 
 #include <pthread.h>  /*  for pthread implementation of interval timer  */
 
+#if __x86_64__
+//  Ugly hack, to avoid link error on __syscall()
+off_t __syscall(quad_t number, ...)
+{
+    return (off_t)(-1);  //  We don't need it anyway
+}
+#endif
+
 //  Global variables
 int gRubyRunLevel = 0;
 int gRubyIsCheckingInterrupt = 0;
