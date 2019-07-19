@@ -28,6 +28,7 @@
     NSView *customView;
     int busIndex;
     int selectedEffect;
+    BOOL needsRedrawCustomView;
     CGFloat xpos_output;  //  X position of the "Stereo Out" box
 }
 - (id)initWithBusIndex:(int)idx;

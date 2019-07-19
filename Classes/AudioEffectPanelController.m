@@ -257,6 +257,20 @@ static NSString *sAudioEffectPanelShouldUpdate = @"Audio effect panel should upd
     [layoutView setFrame:b];
     
     [layoutView setNeedsDisplay:YES];
+
+    //  Show custom view if requested
+    if (needsRedrawCustomView) {
+        int chainIndex, effectIndex;
+        if (selectedEffect < 0) {
+            chainIndex = -1;
+            effectIndex = 0;
+        } else {
+            chainIndex = selectedEffect / 1000;
+            effectIndex = selectedEffect % 1000;
+        }
+        [self showCustomViewForEffectInChain:chainIndex atIndex:effectIndex];
+        needsRedrawCustomView = NO;
+    }
 }
 
 - (void)updateRequested:(NSNotification *)aNotification
@@ -334,7 +348,11 @@ hide:
     int chainIndex = tag / 1000;
     int itemOffset = tag % 1000 - kAudioEffectPanelEffectBaseTag;
     int effectIndex = itemOffset / 3;
-    selectedEffect = chainIndex * 1000 + effectIndex;
+    int newSelectedEffect = chainIndex * 1000 + effectIndex;
+    if (newSelectedEffect != selectedEffect) {
+        needsRedrawCustomView = YES;
+        selectedEffect = newSelectedEffect;
+    }
     [[NSNotificationQueue defaultQueue] enqueueNotification: [NSNotification notificationWithName: sAudioEffectPanelShouldUpdate object: self] postingStyle: NSPostWhenIdle];
 }
 
@@ -404,8 +422,8 @@ hide:
         return;  //  This cannot happen
     MDAudioChangeEffect(busIndex, chainIndex, effectIndex, effectID, 0);
     selectedEffect = chainIndex * 1000 + effectIndex;
+    needsRedrawCustomView = YES;
     [self updateWindow];
-    [self showCustomViewForEffectInChain:chainIndex atIndex:effectIndex];
 }
 
 - (void)insertEffect:(id)sender
@@ -419,8 +437,8 @@ hide:
         return;  //  This cannot happen
     MDAudioChangeEffect(busIndex, chainIndex, effectIndex, effectID, 1);
     selectedEffect = chainIndex * 1000 + effectIndex;
+    needsRedrawCustomView = YES;
     [self updateWindow];
-    [self showCustomViewForEffectInChain:chainIndex atIndex:effectIndex];
 }
 
 - (void)removeEffect:(id)sender
