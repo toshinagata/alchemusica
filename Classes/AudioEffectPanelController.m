@@ -283,7 +283,7 @@ static NSString *sAudioEffectPanelShouldUpdate = @"Audio effect panel should upd
     [super windowDidLoad];
     [[self window] setTitle:[NSString stringWithFormat:@"Audio Effects: Bus %d", busIndex + 1]];
     [layoutView setDataSource:self];
-    selectedEffect = 0;
+    selectedEffect = -1;
     [[NSNotificationCenter defaultCenter]
      addObserver: self
      selector: @selector(updateRequested:)
