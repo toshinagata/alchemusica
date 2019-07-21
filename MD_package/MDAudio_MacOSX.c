@@ -1592,6 +1592,8 @@ MDAudioInitialize(void)
         MDAudioIOStreamInfo *ip = &(gAudio->ioStreamInfos[i]);
         ip->deviceIndex = -1;
         ip->busIndex = -1;
+        ip->pan = 0.5;
+        ip->volume = 1.0;
     }
     
     /*  Load audio device info  */
@@ -1685,31 +1687,34 @@ MDAudioGetMixerBusAttributes(int idx, float *outPan, float *outVolume, float *ou
 {
 	OSStatus err;
 	Float32 f32;
-	int scope;
+    int scope, mixerIndex;
 	if (idx >= 0 && idx < kMDAudioNumberOfInputStreams) {
+        mixerIndex = idx;
 		scope = kAudioUnitScope_Input;
 	} else if (idx >= kMDAudioFirstIndexForOutputStream && idx < kMDAudioNumberOfStreams) {
-		idx -= kMDAudioFirstIndexForOutputStream;
+		mixerIndex = idx - kMDAudioFirstIndexForOutputStream;
 		scope = kAudioUnitScope_Output;
 	} else return kMDErrorCannotSetupAudio;
 	if (scope == kAudioUnitScope_Input) {
-		CHECK_ERR(err, AudioUnitGetParameter(gAudio->mixerUnit, kStereoMixerParam_Pan, scope, idx, &f32));
+		CHECK_ERR(err, AudioUnitGetParameter(gAudio->mixerUnit, kStereoMixerParam_Pan, scope, mixerIndex, &f32));
 	} else f32 = 0.5f;
+    gAudio->ioStreamInfos[idx].pan = f32;
 	if (outPan != NULL)
 		*outPan = f32;	
-	CHECK_ERR(err, AudioUnitGetParameter(gAudio->mixerUnit, kStereoMixerParam_Volume, scope, idx, &f32));
+	CHECK_ERR(err, AudioUnitGetParameter(gAudio->mixerUnit, kStereoMixerParam_Volume, scope, mixerIndex, &f32));
+    gAudio->ioStreamInfos[idx].volume = f32;
 	if (outVolume != NULL)
 		*outVolume = f32;
-	CHECK_ERR(err, AudioUnitGetParameter(gAudio->mixerUnit, kStereoMixerParam_PostAveragePower, scope, idx, &f32));
+	CHECK_ERR(err, AudioUnitGetParameter(gAudio->mixerUnit, kStereoMixerParam_PostAveragePower, scope, mixerIndex, &f32));
 	if (outAmpLeft != NULL)
 		*outAmpLeft = f32;
-	CHECK_ERR(err, AudioUnitGetParameter(gAudio->mixerUnit, kStereoMixerParam_PostAveragePower + 1, scope, idx, &f32));
+	CHECK_ERR(err, AudioUnitGetParameter(gAudio->mixerUnit, kStereoMixerParam_PostAveragePower + 1, scope, mixerIndex, &f32));
 	if (outAmpRight != NULL)
 		*outAmpRight = f32;
-	CHECK_ERR(err, AudioUnitGetParameter(gAudio->mixerUnit, kStereoMixerParam_PostPeakHoldLevel, scope, idx, &f32));
+	CHECK_ERR(err, AudioUnitGetParameter(gAudio->mixerUnit, kStereoMixerParam_PostPeakHoldLevel, scope, mixerIndex, &f32));
 	if (outPeakLeft != NULL)
 		*outPeakLeft = f32;
-	CHECK_ERR(err, AudioUnitGetParameter(gAudio->mixerUnit, kStereoMixerParam_PostPeakHoldLevel + 1, scope, idx, &f32));
+	CHECK_ERR(err, AudioUnitGetParameter(gAudio->mixerUnit, kStereoMixerParam_PostPeakHoldLevel + 1, scope, mixerIndex, &f32));
 	if (outPeakRight != NULL)
 		*outPeakRight = f32;
 	return kMDNoError;
@@ -1722,14 +1727,16 @@ MDAudioSetMixerVolume(int idx, float volume)
 {
 	OSStatus err;
 	Float32 f32 = volume;
-	int scope;
+    int scope, mixerIndex;
 	if (idx >= 0 && idx < kMDAudioNumberOfInputStreams) {
+        mixerIndex = idx;
 		scope = kAudioUnitScope_Input;
 	} else if (idx >= kMDAudioFirstIndexForOutputStream && idx < kMDAudioNumberOfStreams) {
-		idx -= kMDAudioFirstIndexForOutputStream;
+		mixerIndex = idx - kMDAudioFirstIndexForOutputStream;
 		scope = kAudioUnitScope_Output;
 	} else return kMDErrorCannotSetupAudio;
-	CHECK_ERR(err, AudioUnitSetParameter(gAudio->mixerUnit, kStereoMixerParam_Volume, scope, idx, f32, 0));
+	CHECK_ERR(err, AudioUnitSetParameter(gAudio->mixerUnit, kStereoMixerParam_Volume, scope, mixerIndex, f32, 0));
+    gAudio->ioStreamInfos[idx].volume = volume;
 	return kMDNoError;
 exit:
 	return kMDErrorCannotSetupAudio;
@@ -1740,14 +1747,16 @@ MDAudioSetMixerPan(int idx, float pan)
 {
 	OSStatus err;
 	Float32 f32 = pan;
-	int scope;
+	int scope, mixerIndex;
 	if (idx >= 0 && idx < kMDAudioNumberOfInputStreams) {
+        mixerIndex = idx;
 		scope = kAudioUnitScope_Input;
 	} else if (idx >= kMDAudioFirstIndexForOutputStream && idx < kMDAudioNumberOfStreams) {
-		idx -= kMDAudioFirstIndexForOutputStream;
+		mixerIndex = idx - kMDAudioFirstIndexForOutputStream;
 		scope = kAudioUnitScope_Output;
 	} else return kMDErrorCannotSetupAudio;
-	CHECK_ERR(err, AudioUnitSetParameter(gAudio->mixerUnit, kStereoMixerParam_Pan, scope, idx, f32, 0));
+	CHECK_ERR(err, AudioUnitSetParameter(gAudio->mixerUnit, kStereoMixerParam_Pan, scope, mixerIndex, f32, 0));
+    gAudio->ioStreamInfos[idx].pan = pan;
 	return kMDNoError;
 exit:
 	return kMDErrorCannotSetupAudio;

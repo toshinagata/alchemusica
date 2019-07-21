@@ -293,6 +293,16 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 	[AudioSettingsPanelController openAudioSettingsPanel];
 }
 
+- (IBAction)exportAudioSettings: (id)sender
+{
+    [[AudioSettingsPanelController sharedAudioSettingsPanelController] exportAudioSettings];
+}
+
+- (IBAction)importAudioSettings: (id)sender
+{
+    [[AudioSettingsPanelController sharedAudioSettingsPanelController] importAudioSettings];
+}
+
 - (IBAction)openMetronomeSettingsPanel: (id)sender
 {
 	[MetronomeSettingsPanelController openMetronomeSettingsPanel];

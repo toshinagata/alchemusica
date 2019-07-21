@@ -32,6 +32,8 @@ extern NSString *MyAppControllerModalPanelTimerNotification;
 - (void)performScriptCommand: (NSString *)command forDocument: (MyDocument *)document;
 - (void)doScriptCommand: (id)sender;
 - (IBAction)openAudioSettingsPanel: (id)sender;
+- (IBAction)exportAudioSettings: (id)sender;
+- (IBAction)importAudioSettings: (id)sender;
 - (IBAction)openMetronomeSettingsPanel: (id)sender;
 - (IBAction)openAboutWindow:(id)sender;
 - (IBAction)updateAudioAndMIDISettings:(id)sender;

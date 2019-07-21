@@ -26,6 +26,9 @@
     id *effectControllers;         /*  Array of AudioEffectPanelControllers  */
 }
 + (void)openAudioSettingsPanel;
++ (AudioSettingsPanelController *)sharedAudioSettingsPanelController;
+- (void)exportAudioSettings;
+- (void)importAudioSettings;
 - (void)updateDisplay;
 - (void)timerCallback:(NSTimer *)timer;
 - (IBAction)myPopUpAction:(id)sender;
