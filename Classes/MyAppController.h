@@ -34,6 +34,7 @@ extern NSString *MyAppControllerModalPanelTimerNotification;
 - (IBAction)openAudioSettingsPanel: (id)sender;
 - (IBAction)exportAudioSettings: (id)sender;
 - (IBAction)importAudioSettings: (id)sender;
+- (IBAction)openAudioSettingsPrefPanel: (id)sender;
 - (IBAction)openMetronomeSettingsPanel: (id)sender;
 - (IBAction)openAboutWindow:(id)sender;
 - (IBAction)updateAudioAndMIDISettings:(id)sender;

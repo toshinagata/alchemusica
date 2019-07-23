@@ -20,6 +20,7 @@
 #import "LoadingPanelController.h"
 #import "RubyConsoleWindowController.h"
 #import "AudioSettingsPanelController.h"
+#import "AudioSettingsPrefPanelController.h"
 #import "MetronomeSettingsPanelController.h"
 #import "AboutWindowController.h"
 
@@ -301,6 +302,11 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 - (IBAction)importAudioSettings: (id)sender
 {
     [[AudioSettingsPanelController sharedAudioSettingsPanelController] importAudioSettings];
+}
+
+- (IBAction)openAudioSettingsPrefPanel: (id)sender
+{
+    [AudioSettingsPrefPanelController openAudioSettingsPrefPanel];
 }
 
 - (IBAction)openMetronomeSettingsPanel: (id)sender

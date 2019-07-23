@@ -142,6 +142,8 @@
 		E40C7AC7140A94F700969DC3 /* MetronomeSettingsPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7AC5140A94F700969DC3 /* MetronomeSettingsPanel.xib */; };
 		E40C7ACC140A95D700969DC3 /* MetronomeSettingsPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E40C7ACB140A95D700969DC3 /* MetronomeSettingsPanelController.m */; };
 		E4216C2119D6CD3E00533630 /* IntGroup.c in Sources */ = {isa = PBXBuildFile; fileRef = E4216C1F19D6CD3E00533630 /* IntGroup.c */; };
+		E42D332522E4913D00788C29 /* AudioSettingsPrefPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E42D332322E4913D00788C29 /* AudioSettingsPrefPanel.xib */; };
+		E42D332822E4954900788C29 /* AudioSettingsPrefPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E42D332722E4954900788C29 /* AudioSettingsPrefPanelController.m */; };
 		E44590CA1413C1C400F5C20D /* mute.png in Resources */ = {isa = PBXBuildFile; fileRef = E44590C81413C1C400F5C20D /* mute.png */; };
 		E44590CB1413C1C400F5C20D /* mute_non.png in Resources */ = {isa = PBXBuildFile; fileRef = E44590C91413C1C400F5C20D /* mute_non.png */; };
 		E445911A1413CC0500F5C20D /* speaker_gray.png in Resources */ = {isa = PBXBuildFile; fileRef = E44591191413CC0500F5C20D /* speaker_gray.png */; };
@@ -246,6 +248,9 @@
 		E4280BEB0A44465800DCD341 /* EndEditingRange.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = EndEditingRange.png; path = icons/EndEditingRange.png; sourceTree = "<group>"; };
 		E42BF87D0DB1D1100095F74F /* RubyDialogController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RubyDialogController.h; path = Ruby_bindings/RubyDialogController.h; sourceTree = "<group>"; };
 		E42BF87E0DB1D1100095F74F /* RubyDialogController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RubyDialogController.m; path = Ruby_bindings/RubyDialogController.m; sourceTree = "<group>"; };
+		E42D332422E4913D00788C29 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/AudioSettingsPrefPanel.xib; sourceTree = "<group>"; };
+		E42D332622E4954900788C29 /* AudioSettingsPrefPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioSettingsPrefPanelController.h; path = Classes/AudioSettingsPrefPanelController.h; sourceTree = "<group>"; };
+		E42D332722E4954900788C29 /* AudioSettingsPrefPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AudioSettingsPrefPanelController.m; path = Classes/AudioSettingsPrefPanelController.m; sourceTree = "<group>"; };
 		E430D72B0D79700F00717A72 /* EventFilterPanelController.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = EventFilterPanelController.h; path = Classes/EventFilterPanelController.h; sourceTree = "<group>"; };
 		E430D72C0D79700F00717A72 /* EventFilterPanelController.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = EventFilterPanelController.m; path = Classes/EventFilterPanelController.m; sourceTree = "<group>"; };
 		E4332325096841C800D5DAD8 /* sigmoid.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = sigmoid.png; path = icons/sigmoid.png; sourceTree = "<group>"; };
@@ -535,6 +540,8 @@
 				F5D2EB1B0244AFAF01A80002 /* RemapDevicePanelController.m */,
 				E4B4C26711C3EDAC00FE7593 /* AudioSettingsPanelController.h */,
 				E4B4C26811C3EDAC00FE7593 /* AudioSettingsPanelController.m */,
+				E42D332622E4954900788C29 /* AudioSettingsPrefPanelController.h */,
+				E42D332722E4954900788C29 /* AudioSettingsPrefPanelController.m */,
 				E47643C01F889F62009A206D /* AudioEffectPanelController.h */,
 				E47643C11F889F62009A206D /* AudioEffectPanelController.m */,
 				E47643C31F88B29B009A206D /* AudioEffectLayoutView.h */,
@@ -638,6 +645,7 @@
 				E4D701E913F540C5005EE5B3 /* RecordPanel.xib */,
 				E4B4C25911C3ED4C00FE7593 /* AudioSettingsPanel.xib */,
 				E4C8B26D1F83DE020003BD42 /* AudioEffectPanel.xib */,
+				E42D332322E4913D00788C29 /* AudioSettingsPrefPanel.xib */,
 				E48F2FFF11D8EE7B00491B45 /* AUViewWindow.xib */,
 				E48F30EF11DB8B8D00491B45 /* AUCarbonWindow.xib */,
 				E40C7AC5140A94F700969DC3 /* MetronomeSettingsPanel.xib */,
@@ -820,6 +828,7 @@
 				E400BBD411D627650032B969 /* plus.png in Resources */,
 				E400BBD511D627650032B969 /* minus.png in Resources */,
 				E400BBD611D627650032B969 /* horizontal_move.png in Resources */,
+				E42D332522E4913D00788C29 /* AudioSettingsPrefPanel.xib in Resources */,
 				E400BBD711D627650032B969 /* vertical_move.png in Resources */,
 				E400BBD811D627650032B969 /* stretch.png in Resources */,
 				E400BBDA11D627650032B969 /* RecButton.png in Resources */,
@@ -973,6 +982,7 @@
 				E400BC2E11D627730032B969 /* NSStringAdditions.m in Sources */,
 				E400BC2F11D627730032B969 /* NSEventAdditions.m in Sources */,
 				E400BC3111D627730032B969 /* TrackAttributeCell.m in Sources */,
+				E42D332822E4954900788C29 /* AudioSettingsPrefPanelController.m in Sources */,
 				E47643C51F88B29B009A206D /* AudioEffectLayoutView.m in Sources */,
 				E400BC3211D627730032B969 /* NSWindowControllerAdditions.m in Sources */,
 				E400BC3311D627730032B969 /* NSCursorAdditions.m in Sources */,
@@ -1099,6 +1109,14 @@
 				E40C7AC6140A94F700969DC3 /* English */,
 			);
 			name = MetronomeSettingsPanel.xib;
+			sourceTree = "<group>";
+		};
+		E42D332322E4913D00788C29 /* AudioSettingsPrefPanel.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E42D332422E4913D00788C29 /* English */,
+			);
+			name = AudioSettingsPrefPanel.xib;
 			sourceTree = "<group>";
 		};
 		E46A94B01F776E81008477D2 /* EventKindContextMenu.xib */ = {

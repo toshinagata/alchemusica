@@ -17,6 +17,7 @@
  */
 
 #import "AudioSettingsPanelController.h"
+#import "AudioSettingsPrefPanelController.h"
 #import "NSWindowControllerAdditions.h"
 #import "AudioEffectPanelController.h"
 #import "AUViewWindowController.h"
@@ -104,14 +105,14 @@ static void printCFdata(CFTypeRef ref, int nestLevel)
 
 - (id)exportAudioSettingsToPropertyList
 {
-    int idx, isInput, deviceIndex, status;
+    int idx, isInput, deviceIndex, status, shouldSaveInternal;
     MDAudioDeviceInfo *dp;
     MDAudioMusicDeviceInfo *mp;
     MDAudioIOStreamInfo *iop;
     CFPropertyListRef pref;
     UInt32 prefSize = sizeof(pref);
     NSMutableDictionary *dic;
-    
+
     dic = [NSMutableDictionary dictionary];
     for (idx = 0; idx < kMDAudioNumberOfStreams; idx++) {
         NSMutableDictionary *dic2;
@@ -138,16 +139,19 @@ static void printCFdata(CFTypeRef ref, int nestLevel)
             mp = MDAudioMusicDeviceInfoAtIndex(deviceIndex - kMDAudioMusicDeviceIndexOffset);
             name = mp->name;
         }
+        shouldSaveInternal = [AudioSettingsPrefPanelController shouldSaveInternalForDeviceName:name];
         dic2 = [NSMutableDictionary dictionary];
         [dic2 setObject:[NSString stringWithUTF8String:name] forKey:@"deviceName"];
         [dic setObject:dic2 forKey:[NSString stringWithUTF8String:key]];
-        pref = NULL;
-        status = AudioUnitGetProperty(iop->unit, kAudioUnitProperty_ClassInfo, kAudioUnitScope_Global, (AudioUnitElement)0, &pref, &prefSize);
-        if (status == 0) {
-            if (CFGetTypeID(pref) == CFDictionaryGetTypeID()) {
-                [dic2 setObject:pref forKey:@"classInfo"];
+        if (shouldSaveInternal) {
+            pref = NULL;
+            status = AudioUnitGetProperty(iop->unit, kAudioUnitProperty_ClassInfo, kAudioUnitScope_Global, (AudioUnitElement)0, &pref, &prefSize);
+            if (status == 0) {
+                if (CFGetTypeID(pref) == CFDictionaryGetTypeID()) {
+                    [dic2 setObject:pref forKey:@"classInfo"];
+                }
+                CFRelease(pref);
             }
-            CFRelease(pref);
         }
         [dic2 setObject:[NSNumber numberWithFloat:iop->pan] forKey:@"pan"];
         [dic2 setObject:[NSNumber numberWithFloat:iop->volume] forKey:@"volume"];
@@ -478,6 +482,9 @@ static void printCFdata(CFTypeRef ref, int nestLevel)
 				if (n >= kMDAudioMusicDeviceIndexOffset && (mp = MDAudioMusicDeviceInfoAtIndex(n - kMDAudioMusicDeviceIndexOffset)) != NULL && mp->hasCustomView) {
 					[view setEnabled: YES];
 					[view setState: NSOnState];
+                } else if ([AudioSettingsPrefPanelController shouldCallApplicationForDeviceName:mp->name] != nil) {
+                    [view setEnabled: YES];
+                    [view setState: NSOnState];
 				} else {
 					[view setEnabled: NO];
 					[view setState: NSOffState];
@@ -595,15 +602,20 @@ static void printCFdata(CFTypeRef ref, int nestLevel)
 			if (ip != NULL && ip->unit != NULL) {
 				char *name = NULL;
                 MDAudioMusicDeviceInfo *mp = MDAudioMusicDeviceInfoAtIndex(ip->deviceIndex - kMDAudioMusicDeviceIndexOffset);
-				id cont = [AUViewWindowController windowControllerForAudioUnit: ip->unit cocoaView:(mp->hasCustomView == kMDAudioHasCocoaView) delegate: nil];
-				if (ip->midiControllerName != NULL)
-					name = ip->midiControllerName;
-				else {
-					if (mp != NULL && mp->name != NULL)
-						name = mp->name;
-				}
-				if (name != NULL)
-					[[cont window] setTitle: [NSString stringWithUTF8String: name]];
+                id appName = [AudioSettingsPrefPanelController shouldCallApplicationForDeviceName:mp->name];
+                if (appName != nil) {
+                    [[NSWorkspace sharedWorkspace] launchApplication:appName];
+                } else {
+                    id cont = [AUViewWindowController windowControllerForAudioUnit: ip->unit cocoaView:(mp->hasCustomView == kMDAudioHasCocoaView) delegate: nil];
+                    if (ip->midiControllerName != NULL)
+                        name = ip->midiControllerName;
+                    else {
+                        if (mp != NULL && mp->name != NULL)
+                            name = mp->name;
+                    }
+                    if (name != NULL)
+                        [[cont window] setTitle: [NSString stringWithUTF8String: name]];
+                }
 			}
 		}
 	}

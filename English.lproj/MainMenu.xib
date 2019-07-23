@@ -334,6 +334,12 @@ DQ
                                     <action selector="importAudioSettings:" target="199" id="EYc-zu-TI0"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Audio Device Settings Preferences..." id="Cmf-m3-KGj">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="openAudioSettingsPrefPanel:" target="199" id="JpF-B8-aok"/>
+                                </connections>
+                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="kwn-c7-ZJN"/>
                             <menuItem title="Metronome Settings..." id="343">
                                 <modifierMask key="keyEquivalentModifierMask"/>
