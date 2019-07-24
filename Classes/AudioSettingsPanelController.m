@@ -173,11 +173,14 @@ static void printCFdata(CFTypeRef ref, int nestLevel)
                         dic3 = [NSMutableDictionary dictionary];
                         [ary2 addObject:dic3];
                         [dic3 setObject:[NSString stringWithUTF8String:ep->name] forKey:@"effectName"];
-                        ppref = NULL;
-                        status = AudioUnitGetProperty(ep->unit, kAudioUnitProperty_ClassInfo, kAudioUnitScope_Global, (AudioUnitElement)0, &ppref, &prefSize);
-                        if (status == 0) {
-                            [dic3 setObject:ppref forKey:@"classInfo"];
-                            CFRelease(ppref);
+                        shouldSaveInternal = [AudioSettingsPrefPanelController shouldSaveInternalForDeviceName:ep->name];
+                        if (shouldSaveInternal) {
+                            ppref = NULL;
+                            status = AudioUnitGetProperty(ep->unit, kAudioUnitProperty_ClassInfo, kAudioUnitScope_Global, (AudioUnitElement)0, &ppref, &prefSize);
+                            if (status == 0) {
+                                [dic3 setObject:ppref forKey:@"classInfo"];
+                                CFRelease(ppref);
+                            }
                         }
                     }
                 }
@@ -215,7 +218,7 @@ static void printCFdata(CFTypeRef ref, int nestLevel)
     int map_current2plist[kMDAudioNumberOfStreams];
     int map_plist2current[kMDAudioNumberOfStreams];
     id plist4bus[kMDAudioNumberOfStreams];
-    int i, j, k, isInput, deviceIndex, status;
+    int i, j, k, isInput, deviceIndex, status, shouldLoadInternal;
     UInt32 psize = sizeof(id);
     MDAudioDeviceInfo *ap;
     MDAudioMusicDeviceInfo *mp;
@@ -253,8 +256,9 @@ static void printCFdata(CFTypeRef ref, int nestLevel)
                     MDAudioSelectIOStreamDevice(i, deviceIndex);
                 }
                 /*  Set classInfo if present  */
+                shouldLoadInternal = [AudioSettingsPrefPanelController shouldSaveInternalForDeviceName:ap->name];
                 classInfo = [plist4bus[i] valueForKey:@"classInfo"];
-                if (classInfo != nil) {
+                if (classInfo != nil && shouldLoadInternal) {
                     status = AudioUnitSetProperty(iop->unit, kAudioUnitProperty_ClassInfo, kAudioUnitScope_Global, (AudioUnitElement)0, &classInfo, psize);
                     if (status != 0) {
                         fprintf(stderr, "*** cannot set classInfo to output bus %d (device %s)\n", (i - kMDAudioFirstIndexForOutputStream + 1), namep);
@@ -325,9 +329,10 @@ static void printCFdata(CFTypeRef ref, int nestLevel)
                 MDAudioSelectIOStreamDevice(k, deviceIndex);
             }
             /*  Set classInfo if present  */
+            shouldLoadInternal = [AudioSettingsPrefPanelController shouldSaveInternalForDeviceName:namep];
             classInfo = [plist4bus[i] valueForKey:@"classInfo"];
             iop = MDAudioGetIOStreamInfoAtIndex(map_plist2current[i]);
-            if (classInfo != nil) {
+            if (classInfo != nil && shouldLoadInternal) {
                 [classInfo retain];
                 status = AudioUnitSetProperty(iop->unit, kAudioUnitProperty_ClassInfo, kAudioUnitScope_Global, (AudioUnitElement)0, &classInfo, psize);
                 if (status != 0) {
@@ -374,8 +379,9 @@ static void printCFdata(CFTypeRef ref, int nestLevel)
                             } else {
                                 ep = &(iop->chains[j].effects[k]);
                                 /*  Set classInfo if present  */
+                                shouldLoadInternal = [AudioSettingsPrefPanelController shouldSaveInternalForDeviceName:enamep];
                                 classInfo = [dic valueForKey:@"classInfo"];
-                                if (classInfo != nil) {
+                                if (classInfo != nil && shouldLoadInternal) {
                                     status = AudioUnitSetProperty(ep->unit, kAudioUnitProperty_ClassInfo, kAudioUnitScope_Global, (AudioUnitElement)0, &classInfo, psize);
                                     if (status != 0) {
                                         fprintf(stderr, "*** cannot set classInfo to effect %s in effect chain %d-%d\n", enamep, j, k);

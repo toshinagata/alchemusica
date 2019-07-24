@@ -127,6 +127,10 @@ static NSString *sAppPathKey = @"applicationPath";
         for (i = 0; (mp = MDAudioMusicDeviceInfoAtIndex(i)) != NULL; i++) {
             [[self class] lookupDeviceName:mp->name create:YES type:2];
         }
+        for (i = 0; (mp = MDAudioEffectDeviceInfoAtIndex(i)) != NULL; i++) {
+            [[self class] lookupDeviceName:mp->name create:YES type:3];
+        }
+        
         n = (int)[settings count];
         [devicePopUp removeAllItems];
         type = 0;
