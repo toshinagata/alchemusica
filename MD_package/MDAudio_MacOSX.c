@@ -670,22 +670,7 @@ sMDAudioUpdateSoftwareDeviceInfo(int music_or_effect)
 		if (err == noErr) {
             propSize = sizeof(MDAudioFormat);
             err = AudioUnitGetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &info.format, &propSize);
-            if (err) {
-                err = AudioUnitSetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription));
-                info.acceptsCanonicalFormat = 1;
-                info.format = gAudio->preferredFormat;
-            } else {
-                info.acceptsCanonicalFormat = 0;
-            }
-
-           /* if (err != noErr) {
-                info.acceptsCanonicalFormat = 0;
-                propSize = sizeof(MDAudioFormat);
-                err = AudioUnitGetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &info.format, &propSize);
-            } else {
-                info.acceptsCanonicalFormat = 1;
-                info.format = gAudio->preferredFormat;
-            } */
+            info.acceptsCanonicalFormat = sMDAudioCompareFormat(&info.format, &gAudio->preferredFormat);
 		} else {
 			unit = NULL;
 		}
