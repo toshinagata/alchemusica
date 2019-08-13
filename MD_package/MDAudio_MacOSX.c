@@ -35,13 +35,13 @@ struct MDAudio {
 	
 	/*  AUGraph and AUNodes  */
 	AUGraph graph;
-	AUNode mixer, output;
+    AUNode mixer, output;
 /*	AUNode synth, synth2, mixer, output, converter, splitter; */
 /*	int isInputRunning;
 	int isRunning; */
 	
 	/*  Audio Units  */
-	AudioUnit mixerUnit, outputUnit;
+    AudioUnit mixerUnit, outputUnit;
 /*	AudioUnit inputUnit, outputUnit, mixerUnit, converterUnit;
 	MusicDeviceComponent musicDevice, musicDevice2;
 	AUMIDIControllerRef midiCon, midiCon2; */
@@ -257,16 +257,66 @@ static OSStatus
 sMDAudioRecordProc(void* inRefCon, AudioUnitRenderActionFlags* ioActionFlags, const AudioTimeStamp* inTimeStamp, UInt32 inBusNumber, UInt32 inNumberFrames, AudioBufferList* ioData)
 {
 	OSStatus err = noErr;
-	
-	{ static int count = 0; if (++count == 100) { dprintf(3, "sMDAudioRecordProc called at %f, ioData->mNumberBuffers = %d\n", (double)inTimeStamp->mSampleTime, (int)ioData->mNumberBuffers); count = 0; } }
-	
+    MDAudioIOStreamInfo *info = (MDAudioIOStreamInfo *)inRefCon;
+    MDSampleTime startTime, endTime, renderTime;
+    
+    { static int count = 0; if (++count == 100) { dprintf(3, "sMDAudioRecordProc called at %f, ioData->mNumberBuffers = %d\n", (double)inTimeStamp->mSampleTime, (int)ioData->mNumberBuffers); count = 0; } }
+
+#if 1
+    /*  Sample time range to handle during this callback  */
+    startTime = inTimeStamp->mSampleTime;
+    endTime = startTime + inNumberFrames;
+    if (info->firstInputTime < 0) {
+        info->firstInputTime = inTimeStamp->mSampleTime;
+    }
+
+    /*  Fill the ring buffer until enough data is present in the ring buffer  */
+    while ((renderTime = MDRingBufferEndTime(info->ring)) < endTime) {
+        AudioTimeStamp timeStamp = {0};
+        int i, n;
+        timeStamp.mSampleTime = renderTime;
+        timeStamp.mRateScalar = inTimeStamp->mRateScalar;
+        timeStamp.mFlags = kAudioTimeStampSampleTimeValid | kAudioTimeStampRateScalarValid;
+        n = info->bufferSizeFrames;
+        for (i = 0; i < info->bufferList->mNumberBuffers; i++)
+            info->bufferList->mBuffers[i].mDataByteSize = n * info->ring->bytesPerFrame;
+        err = AudioUnitRender(gAudio->mixerUnit, ioActionFlags, inTimeStamp, inBusNumber, n, info->bufferList);
+        if (err != noErr) {
+            dprintf(0, "AudioUnitRender() failed with error %d in sMDAudioRecordProc\n", (int)err);
+            return err;
+        }
+        /*  Write to ring buffer  */
+        err = MDRingBufferStore(info->ring, info->bufferList, n, renderTime);
+        if (err != noErr) {
+            dprintf(0, "MDRingBufferStore() failed with error %d in sMDAudioRecordProc\n", (int)err);
+            if (err < 0) {
+                /*  Throw everything away from the ring buffer  */
+                MDRingBufferSetTimeBounds(info->ring, startTime, startTime);
+            }
+            return err;
+        }
+    }
+    
+    /*  Fill ioData from the ring buffer  */
+    err = MDRingBufferFetch(info->ring, ioData, inNumberFrames, startTime, false);
+    if (err != noErr) {
+        dprintf(0, "MDRingBufferFetch() failed with error %d in sMDAudioRecordProc\n", (int)err);
+        if (err < 0) {
+            /*  Throw everything away from the ring buffer  */
+            MDRingBufferSetTimeBounds(info->ring, startTime, startTime);
+        }
+        return err;
+    }
+
+#else
 	/*  Render into audio buffer  */
 	err = AudioUnitRender(gAudio->mixerUnit, ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);
 	if (err != noErr) {
 		dprintf(0, "AudioUnitRender() failed with error %d in sMDAudioRecordProc\n", (int)err);
 		return err;
 	}
-	
+#endif
+    
 	/*  Write to file  */
 	if (gAudio->isRecording) {
         if (gAudio->recordingStartTime == 0)
@@ -618,15 +668,24 @@ sMDAudioUpdateSoftwareDeviceInfo(int music_or_effect)
 		/*  Get the audio output format  */
 		err = AudioComponentInstanceNew(cmp, &unit);
 		if (err == noErr) {
-            err = AudioUnitSetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Global, 0, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription));
-            if (err != noErr) {
+            propSize = sizeof(MDAudioFormat);
+            err = AudioUnitGetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &info.format, &propSize);
+            if (err) {
+                err = AudioUnitSetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription));
+                info.acceptsCanonicalFormat = 1;
+                info.format = gAudio->preferredFormat;
+            } else {
+                info.acceptsCanonicalFormat = 0;
+            }
+
+           /* if (err != noErr) {
                 info.acceptsCanonicalFormat = 0;
                 propSize = sizeof(MDAudioFormat);
-                err = AudioUnitGetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Global, 0, &info.format, &propSize);
+                err = AudioUnitGetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &info.format, &propSize);
             } else {
                 info.acceptsCanonicalFormat = 1;
                 info.format = gAudio->preferredFormat;
-            }
+            } */
 		} else {
 			unit = NULL;
 		}
@@ -914,12 +973,30 @@ MDAudioSelectIOStreamDevice(int idx, int deviceIndex)
 			if ((UInt64)(dp->deviceID) != ip->deviceID) {
 				/*  Set the output device to the output unit  */
 				audioDeviceID = dp->deviceID;
-				result = AudioUnitSetProperty(gAudio->outputUnit, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0, &audioDeviceID, sizeof(AudioDeviceID));
+                result = AudioUnitSetProperty(gAudio->outputUnit, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0, &audioDeviceID, sizeof(AudioDeviceID));
 				if (result == noErr) {
+                    MDAudioFormat format;
+                    UInt32 propSize;
+                    /*  Initialize the audio unit  */
+                    //CHECK_ERR(result, AudioUnitInitialize(gAudio->outputUnit));
+                    /*  Set the preferred format of the output unit to the output side of the converter unit */
+                    propSize = sizeof(MDAudioFormat);
+                    CHECK_ERR(result, AudioUnitGetProperty(gAudio->outputUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Global, 0, &format, &propSize));
 					gAudio->isAudioThruEnabled = 1;
                     ip->busIndex = idx;
 					ip->deviceID = (UInt64)(dp->deviceID);
 					ip->deviceIndex = deviceIndex;
+                    /*  Reallocate buffer list  */
+                    ip->bufferSizeFrames = dp->bufferSizeFrames;  /*  The buffer size of the underlying audio device; NOTE: dp must be alive until here!  */
+                    if (ip->bufferList != NULL)
+                        sMDAudioReleaseMyBufferList(ip->bufferList);
+                    ip->bufferList = sMDAudioAllocateMyBufferList(gAudio->preferredFormat.mChannelsPerFrame, gAudio->preferredFormat.mBytesPerFrame, ip->bufferSizeFrames);
+                    /*  Reallocate ring buffer  */
+                    if (ip->ring != NULL)
+                        MDRingBufferRelease(ip->ring);
+                    ip->ring = MDRingBufferNew();
+                    MDRingBufferAllocate(ip->ring, gAudio->preferredFormat.mChannelsPerFrame, gAudio->preferredFormat.mBytesPerFrame, dp->bufferSizeFrames * 4);
+                    ip->firstInputTime = ip->firstOutputTime = -1;
 				} else {
 					gAudio->isAudioThruEnabled = 0;
 					ip->busIndex = -1;
@@ -1622,12 +1699,11 @@ MDAudioInitialize(void)
     CHECK_ERR(err, AUGraphNodeInfo(gAudio->graph, gAudio->mixer, &desc, &gAudio->mixerUnit));
     CHECK_ERR(err, AUGraphNodeInfo(gAudio->graph, gAudio->output, &desc, &gAudio->outputUnit));
     
-    /*  Set the canonical format to mixer and output units  */
-    CHECK_ERR(err, AudioUnitSetProperty(gAudio->outputUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription)));
+    /*  Set the canonical format to the mixer unit  */
     CHECK_ERR(err, AudioUnitSetProperty(gAudio->mixerUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Global, 0, &gAudio->preferredFormat, sizeof(AudioStreamBasicDescription)));
-    
+
     /*  Set the AU callback function for the output unit  */
-    /*  (Read output from the mixer and pass to the output _and_ record to the file)  */
+    /*  (Read output from the converter and pass to the output _and_ record to the file)  */
     callback.inputProc = sMDAudioRecordProc;
     callback.inputProcRefCon = &(gAudio->ioStreamInfos[kMDAudioFirstIndexForOutputStream]);
     CHECK_ERR(err, AudioUnitSetProperty(gAudio->outputUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, &callback, sizeof(AURenderCallbackStruct)));
@@ -1907,10 +1983,17 @@ MDAudioPrepareRecording(const char *filename, const MDAudioFormat *format, int a
 		return kMDErrorCannotSetupAudio;
     CFRelease(urlRef);
 
-	/*  Set the client data format to the canonical one (i.e. the format the mixer handles) */
-	err = ExtAudioFileSetProperty(gAudio->audioFile, kExtAudioFileProperty_ClientDataFormat, sizeof(AudioStreamBasicDescription), &gAudio->preferredFormat);
-	if (err != noErr)
-		return kMDErrorCannotSetupAudio;
+	/*  Set the client data format  */
+    err = ExtAudioFileSetProperty(gAudio->audioFile, kExtAudioFileProperty_ClientDataFormat, sizeof(AudioStreamBasicDescription), &gAudio->preferredFormat);
+    if (err != noErr)
+        return kMDErrorCannotSetupAudio;
+    
+    /*  Initialize AudioFile IO  */
+    err = ExtAudioFileWriteAsync(gAudio->audioFile, 0, NULL);
+    if (err != noErr)
+        return kMDErrorCannotSetupAudio;
+    
+    
 
 /*	// If we're recording from a mono source, setup a simple channel map to split to stereo
 	if (fDeviceFormat.mChannelsPerFrame == 1 && fOutputFormat.mChannelsPerFrame == 2)
@@ -1927,11 +2010,6 @@ MDAudioPrepareRecording(const char *filename, const MDAudioFormat *format, int a
 		}
 	}
 */
-
-	/*  Initialize AudioFile IO  */
-	err = ExtAudioFileWriteAsync(gAudio->audioFile, 0, NULL);
-	if (err != noErr)
-		return kMDErrorCannotSetupAudio;
 
     gAudio->recordingDuration = recordingDuration;
 

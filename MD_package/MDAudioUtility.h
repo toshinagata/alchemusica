@@ -35,8 +35,32 @@ enum {
 	kMDRingBufferError_NumberBuffersMismatch = 7
 };
 
-typedef struct MDRingBuffer MDRingBuffer;
 typedef SInt64 MDSampleTime;
+
+#define kMDRingTimeBoundsQueueSize 32
+#define kMDRingTimeBoundsQueueMask (kMDRingTimeBoundsQueueSize - 1)
+
+/*  range of valid sample time in the buffer  */
+typedef struct MDTimeBounds {
+    volatile MDSampleTime  startTime;
+    volatile MDSampleTime  endTime;
+    volatile UInt32        updateCounter;
+} MDTimeBounds;
+
+struct MDRingBuffer {
+    Byte **    buffers;
+    int     numberChannels;
+    int     numberBuffers;
+    UInt32  bytesPerFrame;
+    UInt32  capacityFrames;
+    UInt32  capacityFramesMask;
+    UInt32  capacityBytes;
+    
+    MDTimeBounds timeBoundsQueue[kMDRingTimeBoundsQueueSize];
+    UInt32  timeBoundsQueuePtr;
+};
+
+typedef struct MDRingBuffer MDRingBuffer;
 
 MDRingBuffer *MDRingBufferNew(void);
 int MDRingBufferAllocate(MDRingBuffer *ring, int nChannels, UInt32 bytesPerFrame, UInt32 capacityFrames);

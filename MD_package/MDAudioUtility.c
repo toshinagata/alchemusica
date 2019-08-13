@@ -19,29 +19,6 @@
 
 #pragma mark ====== MDRingBuffer ======
 
-#define kMDRingTimeBoundsQueueSize 32
-#define kMDRingTimeBoundsQueueMask (kMDRingTimeBoundsQueueSize - 1)
-
-/*  range of valid sample time in the buffer  */
-typedef struct MDTimeBounds {
-	volatile MDSampleTime  startTime;
-	volatile MDSampleTime  endTime;
-	volatile UInt32        updateCounter;
-} MDTimeBounds;
-
-struct MDRingBuffer {
-	Byte **	buffers;
-	int     numberChannels;
-	int     numberBuffers;
-	UInt32  bytesPerFrame;
-	UInt32  capacityFrames;
-	UInt32  capacityFramesMask;
-	UInt32  capacityBytes;
-	
-	MDTimeBounds timeBoundsQueue[kMDRingTimeBoundsQueueSize];
-	UInt32  timeBoundsQueuePtr;
-};
-
 static UInt32
 sNextPowerOfTwo(UInt32 x)
 {
@@ -134,6 +111,7 @@ sStoreABL(Byte **buffers, int destOffset, const AudioBufferList *abl, int srcOff
 {
 	int nchannels = abl->mNumberBuffers;
 	const AudioBuffer *src = abl->mBuffers;
+//    printf("Store %d bytes at [%d] from [%d]\n", nbytes, destOffset, srcOffset);
 	while (--nchannels >= 0) {
 		memcpy(*buffers + destOffset, (Byte *)src->mData + srcOffset, nbytes);
 		++buffers;
@@ -146,6 +124,7 @@ sFetchABL(AudioBufferList *abl, int destOffset, Byte **buffers, int srcOffset, i
 {
 	int nchannels = abl->mNumberBuffers;
 	AudioBuffer *dest = abl->mBuffers;
+//    printf("Fetch %d bytes from [%d] to [%d]\n", nbytes, srcOffset, destOffset);
 	while (--nchannels >= 0) {
 		memcpy((Byte *)dest->mData + destOffset, *buffers + srcOffset, nbytes);
 		++buffers;
@@ -251,7 +230,10 @@ MDRingBufferFetch(MDRingBuffer *ring, AudioBufferList *abl, UInt32 nFrames, MDSa
 		dest++;
 	}
 	
-	return MDRingBufferCheckTimeBounds(ring, startRead, endRead, aheadOK);
+    // now update the end time
+    MDRingBufferSetTimeBounds(ring, endRead, MDRingBufferEndTime(ring));
+
+    return kMDRingBufferError_OK;
 }
 
 int
