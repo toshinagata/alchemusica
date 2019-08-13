@@ -8,11 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		E400BBC811D627650032B969 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165FFE840EACC02AAC07 /* InfoPlist.strings */; };
-		E400BBCC11D627650032B969 /* FFButton.icns in Resources */ = {isa = PBXBuildFile; fileRef = F5F22F08022FBBC501A80002 /* FFButton.icns */; };
-		E400BBCD11D627650032B969 /* PauseButton.icns in Resources */ = {isa = PBXBuildFile; fileRef = F5F22F09022FBBC501A80002 /* PauseButton.icns */; };
-		E400BBCE11D627650032B969 /* PlayButton.icns in Resources */ = {isa = PBXBuildFile; fileRef = F5F22F0A022FBBC501A80002 /* PlayButton.icns */; };
-		E400BBCF11D627650032B969 /* RewindButton.icns in Resources */ = {isa = PBXBuildFile; fileRef = F5F22F0B022FBBC501A80002 /* RewindButton.icns */; };
-		E400BBD011D627650032B969 /* StopButton.icns in Resources */ = {isa = PBXBuildFile; fileRef = F5F22F0C022FBBC501A80002 /* StopButton.icns */; };
 		E400BBD111D627650032B969 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5FFC0B30237AAD301A80002 /* Localizable.strings */; };
 		E400BBD211D627650032B969 /* G-clef.icns in Resources */ = {isa = PBXBuildFile; fileRef = F520EC10023D1DC601A80002 /* G-clef.icns */; };
 		E400BBD411D627650032B969 /* plus.png in Resources */ = {isa = PBXBuildFile; fileRef = E48885ED04523E4B00A80006 /* plus.png */; };
@@ -155,6 +150,11 @@
 		E47643C21F889F62009A206D /* AudioEffectPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E47643C11F889F62009A206D /* AudioEffectPanelController.m */; };
 		E47643C51F88B29B009A206D /* AudioEffectLayoutView.m in Sources */ = {isa = PBXBuildFile; fileRef = E47643C41F88B29B009A206D /* AudioEffectLayoutView.m */; };
 		E47643CB1F8B236F009A206D /* MyClipView.m in Sources */ = {isa = PBXBuildFile; fileRef = E47643CA1F8B236F009A206D /* MyClipView.m */; };
+		E48BC3802302A7BD0087B726 /* StopButton.png in Resources */ = {isa = PBXBuildFile; fileRef = E48BC37F2302A7BD0087B726 /* StopButton.png */; };
+		E48BC3822302A89F0087B726 /* FFButton.png in Resources */ = {isa = PBXBuildFile; fileRef = E48BC3812302A89E0087B726 /* FFButton.png */; };
+		E48BC3842302A8DB0087B726 /* PlayButton.png in Resources */ = {isa = PBXBuildFile; fileRef = E48BC3832302A8DB0087B726 /* PlayButton.png */; };
+		E48BC3862302A9210087B726 /* PauseButton.png in Resources */ = {isa = PBXBuildFile; fileRef = E48BC3852302A9210087B726 /* PauseButton.png */; };
+		E48BC3882302A9990087B726 /* RewindButton.png in Resources */ = {isa = PBXBuildFile; fileRef = E48BC3872302A9990087B726 /* RewindButton.png */; };
 		E48F300111D8EE7B00491B45 /* AUViewWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E48F2FFF11D8EE7B00491B45 /* AUViewWindow.xib */; };
 		E48F30F111DB8B8D00491B45 /* AUCarbonWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E48F30EF11DB8B8D00491B45 /* AUCarbonWindow.xib */; };
 		E4951EA411D63CD000D827EC /* AUViewWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = E4951EA311D63CD000D827EC /* AUViewWindowController.m */; };
@@ -295,6 +295,11 @@
 		E481167F071C26C700A80105 /* TrackAttributeCell.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = TrackAttributeCell.h; path = Classes/TrackAttributeCell.h; sourceTree = "<group>"; };
 		E4811680071C26C700A80105 /* TrackAttributeCell.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = TrackAttributeCell.m; path = Classes/TrackAttributeCell.m; sourceTree = "<group>"; };
 		E48885ED04523E4B00A80006 /* plus.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = plus.png; path = icons/plus.png; sourceTree = "<group>"; };
+		E48BC37F2302A7BD0087B726 /* StopButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = StopButton.png; path = icons/StopButton.png; sourceTree = "<group>"; };
+		E48BC3812302A89E0087B726 /* FFButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = FFButton.png; path = icons/FFButton.png; sourceTree = "<group>"; };
+		E48BC3832302A8DB0087B726 /* PlayButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = PlayButton.png; path = icons/PlayButton.png; sourceTree = "<group>"; };
+		E48BC3852302A9210087B726 /* PauseButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = PauseButton.png; path = icons/PauseButton.png; sourceTree = "<group>"; };
+		E48BC3872302A9990087B726 /* RewindButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = RewindButton.png; path = icons/RewindButton.png; sourceTree = "<group>"; };
 		E48F300011D8EE7B00491B45 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/AUViewWindow.xib; sourceTree = "<group>"; };
 		E48F30F011DB8B8D00491B45 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/AUCarbonWindow.xib; sourceTree = "<group>"; };
 		E4951EA211D63CD000D827EC /* AUViewWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AUViewWindowController.h; path = Classes/AUViewWindowController.h; sourceTree = "<group>"; };
@@ -411,11 +416,6 @@
 		F5D2EB1B0244AFAF01A80002 /* RemapDevicePanelController.m */ = {isa = PBXFileReference; fileEncoding = 0; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; name = RemapDevicePanelController.m; path = Classes/RemapDevicePanelController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
 		F5D6C49203E0489301A80002 /* GraphicClientView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = GraphicClientView.h; path = Classes/GraphicClientView.h; sourceTree = "<group>"; };
 		F5D6C49303E0489301A80002 /* GraphicClientView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GraphicClientView.m; path = Classes/GraphicClientView.m; sourceTree = "<group>"; wrapsLines = 1; };
-		F5F22F08022FBBC501A80002 /* FFButton.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = FFButton.icns; path = icons/FFButton.icns; sourceTree = "<group>"; };
-		F5F22F09022FBBC501A80002 /* PauseButton.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = PauseButton.icns; path = icons/PauseButton.icns; sourceTree = "<group>"; };
-		F5F22F0A022FBBC501A80002 /* PlayButton.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = PlayButton.icns; path = icons/PlayButton.icns; sourceTree = "<group>"; };
-		F5F22F0B022FBBC501A80002 /* RewindButton.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = RewindButton.icns; path = icons/RewindButton.icns; sourceTree = "<group>"; };
-		F5F22F0C022FBBC501A80002 /* StopButton.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = StopButton.icns; path = icons/StopButton.icns; sourceTree = "<group>"; };
 		F5F9405D00EE2B4E01000001 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = /System/Library/Frameworks/CoreMIDI.framework; sourceTree = "<absolute>"; };
 		F5FB767800F88D8601000001 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
 		F5FFC0B40237AAD301A80002 /* Localizable.strings */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = English.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -672,11 +672,11 @@
 		E40C7A53140A884400969DC3 /* icons */ = {
 			isa = PBXGroup;
 			children = (
-				F5F22F08022FBBC501A80002 /* FFButton.icns */,
-				F5F22F09022FBBC501A80002 /* PauseButton.icns */,
-				F5F22F0A022FBBC501A80002 /* PlayButton.icns */,
-				F5F22F0B022FBBC501A80002 /* RewindButton.icns */,
-				F5F22F0C022FBBC501A80002 /* StopButton.icns */,
+				E48BC3812302A89E0087B726 /* FFButton.png */,
+				E48BC3852302A9210087B726 /* PauseButton.png */,
+				E48BC3832302A8DB0087B726 /* PlayButton.png */,
+				E48BC3872302A9990087B726 /* RewindButton.png */,
+				E48BC37F2302A7BD0087B726 /* StopButton.png */,
 				F520EC10023D1DC601A80002 /* G-clef.icns */,
 				E4F95D80073D909700F1D121 /* document_icon.icns */,
 				E48885ED04523E4B00A80006 /* plus.png */,
@@ -818,11 +818,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				E400BBC811D627650032B969 /* InfoPlist.strings in Resources */,
-				E400BBCC11D627650032B969 /* FFButton.icns in Resources */,
-				E400BBCD11D627650032B969 /* PauseButton.icns in Resources */,
-				E400BBCE11D627650032B969 /* PlayButton.icns in Resources */,
-				E400BBCF11D627650032B969 /* RewindButton.icns in Resources */,
-				E400BBD011D627650032B969 /* StopButton.icns in Resources */,
 				E400BBD111D627650032B969 /* Localizable.strings in Resources */,
 				E400BBD211D627650032B969 /* G-clef.icns in Resources */,
 				E400BBD411D627650032B969 /* plus.png in Resources */,
@@ -840,9 +835,11 @@
 				E400BBE011D627650032B969 /* loupe.png in Resources */,
 				E400BBE111D627650032B969 /* selection.png in Resources */,
 				E400BBE211D627650032B969 /* pencil.png in Resources */,
+				E48BC3822302A89F0087B726 /* FFButton.png in Resources */,
 				E400BBE311D627650032B969 /* sigmoid.png in Resources */,
 				E400BBE411D627650032B969 /* random.png in Resources */,
 				E400BBE511D627650032B969 /* linear.png in Resources */,
+				E48BC3882302A9990087B726 /* RewindButton.png in Resources */,
 				E400BBE611D627650032B969 /* triangle.png in Resources */,
 				E400BBE711D627650032B969 /* pencil_cursor.png in Resources */,
 				E400BBE811D627650032B969 /* arc.png in Resources */,
@@ -860,6 +857,7 @@
 				E400BBF411D627650032B969 /* note8.png in Resources */,
 				E400BBF511D627650032B969 /* note32.png in Resources */,
 				E400BBF611D627650032B969 /* note1.png in Resources */,
+				E48BC3802302A7BD0087B726 /* StopButton.png in Resources */,
 				E400BBF711D627650032B969 /* note2.png in Resources */,
 				E400BBF811D627650032B969 /* note1_3.png in Resources */,
 				E400BBF911D627650032B969 /* note1d.png in Resources */,
@@ -879,8 +877,10 @@
 				E400BC0C11D627650032B969 /* horizontal_move_plus.png in Resources */,
 				E400BC0D11D627650032B969 /* vertical_move_plus.png in Resources */,
 				E400BC0E11D627650032B969 /* AudioSettingsPanel.xib in Resources */,
+				E48BC3862302A9210087B726 /* PauseButton.png in Resources */,
 				E48F300111D8EE7B00491B45 /* AUViewWindow.xib in Resources */,
 				E48F30F111DB8B8D00491B45 /* AUCarbonWindow.xib in Resources */,
+				E48BC3842302A8DB0087B726 /* PlayButton.png in Resources */,
 				E4C8B26F1F83DE020003BD42 /* AudioEffectPanel.xib in Resources */,
 				E4D701EB13F540C5005EE5B3 /* RecordPanel.xib in Resources */,
 				E4FB54C313FA851A001C1290 /* horizontal_move_zoom.png in Resources */,
