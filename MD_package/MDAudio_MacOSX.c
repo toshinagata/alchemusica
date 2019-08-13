@@ -700,7 +700,6 @@ sMDAudioUpdateSoftwareDeviceInfo(int music_or_effect)
 		else {
 			free(info.name);
 			info.name = NULL;
-			break;
 		}
 	}
 	MyAppCallback_startupMessage("");
