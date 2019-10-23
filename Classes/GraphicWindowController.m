@@ -1731,9 +1731,13 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 		//  Duplicate notes
         for (i = 0; i < n; i++) {
             track = [self sortedTrackNumberAtIndex: i];
-            if (track < 0)
+            if (track <= 0)  //  Ignore events in the conductor track
                 continue;
             pointSet = [document selectionOfTrack: track];
+            if (deltaNote != 0 && deltaTick == 0) {
+                /*  Select only note events  */
+                pointSet = [document eventSetInTrack:track eventKind:kMDEventNote eventCode:-1 fromTick:0 toTick:kMDMaxTick fromData:0 toData:256 inPointSet:pointSet];
+            }
             if (pointSet == nil || IntGroupGetCount([pointSet pointSet]) <= 0)
                 continue;
 			[document duplicateMultipleEventsAt: pointSet ofTrack: track selectInsertedEvents: YES];
@@ -1758,6 +1762,8 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
             if (track < 0)
                 continue;
             pointSet = [document selectionOfTrack: track];
+            /*  Select only note events  */
+            pointSet = [document eventSetInTrack:track eventKind:kMDEventNote eventCode:-1 fromTick:0 toTick:kMDMaxTick fromData:0 toData:256 inPointSet:pointSet];
             if (pointSet == nil || IntGroupGetCount([pointSet pointSet]) <= 0)
                 continue;
             [document modifyCodes: deltaNum ofMultipleEventsAt: pointSet inTrack: track mode: MyDocumentModifyAdd];
