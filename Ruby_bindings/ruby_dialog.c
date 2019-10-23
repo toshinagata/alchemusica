@@ -1271,10 +1271,10 @@ s_RubyDialog_Item(int argc, VALUE *argv, VALUE self)
 	
     /*  If @bind_global_settings is given and the value is not given,
         then try to get the value from the global settings  */
-    {
+    if (rb_hash_aref(hash, sValueSymbol) == Qnil) {
         VALUE gsetval = rb_ivar_get(self, rb_intern("@bind_global_settings"));
         if (gsetval != Qnil) {
-            VALUE tag = rb_ivar_get(val, SYM2ID(sTagSymbol));
+            VALUE tag = rb_ivar_get(new_item, SYM2ID(sTagSymbol));
             if (tag != Qnil) {
                 char *path;
                 VALUE arg, resval;
@@ -1282,7 +1282,7 @@ s_RubyDialog_Item(int argc, VALUE *argv, VALUE self)
                 arg = rb_str_new2(path);
                 resval = rb_funcall(rb_mKernel, rb_intern("get_global_settings"), 1, arg);
                 if (resval != Qnil) {
-                    s_RubyDialogItem_SetAttr(val, sValueSymbol, resval);
+                    s_RubyDialogItem_SetAttr(new_item, sValueSymbol, resval);
                 }
                 free(path);
             }
