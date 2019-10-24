@@ -35,6 +35,8 @@ typedef struct TimeScalingRecord {
 	int *trackNums;        /*  Track numbers  */
 	int32_t *startPos;        /*  Start positions for each track to modify ticks  */
 	MDTickType **originalTicks;  /*  Arrays of original ticks for each track  */
+    IntGroup *meterPos;    /*  The position of meter events  */
+    IntGroup *origMeterPos;  /*  The _original_ position of meter events  */
 } TimeScalingRecord;
 
 @implementation TimeChartView
@@ -211,7 +213,7 @@ typedef struct TimeScalingRecord {
 }
 
 /*  See also: -[MyDocument scaleSelectedTime:]  */
-- (void)scaleSelectedTimeWithEvent: (NSEvent *)theEvent undoEnabled:(BOOL)undoEnabled
+- (void)scaleSelectedTimeWithEvent: (NSEvent *)theEvent
 {
 	MDSequence *seq;
 	int i, j;
@@ -228,20 +230,19 @@ typedef struct TimeScalingRecord {
 	}
 	seq = [[[dataSource document] myMIDISequence] mySequence];
 	for (i = 0; i < timeScaling->ntracks; i++) {
-		MDTrack *track = MDSequenceGetTrack(seq, timeScaling->trackNums[i]);
-		int n = MDTrackGetNumberOfEvents(track) - timeScaling->startPos[i];  /*  Number of events  */
-		MDPointer *pt = MDPointerNew(track);
-		MDEvent *ep;
-		IntGroupObject *psobj = nil;
-		NSMutableData *dt = nil;
-		MDTickType *mutableBytes = NULL;
+        int n;
+        MDPointer *pt;
+        MDEvent *ep;
+        int trackNum = timeScaling->trackNums[i];
+		MDTrack *track = MDSequenceGetTrack(seq, trackNum);
+        MDTrack *meterTrack = NULL;
+        if (trackNum == 0 && IntGroupGetCount(timeScaling->meterPos) > 0) {
+            /*  Temporarily remove the meter events  */
+            MDTrackUnmerge(track, &meterTrack, timeScaling->meterPos);
+        }
+		n = MDTrackGetNumberOfEvents(track) - timeScaling->startPos[i];  /*  Number of events  */
+		pt = MDPointerNew(track);
 		MDPointerSetPosition(pt, timeScaling->startPos[i]);
-		if (undoEnabled && n > 0) {
-			psobj = [[IntGroupObject allocWithZone:[self zone]] init];
-			IntGroupAdd([psobj pointSet], timeScaling->startPos[i], n);
-			dt = [[NSMutableData allocWithZone:[self zone]] initWithLength:sizeof(MDTickType) * n];
-			mutableBytes = (MDTickType *)[dt mutableBytes];
-		}
 		for (ep = MDPointerCurrent(pt), j = 0; ; ep = MDPointerForward(pt), j++) {
 			MDTickType tick = timeScaling->originalTicks[i][j];
 			if (timeScaling->newEndTick != timeScaling->endTick) {
@@ -251,24 +252,26 @@ typedef struct TimeScalingRecord {
 					tick += (timeScaling->newEndTick - timeScaling->endTick);
 			}
 			if (ep == NULL) {
-				if (undoEnabled) {
-					if (n > 0) {
-                        [[dataSource document] modifyTick:dt ofMultipleEventsAt:psobj inTrack:timeScaling->trackNums[i] mode:MyDocumentModifySet destinationPositions:nil setSelection:NO];
-						[dt release];
-						[psobj release];
-					}
-					[[dataSource document] changeTrackDuration:tick ofTrack:timeScaling->trackNums[i]];	
-				} else {
-					MDTrackSetDuration(track, tick);
-				}
+                MDTrackSetDuration(track, tick);
 				break;
 			} else {
-				if (undoEnabled)
-					mutableBytes[j] = tick;
-				else
-					MDSetTick(ep, tick);
+                MDSetTick(ep, tick);
 			}
-		}
+        }
+        if (trackNum == 0 && IntGroupGetCount(timeScaling->meterPos) > 0) {
+            /*  Restore the meter events  */
+            if (theEvent == NULL) {
+                /*  Restore to the original positions  */
+                MDTrackMerge(track, meterTrack, &(timeScaling->origMeterPos));
+            } else {
+                /*  Restore to the appropriate positions  */
+                IntGroupRelease(timeScaling->meterPos);
+                timeScaling->meterPos = NULL;
+                MDTrackMerge(track, meterTrack, &(timeScaling->meterPos));
+            }
+            MDTrackRelease(meterTrack);
+            MDSequenceResetCalibrators(seq);
+        }
 	}
 	[dataSource reloadClientViews];
 }
@@ -311,19 +314,33 @@ typedef struct TimeScalingRecord {
 			for (i = 0; i < timeScaling->ntracks; i++) {
 				MDPointer *pt;
 				MDEvent *ep;
-				track = MDSequenceGetTrack(seq, timeScaling->trackNums[i]);
+                int trackNum = timeScaling->trackNums[i];
+				track = MDSequenceGetTrack(seq, trackNum);
 				pt = MDPointerNew(track);
+                if (trackNum == 0) {
+                    /*  Conductor track: the meter events should be fixed  */
+                    timeScaling->meterPos = IntGroupNew();
+                }
 				if (MDPointerJumpToTick(pt, startTick)) {
 					timeScaling->startPos[i] = MDPointerGetPosition(pt);
 				} else {
 					timeScaling->startPos[i] = MDTrackGetNumberOfEvents(track);
 				}
 				timeScaling->originalTicks[i] = (MDTickType *)calloc(sizeof(MDTickType), MDTrackGetNumberOfEvents(track) - timeScaling->startPos[i] + 1);  /*  +1 for end-of-track  */
-				for (ep = MDPointerCurrent(pt), j = 0; ep != NULL; ep = MDPointerForward(pt), j++) {
-					timeScaling->originalTicks[i][j] = MDGetTick(ep);
+				for (ep = MDPointerCurrent(pt), j = 0; ep != NULL; ep = MDPointerForward(pt)) {
+                    if (trackNum == 0 && MDGetKind(ep) == kMDEventTimeSignature) {
+                        /*  Record the position of the meter events  */
+                        IntGroupAdd(timeScaling->meterPos, MDPointerGetPosition(pt), 1);
+                    } else {
+                        timeScaling->originalTicks[i][j++] = MDGetTick(ep);
+                    }
 				}
 				MDPointerRelease(pt);
 				timeScaling->originalTicks[i][j] = MDTrackGetDuration(track);
+                if (trackNum == 0) {
+                    timeScaling->origMeterPos = IntGroupNew();
+                    IntGroupCopy(timeScaling->origMeterPos, timeScaling->meterPos);
+                }
 			}
 		}
 	} else if ((initialModifierFlags & NSCommandKeyMask)) {
@@ -345,7 +362,7 @@ typedef struct TimeScalingRecord {
 - (void)doMouseDragged: (NSEvent *)theEvent
 {
 	if (timeScaling != NULL) {
-		[self scaleSelectedTimeWithEvent:theEvent undoEnabled:NO];
+		[self scaleSelectedTimeWithEvent:theEvent];
         [(MyDocument *)[dataSource document] setEditingRangeStart:timeScaling->startTick end:timeScaling->newEndTick];
 		return;
 	}
@@ -441,7 +458,11 @@ typedef struct TimeScalingRecord {
          setEditingRangeStart:timeScaling->startTick end:timeScaling->endTick];
 
         /*  Revert temporary scaling  */
-        [self scaleSelectedTimeWithEvent:nil undoEnabled:NO];
+        [self scaleSelectedTimeWithEvent:nil];
+        IntGroupRelease(timeScaling->meterPos);
+        IntGroupRelease(timeScaling->origMeterPos);
+        timeScaling->meterPos = NULL;
+        timeScaling->origMeterPos = NULL;
         
         /*  Scale time with undo registration  */
         timeScaling->newEndTick = mousePt.x / ppt;

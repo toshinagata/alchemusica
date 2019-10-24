@@ -2898,10 +2898,13 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
             mp = (MDTickType *)[dt mutableBytes];
 			for (ep = MDPointerCurrent(pt); ep != NULL; ep = MDPointerForward(pt)) {
 				MDTickType tick = MDGetTick(ep);
-				if (tick < endTick)
-                    tick = startTick + (MDTickType)(((double)tick - startTick) * newDuration / (endTick - startTick));
-				else
-					tick += newDuration - (endTick - startTick);
+                if (MDGetKind(ep) != kMDEventTimeSignature) {
+                    /*  The meter events will be fixed  */
+                    if (tick < endTick)
+                        tick = startTick + (MDTickType)(((double)tick - startTick) * newDuration / (endTick - startTick));
+                    else
+                        tick += newDuration - (endTick - startTick);
+                }
 				*mp++ = tick;
 			}
             [self modifyTick:dt ofMultipleEventsAt:psobj inTrack:trackNo mode:MyDocumentModifySet destinationPositions:nil setSelection:NO];
@@ -2934,7 +2937,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     return YES;
 }
 
-/* See also: -[TimeChartView scaleSelectedTimeWithEvent:undoEnabled:]  */
+/* See also: -[TimeChartView scaleSelectedTimeWithEvent:]  */
 - (IBAction)scaleSelectedTime:(id)sender
 {
 	double *dp;
