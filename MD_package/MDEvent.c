@@ -1231,7 +1231,7 @@ MDEventCalculateMetronomeBarAndBeat(const MDEvent *eptr, int32_t timebase, int32
     if (eptr != NULL && MDGetKind(eptr) == kMDEventTimeSignature) {
         const unsigned char *p = MDGetMetaDataPtr(eptr);
         *outTickPerMetronomeBeat = timebase * p[2] / 24;
-        if (p[1] >= 31)
+        if (p[1] < 31)
             *outTickPerMeasure = (timebase * 4 / (1 << p[1])) * p[0];
         else *outTickPerMeasure = timebase;
         return 1;

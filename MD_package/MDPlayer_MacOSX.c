@@ -1235,7 +1235,7 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
                 MDSetDuration(&metEvent, metDuration);
                 ep = &metEvent;
                 channel = gMetronomeInfo.channel & 15;
-            //    printf("%ld %c\n", currentTick, (isBell ? '*' : ' '));
+            //    printf("Metronome %ld %c\n", currentTick, (isBell ? '*' : ' '));
             } else if (scheduleType == kNoteOffScheduleType) {
                 ep = MDPointerCurrent(info->noteOffPtr);
                 channel = MDGetChannel(ep);

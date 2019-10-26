@@ -192,7 +192,7 @@ static id sharedMetronomeSettingsPanelController;
 	MyAppCallback_setObjectGlobalSettings(key, [NSNumber numberWithInt:ival]);
 	MyAppCallback_saveGlobalSettings();
 	[self updateDisplay];
-	MDPlayerRingMetronomeClick(NULL, 0, (key == MetronomeNote1Key || key == MetronomeVelocity1Key) ? 1 : 0);
+//	MDPlayerRingMetronomeClick(NULL, 0, (key == MetronomeNote1Key || key == MetronomeVelocity1Key) ? 1 : 0);
 }
 
 - (IBAction)metronomeClickStepperMoved:(id)sender
