@@ -1908,31 +1908,9 @@ MDPlayerStart(MDPlayer *inPlayer)
 	inPlayer->startTime = GetHostTimeInMDTimeType() - inPlayer->time;
     inPlayer->countOffEndTime = inPlayer->time;
     if (inPlayer->isRecording && inPlayer->countOffDuration > 0) {
-        /*  Look for the earliest metronome tick after start time  */
-        int32_t bar, beat, barnum, beatnum;
-        MDTickType dtick;
-        MDTickType tick = MDCalibratorTimeToTick(inPlayer->calib, inPlayer->time);
-        MDEvent *ep = MDCalibratorGetEvent(inPlayer->calib, NULL, kMDEventTimeSignature, -1);
-        MDTickType sigtick = (ep == NULL ? 0 : MDGetTick(ep));
-        int32_t timebase = MDSequenceGetTimebase(inPlayer->sequence);
+        inPlayer->countOffFirstRing = inPlayer->time - inPlayer->countOffDuration;
+        inPlayer->countOffNextRing = inPlayer->countOffFirstRing;
         inPlayer->startTime += inPlayer->countOffDuration;
-        MDEventCalculateMetronomeBarAndBeat(ep, timebase, &bar, &beat);
-        tick -= sigtick;
-        barnum = tick / bar;
-        dtick = tick % bar;
-        beatnum = dtick / beat;
-        dtick = dtick % beat;
-        if (dtick > 0) {
-            beatnum++;
-            if (beatnum * beat >= bar) {
-                barnum++;
-                beatnum = 0;
-            }
-        }
-        tick = sigtick + barnum * bar;
-        inPlayer->countOffFirstRing = MDCalibratorTickToTime(inPlayer->calib, tick) - inPlayer->countOffDuration;
-        tick += beatnum * beat;
-        inPlayer->countOffNextRing = MDCalibratorTickToTime(inPlayer->calib, tick) - inPlayer->countOffDuration;
     }
 	inPlayer->status = kMDPlayer_playing;
 	inPlayer->shouldTerminate = 0;

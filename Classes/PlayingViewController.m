@@ -562,17 +562,19 @@
 - (void)pressPlayButtonWithRecording:(BOOL)isRecordButton
 {
 	int status;
+    MDTickType currentTick;
 	MDPlayer *player = [[myDocument myMIDISequence] myPlayer];
 	if (player == NULL)
 		return;
 	status = MDPlayerGetStatus(player);
 	[playButton setState:NSOnState];
+    currentTick = MDCalibratorTimeToTick(calibrator, currentTime);
 	if (status == kMDPlayer_playing || status == kMDPlayer_exhausted)
 		return;
 	else if (status == kMDPlayer_suspended) {
 		[pauseButton setState:NSOnState];
 	} else if (status == kMDPlayer_ready || status == kMDPlayer_idle) {
-		MDPlayerJumpToTick(player, MDCalibratorTimeToTick(calibrator, currentTime));
+		MDPlayerJumpToTick(player, currentTick);
 	}
     if (isRecordButton) {
 		BOOL flag;
@@ -581,18 +583,28 @@
         countOffNumber = [[info valueForKey: MyRecordingInfoCountOffNumberKey] intValue];
         if (countOffNumber > 0) {
             /*  Handle metronome count-off */
-            int bar, beat, barBeatFlag;
+            int bar, beat, barBeatFlag, barTime, beatTime, tickInBeatTime;
+            int32_t currentBar, currentBeat, currentTickInBeat;
+            int countOffDuration;
             float timebase = [myDocument timebase];
             MDEvent *ep = MDCalibratorGetEvent(calibrator, NULL, kMDEventTimeSignature, -1);
             float tempo = MDCalibratorGetTempo(calibrator);
             barBeatFlag = [[info valueForKey: MyRecordingInfoBarBeatFlagKey] intValue];
             MDEventCalculateMetronomeBarAndBeat(ep, (int32_t)timebase, &bar, &beat);
-            bar = (int)floor(bar * 60000000.0 / (tempo * timebase) + 0.5);
-            beat = (int)ceil(beat * 60000000.0 / (tempo * timebase));
+            MDCalibratorTickToMeasure(calibrator, currentTick, &currentBar, &currentBeat, &currentTickInBeat);
+            barTime = (int)floor(bar * 60000000.0 / (tempo * timebase) + 0.5);
+            beatTime = (int)ceil(beat * 60000000.0 / (tempo * timebase));
+            tickInBeatTime = (int)floor(currentTickInBeat * 60000000.0 / (tempo * timebase) + 0.5);
             if (barBeatFlag) {
-                MDPlayerSetCountOffSettings(player, bar * countOffNumber, bar, beat);
+                countOffDuration = barTime * countOffNumber;
+                /*  Add ticks between the beginning of the bar and currentTick  */
+                countOffDuration += (currentBeat - 1) * beatTime + tickInBeatTime;
+                MDPlayerSetCountOffSettings(player, countOffDuration, barTime, beatTime);
             } else {
-                MDPlayerSetCountOffSettings(player, beat * countOffNumber, 0, beat);
+                countOffDuration = beatTime * countOffNumber;
+                /*  Add ticks between the nearest beat and currentTick  */
+                countOffDuration += tickInBeatTime;
+                MDPlayerSetCountOffSettings(player, countOffDuration, 0, beatTime);
             }
         } else MDPlayerSetCountOffSettings(player, 0, 0, 0);
 		if (isAudioRecording)
