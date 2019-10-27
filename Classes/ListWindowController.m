@@ -239,7 +239,7 @@ static NSColor *sMiscColor = nil;
     int lastRow, n, row;
     if (tick < 0)
         return -1;
-    lastRow = [self numberOfRowsInTableView:myEventTrackView] - 1;
+    lastRow = (int)[self numberOfRowsInTableView:myEventTrackView] - 1;
     pt = MDPointerNew(myTrack);
     if (tick >= MDTrackGetDuration(myTrack))
         return lastRow;
@@ -265,7 +265,7 @@ static NSColor *sMiscColor = nil;
 		return;
 	
 	/*  Look for the event representing tick  */
-	maxRow = [self numberOfRowsInTableView:myEventTrackView] - 1;
+	maxRow = (int)[self numberOfRowsInTableView:myEventTrackView] - 1;
     nearestRow = [self maxRowBeforeTick:tick];
     if (nearestRow >= 0) {
 		NSRange visibleRowRange = [myEventTrackView rowsInRect:[myEventTrackView visibleRect]];
@@ -337,7 +337,7 @@ EventSelector(const MDEvent *ep, int32_t position, void *inUserData)
     selectionDidChangeNotificationLevel--;
 }
 
-- (int)numberOfRowsInTableView:(NSTableView *)aTableView
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
 	if (myTrack != NULL && myPointer != NULL) {
 		if (myCount == -1) {
@@ -468,7 +468,7 @@ EventSelector(const MDEvent *ep, int32_t position, void *inUserData)
 
 - (id)tableView:(NSTableView *)aTableView
 objectValueForTableColumn:(NSTableColumn *)aTableColumn
-row:(int)rowIndex
+row:(NSInteger)rowIndex
 {
 	id identifier = [aTableColumn identifier];
 	MDEvent *ep;
@@ -481,7 +481,7 @@ row:(int)rowIndex
 		ep = NULL;
 		tick = MDTrackGetDuration(myTrack);
 	} else {
-		ep = [self eventPointerForTableRow:rowIndex];
+		ep = [self eventPointerForTableRow:(int)rowIndex];
 		if (ep == NULL)
 			return nil;
 		tick = MDGetTick(ep);
@@ -500,7 +500,7 @@ row:(int)rowIndex
 		return [NSString localizedStringWithFormat:@"%8d", (int32_t)tick];
 	} else if ([@"deltacount" isEqualToString: identifier]) {
 		if (rowIndex == myCount) {
-			ep = [self eventPointerForTableRow:rowIndex - 1];
+			ep = [self eventPointerForTableRow:(int)rowIndex - 1];
 			if (ep != NULL)
 				tick -= MDGetTick(ep);
 		} else if (rowIndex > 0) {
@@ -643,7 +643,7 @@ newEventFromKindAndCode(MDEvent *ep, MDEventFieldData ed)
 - (void)tableView:(NSTableView *)aTableView
 setObjectValue:(id)anObject
 forTableColumn:(NSTableColumn *)aTableColumn
-row:(int)rowIndex
+row:(NSInteger)rowIndex
 {
 	id identifier = [aTableColumn identifier];
 //	const char *descStr = [[anObject description] UTF8String];
@@ -660,7 +660,7 @@ row:(int)rowIndex
 	
 	/*  Prepare arguments for posting action  */
 	trackNo = myTrackNumber; /* [[self myMIDISequence] lookUpTrack: [self MIDITrack]]; */
-	position = [self eventPositionForTableRow:rowIndex];
+	position = [self eventPositionForTableRow:(int)rowIndex];
 	document = (MyDocument *)[self document];
 
 	tick = kMDNegativeTick;
@@ -680,13 +680,13 @@ row:(int)rowIndex
 	} else if ([@"deltacount" isEqualToString: identifier]) {
 		tick = (int32_t)atol(buf);
 		if (rowIndex > 0) {
-			ep = [self eventPointerForTableRow:rowIndex - 1];
+			ep = [self eventPointerForTableRow:(int)rowIndex - 1];
 			if (ep != NULL)
 				tick += MDGetTick(ep);
 		}
 	}
 	
-	ep = [self eventPointerForTableRow:rowIndex];
+	ep = [self eventPointerForTableRow:(int)rowIndex];
 	if (tick != kMDNegativeTick) {
 		/*  set tick  */
 		int32_t npos;
@@ -823,8 +823,8 @@ row:(int)rowIndex
     MDSelectionObject *pointSet;
     NSIndexSet *iset;
     MDStatus sts;
-    int numberOfRows;
-    unsigned flags;
+    NSInteger numberOfRows;
+    NSUInteger flags;
     NSUInteger idx;
     if (selectionDidChangeNotificationLevel > 0)
         return;

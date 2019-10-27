@@ -441,7 +441,7 @@ typedef struct TimeScalingRecord {
             [alert addButtonWithTitle:@"Cancel"];
             [alert addButtonWithTitle:[NSString stringWithFormat:@"NO, %s insert", (insertTempo ? "don't" : "do")]];
             [alert setAlertStyle:NSWarningAlertStyle];
-            response = [alert runModal];
+            response = (int)[alert runModal];
             [alert autorelease];
             if (response == NSAlertThirdButtonReturn) {
                 insertTempo = !insertTempo;
@@ -572,7 +572,7 @@ typedef struct TimeScalingRecord {
 {
 	NSPoint pt;
 	int n;
-	unsigned modifierFlags;
+	NSUInteger modifierFlags;
 	localGraphicTool = [self modifyLocalGraphicTool:[[self dataSource] graphicTool]];
 	if ([theEvent type] == NSFlagsChanged) {
 		pt = [self convertPoint:[[self window] convertScreenToBase:[NSEvent mouseLocation]] fromView:nil];

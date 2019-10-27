@@ -391,7 +391,7 @@ sAllowedExtensionsForTag(int tag)
 	} else if (sender == barBeatPopUp) {
 		[info setValue: [NSNumber numberWithBool: (tag == 0)] forKey: MyRecordingInfoBarBeatFlagKey];
     } else if (sender == transposeOctavePopUp || sender == transposeNotePopUp) {
-        tag = (4 - [transposeOctavePopUp indexOfSelectedItem]) * 12;
+        tag = (4 - (int)[transposeOctavePopUp indexOfSelectedItem]) * 12;
         tag += [transposeNotePopUp indexOfSelectedItem];
         [info setValue: [NSNumber numberWithInt: tag] forKey: MyRecordingInfoMIDITransposeKey];
         MDPlayerSetMIDIThruTranspose(tag);

@@ -37,8 +37,8 @@ enum {
     BOOL isDragging;
     BOOL isLoupeDragging;
 	BOOL autoScaleOnResizing;
-    unsigned int initialModifierFlags;
-    unsigned int currentModifierFlags;
+    NSUInteger initialModifierFlags;
+    NSUInteger currentModifierFlags;
     NSMutableArray *selectPoints;
     NSBezierPath *selectionPath;
 	NSRect initialSelectionRect;

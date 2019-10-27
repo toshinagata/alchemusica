@@ -204,7 +204,7 @@
 	int row;
 	BOOL insertFlag;
 	unichar charCode = [[theEvent charactersIgnoringModifiers] characterAtIndex: 0];
-	int modifierFlags = [theEvent modifierFlags];
+	NSUInteger modifierFlags = [theEvent modifierFlags];
 	if ((modifierFlags & NSCommandKeyMask) != 0 && (charCode == NSCarriageReturnCharacter || charCode == NSEnterCharacter)) {
 		/*  Enter edit mode  */
 		if ([self numberOfSelectedRows] == 1) {

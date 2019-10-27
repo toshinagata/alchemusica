@@ -399,7 +399,7 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 {
 	NSEvent *event;
 	NSString *s;
-	unsigned int flags;
+	NSUInteger flags;
     if (!sStartupCompleted)
         return NO;
 	if (rubyProgressPanelController != nil) {

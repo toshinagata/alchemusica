@@ -217,7 +217,7 @@ static id sharedMetronomeSettingsPanelController;
 
 - (IBAction)checkBoxPressed:(id)sender
 {
-	int state = [sender state];
+	int state = (int)[sender state];
 	MyAppCallback_setObjectGlobalSettings((sender == metronomeEnableWhenPlayCheck ? MetronomeEnableWhenPlayKey : MetronomeEnableWhenRecordKey), [NSNumber numberWithBool:(state == NSOnState)]);
 	MyAppCallback_saveGlobalSettings();
 	[self updateDisplay];

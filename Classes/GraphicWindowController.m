@@ -1199,7 +1199,7 @@ sTableColumnIDToInt(id identifier)
     int i, track;
     for (i = 1; i < myClientViewsCount; i++) {
         if (records[i].splitter == (GraphicSplitterView *)[sender superview]) {
-            track = [sender indexOfSelectedItem];
+            track = (int)[sender indexOfSelectedItem];
             [self setStripChartAtIndex:i track:track - 1];
             break;
         }
@@ -2501,15 +2501,16 @@ row:(int)rowIndex
 
 #pragma mark ====== Split view control ======
 
-- (float)splitView: (NSSplitView *)sender constrainMaxCoordinate: (float)proposedMax ofSubviewAt: (int)offset
+- (CGFloat)splitView: (NSSplitView *)sender constrainMaxCoordinate: (CGFloat)proposedMax ofSubviewAt: (NSInteger)offset
 {
-    return [sender bounds].size.width - 160.0f;
+    CGFloat max = [sender bounds].size.width - 160.0f;
+    return max;
 }
 
-- (float)splitView: (NSSplitView *)sender constrainMinCoordinate: (float)proposedMin ofSubviewAt: (int)offset
+- (CGFloat)splitView: (NSSplitView *)sender constrainMinCoordinate: (CGFloat)proposedMin ofSubviewAt: (NSInteger)offset
 {
-	return 100.0f;
-//    return proposedMin;
+    CGFloat min = 100.0f;
+    return min;
 }
 
 - (BOOL)splitView:(NSSplitView *)sender canCollapseSubview:(NSView *)subview

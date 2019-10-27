@@ -344,7 +344,7 @@ hide:
 
 - (IBAction)effectButtonPressed:(id)sender
 {
-    int tag = [sender tag];
+    int tag = (int)[sender tag];
     int chainIndex = tag / 1000;
     int itemOffset = tag % 1000 - kAudioEffectPanelEffectBaseTag;
     int effectIndex = itemOffset / 3;
@@ -361,7 +361,7 @@ hide:
     NSMenu *menu;
     id item;
     int i;
-    int tag = [sender tag];
+    int tag = (int)[sender tag];
     int chainIndex = tag / 1000;
     int itemOffset = tag % 1000 - kAudioEffectPanelEffectBaseTag;
     int effectIndex = itemOffset / 3;
@@ -372,7 +372,7 @@ hide:
     if (effectIndex < 0 || effectIndex > ip->chains[chainIndex].neffects)
         return;  //  This cannot happen
     menu = [self menuWithEffectNames];
-    for (i = [menu numberOfItems] - 1; i >= 0; i--) {
+    for (i = (int)[menu numberOfItems] - 1; i >= 0; i--) {
         item = [menu itemAtIndex:i];
         [item setAction:(insert ? @selector(insertEffect:) : @selector(changeEffect:))];
         [item setTag:chainIndex * 1000000 + effectIndex * 1000 + i];
@@ -413,7 +413,7 @@ hide:
 
 - (void)changeEffect:(id)sender
 {
-    int tag = [sender tag];
+    int tag = (int)[sender tag];
     int chainIndex = tag / 1000000;
     int effectIndex = (tag / 1000) % 1000;
     int effectID = tag % 1000;
@@ -428,7 +428,7 @@ hide:
 
 - (void)insertEffect:(id)sender
 {
-    int tag = [sender tag];
+    int tag = (int)[sender tag];
     int chainIndex = tag / 1000000;
     int effectIndex = (tag / 1000) % 1000;
     int effectID = tag % 1000;
@@ -444,7 +444,7 @@ hide:
 - (void)removeEffect:(id)sender
 {
     int i, n;
-    int tag = [sender tag];
+    int tag = (int)[sender tag];
     int chainIndex = tag / 1000000;
     int effectIndex = (tag / 1000) % 1000;
     MDAudioIOStreamInfo *ip = MDAudioGetIOStreamInfoAtIndex(busIndex);

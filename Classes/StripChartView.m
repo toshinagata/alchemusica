@@ -746,7 +746,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 - (int)modifyLocalGraphicTool:(int)originalGraphicTool
 {
 	NSEvent *event = [NSApp currentEvent];
-	unsigned int flags = [event modifierFlags];
+	NSUInteger flags = [event modifierFlags];
 	int tool = originalGraphicTool;
 	if ((flags & NSCommandKeyMask) != 0) {
 		if (tool == kGraphicPencilTool)

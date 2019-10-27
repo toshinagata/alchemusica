@@ -674,7 +674,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 
 - (void)doFlagsChanged: (NSEvent *)theEvent
 {
-	unsigned int flags = [theEvent modifierFlags];
+	NSUInteger flags = [theEvent modifierFlags];
 	localGraphicTool = [self modifyLocalGraphicTool:[[self dataSource] graphicTool]];
 	if (![[[[self dataSource] document] myMIDISequence] isPlaying]) {
 		if ((flags & NSControlKeyMask) != 0) {
@@ -694,7 +694,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	MDEvent *ep;
 	int n;
 	NSPoint pt;
-	unsigned int flags = [theEvent modifierFlags];
+	NSUInteger flags = [theEvent modifierFlags];
 	localGraphicTool = [self modifyLocalGraphicTool:[[self dataSource] graphicTool]];
 	if (![[[[self dataSource] document] myMIDISequence] isPlaying]) {
 		if ((flags & NSControlKeyMask) != 0) {
@@ -821,7 +821,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 - (int)modifyLocalGraphicTool:(int)originalGraphicTool
 {
 	NSEvent *event = [NSApp currentEvent];
-	unsigned int flags = [event modifierFlags];
+	NSUInteger flags = [event modifierFlags];
 	int tool = originalGraphicTool;
 	if ((flags & NSCommandKeyMask) != 0) {
 		if (tool == kGraphicPencilTool)

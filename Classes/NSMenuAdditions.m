@@ -25,7 +25,7 @@
 {
     int i;
     NSArray *ary = [self itemArray];
-    for (i = [ary count] - 1; i >= 0; i--) {
+    for (i = (int)[ary count] - 1; i >= 0; i--) {
         NSMenuItem *item = [ary objectAtIndex:i];
         NSMenu *submenu;
         NSAttributedString *astr = [[[NSAttributedString alloc] initWithString:[item title] attributes:attributes] autorelease];

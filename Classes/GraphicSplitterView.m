@@ -231,7 +231,7 @@ trackPopUp(int count)
 {
     int i, count;
     id target = [trackPopup target];
-    i = [trackPopup indexOfSelectedItem];
+    i = (int)[trackPopup indexOfSelectedItem];
     count = [target trackCount];
     [trackPopup setMenu:trackPopUp(count)];
     

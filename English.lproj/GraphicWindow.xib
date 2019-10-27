@@ -584,12 +584,12 @@
         </view>
     </objects>
     <resources>
-        <image name="FFButton" width="16" height="16"/>
-        <image name="PauseButton" width="16" height="16"/>
-        <image name="PlayButton" width="16" height="16"/>
-        <image name="RecButton" width="24" height="24"/>
-        <image name="RewindButton" width="16" height="16"/>
-        <image name="StopButton" width="16" height="16"/>
+        <image name="FFButton" width="18" height="18"/>
+        <image name="PauseButton" width="18" height="18"/>
+        <image name="PlayButton" width="18" height="18"/>
+        <image name="RecButton" width="18" height="18"/>
+        <image name="RewindButton" width="18" height="18"/>
+        <image name="StopButton" width="18" height="18"/>
         <image name="expand" width="17" height="16"/>
         <image name="ibeam" width="22" height="14"/>
         <image name="pencil" width="22" height="14"/>
