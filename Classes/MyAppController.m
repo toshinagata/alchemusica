@@ -18,6 +18,7 @@
 #import "MyAppController.h"
 #import "MyDocument.h"
 #import "LoadingPanelController.h"
+#import "GraphicWindowController.h"
 #import "RubyConsoleWindowController.h"
 #import "AudioSettingsPanelController.h"
 #import "AudioSettingsPrefPanelController.h"
@@ -323,6 +324,17 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 {
 	MDAudioUpdateDeviceInfo();
 	MDPlayerReloadDeviceInformation();
+}
+
+- (IBAction)tryTrackColorForCurrentDocument:(id)sender
+{
+    //  Pass the message to the current document
+    id doc = [[NSDocumentController sharedDocumentController] currentDocument];
+    if (doc != nil) {
+        GraphicWindowController *cont = [(MyDocument *)doc mainWindowController];
+        if (cont != nil)
+            [cont tryTrackColor:sender];
+    }
 }
 
 - (BOOL)validateUserInterfaceItem: (id)anItem

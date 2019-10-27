@@ -422,7 +422,7 @@ static void printCFdata(CFTypeRef ref, int nestLevel)
             [alert runModal];
             return;
         }
-        printCFdata(plist, 0); /* for debug */
+        //printCFdata(plist, 0); /* for debug */
         [self importAudioSettingsFromPropertyList:plist];
     }
 }

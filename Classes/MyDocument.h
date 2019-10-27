@@ -94,6 +94,7 @@ typedef enum MyDocumentModifyMode {
 - (void)lockMIDISequence;
 - (void)unlockMIDISequence;
 
+- (GraphicWindowController *)mainWindowController;
 - (void)createWindowForTracks: (NSArray *)tracks ofType: (NSString *)windowType;
 
 - (NSArray *)getDestinationNames;
@@ -178,7 +179,9 @@ typedef enum MyDocumentModifyMode {
 - (void)setTimebase:(float)timebase;
 
 //  Color management
+- (NSColor *)defaultColorForTrack: (int)track enabled: (BOOL)flag;
 - (NSColor *)colorForTrack: (int)track enabled: (BOOL)flag;
+- (void)changeColor: (NSColor *)color forTrack: (int)track enableUndo: (BOOL)enableUndo;
 + (NSColor *)colorForEditingRange;
 + (NSColor *)colorForSelectingRange;
 

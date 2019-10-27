@@ -146,6 +146,10 @@ enum {
 	//  during startup, which may causes inconsistency of the layout of the subviews. This 
 	//  flag avoid such inconsistency.
 	BOOL waitingForFirstWindowResize;
+    
+    //  This flag is asserted on invocation of [tryTrackColor:], and negated on first
+    //  idle event. While this flag is asserted, changeColor undo events are not registered.
+    BOOL changingTrackColor;
 }
 
 //+ (NSCursor *)horizontalMoveCursor;
@@ -176,15 +180,23 @@ enum {
 - (float)quantizedPixelFromPixel: (float)pixel;
 - (float)pixelQuantum;
 
+- (void)showPlayPosition: (NSNotification *)notification;
+- (void)editingRangeChanged: (NSNotification *)notification;
+
 - (float)scrollPositionOfClientViews;
 - (void)scrollClientViewsToPosition: (float)pos;
 - (void)scrollClientViewsToTick: (MDTickType)tick;
+
+- (void)needsReloadClientViews: (NSNotification *)aNotification;
 
 - (void)verticalLinesFromTick: (MDTickType)fromTick timeSignature: (MDEvent **)timeSignature nextTimeSignature: (MDEvent **)nextTimeSignature lineIntervalInPixels: (float *)lineIntervalInPixels mediumCount: (int *)mediumCount majorCount: (int *)majorCount;
 
 - (MDTickType)sequenceDuration;
 - (float)sequenceDurationInQuarter;
 - (void)setInfoText: (NSString *)string;
+
+- (void)midiSetupDidChange: (NSNotification *)aNotification;
+- (void)windowDidResize:(NSNotification *)aNotification;
 
 - (void)setStripChartAtIndex: (int)index kind: (int)kind code: (int)code;
 - (IBAction)kindPopUpPressed: (id)sender;
@@ -248,9 +260,17 @@ enum {
 - (IBAction)createNewTrack: (id)sender;
 - (IBAction)deleteSelectedTracks:(id)sender;
 - (IBAction)remapDevice: (id)sender;
+- (IBAction)changeTrackColor: (id)sender;
+- (IBAction)tryTrackColor: (id)sender;
+- (void)clearChangingColorFlag: (NSNotification *)aNotification;
 
 - (void)trackTableAction:(id)sender;
 - (void)trackTableDoubleAction:(id)sender;
+- (void)tableViewSelectionDidChange: (NSNotification *)aNotification;
+
+- (void)trackModified: (NSNotification *)notification;
+- (void)trackInserted: (NSNotification *)notification;
+- (void)trackDeleted: (NSNotification *)notification;
 
 //  Action methods for graphic views
 //- (IBAction)changeControlNumber:(id)sender;

@@ -38,6 +38,7 @@ extern NSString *MyAppControllerModalPanelTimerNotification;
 - (IBAction)openMetronomeSettingsPanel: (id)sender;
 - (IBAction)openAboutWindow:(id)sender;
 - (IBAction)updateAudioAndMIDISettings:(id)sender;
+- (IBAction)tryTrackColorForCurrentDocument:(id)sender;
 - (id)documentAtIndex: (int)idx;
 
 - (void)getRubyVersion:(NSString **)outVersion copyright:(NSString **)outCopyright;

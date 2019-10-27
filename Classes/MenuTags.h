@@ -22,7 +22,8 @@ enum {
 	kOpenGraphicWindowMenuTag = 301,
 	kCreateNewTrackMenuTag = 302,
 	kDeleteSelectedTracksMenuTag = 303,
-	kRemapDevicesMenuTag = 304
+	kRemapDevicesMenuTag = 304,
+    kChangeTrackColorMenuTag = 305
 };
 
 #endif

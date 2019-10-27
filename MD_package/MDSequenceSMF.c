@@ -405,7 +405,12 @@ MDSequenceReadSMFTrack(MDSMFConvert *cref)
                     case kMDMetaSequenceName:
                         MDTrackGetName(cref->temptrk, buf, sizeof buf);
                         if (buf[0] == 0) {
-                            result = MDTrackSetName(cref->temptrk, (const char *)MDGetMessageConstPtr(&event, NULL));
+                            const char *p = (const char *)MDGetMessageConstPtr(&event, NULL);
+                            if (strcmp(p, " ") != 0) {
+                                /*  A sequence name " " is equivalent to blank  */
+                                /*  (Cf. MDSequenceWriteSMFTrackNameAndDevice())  */
+                                result = MDTrackSetName(cref->temptrk, p);
+                            }
                             skipFlag = 1;
                         }
                         break;
@@ -416,6 +421,25 @@ MDSequenceReadSMFTrack(MDSMFConvert *cref)
                             skipFlag = 1;
                         }
                         break;
+                    case kMDMetaText: {
+                        /*  Begin with %% at tick 0: an extra info  */
+                        const char *p = (const char *)MDGetMessageConstPtr(&event, NULL);
+                        if (cref->tick == 0 && strncmp(p, "%%", 2) == 0) {
+                            /*  key:value  */
+                            const char *pp = strchr(p, ':');
+                            if (pp != NULL) {
+                                size_t len = pp - (p + 2);
+                                if (len >= sizeof(buf))
+                                    len = sizeof(buf) - 1;
+                                strncpy(buf, p + 2, len);
+                                buf[len] = 0;
+                                pp = pp + 1;
+                                MDTrackSetExtraInfo(cref->temptrk, buf, pp);
+                                skipFlag = 1;
+                            }
+                        }
+                        break;
+                    }
                 }
             } else if (MDGetKind(&event) == kMDEventInternalDuration) {
 				metaDuration = MDGetDuration(&event);
@@ -782,10 +806,17 @@ MDSequenceWriteSMFTrackNameAndDevice(MDSMFConvert *cref)
 {
     MDStatus result;
     char buf[256];
-	int32_t dev;
+    int32_t dev, i;
+    const char *key, *value;
 
     /*  Sequence name  */
     MDTrackGetName(cref->temptrk, buf, sizeof buf);
+    if (buf[0] == 0) {
+        /*  We will avoid an empty sequence name, because otherwise the older version
+            of Alchemusica will try to get the name from the first TEXT metaevent,
+            which causes problem when extra info is stored as a TEXT metaevent  */
+        strcpy(buf, " ");
+    }
     result = MDSequenceWriteSMFDeltaTime(cref, 0);
     if (result != kMDNoError)
         return result;
@@ -796,7 +827,7 @@ MDSequenceWriteSMFTrackNameAndDevice(MDSMFConvert *cref)
     result = MDSequenceWriteSMFWriteMessage(cref, (unsigned char *)buf, (int)strlen(buf));
     if (result != kMDNoError)
         return result;
-
+    
     /*  Device name  */
 	dev = MDTrackGetDevice(cref->temptrk);
 	if (dev < 0 || MDPlayerGetDestinationName(dev, buf, sizeof buf) != kMDNoError)
@@ -811,6 +842,22 @@ MDSequenceWriteSMFTrackNameAndDevice(MDSMFConvert *cref)
     result = MDSequenceWriteSMFWriteMessage(cref, (unsigned char *)buf, (int)strlen(buf));
     if (result != kMDNoError)
         return result;
+    
+    /*  Other extra info  */
+    for (i = 0; (value = MDTrackGetExtraInfoAtIndex(cref->temptrk, i, &key)) != NULL; i++) {
+        char *msg;
+        asprintf(&msg, "%%%%%s:%s", key, value);
+        result = MDSequenceWriteSMFDeltaTime(cref, 0);
+        if (result != kMDNoError)
+            return result;
+        if (PUTC(kMDEventSMFMeta, cref->stream) == EOF)
+            return kMDErrorCannotWriteToStream;
+        if (PUTC(kMDMetaText, cref->stream) == EOF)
+            return kMDErrorCannotWriteToStream;
+        result = MDSequenceWriteSMFWriteMessage(cref, (unsigned char *)msg, (int)strlen(msg));
+        if (result != kMDNoError)
+            return result;
+    }
     return result;
 }
 

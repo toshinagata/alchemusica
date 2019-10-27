@@ -285,7 +285,16 @@ callback(float progress, void *data)
         }
     }
 
-	return (result == kMDNoError);
+    //  Initialize colors
+    if (result == kMDNoError) {
+        n = [myMIDISequence trackCount];
+        for (i = 0; i < n; i++) {
+            NSColor *color = [self colorForTrack:i enabled:YES];
+            [self changeColor:color forTrack:i enableUndo:NO];
+        }
+    }
+
+    return (result == kMDNoError);
 }
 
 - (BOOL)writeToFile:(NSString *)fileName ofType:(NSString *)docType
@@ -343,6 +352,10 @@ callback(float progress, void *data)
     [[mainWindowController window] makeFirstResponder: [[mainWindowController window] initialFirstResponder]];
 }
 
+- (GraphicWindowController *)mainWindowController
+{
+    return mainWindowController;
+}
 - (void)createWindowForTracks: (NSArray *)tracks ofType: (NSString *)windowType
 {
 	NSEnumerator *en;
@@ -455,13 +468,52 @@ callback(float progress, void *data)
 
 #pragma mark ====== Color management ======
 
-- (NSColor *)colorForTrack: (int)track enabled: (BOOL)flag
+- (NSColor *)defaultColorForTrack: (int)track enabled: (BOOL)flag
 {
 	NSColor *color;
-	color = [NSColor colorWithDeviceHue: (float)(track * 2 % 31) / 31.0f saturation: 1.0f brightness: 1.0f - 0.1f * (track / 31) alpha: (flag ? 1.0f : 0.5f)];
-//	if (!flag)
-//		color = [color shadowWithLevel: 0.5];
+    color = [NSColor colorWithDeviceHue: (float)((track * 5 + 7) % 17) / 17.0f saturation: 1.0f brightness: 1.0f - 0.2f * (track % 34 >= 17) alpha: (flag ? 1.0 : 0.5)];
 	return color;
+}
+
+- (NSColor *)colorForTrack: (int)track enabled: (BOOL)flag
+{
+    const char *value;
+    unsigned int r, g, b;
+    MDTrack *tp = [[self myMIDISequence] getTrackAtIndex:track];
+    if (MDTrackGetExtraInfo(tp, "color", &value) >= 0 && sscanf(value, "%2x%2x%2x", &r, &g, &b) == 3) {
+        return [NSColor colorWithDeviceRed: r/255.0f green: g/255.0f blue: b/255.0f alpha: (flag ? 1.0 : 0.5)];
+    } else {
+        return [self defaultColorForTrack: track enabled: flag];
+    }
+}
+
+- (void)changeColor: (NSColor *)color forTrack: (int)track enableUndo: (BOOL)enableUndo
+{
+    NSColor *oldColor = nil;
+    MDTrack *tp = [[self myMIDISequence] getTrackAtIndex:track];
+    if (MDTrackGetExtraInfo(tp, "color", NULL) >= 0) {
+        oldColor = [self colorForTrack: track enabled: YES];
+    }
+    if (enableUndo) {
+        [[[self undoManager] prepareWithInvocationTarget: self]
+         changeColor:oldColor forTrack:track enableUndo:YES];
+    }
+    if (color == nil) {
+        /*  Unregister the color  */
+        MDTrackSetExtraInfo(tp, "color", NULL);
+    } else {
+        unsigned int r, g, b;
+        CGFloat fr, fg, fb, fa;
+        char *newValue;
+        [color getRed:&fr green:&fg blue:&fb alpha:&fa];
+        r = floor(fr * 255.0);
+        g = floor(fg * 255.0);
+        b = floor(fb * 255.0);
+        asprintf(&newValue, "%02x%02x%02x", r, g, b);
+        MDTrackSetExtraInfo(tp, "color", newValue);
+        free(newValue);
+    }
+    [self enqueueTrackModifiedNotification: track];
 }
 
 + (NSColor *)colorForEditingRange
@@ -755,7 +807,8 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 			postNotificationName:MyDocumentTrackInsertedNotification
 			object:self
 			userInfo:[NSDictionary dictionaryWithObjectsAndKeys: [NSNumber numberWithLong: index], @"track", nil]];
-
+        /*  Set track color  */
+        
 		/*  Update registered document/track info  */
 		{
 			int i;

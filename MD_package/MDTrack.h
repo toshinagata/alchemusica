@@ -189,6 +189,11 @@ void		MDTrackDump(const MDTrack *inTrack);
 /*  Track の内部情報を正しく更新する。check が non-zero ならば、内部情報が矛盾していれば stderr にメッセージを出力する。 */
 int		MDTrackRecache(MDTrack *inTrack, int check);
 
+int32_t MDTrackCountExtraInfo(const MDTrack *inTrack);
+int32_t MDTrackGetExtraInfo(const MDTrack *inTrack, const char *key, const char **outValue);
+int32_t MDTrackSetExtraInfo(MDTrack *inTrack, const char *key, const char *value);
+const char *MDTrackGetExtraInfoAtIndex(const MDTrack *inTrack, int32_t index, const char **outKey);
+
 /* -------------------------------------------------------------------
     MDPointer functions
    -------------------------------------------------------------------  */

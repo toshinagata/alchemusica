@@ -92,6 +92,7 @@ static NSImage *sSoloImage = NULL;
 static NSImage *sSoloNonImage = NULL;
 
 static NSString *sNeedsReloadClientViewNotification = @"reload client views";
+static NSString *sClearChangingColorFlagNotification = @"clear changing color flag";
 
 static int
 sTableColumnIDToInt(id identifier)
@@ -1404,6 +1405,12 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 		selector:@selector(windowDidResize:)
 		name:NSWindowDidResizeNotification object:[self window]];
 
+    [[NSNotificationCenter defaultCenter]
+     addObserver: self
+     selector: @selector(clearChangingColorFlag:)
+     name: sClearChangingColorFlagNotification
+     object: self];
+    
 	[myMainView setPostsFrameChangedNotifications: YES];
 
 	[[NSNotificationCenter defaultCenter]
@@ -2455,6 +2462,43 @@ row:(int)rowIndex
     [controller beginSheetForWindow: [self window] invokeStopModalWhenDone: NO];
 }
 
+- (IBAction)changeTrackColor: (id)sender
+{
+    NSUInteger idx;
+    NSColorPanel *cpanel;
+    if ([myTableView numberOfSelectedRows] != 1)
+        return;
+    idx = [[myTableView selectedRowIndexes] firstIndex];
+    //  Open NSColorPanel
+    cpanel = [NSColorPanel sharedColorPanel];
+    [cpanel setColor:[[self document] colorForTrack:(int)idx enabled:YES]];
+    [cpanel setContinuous:YES];
+    [cpanel setTarget:[NSApp delegate]];
+    [cpanel setAction:@selector(tryTrackColorForCurrentDocument:)];
+    [cpanel makeKeyAndOrderFront:self];
+    changingTrackColor = NO;
+}
+
+- (IBAction)tryTrackColor: (id)sender
+{
+    NSUInteger idx;
+    NSColor *color = [sender color];
+    if ([myTableView numberOfSelectedRows] == 0)
+        return;
+    idx = [[myTableView selectedRowIndexes] firstIndex];
+    [[self document] changeColor:color forTrack:(int)idx enableUndo:!changingTrackColor];
+    changingTrackColor = YES;
+    [myTableView reloadData];
+    [self setNeedsReloadClientViews];
+    //  Clear changingTrackColor flag when idle
+    [[NSNotificationQueue defaultQueue] enqueueNotification: [NSNotification notificationWithName: sClearChangingColorFlagNotification object: self] postingStyle: NSPostWhenIdle coalesceMask: NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender forModes: nil];
+}
+
+- (void)clearChangingColorFlag:(NSNotification *)aNotification
+{
+    changingTrackColor = NO;
+}
+
 #pragma mark ====== Split view control ======
 
 - (float)splitView: (NSSplitView *)sender constrainMaxCoordinate: (float)proposedMax ofSubviewAt: (int)offset
@@ -2475,7 +2519,8 @@ row:(int)rowIndex
 
 #pragma mark ==== Responding to notification from other windows ====
 
-- (void)trackModified: (NSNotification *)notification {
+- (void)trackModified: (NSNotification *)notification
+{
 //	id trackObj = [[notification userInfo] objectForKey: @"track"];
 //	if ([self containsTrack: [trackObj intValue]])
 //		[self reloadClientViews];
@@ -2832,6 +2877,8 @@ row:(int)rowIndex
         if (startTick < 0 || startTick >= kMDMaxTick)
             return NO;
         else return YES;
+    } else if (sel == @selector(changeTrackColor:)) {
+        return [myTableView numberOfSelectedRows] == 1;
 	} else if ([self respondsToSelector:sel]) {
 		return YES;
 	} else return NO;

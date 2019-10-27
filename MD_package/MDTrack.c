@@ -47,6 +47,8 @@ struct MDTrack {
 	int32_t			numBlocks;	/*  the number of blocks  */
 	char *			name;		/*  the track name  */
 	char *			devname;	/*  the device name  */
+    char **         extraInfo;  /*  Extra info: {key1, value1, ..., NULL}  */
+                                /*  malloc'ed as multiples of 16*sizeof(char *)  */
     MDTrackAttribute	attribute;  /*  the track attribute (Rec/Solo/Mute)  */
 	MDBlock *		first;		/*  the first MDBlock  */
 	MDBlock *		last;		/*  the last MDBlock  */
@@ -202,6 +204,89 @@ MDTrackUpdateLargestTickForBlock(MDTrack *inTrack, MDBlock *inBlock)
         }
         inBlock->largestTick = largestTick;
     }
+}
+
+#if 0
+#pragma mark ====== Manipulation of extraInfo ======
+#endif
+
+/* --------------------------------------
+ ･ MDTrackCountExtraInfo
+ -------------------------------------- */
+int32_t
+MDTrackCountExtraInfo(const MDTrack *inTrack)
+{
+    int i;
+    if (inTrack == NULL || inTrack->extraInfo == NULL)
+        return 0;
+    i = 0;
+    while (inTrack->extraInfo[i] != NULL)
+        i += 2;
+    return i / 2;
+}
+
+int32_t
+MDTrackGetExtraInfo(const MDTrack *inTrack, const char *key, const char **outValue)
+{
+    int i, n;
+    if (inTrack == NULL)
+        return -1;
+    n = MDTrackCountExtraInfo(inTrack);
+    for (i = 0; i < n; i++) {
+        if (strcmp(inTrack->extraInfo[i * 2], key) == 0) {
+            if (outValue != NULL)
+                *outValue = inTrack->extraInfo[i * 2 + 1];
+            return i;
+        }
+    }
+    return -1;
+}
+
+int32_t
+MDTrackSetExtraInfo(MDTrack *inTrack, const char *key, const char *value)
+{
+    int n;
+    if (inTrack == NULL)
+        return -1;
+    n = MDTrackGetExtraInfo(inTrack, key, NULL);
+    if (n >= 0) {
+        /*  Found  */
+        free(inTrack->extraInfo[n * 2 + 1]);
+        if (value != NULL) {
+            /*  Replace the value  */
+            inTrack->extraInfo[n * 2 + 1] = strdup(value);
+        } else {
+            /*  Remove the key and value  */
+            int m = MDTrackCountExtraInfo(inTrack);
+            memmove(inTrack->extraInfo + (n * 2), inTrack->extraInfo + (n * 2 + 2), sizeof(char *) * (2 * (m - n) + 1));
+        }
+        return n;
+    } else {
+        /*  Create a new entry  */
+        int m = MDTrackCountExtraInfo(inTrack);
+        if (value == NULL)
+            return -1;  /*  Do nothing  */
+        if (m == 0 || m % 8 == 7) {
+            char **p = (char **)realloc(inTrack->extraInfo, ((m + 9) / 8) * sizeof(char *) * 16);
+            if (p == NULL)
+                return -1;  /*  Cannot allocate  */
+            inTrack->extraInfo = p;
+            p[m * 2] = strdup(key);
+            p[m * 2 + 1] = strdup(value);
+            p[m * 2 + 2] = NULL;
+        }
+        return m;
+    }
+}
+
+const char *MDTrackGetExtraInfoAtIndex(const MDTrack *inTrack, int32_t index, const char **outKey)
+{
+    int n = MDTrackCountExtraInfo(inTrack);
+    if (index < 0 || index >= n)
+        return NULL;
+    if (outKey != NULL)
+        *outKey = inTrack->extraInfo[index * 2];
+    return inTrack->extraInfo[index * 2 + 1];
 }
 
 #ifdef __MWERKS__
@@ -491,6 +576,17 @@ MDTrackRelease(MDTrack *inTrack)
 		while (inTrack->pointer != NULL)
 			MDPointerSetTrack(inTrack->pointer, NULL);
 
+        /*  Release random fields  */
+        if (inTrack->name != NULL)
+            free(inTrack->name);
+        if (inTrack->devname != NULL)
+            free(inTrack->devname);
+        if (inTrack->extraInfo != NULL) {
+            int i;
+            for (i = 0; inTrack->extraInfo[i] != NULL; i++)
+                free(inTrack->extraInfo[i]);
+            free(inTrack->extraInfo);
+        }
 		free(inTrack);
 	}
 }
@@ -524,6 +620,7 @@ MDTrackNewFromTrack(const MDTrack *inTrack)
 	MDEvent *eventSrc, *eventDest;
 	int32_t count, noteCount;
 	MDTrack *newTrack;
+    const char *key, *value;
 	int i;
 	
 	/*  Allocate a new track  */
@@ -563,6 +660,10 @@ MDTrackNewFromTrack(const MDTrack *inTrack)
 		newTrack->name = strdup(inTrack->name);
 	if (inTrack->devname != NULL)
 		newTrack->devname = strdup(inTrack->devname);
+    for (i = 0; (value = MDTrackGetExtraInfoAtIndex(inTrack, i, &key)) != NULL; i++) {
+        MDTrackSetExtraInfo(newTrack, key, value);
+    }
+    
 	return newTrack;
 }
 
