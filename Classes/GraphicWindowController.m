@@ -605,6 +605,13 @@ sTableColumnIDToInt(id identifier)
             frame.origin.y = aFrame.origin.y;
         }
         [containerView setFrame:frame];
+        //  Sometimes the clipview enclosing the ruler view is not resized correctly.
+        if (records[i].ruler != nil) {
+            NSClipView *cview = (NSClipView *)[records[i].ruler superview];
+            NSRect cframe = [cview frame];
+            cframe.size.height = frame.size.height - cframe.origin.y;
+            [cview setFrame:cframe];
+        }
     }
     [self setNeedsReloadClientViews];
 }
