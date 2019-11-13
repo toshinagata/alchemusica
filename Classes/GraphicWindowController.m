@@ -367,10 +367,16 @@ sTableColumnIDToInt(id identifier)
 
 - (void)hideTimeIndicator
 {
+    int n;
     if (!NSIsEmptyRect(timeIndicatorRect)) {
         if ([myFloatingView canDraw]) {
             [myFloatingView lockFocus];
-            NSEraseRect([myFloatingView convertRect:timeIndicatorRect fromView:myMainView]);
+            NSRect tRect = [myFloatingView convertRect:timeIndicatorRect fromView:myMainView];
+            for (n = 0; n < myClientViewsCount; n++) {
+                NSRect aRect = [myFloatingView convertRect: [[records[n].client superview] bounds] fromView: records[n].client];
+                aRect = NSIntersectionRect(aRect, tRect);
+                NSEraseRect(aRect);
+            }
             [myFloatingView unlockFocus];
         }
         [myMainView displayRect:timeIndicatorRect];

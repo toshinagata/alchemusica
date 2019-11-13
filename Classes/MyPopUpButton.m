@@ -50,10 +50,11 @@ static NSImage *sTriangleImage, *sDoubleTriangleImage;
 - (void)superDrawRect: (NSRect)aRect
 {
     if (backgroundColor != nil) {
+        NSRect boundsRect = [self bounds];
         [[NSColor lightGrayColor] set];
-        NSFrameRect(aRect);
+        NSFrameRect(boundsRect);
         [backgroundColor set];
-        NSRectFill(NSInsetRect(aRect, 1, 1));
+        NSRectFill(NSInsetRect(boundsRect, 1, 1));
     } else [super drawRect:aRect];
 }
 
@@ -107,7 +108,7 @@ static NSImage *sTriangleImage, *sDoubleTriangleImage;
                 [attr setObject:textColor forKey:NSForegroundColorAttributeName];
             }
             atitle = [[NSAttributedString alloc] initWithString:theTitle attributes: attr];
-            [atitle drawInRect:NSInsetRect(aRect, 4, 1)];
+            [atitle drawInRect:NSInsetRect(theRect, 4, 1)];
         }
     }
     [item setTitle:theTitle];
