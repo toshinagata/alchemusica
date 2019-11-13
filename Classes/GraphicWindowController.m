@@ -1474,7 +1474,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 	[myScroller setEnabled: YES];
 
     /*  Set myTableView as the initial first responder  */
-    [[self window] setInitialFirstResponder: myTableView];
+    //[[self window] setInitialFirstResponder: myTableView];
     
 	/*  Set up the data cells for the TableView  */
 	{
@@ -1666,6 +1666,9 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 	[self reloadClientViews];
     [self updateTrackingRect];
 	
+    /*  Make the playing view the first responder  */
+    [[self window] setInitialFirstResponder: myPlayerView];
+    
 	[[NSNotificationCenter defaultCenter]
 	 postNotificationName: MyAppControllerMIDISetupDidChangeNotification
 	 object: [NSApp delegate] userInfo: nil];	

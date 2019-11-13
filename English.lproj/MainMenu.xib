@@ -287,7 +287,7 @@ DQ
                 <menuItem title="Play" id="277">
                     <menu key="submenu" title="Play" id="278">
                         <items>
-                            <menuItem title="Play" id="285">
+                            <menuItem title="Play/Pause" keyEquivalent=" " id="285">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="performStartPlay:" target="-1" id="289"/>
@@ -300,11 +300,6 @@ DQ
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="performStopPlay:" target="-1" id="290"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Pause" keyEquivalent="." id="281">
-                                <connections>
-                                    <action selector="performPausePlay:" target="-1" id="291"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="293">

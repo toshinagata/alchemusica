@@ -102,6 +102,7 @@ extern NSString *MyRecordingInfoFileExtensionForFormat(int format);
 //- (id)startPlay:(id)sender;
 //- (id)stopPlay:(id)sender;
 - (BOOL)isPlaying;
+- (BOOL)isSuspended;
 - (float)playingTime;
 //- (float)playingBeat;
 

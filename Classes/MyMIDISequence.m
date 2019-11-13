@@ -341,17 +341,24 @@ NSString
 }
 */
 
-- (BOOL)isPlaying {
+- (BOOL)isPlaying
+{
 	MDPlayerStatus status;
 	if (myPlayer != NULL) {
 		status = MDPlayerGetStatus(myPlayer);
-	//	if (status == kMDPlayer_exhausted) {
-	//		MDPlayerStop(myPlayer);
-	//		status = kMDPlayer_ready;
-	//	}
 		return (status == kMDPlayer_playing || status == kMDPlayer_exhausted);
 	}
 	return NO;
+}
+
+- (BOOL)isSuspended
+{
+    MDPlayerStatus status;
+    if (myPlayer != NULL) {
+        status = MDPlayerGetStatus(myPlayer);
+        return (status == kMDPlayer_suspended);
+    }
+    return NO;
 }
 
 - (float)playingTime

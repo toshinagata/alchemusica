@@ -2674,6 +2674,10 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 
 - (IBAction)performStartPlay: (id)sender
 {
+    if ([[self myMIDISequence] isPlaying]) {
+        [self performPausePlay:sender];
+        return;
+    }
 	[[(GraphicWindowController *)mainWindowController playingViewController] pressPlayButton: sender];
 }
 
@@ -3099,11 +3103,14 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 - (BOOL)validateUserInterfaceItem: (id)anItem
 {
 	SEL sel = [anItem action];
-	if (sel == @selector(performStartPlay:) || sel == @selector(performStartMIDIRecording:)
+    MyMIDISequence *seq = [self myMIDISequence];
+	if (sel == @selector(performStartMIDIRecording:)
         /* || sel == @selector(performStopMIDIRecording:) */ ) {
-		return ![[self myMIDISequence] isPlaying];
-	} else if (sel == @selector(performStopPlay:) || sel == @selector(performPausePlay:)) {
-		return [[self myMIDISequence] isPlaying];
+		return ![seq isPlaying];
+    } else if (sel == @selector(performPausePlay:)) {
+        return [seq isPlaying];
+	} else if (sel == @selector(performStopPlay:)) {
+        return [seq isPlaying] || [seq isSuspended];
 	} else if (sel == @selector(insertBlankTime:) || sel == @selector(deleteSelectedTime:) || sel == @selector(scaleSelectedTime:)) {
 		MDTickType startTick, endTick;
 		[self getEditingRangeStart:&startTick end:&endTick];
