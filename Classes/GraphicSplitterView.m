@@ -17,6 +17,8 @@
 
 #import "GraphicSplitterView.h"
 #import "GraphicWindowController.h"
+#import "MyDocument.h"
+#import "MyMIDISequence.h"
 #import "NSCursorAdditions.h"
 #import "MDObjects.h"
 
@@ -81,7 +83,7 @@ searchMenuItemWithTag(NSMenu *menu, int tag)
         trackLabelText = [[[NSTextField allocWithZone:[self zone]] initWithFrame:rect] autorelease];
         rect.origin.y += 2;
         rect.origin.x += rect.size.width + 4.0f;
-        rect.size.width = 100.0f;
+        rect.size.width = 160.0f;
         trackPopup = [[[MyPopUpButton allocWithZone:[self zone]] initWithFrame:rect] autorelease];
         [trackPopup setBezelStyle: NSShadowlessSquareBezelStyle];
         [trackPopup setBackgroundColor:[NSColor whiteColor]];
@@ -112,19 +114,35 @@ searchMenuItemWithTag(NSMenu *menu, int tag)
     return self;
 }
 
-static NSMenu *
-trackPopUp(int count)
+- (NSMenu *)makeTrackPopup
 {
     NSMenu *menu;
-    int i;
+    int i, count;
+    id target, doc;
+    MyMIDISequence *seq = nil;
+    target = [trackPopup target];
+    if (target != nil) {
+        doc = [target document];
+        if (doc != nil && [doc isKindOfClass:[MyDocument class]]) {
+            seq = [(MyDocument *)doc myMIDISequence];
+        }
+    }
+    if (seq != nil)
+        count = [seq trackCount];
+    else count = 0;
     menu = [[[NSMenu alloc] initWithTitle: @"tracks"] autorelease];
     for (i = 0; i <= count; i++) {
         NSString *s;
         if (i == 0)
             s = @"(As Piano Roll)";
-        else if (i == 1)
-            s = @"C";
-        else s = [NSString stringWithFormat:@"%d", i - 1];
+        else {
+            NSString *name = [seq trackName:i - 1];
+            if (i == 1) {
+                s = [NSString stringWithFormat:@"C: %@", name];
+            } else {
+                s = [NSString stringWithFormat:@"%d: %@", i - 1, name];
+            }
+        }
         [menu addItemWithTitle:s action:nil keyEquivalent:@""];
     }
     return menu;
@@ -143,7 +161,7 @@ trackPopUp(int count)
     [codePopup setAction: @selector(codeMenuItemSelected:)];
     [trackPopup setTarget:target];
     [trackPopup setAction:@selector(trackPopUpPressedInSplitterView:)];
-    [trackPopup setMenu:trackPopUp([target trackCount])];
+    [trackPopup setMenu:[self makeTrackPopup]];
 }
 
 - (void)drawRect:(NSRect)rect {
@@ -229,12 +247,12 @@ trackPopUp(int count)
 
 - (void)rebuildTrackPopup
 {
-    int i, count;
-    id target = [trackPopup target];
-    i = (int)[trackPopup indexOfSelectedItem];
-    count = [target trackCount];
-    [trackPopup setMenu:trackPopUp(count)];
-    
+    int n = (int)[trackPopup indexOfSelectedItem];
+    NSMenu *menu = [self makeTrackPopup];
+    [trackPopup setMenu:menu];
+    if (n >= 0 && n < [menu numberOfItems]) {
+        [trackPopup selectItemAtIndex:n];
+    }
 }
 
 @end
