@@ -647,14 +647,37 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	[self setNeedsDisplayInRect: rect];
 }
 
-- (NSString *)infoTextForMousePoint:(NSPoint)pt dragging:(BOOL)flag
+- (NSString *)infoTextForMousePoint:(NSPoint)pt dragging:(BOOL)flag option:(int *)option
 {
 	int theNote;
+	int32_t measure, beat, tick;
 	char buf[8];
+	NSString *tickString;
 	float ys = [self yScale];
-	theNote = (int)floor(pt.y / ys);
+	if (draggingMode > 0) {
+		theNote = initialDraggedValue + deltaDraggedValue;
+		if (option != NULL)
+			*option = 1;
+	} else {
+		theNote = (int)floor(pt.y / ys);
+		if (option != NULL)
+			*option = 0;
+	}
 	MDEventNoteNumberToNoteName(theNote, buf);
-	return [NSString stringWithFormat:@"%s, %@", buf, [super infoTextForMousePoint:pt dragging:flag]];
+	switch (draggingMode) {
+		case 1:
+		case 2:
+			[dataSource convertTick:initialDraggedTick + deltaDraggedTick toMeasure:&measure beat:&beat andTick:&tick];
+			tickString = [NSString stringWithFormat:@"%d.%d.%d", measure, beat, tick];
+			break;
+		case 3:
+			tickString = [NSString stringWithFormat:@"%d", initialDraggedTick + deltaDraggedTick];
+			break;
+		default:
+			tickString = [super infoTextForMousePoint:pt dragging:flag option:option];
+			break;
+	}
+	return [NSString stringWithFormat:@"%s, %@", buf, tickString];
 }
 
 - (void)updateInfoTextForPoint:(NSPoint)pt
@@ -707,6 +730,18 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	pt = [self convertPoint:[theEvent locationInWindow] fromView: nil];
 	n = [self findNoteUnderPoint: pt track: &track position: &pos mdEvent: &ep];
 	if (n > 0) {
+		if (n == 3)
+			initialDraggedTick = MDGetDuration(ep);
+		else
+			initialDraggedTick = MDGetTick(ep);
+		initialDraggedValue = MDGetCode(ep);
+		deltaDraggedTick = 0;
+		deltaDraggedValue = 0;
+		if (n > 0) {
+			draggingMode = n;
+			[dataSource updateCursorInfoForView:self atPosition:pt];
+			draggingMode = 0;
+		}
 		[self setDraggingCursor: n];
 		return;
 	} else if (localGraphicTool == kGraphicPencilTool) {
@@ -988,6 +1023,10 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 				}
 			}
 		}
+		pt.x = pt.x - draggingStartPoint.x;
+		pt.y = pt.y - draggingStartPoint.y;
+		deltaDraggedTick = (MDTickType)(floor(pt.x / [dataSource pixelsPerTick] + 0.5));
+		deltaDraggedValue = (int)floor(pt.y / [self yScale] + 0.5);
 	} else if (pencilOn) {
 		[self invalidateDraggingRegion];
 		draggingPoint = pt;
@@ -1076,6 +1115,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 			}
 		}
 		draggingMode = 0;
+		[dataSource updateCursorInfoForView:self atPosition:draggingPoint];
 	//	[self displayIfNeeded];
 		return;
 	}

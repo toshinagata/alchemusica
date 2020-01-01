@@ -1071,19 +1071,29 @@ cubicReverseFunc(float x, const float *points, float tt)
 	}
 }
 
-- (NSString *)infoTextForMousePoint:(NSPoint)pt dragging:(BOOL)flag
+- (NSString *)infoTextForMousePoint:(NSPoint)pt dragging:(BOOL)flag option:(int *)option
 {
 	int yval;
 	NSString *s;
+	if (option != NULL)
+		*option = 0;
+	if (stripDraggingMode > 0) {
+		int32_t measure, beat, tick;
+		[dataSource convertTick:initialDraggedTick + deltaDraggedTick toMeasure:&measure beat:&beat andTick:&tick];
+		s = [NSString stringWithFormat:@"%d, %d.%d.%d", initialDraggedValue + deltaDraggedValue, measure, beat, tick];
+		if (option != NULL)
+			*option = 1;
+		return s;
+	}
 	yval = (int)floor((maxValue - minValue) * pt.y / [self frame].size.height + minValue + 0.5);
-	s = [[NSString stringWithFormat:@"%d, ", yval] stringByAppendingString:[super infoTextForMousePoint:pt dragging:flag]];
+	s = [[NSString stringWithFormat:@"%d, ", yval] stringByAppendingString:[super infoTextForMousePoint:pt dragging:flag option:option]];
 	if (!flag) {
 		return s;
 	} else {
 		NSPoint pt0;
 		if (selectPoints != nil && [selectPoints count] > 0) {
 			pt0 = [[selectPoints objectAtIndex:0] pointValue];
-			return [NSString stringWithFormat:@"%@-%@", [self infoTextForMousePoint:pt0 dragging:NO], s];
+			return [NSString stringWithFormat:@"%@-%@", [self infoTextForMousePoint:pt0 dragging:NO option:option], s];
 		} else return s;
 	}
 }
@@ -1102,16 +1112,40 @@ cubicReverseFunc(float x, const float *points, float tt)
 		return;
 	}
 	n = [self findStripUnderPoint: pt track: &track position: &pos mdEvent: &ep];
-	switch (n) {
-		case 1:
-			[[NSCursor moveAroundCursor] set];
-			return;
-		case 2:
-			[[NSCursor horizontalMoveCursor] set];
-			return;
-		case 3:
-			[[NSCursor verticalMoveCursor] set];
-			return;
+	if (n != 0) {
+		initialDraggedTick = MDGetTick(ep);
+		switch (eventKind) {
+			case kMDEventNote:
+				initialDraggedValue = MDGetNoteOnVelocity(ep);
+				break;
+			case kMDEventInternalNoteOff:
+				initialDraggedValue = MDGetNoteOffVelocity(ep);
+				break;
+			case kMDEventTempo:
+				initialDraggedValue = MDGetTempo(ep);
+				break;
+			default:
+				initialDraggedValue = MDGetData1(ep);
+				break;
+		}
+		deltaDraggedTick = 0;
+		deltaDraggedValue = 0;
+		if (n > 0) {
+			stripDraggingMode = n;
+			[dataSource updateCursorInfoForView:self atPosition:pt];
+			stripDraggingMode = 0;
+		}
+		switch (n) {
+			case 1:
+				[[NSCursor moveAroundCursor] set];
+				return;
+			case 2:
+				[[NSCursor horizontalMoveCursor] set];
+				return;
+			case 3:
+				[[NSCursor verticalMoveCursor] set];
+				return;
+		}
 	}
 	[super doMouseMoved: theEvent];
 }
@@ -1230,6 +1264,10 @@ cubicReverseFunc(float x, const float *points, float tt)
 		[self invalidateDraggingRegion];
 		draggingPoint = pt;
 		[self invalidateDraggingRegion];
+		pt.x = pt.x - draggingStartPoint.x;
+		pt.y = pt.y - draggingStartPoint.y;
+		deltaDraggedTick = (MDTickType)floor(pt.x / [dataSource pixelsPerTick] + 0.5);
+		deltaDraggedValue = (MDTickType)floor(pt.y * (maxValue - minValue) / [self bounds].size.height + 0.5);
 		[self displayIfNeeded];
 	} else [super doMouseDragged: theEvent];
 }
@@ -1263,6 +1301,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 		deltaValue = (MDTickType)floor(pt.y * (maxValue - minValue) / [self bounds].size.height + 0.5);
 		[dataSource dragEventsOfKind: eventKind andCode: eventCode byTick: deltaTick andValue: deltaValue sender: self optionFlag: optionDown];
 		stripDraggingMode = 0;
+		[dataSource updateCursorInfoForView:self atPosition:draggingPoint];
 		[self displayIfNeeded];
 		return;
 	} else if (!isDragging || isLoupeDragging) {

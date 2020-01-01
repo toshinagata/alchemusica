@@ -41,6 +41,12 @@
     NSMutableArray *rubbingArray;  /*  An array of IntGroupObject; the number of objects is the number of editable tracks  */
     MDTickType rubbingTick;
 
+    //  Used for showing cursor info when draggingMode > 0
+    //  (i.e. while dragging the selected event(s))
+    int initialDraggedValue;    //  The initial strip value of the dragged event
+    int32_t initialDraggedTick; //  The initial tick value of the dragged event
+    int deltaDraggedValue;
+    int32_t deltaDraggedTick;
 }
 - (void)mouseExited: (NSEvent *)theEvent;  //  Should stop rubbing
 

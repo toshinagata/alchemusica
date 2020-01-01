@@ -194,6 +194,9 @@ enum {
 - (MDTickType)sequenceDuration;
 - (float)sequenceDurationInQuarter;
 - (void)setInfoText: (NSString *)string;
+- (void)setCursorInfoPosition: (NSPoint)position;
+- (void)setCursorInfoText: (NSString *)string;
+- (void)updateCursorInfoForView: (NSView *)view atPosition: (NSPoint)pos;
 
 - (void)midiSetupDidChange: (NSNotification *)aNotification;
 - (void)windowDidResize:(NSNotification *)aNotification;

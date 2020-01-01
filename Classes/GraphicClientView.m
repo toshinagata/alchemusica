@@ -367,10 +367,12 @@
     [self mouseDragged: event];
 }
 
-- (NSString *)infoTextForMousePoint:(NSPoint)pt dragging:(BOOL)flag
+- (NSString *)infoTextForMousePoint:(NSPoint)pt dragging:(BOOL)flag option:(int *)option
 {
 	MDTickType theTick;
 	int32_t measure, beat, tick;
+    if (option != NULL)
+        *option = 0;
 	theTick = [dataSource quantizedTickFromPixel:pt.x];
 	[dataSource convertTick:theTick toMeasure:&measure beat:&beat andTick:&tick];
 	return [NSString stringWithFormat:@"%d.%d.%d", measure, beat, tick];
@@ -412,6 +414,7 @@
     isDragging = isLoupeDragging = NO;
 	localGraphicTool = [self modifyLocalGraphicTool:[dataSource graphicTool]];
     [self doMouseDown: theEvent];
+    [dataSource updateCursorInfoForView:self atPosition:pt];
 }
 
 - (void)doMouseDragged: (NSEvent *)theEvent
@@ -448,7 +451,8 @@
     currentModifierFlags = [theEvent modifierFlags];
     pt = [self convertPoint: [theEvent locationInWindow] fromView: nil];
 	pt.x = [dataSource quantizedPixelFromPixel: pt.x];
-	[dataSource setInfoText:[self infoTextForMousePoint:pt dragging:YES]];
+    [dataSource setInfoText:[self infoTextForMousePoint:pt dragging:YES option:NULL]];
+    [dataSource updateCursorInfoForView:self atPosition:pt];
     bounds = [self bounds];
     if (pt.x < bounds.origin.x)
         pt.x = bounds.origin.x;
@@ -521,7 +525,10 @@
 
 - (void)mouseUp: (NSEvent *)theEvent
 {
+    NSPoint pt = [self convertPoint: [theEvent locationInWindow] fromView: nil];
+    pt.x = [dataSource quantizedPixelFromPixel: pt.x];
 	[dataSource mouseEvent:theEvent receivedByClientView:self];
+    [dataSource updateCursorInfoForView:self atPosition:pt];
 
     if (selectPoints == nil || [selectPoints count] == 0) {
         [super mouseUp: theEvent];

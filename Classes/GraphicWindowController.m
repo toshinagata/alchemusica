@@ -51,6 +51,7 @@ enum {
 	kInfoTextTag = 3005,
 	kEditingRangeStartTextTag = 3006,
 	kEditingRangeEndTextTag = 3007,
+    kCursorInfoTextTag = 3008,
 	kQuantizePopUpTag = 3020,
 	kLinearMenuTag = 3021,
 	kParabolaMenuTag = 3022,
@@ -1703,6 +1704,48 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 	[[[[self window] contentView] viewWithTag: kInfoTextTag] setStringValue: string];
 }
 
+- (void)setCursorInfoPosition: (NSPoint)position
+{
+    NSTextField *field = (NSTextField *)[[[self window] contentView] viewWithTag: kCursorInfoTextTag];
+    NSRect frame = [field frame];
+    [field setFrameOrigin:NSMakePoint(position.x + 6, position.y - 8 - frame.size.height)];
+}
+
+- (void)setCursorInfoText: (NSString *)string
+{
+    NSTextField *field = (NSTextField *)[[[self window] contentView] viewWithTag: kCursorInfoTextTag];
+    if (string == nil) {
+        [field setHidden:YES];
+    } else {
+        CGFloat width, height;
+        [field setHidden:NO];
+        [field setStringValue: string];
+        width = [[field cell] cellSizeForBounds:[field bounds]].width;
+        height = [[field cell] cellSizeForBounds:[field bounds]].height;
+        [field setFrameSize:NSMakeSize(width + 1, height + 1)];
+    }
+}
+
+- (void)updateCursorInfoForView: (NSView *)view atPosition: (NSPoint)pos
+{
+    int option;
+    NSString *s;
+    if ([view isKindOfClass:[GraphicClientView class]]) {
+        NSPoint pt = [myFloatingView convertPoint: pos fromView: view];
+        NSTextField *field = (NSTextField *)[[[self window] contentView] viewWithTag: kCursorInfoTextTag];
+        [self setCursorInfoPosition:pt];
+        s = [(id)view infoTextForMousePoint:pos dragging:NO option:&option];
+        if (option == 1) {
+            [field setFont: [NSFont boldSystemFontOfSize:9]];
+        } else {
+            [field setFont: [NSFont systemFontOfSize:9]];
+        }
+        [self setCursorInfoText:s];
+    } else {
+        [self setCursorInfoText:nil];
+    }
+}
+
 - (void)changeFirstResponderWithEvent: (NSEvent *)theEvent
 {
 	/*  myTableView, one of the container views, or myPlayerView can be the first responder  */
@@ -1951,7 +1994,8 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 			if ([view isKindOfClass:[GraphicClientView class]]) {
 				NSPoint pt2 = [view convertPoint: pt fromView: nil];
 				pt2.x = [self quantizedPixelFromPixel: pt2.x];
-				[self setInfoText:[(id)view infoTextForMousePoint:pt2 dragging:NO]];
+                [self setInfoText:[(id)view infoTextForMousePoint:pt2 dragging:NO option:NULL]];
+                [self updateCursorInfoForView:view atPosition:pt2];
                 [self mouseEvent:theEvent receivedByClientView:(id)view];
 			}
             [(id)view doMouseMoved: theEvent];
@@ -1981,6 +2025,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
     }
 	if (i == myClientViewsCount) {
 		[[NSCursor arrowCursor] set];
+        [self setCursorInfoText:nil];
 	}
 }
 

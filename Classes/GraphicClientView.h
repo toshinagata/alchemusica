@@ -100,7 +100,7 @@ enum {
 - (void)mouseUp: (NSEvent *)theEvent;
 
 //  Info text during mouse move and dragging
-- (NSString *)infoTextForMousePoint:(NSPoint)pt dragging:(BOOL)flag;
+- (NSString *)infoTextForMousePoint:(NSPoint)pt dragging:(BOOL)flag option:(int *)option;
 
 //  Will be called from GraphicWindowController's mouseMoved: handler
 - (void)doMouseMoved: (NSEvent *)theEvent;

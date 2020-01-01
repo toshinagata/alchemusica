@@ -77,4 +77,10 @@
 	else [super flagsChanged:theEvent];
 }
 
+- (void)cursorUpdate:(NSEvent *)theEvent
+{
+    //  Stop auto update of cursor
+    //  (Otherwise, the cursor sometimes automatically returns to the arrow cursor)
+}
+
 @end

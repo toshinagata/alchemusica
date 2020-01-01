@@ -507,6 +507,17 @@
                                             <customView id="108" customClass="GraphicFloatingView">
                                                 <rect key="frame" x="0.0" y="0.0" width="514" height="446"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                <subviews>
+                                                    <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="3008" id="kQm-fP-pX4">
+                                                        <rect key="frame" x="230" y="218" width="53" height="11"/>
+                                                        <autoresizingMask key="autoresizingMask"/>
+                                                        <textFieldCell key="cell" lineBreakMode="clipping" allowsUndo="NO" borderStyle="border" title="Cursor Info" drawsBackground="YES" usesSingleLineMode="YES" id="vdH-gv-dxp">
+                                                            <font key="font" metaFont="miniSystem"/>
+                                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" red="0.94074641912705836" green="1" blue="0.86334664550131901" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                </subviews>
                                             </customView>
                                         </subviews>
                                     </customView>
