@@ -1,0 +1,25 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "19e2383c-df9d-4eb5-8775-ae43218f5bcb++505",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+    "19e2383c-df9d-4eb5-8775-ae43218f5bcb++505" : {
+
+    }
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "19e2383c-df9d-4eb5-8775-ae43218f5bcb++505" : 9223372036854775807
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "EE055AC4-C6BA-4025-A7C4-6A5209534DE4",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "19e2383c-df9d-4eb5-8775-ae43218f5bcb++505" : "Alchemusica\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "Alchemusica",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "Alchemusica.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "svn+ssh:\/\/svn.sourceforge.jp\/svnroot\/alchemusica",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Subversion",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "19e2383c-df9d-4eb5-8775-ae43218f5bcb++505"
+    }
+  ]
+}
