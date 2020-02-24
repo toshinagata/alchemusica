@@ -133,7 +133,7 @@ getYValue(const MDEvent *ep, int eventKind)
 		while ((ep = MDPointerForward(pt)) != NULL && MDGetTick(ep) < endTick) {
 			if (MDGetKind(ep) != kMDEventNote)
 				continue;
-			y = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * height) - 0.5);
+			y = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - 2)) + 0.5);
 			x = (float)(floor(MDGetTick(ep) * ppt) + 0.5);
 			if (y >= aRect.origin.y) {
 				if ([[dataSource document] isSelectedAtPosition: MDPointerGetPosition(pt) inTrack: trackNo]) {
@@ -226,7 +226,7 @@ getYValue(const MDEvent *ep, int eventKind)
 			xlast = ylast = 0;
 			poslast = -1;
 		} else {
-			ylast = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * height));
+			ylast = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - 2))) + 1;
 			xlast = (float)(floor(MDGetTick(ep) * ppt));
 			poslast = MDPointerGetPosition(pt);
 		}
@@ -237,7 +237,7 @@ getYValue(const MDEvent *ep, int eventKind)
 					continue;
 				if (eventCode != -1 && MDGetCode(ep) != eventCode)
 					continue;
-				y = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * height));
+				y = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - 2))) + 1;
 				x = (float)(floor(MDGetTick(ep) * ppt));
 			} else {
 				x = [self bounds].size.width;
@@ -323,10 +323,32 @@ getYValue(const MDEvent *ep, int eventKind)
 		[self drawSelectRegion];
 }
 
+- (void)reallocateCalibrators
+{
+	MDSequence *sequence;
+	if (calib != NULL)
+		MDCalibratorRelease(calib);
+	calib = NULL;
+	sequence = [[[dataSource document] myMIDISequence] mySequence];
+	calib = MDCalibratorNew(sequence, NULL, kMDEventTempo, -1);
+	if (eventKind != kMDEventTempo && eventKind != kMDEventNote && eventKind != kMDEventInternalNoteOff) {
+		int i;
+		MDTrack *track;
+		for (i = [self visibleTrackCount] - 1; i >= 0; i--) {
+			track = MDSequenceGetTrack(sequence, [self sortedTrackNumberAtIndex: i]);
+			if (track != NULL) {
+				if (calib == NULL)
+					calib = MDCalibratorNew(sequence, track, eventKind, eventCode);
+				else
+					MDCalibratorAppend(calib, track, eventKind, eventCode);
+			}
+		}
+	}
+}
+
 - (void)setKindAndCode: (int32_t)kindAndCode
 {
 	int newKind, newCode, ftrack;
-	MDSequence *sequence;
 	float minval, maxval;
 	newKind = (kindAndCode >> 16) & 65535;
 	newCode = kindAndCode & 65535;
@@ -355,27 +377,6 @@ getYValue(const MDEvent *ep, int eventKind)
 	if (newCode != 65535)
 		eventCode = newCode;
 	else eventCode = -1;
-	if (calib != NULL)
-		MDCalibratorRelease(calib);
-	calib = NULL;
-	sequence = [[[dataSource document] myMIDISequence] mySequence];
-	calib = MDCalibratorNew(sequence, NULL, kMDEventTempo, -1);
-//	if (eventKind == kMDEventTempo) {
-//		calib = MDCalibratorNew(sequence, NULL, eventKind, -1);
-//	} else if (eventKind != kMDEventNote && eventKind != kMDEventInternalNoteOff) {
-	if (eventKind != kMDEventTempo && eventKind != kMDEventNote && eventKind != kMDEventInternalNoteOff) {
-		int i;
-		MDTrack *track;
-		for (i = [self visibleTrackCount] - 1; i >= 0; i--) {
-			track = MDSequenceGetTrack(sequence, [self sortedTrackNumberAtIndex: i]);
-			if (track != NULL) {
-				if (calib == NULL)
-					calib = MDCalibratorNew(sequence, track, eventKind, eventCode);
-				else
-					MDCalibratorAppend(calib, track, eventKind, eventCode);
-			}
-		}
-	}
 	ftrack = focusTrack;
 	if (eventKind == kMDEventTempo)
 		ftrack = 0;  /*  Conductor Track  */
@@ -384,6 +385,7 @@ getYValue(const MDEvent *ep, int eventKind)
 	if (ftrack != focusTrack)
 		[self setFocusTrack:ftrack];
 	else {
+		[self reallocateCalibrators];
 		[self reloadData];
 		[self setNeedsDisplay: YES];
 	}
@@ -421,6 +423,7 @@ getYValue(const MDEvent *ep, int eventKind)
 			break;
 		}
 	}
+	[self reallocateCalibrators];
 	[self reloadData];
 	[self setNeedsDisplay:YES];
 }
@@ -538,7 +541,7 @@ getYValue(const MDEvent *ep, int eventKind)
 			xlast = ylast = 0;
 			poslast = -1;
 		} else {
-			ylast = (float)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * height);
+			ylast = (float)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - 2)) + 1;
 			xlast = (float)floor(MDGetTick(ep) * ppt);
 			poslast = MDPointerGetPosition(pt);
 		}
@@ -549,7 +552,7 @@ getYValue(const MDEvent *ep, int eventKind)
 					continue;
 				if (eventCode != -1 && MDGetCode(ep) != eventCode)
 					continue;
-				y = (float)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * height);
+				y = (float)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - 2)) + 1;
 				x = (float)floor(MDGetTick(ep) * ppt);
 			} else {
 				x = [self bounds].size.width + 2;
@@ -786,8 +789,16 @@ cubicReverseFunc(float x, const float *points, float tt)
 	height = [self bounds].size.height;
 	t1 = (MDTickType)floor(pt1.x / pixelsPerTick + 0.5);
 	t2 = (MDTickType)floor(pt2.x / pixelsPerTick + 0.5);
-	v1 = (int)floor(pt1.y * (maxValue - minValue) / height + 0.5 + minValue);
-	v2 = (int)floor(pt2.y * (maxValue - minValue) / height + 0.5 + minValue);
+	v1 = (int)floor((pt1.y - 1) * (maxValue - minValue) / (height - 2) + 0.5 + minValue);
+	v2 = (int)floor((pt2.y - 1) * (maxValue - minValue) / (height - 2) + 0.5 + minValue);
+	if (v1 < minValue)
+		v1 = minValue;
+	if (v2 < minValue)
+		v2 = minValue;
+	if (v1 > maxValue)
+		v1 = maxValue;
+	if (v2 > maxValue)
+		v2 = maxValue;
 	if (t1 < t2) {
 		fromTick = t1;
 		toTick = t2;
@@ -1085,7 +1096,11 @@ cubicReverseFunc(float x, const float *points, float tt)
 			*option = 1;
 		return s;
 	}
-	yval = (int)floor((maxValue - minValue) * pt.y / [self frame].size.height + minValue + 0.5);
+	yval = (int)floor((maxValue - minValue) * (pt.y - 1) / ([self frame].size.height - 2) + minValue + 0.5);
+	if (yval < minValue)
+		yval = minValue;
+	if (yval > maxValue)
+		yval = maxValue;
 	s = [[NSString stringWithFormat:@"%d, ", yval] stringByAppendingString:[super infoTextForMousePoint:pt dragging:flag option:option]];
 	if (!flag) {
 		return s;
@@ -1190,9 +1205,9 @@ cubicReverseFunc(float x, const float *points, float tt)
 		bounds = [self bounds];
 		limitRect = NSMakeRect(
 			pt.x - (selectionRect.origin.x - bounds.origin.x),
-			0,
+			1,
 			bounds.size.width - selectionRect.size.width,
-			bounds.size.height);
+			bounds.size.height - 2);
 		pixelQuantum = [dataSource pixelQuantum];
 		limitRect.origin.x = [dataSource quantizedPixelFromPixel: limitRect.origin.x];
 		if (limitRect.origin.x < 0.0)
@@ -1267,7 +1282,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 		pt.x = pt.x - draggingStartPoint.x;
 		pt.y = pt.y - draggingStartPoint.y;
 		deltaDraggedTick = (MDTickType)floor(pt.x / [dataSource pixelsPerTick] + 0.5);
-		deltaDraggedValue = (MDTickType)floor(pt.y * (maxValue - minValue) / [self bounds].size.height + 0.5);
+		deltaDraggedValue = (MDTickType)floor(pt.y * (maxValue - minValue) / ([self bounds].size.height - 2) + 0.5);
 		[self displayIfNeeded];
 	} else [super doMouseDragged: theEvent];
 }
@@ -1298,7 +1313,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 		pt.x = draggingPoint.x - draggingStartPoint.x;
 		pt.y = draggingPoint.y - draggingStartPoint.y;
 		deltaTick = (MDTickType)floor(pt.x / [dataSource pixelsPerTick] + 0.5);
-		deltaValue = (MDTickType)floor(pt.y * (maxValue - minValue) / [self bounds].size.height + 0.5);
+		deltaValue = (MDTickType)floor(pt.y * (maxValue - minValue) / ([self bounds].size.height - 2) + 0.5);
 		[dataSource dragEventsOfKind: eventKind andCode: eventCode byTick: deltaTick andValue: deltaValue sender: self optionFlag: optionDown];
 		stripDraggingMode = 0;
 		[dataSource updateCursorInfoForView:self atPosition:draggingPoint];
@@ -1341,7 +1356,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 				continue;
 			if (eventCode != -1 && MDGetCode(ep) != eventCode)
 				continue;
-			point.y = (CGFloat)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * height);
+			point.y = (CGFloat)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - 2)) + 1;
 			point.x = (CGFloat)floor(MDGetTick(ep) * ppt);
 		//	point.x = floor(MDGetTick(ep) * ppt);
 		//	point.y = floor(MDGetCode(ep) * ys + 0.5) + 0.5 * ys;
