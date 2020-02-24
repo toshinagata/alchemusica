@@ -981,6 +981,7 @@ MRTrackInitClass(void)
 		return;
 
 	rb_cMRTrack = rb_define_class("Track", rb_cObject);
+    rb_include_module(rb_cMRTrack, rb_mEnumerable);
 	rb_define_alloc_func(rb_cMRTrack, s_MRTrack_Alloc);
 	rb_define_private_method(rb_cMRTrack, "initialize", s_MRTrack_Initialize, -1);
 	rb_define_method(rb_cMRTrack, "index", s_MRTrack_Index, 0);

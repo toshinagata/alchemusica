@@ -308,6 +308,7 @@ s_MRSequence_NumberOfTracks(VALUE self)
 /*
  *  call-seq:
  *     sequence.each_track block
+ *     sequence.each block
  *
  *  Execute the block for each track; the block argument is a Track object.
  */
@@ -596,6 +597,7 @@ MRSequenceInitClass(void)
 		return;
 
 	rb_cMRSequence = rb_define_class("Sequence", rb_cObject);
+    rb_include_module(rb_cMRSequence, rb_mEnumerable);
 
 	//  Define methods
 /*    rb_define_method(rb_cMRSequence, "register_menu", s_MRSequence_RegisterMenu, 2); */
@@ -612,6 +614,7 @@ MRSequenceInitClass(void)
     rb_define_method(rb_cMRSequence, "number_of_tracks", s_MRSequence_NumberOfTracks, 0);
     rb_define_method(rb_cMRSequence, "ntracks", s_MRSequence_NumberOfTracks, 0);
 	rb_define_method(rb_cMRSequence, "each_track", s_MRSequence_EachTrack, 0);
+    rb_define_method(rb_cMRSequence, "each", s_MRSequence_EachTrack, 0);
 	rb_define_method(rb_cMRSequence, "each_editable_track", s_MRSequence_EachEditableTrack, 0);
 	rb_define_method(rb_cMRSequence, "each_selected_track", s_MRSequence_EachSelectedTrack, 0);
 	rb_define_method(rb_cMRSequence, "insert_track", s_MRSequence_InsertTrack, -1);
