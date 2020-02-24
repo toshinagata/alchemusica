@@ -119,8 +119,9 @@ MDStatus	MDTrackExtract(MDTrack *inTrack, MDTrack **outTrack, const IntGroup *in
 /*  inTrack を MIDI チャンネルで分けて最大16個のトラックにする。最も若い番号の MIDI チャンネルイベントと、チャンネルイベント以外のイベント（Sysex とメタイベント）は inTrack に残る。outTracks は MDTrack * を 16 個格納できる配列であること。対応するチャンネルイベントがない outTracks の要素は NULL になる。NULL でない最初の要素は inTrack に等しい。NULL でない outTracks の要素数を返す。 */
 int         MDTrackSplitByMIDIChannel(MDTrack *inTrack, MDTrack **outTracks);
 
-/*  noteOffEvent に対応する inTrack 中の internal note-on を探し、duration をセットして正常な Note イベントにする。Internal note-on は inTrack の末尾から先頭に向かって検索される。もし internal note-on の duration がゼロでなければ、noteOffevent とそのイベントの tick 差が duration に等しいかどうかもチェックされる。これは重なったノートを正しく対応づけるための処理。 */
-MDStatus	MDTrackMatchNoteOff(MDTrack *inTrack, const MDEvent *noteOffEvent);
+/*  noteOffEvent に対応する inTrack 中の internal note-on を探し、duration をセットして正常な Note イベントにする。Internal note-on は inTrack の先頭から末尾に向かって検索される。もし internal note-on の duration がゼロでなければ、noteOffevent とそのイベントの tick 差が duration に等しいかどうかもチェックされる。これは重なったノートを正しく対応づけるための処理。 */
+/*  lastPendingNoteOn が NULL でなければ、これは inTrack の中を指すポインタと見なされ、internal note-on はこのポインタ以降のみ検索される。*/
+MDStatus	MDTrackMatchNoteOff(MDTrack *inTrack, const MDEvent *noteOffEvent, MDPointer *lastPendingNoteOn);
 
 /*  inTrack のノートイベントで、internal note-on に対応する internal note-off イベントを noteOffTrack から探し出して、duration をセットする。対応がとれた internal note-off イベントは null イベントに変換される（二度読みを防ぐため）。SMF の読み込み、および MIDI レコーディングの時に使う。  */
 MDStatus	MDTrackMatchNoteOffInTrack(MDTrack *inTrack, MDTrack *noteOffTrack);

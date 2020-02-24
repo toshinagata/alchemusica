@@ -432,6 +432,7 @@ MyRecordingInfoFileExtensionForFormat(int format)
     MDEvent *eventBuf;
 	int eventBufSize;
     MDStatus result = kMDNoError;
+    MDPointer *lastPendingNoteOn;
 	int count;
     int32_t n = 0;
 //    if (recordTrack == NULL || recordNoteOffTrack == NULL)
@@ -440,11 +441,12 @@ MyRecordingInfoFileExtensionForFormat(int format)
 		return -2;
 	eventBuf = NULL;
 	eventBufSize = 0;
+    lastPendingNoteOn = MDPointerNew(recordTrack);
     while ((count = MDPlayerGetRecordedEvents(myPlayer, &eventBuf, &eventBufSize)) > 0) {
 		MDEvent *ep;
 		for (ep = eventBuf; ep < eventBuf + count; ep++) {
 			if (MDGetKind(ep) == kMDEventInternalNoteOff) {
-				result = MDTrackMatchNoteOff(recordTrack, ep);
+				result = MDTrackMatchNoteOff(recordTrack, ep, lastPendingNoteOn);
 			} else {
 				if (MDTrackAppendEvents(recordTrack, ep, 1) < 1)
 					result = kMDErrorOutOfMemory;
@@ -455,6 +457,7 @@ MyRecordingInfoFileExtensionForFormat(int format)
 			n++;
 		}
     }
+    MDPointerRelease(lastPendingNoteOn);
 	if (result != kMDNoError)
 		return -1;  /*  Error  */
 

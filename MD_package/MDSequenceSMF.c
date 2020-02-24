@@ -324,7 +324,7 @@ MDSequenceReadSMFTrack(MDSMFConvert *cref)
 {
 	MDEvent event;
 	MDStatus result = kMDNoError;
-	MDPointer *ptr;
+    MDPointer *lastPendingNoteOn;
 	int n, count;
 	unsigned char quitFlag, skipFlag;
 	MDTickType maxTick = 0;
@@ -340,9 +340,13 @@ MDSequenceReadSMFTrack(MDSMFConvert *cref)
 	if (cref->temptrk == NULL)
 		return kMDErrorOutOfMemory;
 
-	ptr = MDPointerNew(cref->temptrk);
-	if (ptr == NULL)
-		return kMDErrorOutOfMemory;
+//	ptr = MDPointerNew(cref->temptrk);
+//	if (ptr == NULL)
+//		return kMDErrorOutOfMemory;
+
+    lastPendingNoteOn = MDPointerNew(cref->temptrk);
+    if (lastPendingNoteOn == NULL)
+        return kMDErrorOutOfMemory;
 
 //	noteOffTrack = MDTrackNew();
 //	if (noteOffTrack == NULL)
@@ -456,7 +460,7 @@ MDSequenceReadSMFTrack(MDSMFConvert *cref)
 			if (metaDuration > 0)
 				MDSetDuration(&event, metaDuration);
 		} else if (MDGetKind(&event) == kMDEventInternalNoteOff) {
-			result = MDTrackMatchNoteOff(cref->temptrk, &event);
+			result = MDTrackMatchNoteOff(cref->temptrk, &event, lastPendingNoteOn);
 			if (result != kMDNoError) {
 				fprintf(stderr, "Corrupsed file? orphaned note off at %d\n", (int32_t)MDGetTick(&event));
 				// break;
@@ -489,6 +493,8 @@ MDSequenceReadSMFTrack(MDSMFConvert *cref)
 		MDEventClear(&event);
 	} /* end while (quitFlag == 0)  */
 	
+    MDPointerRelease(lastPendingNoteOn);
+
 	/*  Set the track duration  */
 	if (maxTick < cref->tick)
 		maxTick = cref->tick;
@@ -519,7 +525,6 @@ MDSequenceReadSMFTrack(MDSMFConvert *cref)
     }
 	
 	if (result != kMDErrorOutOfMemory) {
-		MDPointerRelease(ptr);
 		MDSequenceInsertTrack(cref->sequence, -1, cref->temptrk);
 		MDTrackRelease(cref->temptrk);  /* the track will be retained by the sequence */
 		cref->temptrk = NULL;

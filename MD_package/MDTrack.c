@@ -1131,14 +1131,53 @@ MDTrackSplitByMIDIChannel(MDTrack *inTrack, MDTrack **outTracks)
 	･ MDTrackMatchNoteOff
    -------------------------------------- */
 MDStatus
-MDTrackMatchNoteOff(MDTrack *inTrack, const MDEvent *noteOffEvent)
+MDTrackMatchNoteOff(MDTrack *inTrack, const MDEvent *noteOffEvent, MDPointer *lastPendingNoteOn)
 {
-	MDBlock *bp;
-	int index;
+    MDEvent *ep;
+    MDStatus result = kMDErrorOrphanedNoteOff;
+    int32_t lastPendingPos;
 	unsigned char code = MDGetCode(noteOffEvent);
 	int channel = MDGetChannel(noteOffEvent);
 	MDTickType tick = MDGetTick(noteOffEvent);
-
+    if (lastPendingNoteOn == NULL) {
+        lastPendingNoteOn = MDPointerNew(inTrack);
+    } else {
+        MDPointerRetain(lastPendingNoteOn);
+        MDPointerBackward(lastPendingNoteOn);
+    }
+    lastPendingPos = -1;
+#if 1
+    while ((ep = MDPointerForward(lastPendingNoteOn)) != NULL) {
+        if (MDGetKind(ep) == kMDEventInternalNoteOn) {
+            if (MDGetCode(ep) == code && MDGetChannel(ep) == channel && (MDGetDuration(ep) == 0 || MDGetDuration(ep) == tick - MDGetTick(ep))) {
+                /*  Found  */
+                MDTickType duration = tick - MDGetTick(ep);
+                MDSetKind(ep, kMDEventNote);
+                if (duration <= 0)
+                    duration = 1;  /*  Avoid zero-duration event  */
+                MDSetDuration(ep, duration);
+                MDSetNoteOffVelocity(ep, MDGetNoteOffVelocity(noteOffEvent));
+                /*  Reset the 'largestTick' field directly  */
+                lastPendingNoteOn->block->largestTick = kMDNegativeTick;
+                result = kMDNoError;
+                if (lastPendingPos == -1)
+                    lastPendingPos = MDPointerGetPosition(lastPendingNoteOn) + 1;
+                break;
+            }
+        } else {
+            if (lastPendingPos == -1)
+                lastPendingPos = MDPointerGetPosition(lastPendingNoteOn);
+        }
+    }
+    if (lastPendingNoteOn->refCount > 1) {
+        if (lastPendingPos < 0)
+            MDPointerJumpToLast(lastPendingNoteOn);
+        else
+            MDPointerSetPosition(lastPendingNoteOn, lastPendingPos);
+    }
+    MDPointerRelease(lastPendingNoteOn);
+    return result;
+#else
 	/*  Do not use MDPointer, but use internal block info directly (for efficiency)  */
 	for (bp = inTrack->last; bp != NULL; bp = bp->last) {
 		MDEvent *ep;
@@ -1151,12 +1190,14 @@ MDTrackMatchNoteOff(MDTrack *inTrack, const MDEvent *noteOffEvent)
 					MDSetDuration(ep, tick - MDGetTick(ep));
 					MDSetNoteOffVelocity(ep, MDGetNoteOffVelocity(noteOffEvent));
 					bp->largestTick = kMDNegativeTick;
+                    MDPointerRelease(lastPendingNoteOn);
 					return kMDNoError;
 				}
 			}
 		}
 	}
-	return kMDErrorOrphanedNoteOff;
+    return kMDErrorOrphanedNoteOff;
+#endif
 }
 
 /* --------------------------------------
