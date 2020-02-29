@@ -256,6 +256,22 @@ MDSequenceGetTrack(const MDSequence *inSequence, int32_t index)
 	else return NULL;
 }
 
+/* --------------------------------------
+ ･ MDSequenceFindTrack
+ -------------------------------------- */
+int32_t
+MDSequenceFindTrack(const MDSequence *inSequence, const MDTrack *inTrack)
+{
+    int32_t i;
+    for (i = 0; i < inSequence->num; i++) {
+        MDTrack *track;
+        MDArrayFetch(inSequence->tracks, i, 1, &track);
+        if (track == inTrack)
+            return i;
+    }
+    return -1;
+}
+
 #ifdef __MWERKS__
 #pragma mark ====== MDTrack attribute manipulations ======
 #endif

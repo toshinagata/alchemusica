@@ -2169,6 +2169,47 @@ MDPlayerSetCountOffSettings(MDPlayer *inPlayer, MDTimeType duration, MDTimeType 
 }
 
 /* --------------------------------------
+    ･ MDPlayerBuildKeyswitchRecord
+ -------------------------------------- */
+static char *
+sMDPlayerBuildKeyswitchRecord(MDPlayer *inPlayer)
+{
+    /*  Returns an array of chars, whose [t*128+n] element (where t is
+        a track number and n is a note number) contains '1' when
+        the note number for the track works as a keyswitch.
+        The keyswitch info is stored as a Meta text in the form
+        '%%keyswitch: note1,note2,...' at tick 0.  */
+    MDSequence *seq = inPlayer->sequence;
+    int32_t num = MDSequenceGetNumberOfTracks(seq);
+    char *record = (char *)calloc(1, num * 128);
+    int32_t i;
+    for (i = 1; i < num; i++) {
+        MDTrack *track = MDSequenceGetTrack(seq, i);
+        MDPointer *pt = MDPointerNew(track);
+        MDEvent *ep;
+        while ((ep = MDPointerForward(pt)) != NULL) {
+            if (MDGetTick(ep) > 0)
+                break;
+            if (MDGetKind(ep) == kMDEventMetaText && MDGetCode(ep) == kMDMetaText) {
+                const char *mes = (const char *)MDGetMessageConstPtr(ep, NULL);
+                if (strncmp(mes, "%%keyswitch:", 12) == 0) {
+                    int note;
+                    mes += 12;
+                    while ((note = MDEventNoteNameToNoteNumber(mes)) >= 0 && note < 128) {
+                        record[i * 128 + note] = 1;
+                        mes = strchr(mes, ',');
+                        if (mes == NULL)
+                            break;
+                        mes++;
+                    }
+                }
+            }
+        }
+    }
+    return record;
+}
+
+/* --------------------------------------
 	･ MDPlayerBacktrackEvents
    -------------------------------------- */
 MDStatus
@@ -2183,6 +2224,7 @@ MDPlayerBacktrackEvents(MDPlayer *inPlayer, MDTickType inTick, const int32_t *in
 	MDDestinationInfo *info;
     int i, channel, num, lastOnlyCount, processedDest;
     static const int32_t sDefaultEventType = { -1 };
+    char *ks_record;
 
 	if (inEventType == NULL)
 		inEventType = &sDefaultEventType;
@@ -2205,7 +2247,10 @@ MDPlayerBacktrackEvents(MDPlayer *inPlayer, MDTickType inTick, const int32_t *in
         MDPointerSetPosition(info->noteOffPtr, 0);
         MDTrackClear(info->noteOff);
     }
-        
+    
+    /*  Build keyswitch record  */
+    ks_record = sMDPlayerBuildKeyswitchRecord(inPlayer);
+    
     do {
         processedDest = 0;
         for (num = 0; num < inPlayer->destNum; num++) {
@@ -2228,13 +2273,21 @@ MDPlayerBacktrackEvents(MDPlayer *inPlayer, MDTickType inTick, const int32_t *in
                     if (ScheduleMDEventToDevice(info->dev, 0, ep, channel) < 0)
                         continue;
                 } else {
-                    /*  Is this 'last only' event?  */
-                    for (i = 0; i < lastOnlyCount; i++) {
-                        n = inEventTypeLastOnly[i];
-                        kind = (n & 0xffff);
-                        code = ((n >> 16) & 0xffff);
-                        if (MDGetKind(ep) == kind && (!MDHasCode(ep) || code == 0xffff || MDGetCode(ep) == code))
-                            break;
+                    if (MDGetKind(ep) == kMDEventNote) {
+                        /*  Is this a keyswitch?  */
+                        n = MDSequenceFindTrack(inPlayer->sequence, info->currentTrack);
+                        if (n >= 1 && ks_record[n * 128 + MDGetCode(ep)] == 1)
+                            i = 0;
+                        else i = lastOnlyCount;
+                    } else {
+                        /*  Is this 'last only' event?  */
+                        for (i = 0; i < lastOnlyCount; i++) {
+                            n = inEventTypeLastOnly[i];
+                            kind = (n & 0xffff);
+                            code = ((n >> 16) & 0xffff);
+                            if (MDGetKind(ep) == kind && (!MDHasCode(ep) || code == 0xffff || MDGetCode(ep) == code))
+                                break;
+                        }
                     }
                     if (i < lastOnlyCount) {
                         /*  Store this event; if the same type of event is already
@@ -2251,7 +2304,7 @@ MDPlayerBacktrackEvents(MDPlayer *inPlayer, MDTickType inTick, const int32_t *in
                         while ((ep1 = MDPointerForward(info->noteOffPtr)) != NULL) {
                             if (MDGetChannel(ep1) == channel
                                 && MDGetKind(ep1) == kind
-                                && (!MDHasCode(ep1) || MDGetCode(ep1) == code))
+                                && (kind == kMDEventNote || !MDHasCode(ep1) || MDGetCode(ep1) == code))
                                 break;
                         }
                         if (ep1 != NULL) {
@@ -2275,6 +2328,11 @@ MDPlayerBacktrackEvents(MDPlayer *inPlayer, MDTickType inTick, const int32_t *in
         MDPointerSetPosition(info->noteOffPtr, -1);
         while ((ep2 = MDPointerForward(info->noteOffPtr)) != NULL) {
             ScheduleMDEventToDevice(info->dev, 0, ep2, 0);
+            if (MDGetKind(ep2) == kMDEventNote) {
+                MDSetKind(ep2, kMDEventInternalNoteOff);
+                ScheduleMDEventToDevice(info->dev, 0, ep2, 0);
+                MDSetKind(ep2, kMDEventNote);
+            }
         }
         MDPointerSetPosition(info->noteOffPtr, 0);
         MDTrackClear(info->noteOff);

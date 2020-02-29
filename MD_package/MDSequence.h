@@ -82,6 +82,9 @@ MDTickType	MDSequenceGetDuration(const MDSequence *inSequence);
 /*  index 番目のトラック（先頭＝コンダクタートラックが０）を返す */
 MDTrack *	MDSequenceGetTrack(const MDSequence *inSequence, int32_t index);
 
+/*  トラックが MDSequence に含まれているかどうかを調べる。含まれていればトラック番号、なければ -1 を返す */
+int32_t MDSequenceFindTrack(const MDSequence *inSequence, const MDTrack *inTrack);
+
 /*  index 番目にトラックを挿入する。index が大きすぎるかまたは -1 の場合にはトラック
     リストの末尾に挿入する。実際に挿入した位置を返す。 */
 int32_t	MDSequenceInsertTrack(MDSequence *inSequence, int32_t index, MDTrack *inTrack);

@@ -427,10 +427,10 @@ MDEventNoteNameToNoteNumber(const char *p)
 		else if (*p >= 'a' && *p <= 'g')
 			code = table[*p++ - 'a'];
 		else return -1;
-		if (*p == '+' || *p == '#') {
+		if (*p == '#') {
 			code++;
 			p++;
-		} else if (*p == '-' || *p == 'b') {
+		} else if (*p == 'b') {
 			code--;
 			p++;
 		}

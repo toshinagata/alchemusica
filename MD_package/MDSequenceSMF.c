@@ -437,9 +437,16 @@ MDSequenceReadSMFTrack(MDSMFConvert *cref)
                                     len = sizeof(buf) - 1;
                                 strncpy(buf, p + 2, len);
                                 buf[len] = 0;
+                                /*  Is it a known key?  */
+                                /*  (At present, only 'color' is specially treated)  */
+                                /*  'keyswitch:key1,key2,...' is also recognized, but
+                                    it is left as a meta text and interpreted only
+                                    when necessary.  */
                                 pp = pp + 1;
-                                MDTrackSetExtraInfo(cref->temptrk, buf, pp);
-                                skipFlag = 1;
+                                if (strcmp(buf, "color") == 0) {
+                                    MDTrackSetExtraInfo(cref->temptrk, buf, pp);
+                                    skipFlag = 1;
+                                }
                             }
                         }
                         break;
