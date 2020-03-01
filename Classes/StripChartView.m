@@ -41,6 +41,8 @@ static MDTimeType sTimeResolution = 5000;
 static MDTickType sTickResolution = 1;
 static float sValueResolution = 1.0f;
 
+static const int sVerticalMargin = 2;
+
 @implementation StripChartView
 
 - (int)clientViewType
@@ -129,11 +131,11 @@ getYValue(const MDEvent *ep, int eventKind)
 			break;
 		MDPointerJumpToTick(pt, beginTick);
 		MDPointerBackward(pt);
-		ybase = aRect.origin.y - 1;
+		ybase = aRect.origin.y;
 		while ((ep = MDPointerForward(pt)) != NULL && MDGetTick(ep) < endTick) {
 			if (MDGetKind(ep) != kMDEventNote)
 				continue;
-			y = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - 2)) + 0.5);
+			y = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - sVerticalMargin * 2)) + 0.5) + sVerticalMargin;
 			x = (float)(floor(MDGetTick(ep) * ppt) + 0.5);
 			if (y >= aRect.origin.y) {
 				if ([[dataSource document] isSelectedAtPosition: MDPointerGetPosition(pt) inTrack: trackNo]) {
@@ -226,7 +228,7 @@ getYValue(const MDEvent *ep, int eventKind)
 			xlast = ylast = 0;
 			poslast = -1;
 		} else {
-			ylast = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - 2))) + 1;
+			ylast = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - sVerticalMargin * 2))) + sVerticalMargin;
 			xlast = (float)(floor(MDGetTick(ep) * ppt));
 			poslast = MDPointerGetPosition(pt);
 		}
@@ -237,7 +239,7 @@ getYValue(const MDEvent *ep, int eventKind)
 					continue;
 				if (eventCode != -1 && MDGetCode(ep) != eventCode)
 					continue;
-				y = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - 2))) + 1;
+				y = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - sVerticalMargin * 2))) + sVerticalMargin;
 				x = (float)(floor(MDGetTick(ep) * ppt));
 			} else {
 				x = [self bounds].size.width;
@@ -315,8 +317,10 @@ getYValue(const MDEvent *ep, int eventKind)
 	pt.x = bounds.origin.x;
 	grid = [self horizontalGridInterval];
 	[[NSColor lightGrayColor] set];
-	for (y = minValue + grid; y < maxValue; y += grid) {
-		pt.y = (CGFloat)(floor(bounds.origin.x + y * (bounds.size.height / (maxValue - minValue))) + 0.5);
+	for (y = minValue; y <= maxValue + 1; y += grid) {
+		if (y > maxValue)
+			y = maxValue;
+		pt.y = (CGFloat)(floor(bounds.origin.y + y * ((bounds.size.height - sVerticalMargin * 2) / (maxValue - minValue)) + sVerticalMargin) + 0.5);
 		[NSBezierPath strokeLineFromPoint: pt toPoint: NSMakePoint(pt.x + bounds.size.width, pt.y)];
 	}
 	if ([self isDragging])
@@ -541,7 +545,7 @@ getYValue(const MDEvent *ep, int eventKind)
 			xlast = ylast = 0;
 			poslast = -1;
 		} else {
-			ylast = (float)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - 2)) + 1;
+			ylast = (float)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - sVerticalMargin * 2)) + sVerticalMargin;
 			xlast = (float)floor(MDGetTick(ep) * ppt);
 			poslast = MDPointerGetPosition(pt);
 		}
@@ -552,7 +556,7 @@ getYValue(const MDEvent *ep, int eventKind)
 					continue;
 				if (eventCode != -1 && MDGetCode(ep) != eventCode)
 					continue;
-				y = (float)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - 2)) + 1;
+				y = (float)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - sVerticalMargin * 2)) + sVerticalMargin;
 				x = (float)floor(MDGetTick(ep) * ppt);
 			} else {
 				x = [self bounds].size.width + 2;
@@ -789,8 +793,8 @@ cubicReverseFunc(float x, const float *points, float tt)
 	height = [self bounds].size.height;
 	t1 = (MDTickType)floor(pt1.x / pixelsPerTick + 0.5);
 	t2 = (MDTickType)floor(pt2.x / pixelsPerTick + 0.5);
-	v1 = (int)floor((pt1.y - 1) * (maxValue - minValue) / (height - 2) + 0.5 + minValue);
-	v2 = (int)floor((pt2.y - 1) * (maxValue - minValue) / (height - 2) + 0.5 + minValue);
+	v1 = (int)floor((pt1.y - sVerticalMargin) * (maxValue - minValue) / (height - sVerticalMargin * 2) + 0.5 + minValue);
+	v2 = (int)floor((pt2.y - sVerticalMargin) * (maxValue - minValue) / (height - sVerticalMargin * 2) + 0.5 + minValue);
 	if (v1 < minValue)
 		v1 = minValue;
 	if (v2 < minValue)
@@ -1096,7 +1100,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 			*option = 1;
 		return s;
 	}
-	yval = (int)floor((maxValue - minValue) * (pt.y - 1) / ([self frame].size.height - 2) + minValue + 0.5);
+	yval = (int)floor((maxValue - minValue) * (pt.y - sVerticalMargin) / ([self frame].size.height - sVerticalMargin * 2) + minValue + 0.5);
 	if (yval < minValue)
 		yval = minValue;
 	if (yval > maxValue)
@@ -1282,7 +1286,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 		pt.x = pt.x - draggingStartPoint.x;
 		pt.y = pt.y - draggingStartPoint.y;
 		deltaDraggedTick = (MDTickType)floor(pt.x / [dataSource pixelsPerTick] + 0.5);
-		deltaDraggedValue = (MDTickType)floor(pt.y * (maxValue - minValue) / ([self bounds].size.height - 2) + 0.5);
+		deltaDraggedValue = (MDTickType)floor(pt.y * (maxValue - minValue) / ([self bounds].size.height - sVerticalMargin * 2) + 0.5);
 		[self displayIfNeeded];
 	} else [super doMouseDragged: theEvent];
 }
@@ -1313,7 +1317,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 		pt.x = draggingPoint.x - draggingStartPoint.x;
 		pt.y = draggingPoint.y - draggingStartPoint.y;
 		deltaTick = (MDTickType)floor(pt.x / [dataSource pixelsPerTick] + 0.5);
-		deltaValue = (MDTickType)floor(pt.y * (maxValue - minValue) / ([self bounds].size.height - 2) + 0.5);
+		deltaValue = (MDTickType)floor(pt.y * (maxValue - minValue) / ([self bounds].size.height - sVerticalMargin * 2) + 0.5);
 		[dataSource dragEventsOfKind: eventKind andCode: eventCode byTick: deltaTick andValue: deltaValue sender: self optionFlag: optionDown];
 		stripDraggingMode = 0;
 		[dataSource updateCursorInfoForView:self atPosition:draggingPoint];
