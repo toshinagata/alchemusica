@@ -133,10 +133,10 @@ typedef int	(*MDSequenceCallback)(float, void *);
 MDStatus	MDSequenceReadSMF(MDSequence *inSequence, STREAM stream, MDSequenceCallback callback, void *cbdata);
 
 /*  ファイル（ストリーム）に SMF を書き出す。途中で失敗したら中断してエラーコードを返す。 */
-MDStatus	MDSequenceWriteSMF(MDSequence *inSequence, STREAM stream, MDSequenceCallback callback, void *cbdata);
+MDStatus	MDSequenceWriteSMF(MDSequence *inSequence, STREAM stream, MDSequenceCallback callback, void *cbdata, STREAM err_stream);
 
 /*  ファイル（ストリーム）に選択されたイベントを SMF として書き出す。i 番目のトラックの選択は psetArray[i] で指示され、これが NULL ならそのトラックはスキップ、有効な IntGroup ならそれが指定するイベントを書き出し、(IntGroup *)(-1) ならそのトラック中のすべてのイベントを書き出す。IntGroup を指定したときは、end-of-track を選択しているかどうかを eotSelectFlags[i] で指示することができる。 */
-MDStatus	MDSequenceWriteSMFWithSelection(MDSequence *inSequence, IntGroup **psetArray, char *eotSelectFlags, STREAM stream, MDSequenceCallback callback, void *cbdata);
+MDStatus	MDSequenceWriteSMFWithSelection(MDSequence *inSequence, IntGroup **psetArray, char *eotSelectFlags, STREAM stream, MDSequenceCallback callback, void *cbdata, STREAM err_stream);
 
 /*  ストリームに MDCatalog を書き出す。 */
 MDStatus    MDSequenceWriteCatalog(MDCatalog *inCatalog, STREAM stream);

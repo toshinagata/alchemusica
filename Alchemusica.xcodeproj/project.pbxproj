@@ -144,6 +144,8 @@
 		E445911A1413CC0500F5C20D /* speaker_gray.png in Resources */ = {isa = PBXBuildFile; fileRef = E44591191413CC0500F5C20D /* speaker_gray.png */; };
 		E44591981413D9F200F5C20D /* solo.png in Resources */ = {isa = PBXBuildFile; fileRef = E44591971413D9F200F5C20D /* solo.png */; };
 		E445919C1413DA2D00F5C20D /* solo_non.png in Resources */ = {isa = PBXBuildFile; fileRef = E445919B1413DA2D00F5C20D /* solo_non.png */; };
+		E467A8D9240D55B700F7DD6F /* SaveErrorPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E467A8D7240D55B700F7DD6F /* SaveErrorPanel.xib */; };
+		E467A8DC240EA60400F7DD6F /* SaveErrorPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E467A8DA240EA60400F7DD6F /* SaveErrorPanelController.m */; };
 		E468AD5B1FAEBFDF00EE393E /* speaker_cursor.png in Resources */ = {isa = PBXBuildFile; fileRef = E468AD5A1FAEBFDF00EE393E /* speaker_cursor.png */; };
 		E46A94AF1F776B23008477D2 /* ContextMenuTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E46A94AE1F776B23008477D2 /* ContextMenuTextFieldCell.m */; };
 		E46A94B21F776E81008477D2 /* EventKindContextMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = E46A94B01F776E81008477D2 /* EventKindContextMenu.xib */; };
@@ -279,6 +281,9 @@
 		E46394320A0E0C5400FD0629 /* MyPopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyPopUpButtonCell.m; path = Classes/MyPopUpButtonCell.m; sourceTree = "<group>"; };
 		E46394F10A0E52D900FD0629 /* MyComboBoxCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MyComboBoxCell.h; path = Classes/MyComboBoxCell.h; sourceTree = "<group>"; };
 		E46394F20A0E52D900FD0629 /* MyComboBoxCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyComboBoxCell.m; path = Classes/MyComboBoxCell.m; sourceTree = "<group>"; };
+		E467A8D8240D55B700F7DD6F /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/SaveErrorPanel.xib; sourceTree = "<group>"; };
+		E467A8DA240EA60400F7DD6F /* SaveErrorPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SaveErrorPanelController.m; path = Classes/SaveErrorPanelController.m; sourceTree = "<group>"; };
+		E467A8DB240EA60400F7DD6F /* SaveErrorPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SaveErrorPanelController.h; path = Classes/SaveErrorPanelController.h; sourceTree = "<group>"; };
 		E468AD5A1FAEBFDF00EE393E /* speaker_cursor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = speaker_cursor.png; path = icons/speaker_cursor.png; sourceTree = "<group>"; };
 		E46A94AD1F776B23008477D2 /* ContextMenuTextFieldCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ContextMenuTextFieldCell.h; path = Classes/ContextMenuTextFieldCell.h; sourceTree = "<group>"; };
 		E46A94AE1F776B23008477D2 /* ContextMenuTextFieldCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ContextMenuTextFieldCell.m; path = Classes/ContextMenuTextFieldCell.m; sourceTree = "<group>"; };
@@ -614,6 +619,8 @@
 				E4DB28E10C1458D500B6E980 /* TextureView.m */,
 				E430D72B0D79700F00717A72 /* EventFilterPanelController.h */,
 				E430D72C0D79700F00717A72 /* EventFilterPanelController.m */,
+				E467A8DB240EA60400F7DD6F /* SaveErrorPanelController.h */,
+				E467A8DA240EA60400F7DD6F /* SaveErrorPanelController.m */,
 				E46A94AD1F776B23008477D2 /* ContextMenuTextFieldCell.h */,
 				E46A94AE1F776B23008477D2 /* ContextMenuTextFieldCell.m */,
 			);
@@ -651,6 +658,7 @@
 				E40C7AC5140A94F700969DC3 /* MetronomeSettingsPanel.xib */,
 				E4C383F11411124C006F2661 /* AboutPanel.xib */,
 				E4F81DC014C1CBE000F63BA6 /* QuantizePanel.xib */,
+				E467A8D7240D55B700F7DD6F /* SaveErrorPanel.xib */,
 				089C165FFE840EACC02AAC07 /* InfoPlist.strings */,
 				F5FFC0B30237AAD301A80002 /* Localizable.strings */,
 				E40C7A53140A884400969DC3 /* icons */,
@@ -831,6 +839,7 @@
 				E400BBDC11D627650032B969 /* move_around.png in Resources */,
 				E400BBDD11D627650032B969 /* document_icon.icns in Resources */,
 				E400BBDE11D627650032B969 /* expand.png in Resources */,
+				E467A8D9240D55B700F7DD6F /* SaveErrorPanel.xib in Resources */,
 				E400BBDF11D627650032B969 /* shrink.png in Resources */,
 				E400BBE011D627650032B969 /* loupe.png in Resources */,
 				E400BBE111D627650032B969 /* selection.png in Resources */,
@@ -955,6 +964,7 @@
 				E400BC1611D627730032B969 /* MDUtility.c in Sources */,
 				E400BC1711D627730032B969 /* MDPlayer_MacOSX.c in Sources */,
 				E400BC1811D627730032B969 /* MDAudio_MacOSX.c in Sources */,
+				E467A8DC240EA60400F7DD6F /* SaveErrorPanelController.m in Sources */,
 				E47643C21F889F62009A206D /* AudioEffectPanelController.m in Sources */,
 				E400BC1911D627730032B969 /* MDRubyCore.m in Sources */,
 				E400BC1A11D627730032B969 /* MDObjects.m in Sources */,
@@ -1117,6 +1127,14 @@
 				E42D332422E4913D00788C29 /* English */,
 			);
 			name = AudioSettingsPrefPanel.xib;
+			sourceTree = "<group>";
+		};
+		E467A8D7240D55B700F7DD6F /* SaveErrorPanel.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E467A8D8240D55B700F7DD6F /* English */,
+			);
+			name = SaveErrorPanel.xib;
 			sourceTree = "<group>";
 		};
 		E46A94B01F776E81008477D2 /* EventKindContextMenu.xib */ = {

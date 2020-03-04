@@ -27,6 +27,7 @@
 #import "PlayingViewController.h"
 #import "MyAppController.h"
 #import "QuantizePanelController.h"
+#import "SaveErrorPanelController.h"
 
 #include "MDRubyExtern.h"
 
@@ -297,6 +298,59 @@ callback(float progress, void *data)
     return (result == kMDNoError);
 }
 
+- (BOOL)writeToURL:(NSURL *)url ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation originalContentsURL:(NSURL *)absoluteOriginalContentsURL error:(NSError * _Nullable *)outError
+{
+    NSString *fileName = [url path];
+    NSString *originalFile = [absoluteOriginalContentsURL path];
+    MDStatus result;
+    LoadingPanelController *controller;
+    NSString *title = NSLocalizedString(@"Alchemusica: Saving...", @"");
+    NSString *caption = [NSString stringWithFormat: NSLocalizedString(@"Saving %@...", @""), [fileName lastPathComponent]];
+    NSString *smfName;
+    int docCode = docTypeToDocCode(typeName);
+    char *errorMessage;
+    
+    if (docCode == 0)
+        return NO;
+    
+    //  Create a new directory if necessary
+    if (docCode == 1) {
+        if (![[NSFileManager defaultManager] createDirectoryAtPath: fileName withIntermediateDirectories: YES attributes: nil error:NULL])
+            return NO;
+        /*  TODO: Make it package <-- not necessary! (Info.plist description is enough)  */
+    }
+    
+    //  Create progress panel
+    controller = [[LoadingPanelController allocWithZone: [self zone]] initWithTitle: title andCaption: caption];
+    
+    //  Begin a modal session
+    [controller beginSession];
+    
+    //  Write SMF, periodically invoking callback
+    if (docCode == 1)
+        smfName = [NSString stringWithFormat: @"%@/Sequence.mid", fileName];
+    else smfName = fileName;
+    result = [myMIDISequence writeSMFToFile: smfName withCallback: callback andData: controller errorMessage:&errorMessage];
+    if (errorMessage != NULL) {
+        //  Show warning message
+        NSString *mes = [NSString stringWithUTF8String:errorMessage];
+        if (![SaveErrorPanelController showSaveErrorPanelWithMessage:mes]) {
+            result = kMDErrorUserInterrupt;
+        }
+    }
+    //  Archive window informations
+    if (result == kMDNoError && docCode == 1) {
+        result = ([self encodeDocumentAttributesToFile: fileName] ? kMDNoError : kMDErrorCannotWriteToStream);
+    }
+    
+    //  End modal session and close the panel
+    [[controller endSession] close];
+    
+    return (result == kMDNoError);
+}
+
+
+#if 0
 - (BOOL)writeToFile:(NSString *)fileName ofType:(NSString *)docType
 {
 	MDStatus result;
@@ -338,6 +392,7 @@ callback(float progress, void *data)
 
 	return (result == kMDNoError);
 }
+#endif
 
 #pragma mark ====== Handling windows ======
 
@@ -3184,7 +3239,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	if (sp == NULL)
 		return NO;
 
-	sts = MDSequenceWriteSMFWithSelection([seq mySequence], psetArray, eotSelectFlags, sp, NULL, NULL);
+	sts = MDSequenceWriteSMFWithSelection([seq mySequence], psetArray, eotSelectFlags, sp, NULL, NULL, NULL);
 	if (sts != kMDNoError)
 		return NO;
 

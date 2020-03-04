@@ -305,15 +305,30 @@ NSString
 	return sts;
 }
 
-- (MDStatus)writeSMFToFile:(NSString *)fileName withCallback: (MDSequenceCallback)callback andData: (void *)data
+- (MDStatus)writeSMFToFile:(NSString *)fileName withCallback: (MDSequenceCallback)callback andData: (void *)data errorMessage: (char **)errorMessage
 {
 	MDStatus sts;
-	STREAM stream;
+    STREAM stream, err_stream;
 	if (mySequence != NULL) {
 		stream = MDStreamOpenFile([fileName fileSystemRepresentation], "wb");
 		if (stream != NULL) {
-			sts = MDSequenceWriteSMF(mySequence, stream, callback, data);
+            char *errdata;
+            size_t errsize;
+            if (errorMessage != NULL) {
+                err_stream = MDStreamOpenData(NULL, 0);
+                *errorMessage= NULL;
+            } else
+                err_stream = NULL;
+			sts = MDSequenceWriteSMF(mySequence, stream, callback, data, err_stream);
 			FCLOSE(stream);
+            if (err_stream != NULL) {
+                MDStreamGetData(err_stream, (void **)(&errdata), &errsize);
+                if (errsize > 0) {
+                    errdata = (char *)realloc(errdata, errsize + 1);
+                    errdata[errsize] = 0;  /*  Be sure that the message is null-terminated */
+                    *errorMessage = errdata;
+                }
+            }
 		} else sts = kMDErrorCannotCreateFile;
 	} else sts = kMDErrorInternalError;
 	return sts;

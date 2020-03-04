@@ -45,6 +45,9 @@ struct MDSMFConvert {
 	MDSequenceCallback callback;	/*  A callback function. Periodically called, and abort if 0 */
 	int32_t			filesize;		/*  total file size  */
 	void *			cbdata;			/*  callback data  */
+
+    /*  Store error message  */
+    STREAM          err_stream;
 };
 
 /*  SMF コントロールで特別扱いするもの  */
@@ -81,6 +84,28 @@ MDSequenceSMFTempoToTempo(int32_t smfTempo)
     else if (smfTempo > (int32_t)(60000000.0 / kMDMinTempo))
         return kMDMinTempo;
     else return (float)(60000000.0 / smfTempo);
+}
+
+#pragma mark ====== Error message ======
+
+static void
+MDSequenceSMFConvertError(MDSMFConvert *cref, const char *fmt, ...)
+{
+    if (cref != NULL && cref->err_stream != NULL) {
+        char *p1, *p2;
+        int n1, n2;
+        va_list ap;
+        va_start(ap, fmt);
+        asprintf(&p1, "Track %d tick %d: ", cref->track_index, cref->tick);
+        vasprintf(&p2, fmt, ap);
+        va_end(ap);
+        if (p1 == NULL || p2 == NULL)
+            return;  /*  Ignore error  */
+        n1 = (int)strlen(p1);
+        n2 = (int)strlen(p2);
+        if (FWRITE_(p1, n1, cref->err_stream) < n1 || FWRITE_(p2, n2, cref->err_stream) < n2 || PUTC('\n', cref->err_stream) == EOF)
+            return;  /*  Ignore error  */
+    }
 }
 
 #pragma mark ====== Reading SMF ======
@@ -627,6 +652,8 @@ static MDStatus
 MDSequenceWriteSMFDeltaTime(MDSMFConvert *cref, MDTickType tick)
 {
 	cref->deltatime = tick - cref->tick;
+    if (cref->deltatime < 0)
+        MDSequenceSMFConvertError(cref, "tick disorder");
 	if (MDWriteStreamFormat(cref->stream, "w", cref->deltatime) != 1)
 		return kMDErrorCannotWriteToStream;
 	cref->tick += cref->deltatime;
@@ -654,9 +681,11 @@ MDSequenceWriteSMFSpecialDurationEvent(MDSMFConvert *cref, MDEvent *eref)
 	int i;
 	unsigned char s[12];
 
-	if (MDGetKind(eref) != kMDEventNote)
+    if (MDGetKind(eref) != kMDEventNote) {
+        MDSequenceSMFConvertError(cref, "Internal error during MDSequenceWriteSMFSpecialDurationEvent()");
 		return kMDErrorInternalError;
-
+    }
+    
 	/*  Convert the duration to BER-compressed form  */
 	d = MDGetDuration(eref);
 	i = sizeof(s) - 1;
@@ -746,7 +775,11 @@ MDSequenceWriteSMFMetaEvent(MDSMFConvert *cref, MDEvent *eref)
 			length = 1;
 			break;
 		default:
-			return kMDErrorWrongMetaEvent;
+            MDSequenceSMFConvertError(cref, "Wrong internal meta code %d", kind);
+            n = kMDMetaText;  /*  Replace with an empty text  */
+            s[0] = 0;
+            length = 1;
+            break;
 	}
 	
 	if (PUTC(n, cref->stream) == EOF)
@@ -799,7 +832,14 @@ MDSequenceWriteSMFChannelEvent(MDSMFConvert *cref, MDEvent *eref)
 			s[0] = kMDEventSMFKeyPressure;
 			break;
 		default:
-			return kMDErrorUnknownChannelEvent;
+            MDSequenceSMFConvertError(cref, "Unknown channel event %d", MDGetKind(eref));
+            /*  Replace with an empty text meta  */
+            s[0] = kMDEventSMFMeta;
+            s[1] = kMDMetaText;
+            s[2] = 0;
+            if (FWRITE_(s, n, cref->stream) < n)
+                return kMDErrorCannotWriteToStream;
+            return kMDNoError;
 	}
 	
     if (cref->track_channel < 16)
@@ -925,6 +965,7 @@ MDSequenceWriteSMFTrackWithSelection(MDSMFConvert *cref, IntGroup *pset, char eo
 
 		if (MDGetKind(eref) == kMDEventNull) {
 			/*  We should not have it, but sometimes we get it because of bugs  */
+            MDSequenceSMFConvertError(cref, "Incorrect event");
 			continue;
 		}
 			
@@ -1023,13 +1064,15 @@ MDSequenceWriteSMFTrackWithSelection(MDSMFConvert *cref, IntGroup *pset, char eo
 			if (overlap) {
 				/*  Write a special 'duration' meta-event  */
 				result = MDSequenceWriteSMFSpecialDurationEvent(cref, eref);
-				if (result != kMDNoError)
-					break;
-				/*  Write deltatime 0  */
-				if (PUTC(0, cref->stream) == EOF) {
-					result = kMDErrorCannotWriteToStream;
-					break;
-				}
+                if (result == kMDErrorCannotWriteToStream)
+                    break;  /*  Stop writing  */
+                else if (result == kMDNoError) {
+                    /*  Write deltatime 0 (for next event)  */
+                    if (PUTC(0, cref->stream) == EOF) {
+                        result = kMDErrorCannotWriteToStream;
+                        break;
+                    }
+                }
 			}
 			result = MDSequenceWriteSMFChannelEvent(cref, eref);
 		}
@@ -1069,7 +1112,7 @@ MDSequenceWriteSMFTrackWithSelection(MDSMFConvert *cref, IntGroup *pset, char eo
 }
 
 MDStatus
-MDSequenceWriteSMFWithSelection(MDSequence *inSequence, IntGroup **psetArray, char *eotSelectFlags, STREAM stream, MDSequenceCallback callback, void *cbdata)
+MDSequenceWriteSMFWithSelection(MDSequence *inSequence, IntGroup **psetArray, char *eotSelectFlags, STREAM stream, MDSequenceCallback callback, void *cbdata, STREAM err_stream)
 {
 	MDStatus result = kMDNoError;
 	MDSMFConvert conv;
@@ -1082,6 +1125,7 @@ MDSequenceWriteSMFWithSelection(MDSequence *inSequence, IntGroup **psetArray, ch
 	/*  Initialize the convert record  */
 	memset(&conv, 0, sizeof(conv));
 	conv.stream = stream;
+    conv.err_stream = err_stream;
 	conv.sequence = inSequence;
 	conv.timebase = MDSequenceGetTimebase(inSequence);
 	trkmax = MDSequenceGetNumberOfTracks(inSequence);
@@ -1162,9 +1206,9 @@ MDSequenceWriteSMFWithSelection(MDSequence *inSequence, IntGroup **psetArray, ch
 }
 
 MDStatus
-MDSequenceWriteSMF(MDSequence *inSequence, STREAM stream, MDSequenceCallback callback, void *cbdata)
+MDSequenceWriteSMF(MDSequence *inSequence, STREAM stream, MDSequenceCallback callback, void *cbdata, STREAM err_stream)
 {
-	return MDSequenceWriteSMFWithSelection(inSequence, NULL, NULL, stream, callback, cbdata);
+	return MDSequenceWriteSMFWithSelection(inSequence, NULL, NULL, stream, callback, cbdata, err_stream);
 }
 
 #pragma mark ====== Read/Write Catalog ======

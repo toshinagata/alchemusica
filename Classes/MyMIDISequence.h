@@ -96,7 +96,7 @@ extern NSString *MyRecordingInfoFileExtensionForFormat(int format);
 - (void)setRecordingInfo: (NSDictionary *)anInfo;
 
 - (MDStatus)readSMFFromFile:(NSString *)fileName withCallback: (MDSequenceCallback)callback andData: (void *)data;
-- (MDStatus)writeSMFToFile:(NSString *)fileName withCallback: (MDSequenceCallback)callback andData: (void *)data;
+- (MDStatus)writeSMFToFile:(NSString *)fileName withCallback: (MDSequenceCallback)callback andData: (void *)data errorMessage: (char **)errorMessage;
 
 - (MDPlayer *)myPlayer;
 //- (id)startPlay:(id)sender;
