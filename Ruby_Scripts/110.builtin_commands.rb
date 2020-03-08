@@ -126,7 +126,7 @@ def scale_selected_time_dialog
 				set_value("duration", sprintf("%d", duration))
 			}),
 	    item(:text, :title=>"Duration:"),
-	    item(:textfield, :width=>50, :tag=>"duration", :value=>sprintf("%d", duration),
+	    item(:textfield, :width=>100, :tag=>"duration", :value=>sprintf("%d", duration),
 			:action=>proc { |it|
 				duration = it[:value].to_i
 				if duration < 0
@@ -150,8 +150,8 @@ def scale_selected_time_dialog
 					new_duration = new_e_tick - s_tick
 				end
 			}),
-	    item(:radio, :title=>"Specify duration", :tag=>"new_duration_radio"),
-	    item(:textfield, :width=>50, :tag=>"new_duration", :value=>duration.to_s,
+        item(:radio, :title=>"Specify duration", :tag=>"new_duration_radio", :value=>0),
+	    item(:textfield, :width=>100, :tag=>"new_duration", :value=>duration.to_s,
 			:action=>proc { |it|
 				d = Integer(it[:value])
 				if d != new_duration
