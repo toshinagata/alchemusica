@@ -220,6 +220,17 @@ sTableColumnIDToInt(id identifier)
 		j = k = 0;
 		for (i = 0; i < n; i++) {
 			MDTrackAttribute attr = [[[self document] myMIDISequence] trackAttributeAtIndex: i];
+#if 1
+            if ((attr & kMDTrackAttributeHidden) && !(attr & kMDTrackAttributeEditable))
+                continue;
+            if (attr & kMDTrackAttributeEditable) {
+                memmove(sortedTrackNumbers + j + 1, sortedTrackNumbers + j, sizeof(int) * (k - j));
+                sortedTrackNumbers[j++] = i;
+            } else {
+                sortedTrackNumbers[k] = i;
+            }
+            k++;
+#else
 			if (!(attr & kMDTrackAttributeHidden)) {
 				if (attr & kMDTrackAttributeEditable) {
 					memmove(sortedTrackNumbers + j + 1, sortedTrackNumbers + j, sizeof(int) * (k - j));
@@ -229,6 +240,7 @@ sTableColumnIDToInt(id identifier)
 				}
 				k++;
 			}
+#endif
 		}
 		visibleTrackCount = k;
 	}
@@ -2179,7 +2191,7 @@ row:(int)rowIndex
 	if (idnum == kEditableID) {
 		[aCell setRepresentedObject: [self colorForTrack: rowIndex enabled: YES]];		
 		attr = [[[self document] myMIDISequence] trackAttributeAtIndex: rowIndex];
-		[aCell setFillsColor:(attr & kMDTrackAttributeHidden) == 0];
+        [aCell setFillsColor:((attr & kMDTrackAttributeHidden) == 0 || (attr & kMDTrackAttributeEditable) != 0)];
 	} else if (idnum == kSoloID) {
 		attr = [[[self document] myMIDISequence] trackAttributeAtIndex: rowIndex];
 		[aCell setFillsColor: (attr & kMDTrackAttributeSolo) != 0];
@@ -2343,8 +2355,8 @@ row:(int)rowIndex
 		switch (idnum) {
 			case kEditableID: {
 				attr = [seq trackAttributeAtIndex: row];
-				if (attr & kMDTrackAttributeHidden)
-					break;
+				// if (attr & kMDTrackAttributeHidden)
+				//	break;
 				if (![self isFocusTrack: row]) {
 					[self setFocusFlag: YES onTrack: row extending: shiftFlag];
 				} else if (shiftFlag) {
@@ -2364,11 +2376,13 @@ row:(int)rowIndex
 					attr &= ~kMDTrackAttributeHidden;
 				} else {
 					attr |= kMDTrackAttributeHidden;
-					if (attr & kMDTrackAttributeEditable) {
+#if 0
+                    if (attr & kMDTrackAttributeEditable) {
 						//  Hidden tracks are non-editable
 						attr &= ~kMDTrackAttributeEditable;
 						editableTrackWasHidden = YES;
 					}
+#endif
 				}
 				[seq setTrackAttribute: attr atIndex: row];
 				break;
@@ -2377,6 +2391,7 @@ row:(int)rowIndex
 		}
 	}
 
+#if 0
 	if (idnum == kVisibleID) {
 		//  Check whether any editable track is left
 		int firstVisibleRow = -1;
@@ -2396,6 +2411,7 @@ row:(int)rowIndex
 			[seq setTrackAttribute: attr atIndex: firstVisibleRow];
 		}
 	}
+#endif
 
 	if (idnum == kEditableID || idnum == kVisibleID)
 		visibleTrackCount = -1;  // Invalidate the track list cache
@@ -2442,6 +2458,20 @@ row:(int)rowIndex
 	[self setNeedsReloadClientViews];
 }
 
+- (BOOL)selectionShouldChangeInTableView:(NSTableView *)tableView
+{
+    int column;
+    column = (int)[myTableView clickedColumn];
+    if (column >= 0) {
+        NSTableColumn *tableColumn;
+        int idnum;
+        tableColumn = [[myTableView tableColumns] objectAtIndex: column];
+        idnum = sTableColumnIDToInt([tableColumn identifier]);
+        if (idnum == kEditableID || idnum == kVisibleID || idnum == kSoloID || idnum == kMuteID)
+            return NO;  //  we don't change selection on clicking these columns
+    }
+    return YES;
+}
 
 - (BOOL)tableView:(NSTableView *)aTableView shouldTrackCell:(NSCell *)cell forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
 {
