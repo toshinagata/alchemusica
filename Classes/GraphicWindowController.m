@@ -166,7 +166,7 @@ sTableColumnIDToInt(id identifier)
 				attr |= kMDTrackAttributeEditable;
 			else
 				attr &= ~kMDTrackAttributeEditable;
-			[seq setTrackAttribute: attr atIndex: i];
+			[[self document] setTrackAttribute: attr forTrack: i];
 		}
 	} else {
 		attr = [seq trackAttributeAtIndex: trackNum];
@@ -174,7 +174,7 @@ sTableColumnIDToInt(id identifier)
 			attr |= kMDTrackAttributeEditable;
 		else
 			attr &= ~kMDTrackAttributeEditable;
-		[seq setTrackAttribute: attr atIndex: trackNum];
+		[[self document] setTrackAttribute: attr forTrack: trackNum];
 	}
 	visibleTrackCount = -1;  /*  Needs update  */
 	[self reloadClientViews];
@@ -2319,12 +2319,12 @@ row:(int)rowIndex
 		for (row = [seq trackCount] - 1; row >= 0; row--) {
 			if (![myTableView isRowSelected: row])
 				continue;
-			attr = [seq trackAttributeAtIndex: row];
+			attr = [doc trackAttributeForTrack: row];
 			if (idnum == kEditableID && (attr & kMDTrackAttributeHidden))
 				continue;
 			if ((attr & attrMask) == 0) {
 				attr |= attrMask;
-				[seq setTrackAttribute: attr atIndex: row];
+				[doc setTrackAttribute: attr forTrack: row];
 				countChangedTrack++;
 			}
 		}
@@ -2333,7 +2333,7 @@ row:(int)rowIndex
 			for (row = [seq trackCount] - 1; row >= 0; row--) {
 				if (![myTableView isRowSelected: row])
 					continue;
-				attr = [seq trackAttributeAtIndex: row];
+				attr = [doc trackAttributeForTrack: row];
 				if (idnum == kEditableID && (attr & kMDTrackAttributeHidden))
 					continue;
 				attr &= ~attrMask;
@@ -2344,7 +2344,7 @@ row:(int)rowIndex
 						editableTrackWasHidden = YES;
 					}
 				}
-				[seq setTrackAttribute: attr atIndex: row];
+				[doc setTrackAttribute: attr forTrack: row];
 			}
 		}
 	} else {
@@ -2371,7 +2371,7 @@ row:(int)rowIndex
 				[doc setSoloFlagOnTrack: row flag: -1];
 				break;
 			case kVisibleID:
-				attr = [seq trackAttributeAtIndex: row];
+				attr = [doc trackAttributeForTrack: row];
 				if (attr & kMDTrackAttributeHidden) {
 					attr &= ~kMDTrackAttributeHidden;
 				} else {
@@ -2384,7 +2384,7 @@ row:(int)rowIndex
 					}
 #endif
 				}
-				[seq setTrackAttribute: attr atIndex: row];
+				[doc setTrackAttribute: attr forTrack: row];
 				break;
 			default:
 				return;
@@ -2613,15 +2613,17 @@ row:(int)rowIndex
 
 - (void)trackModified: (NSNotification *)notification
 {
-//	id trackObj = [[notification userInfo] objectForKey: @"track"];
-//	if ([self containsTrack: [trackObj intValue]])
-//		[self reloadClientViews];
-//	[self updateMarkerList];
+    int i, track;
+    track = [[[notification userInfo] objectForKey: @"track"] intValue];
+    for (i = 2; i < myClientViewsCount; i++) {
+        /*  If focus track is set in the strip chart view, update it  */
+        GraphicClientView *client = records[i].client;
+        [client doTrackModified:track];
+    }
 	visibleTrackCount = -1;
 	[myTableView reloadData];
 	[myPlayerView setNeedsDisplay: YES];
 	[self setNeedsReloadClientViews];
-//	[self editingRangeChanged: notification];
 }
 
 - (void)trackInserted: (NSNotification *)notification

@@ -92,6 +92,10 @@
     return -1;
 }
 
+- (void)doTrackModified:(int)aTrack
+{
+}
+
 //  Should be overridden in subclasses
 - (void)drawContentsInRect: (NSRect)aRect
 {

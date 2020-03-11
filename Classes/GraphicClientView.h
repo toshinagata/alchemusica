@@ -73,6 +73,9 @@ enum {
 - (void)setFocusTrack:(int)aTrack;
 - (int)focusTrack;
 
+//  Update internal information for the track if necessary
+- (void)doTrackModified:(int)aTrack;
+
 //  Drawing
 - (void)drawContentsInRect:(NSRect)aRect;
 

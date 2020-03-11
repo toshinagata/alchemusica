@@ -180,8 +180,9 @@ getYValue(const MDEvent *ep, int eventKind)
 	NSBezierPath *draggingPath;
 	NSMutableArray *array;
 
-	if (calib == NULL)
-		return;
+	if (calib == NULL) {
+		[self reallocateCalibrators];
+	}
 
 	height = [self bounds].size.height;
 	ppt = [dataSource pixelsPerTick];
@@ -437,6 +438,20 @@ getYValue(const MDEvent *ep, int eventKind)
 	return focusTrack;
 }
 
+- (void)doTrackModified:(int)aTrack
+{
+	/*  Check if the calibrator support matches the track status  */
+	/*  If no, then reset the calibrator  */
+	if (calib != NULL) {
+		BOOL focus = ([self isFocusTrack:aTrack] != 0);
+		BOOL support = (MDCalibratorIsSupporting(calib, [[[dataSource document] myMIDISequence] getTrackAtIndex:aTrack], eventKind, eventCode) != 0);
+		if (focus != support) {
+			MDCalibratorRelease(calib);
+			calib = NULL;
+		}
+	}
+}
+
 - (int32_t)kindAndCode
 {
 	return ((((int32_t)eventKind) & 65535) << 16) | (eventCode & 65535);
@@ -519,8 +534,9 @@ getYValue(const MDEvent *ep, int eventKind)
 
 	num = [self visibleTrackCount];
 	theTick = (MDTickType)((aPoint.x - 1) / ppt);
-	if (calib != NULL)
-		MDCalibratorJumpToTick(calib, theTick);
+	if (calib == NULL)
+		[self reallocateCalibrators];
+	MDCalibratorJumpToTick(calib, theTick);
 	retval = 0;
 	for (i = 0; i < num; i++) {
 		MDTrack *track;
@@ -837,6 +853,9 @@ cubicReverseFunc(float x, const float *points, float tt)
 			break;
 	}
 
+	if (calib == NULL)
+		[self reallocateCalibrators];
+	
 	editingMode = [[self dataSource] graphicEditingMode];
 	if (editingMode == kGraphicSetMode && eventKind != kMDEventNote && eventKind != kMDEventInternalNoteOff && !shiftFlag) {
 		//  Generate a series of events
