@@ -319,9 +319,8 @@ getYValue(const MDEvent *ep, int eventKind)
 	grid = [self horizontalGridInterval];
 	[[NSColor lightGrayColor] set];
 	for (y = minValue; y <= maxValue + 1; y += grid) {
-		if (y > maxValue)
-			y = maxValue;
-		pt.y = (CGFloat)(floor(bounds.origin.y + y * ((bounds.size.height - sVerticalMargin * 2) / (maxValue - minValue)) + sVerticalMargin) + 0.5);
+		float y0 = (y > maxValue ? maxValue : y);
+		pt.y = (CGFloat)(floor(bounds.origin.y + y0 * ((bounds.size.height - sVerticalMargin * 2) / (maxValue - minValue)) + sVerticalMargin) + 0.5);
 		[NSBezierPath strokeLineFromPoint: pt toPoint: NSMakePoint(pt.x + bounds.size.width, pt.y)];
 	}
 	if ([self isDragging])
