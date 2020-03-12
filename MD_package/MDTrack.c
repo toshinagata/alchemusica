@@ -1164,10 +1164,9 @@ MDTrackMatchNoteOff(MDTrack *inTrack, const MDEvent *noteOffEvent, MDPointer *la
                     lastPendingPos = MDPointerGetPosition(lastPendingNoteOn) + 1;
                 break;
             }
-        } else {
-            if (lastPendingPos == -1)
-                lastPendingPos = MDPointerGetPosition(lastPendingNoteOn);
         }
+        if (lastPendingPos == -1)
+            lastPendingPos = MDPointerGetPosition(lastPendingNoteOn);
     }
     if (lastPendingNoteOn->refCount > 1) {
         if (lastPendingPos < 0)
