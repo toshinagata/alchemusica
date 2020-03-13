@@ -786,7 +786,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	if (gMyDocumentSanityCheck) {
 		int32_t trackNo = [[[notification userInfo] objectForKey: @"track"] intValue];
 		MDTrack *track = [[self myMIDISequence] getTrackAtIndex:trackNo];
-		if (MDTrackRecache(track, 1) > 0) {
+		if (track != NULL && MDTrackRecache(track, 1) > 0) {
 			MyAppCallback_messageBox("Track data has some inconsistency", "Internal Error", 0, 0);
 		}
 	}

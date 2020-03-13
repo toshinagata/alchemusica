@@ -2792,6 +2792,7 @@ row:(int)rowIndex
     int i, j, numberOfTracks, trackCount, hasConductorTrack;
 	int *trackList;
 	id firstResponder;
+    int focusTrack;
 
 	if (![doc getPasteboardSequence: &seq catalog: &catalog])
 		return;
@@ -2803,10 +2804,11 @@ row:(int)rowIndex
 		return;
 
 	firstResponder = [[self window] firstResponder];
+    focusTrack = -1;  /*  Only meaningful for the strip chart view  */
 
 	if ([firstResponder isKindOfClass:[GraphicBackgroundView class]]) {
 
-        int focusTrack, kind, code;
+        int kind, code;
         GraphicClientView *client = nil;
         /*  Look for the client view contained in the firstResponder container view  */
         for (i = 0; i < myClientViewsCount; i++) {
@@ -2860,52 +2862,41 @@ row:(int)rowIndex
             }
         }
         
-		/*  Look for the "editing" tracks  */
-		for (i = j = 0; i < trackCount; i++) {
-            MDTrackAttribute attr = [doc trackAttributeForTrack: i];
-            if (focusTrack >= 0) {
-                if (i != focusTrack)
-                    continue;
-            } else {
-                if ((attr & kMDTrackAttributeEditable) == 0)
-                    continue;
+	} else if (firstResponder != myTableView) {
+        return;
+    }
+	
+    /*  Build track list from the "editing" tracks
+     or the "focused" track */
+    for (i = j = 0; i < trackCount; i++) {
+        MDTrackAttribute attr = [doc trackAttributeForTrack: i];
+        if (focusTrack >= 0) {
+            if (i != focusTrack)
+                continue;
+        } else {
+            if ((attr & kMDTrackAttributeEditable) == 0)
+                continue;
+        }
+        if (j == 0) {
+            /*  The first editable track: we need to check for the conductor track  */
+            if (!hasConductorTrack && i == 0)
+                continue;  /*  We should not target the conductor track  */
+            if (hasConductorTrack && i != 0) {
+                /*  We should target the conductor track  */
+                trackList[j++] = 0;
+                if (j >= numberOfTracks)
+                    break;
             }
-            if (j == 0) {
-                /*  The first editable track: we need to check for the conductor track  */
-                if (!hasConductorTrack && i == 0)
-                    continue;  /*  We should not target the conductor track  */
-                if (hasConductorTrack && i != 0) {
-                    /*  We should target the conductor track  */
-                    trackList[j++] = 0;
-                    if (j >= numberOfTracks)
-                        break;
-                }
-            }
-            trackList[j++] = i;
-            if (j >= numberOfTracks)
-                break;
-		}
-		while (j < numberOfTracks) {
-			trackList[j++] = i++;
-		}
-		
-	} else if (firstResponder == myTableView) {
-	
-		/*  Look for the selected tracks  */
-		for (i = j = 0; i < trackCount; i++) {
-			if ([myTableView isRowSelected: i]) {
-				trackList[j++] = i;
-				if (j >= numberOfTracks)
-					break;
-			}
-		}
-		while (j < numberOfTracks) {
-            trackList[j++] = i++;
-		}
-	
-	} else return;
-	
-	i = [doc doPaste: seq toTracks: trackList rangeStart: catalog->startTick rangeEnd: catalog->endTick mergeFlag: mergeFlag];
+        }
+        trackList[j++] = i;
+        if (j >= numberOfTracks)
+            break;
+    }
+    while (j < numberOfTracks) {
+        trackList[j++] = i++;
+    }
+
+    i = [doc doPaste: seq toTracks: trackList rangeStart: catalog->startTick rangeEnd: catalog->endTick mergeFlag: mergeFlag];
 	
 	switch (i) {
 		case 1:  /*  Trying to paste MIDI track to the conductor track  */
