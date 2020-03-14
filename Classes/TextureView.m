@@ -19,25 +19,6 @@
 
 @implementation TextureView
 
-- (BOOL)acceptsFirstResponder
-{
-	return YES;
-}
-
-- (BOOL)becomeFirstResponder
-{
-	[self setNeedsDisplay: YES];
-    [self setKeyboardFocusRingNeedsDisplayInRect: [self bounds]];
-	return YES;
-}
-	
-- (BOOL)resignFirstResponder
-{
-	[self setNeedsDisplay: YES];
-    [self setKeyboardFocusRingNeedsDisplayInRect: [self bounds]];
-	return YES;
-}
-	
 - (id)initWithFrame:(NSRect)frameRect
 {
 	if ((self = [super initWithFrame:frameRect]) != nil) {

@@ -1485,6 +1485,9 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 		[records[1].client scrollPoint: bounds.origin];
 	}
 
+    /*  Make the piano-roll view the first responder  */
+    [[self window] setInitialFirstResponder: records[1].container];
+    
 	[myScroller setEnabled: YES];
 
     /*  Set myTableView as the initial first responder  */
@@ -1680,9 +1683,6 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 	[self reloadClientViews];
     [self updateTrackingRect];
 	
-    /*  Make the playing view the first responder  */
-    [[self window] setInitialFirstResponder: myPlayerView];
-    
 	[[NSNotificationCenter defaultCenter]
 	 postNotificationName: MyAppControllerMIDISetupDidChangeNotification
 	 object: [NSApp delegate] userInfo: nil];	
@@ -1778,14 +1778,17 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
         for (i = 0; i < myClientViewsCount; i++) {
             GraphicBackgroundView *view = records[i].container;
             if (NSPointInRect(pt, [[view superview] convertRect:[view frame] toView:nil])) {
-                if (i > 0)  /*  The time chart view does not accept first responder  */
+                if (i == 0) {
+                    /*  The time chart view does not accept first responder:
+                        the piano roll view is made first responder instead */
+                    [theWindow makeFirstResponder:records[1].container];
+                } else {
                     [theWindow makeFirstResponder:view];
+                }
                 return;
             }
         }
-	} else if (NSPointInRect(pt, [[myPlayerView superview] convertRect: [myPlayerView frame] toView: nil])) {
-		[theWindow makeFirstResponder: myPlayerView];
-	}	
+	}
 }
 
 - (id)playingViewController
