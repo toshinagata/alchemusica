@@ -1058,8 +1058,9 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 		MDTrackAttribute oldAttr = MDTrackGetAttribute(track);
 		if (oldAttr != attr) {
 			MDTrackSetAttribute(track, attr);
-			[[[self undoManager] prepareWithInvocationTarget: self]
-				setTrackAttribute: oldAttr forTrack: trackNo];
+        //  Probably we do not want undo registration
+		//	[[[self undoManager] prepareWithInvocationTarget: self]
+		//		setTrackAttribute: oldAttr forTrack: trackNo];
 			[self enqueueTrackModifiedNotification: trackNo];
 		}
 	}	
@@ -3379,7 +3380,7 @@ isConductorEvent(const MDEvent *ep, int32_t position, void *inUserData)
 - (int)doPaste: (MDSequence *)seq toTracks: (int *)trackList rangeStart: (MDTickType)startTick rangeEnd: (MDTickType)endTick mergeFlag: (BOOL)mergeFlag
 {
 	MDTickType tickOffset;
-	int i, numberOfTracks;
+    int i, numberOfTracks, n;
 	MDTrack *track, *conductorTrack;
 	MDSelectionObject *sel;
 	int trackCount = [[self myMIDISequence] trackCount];
@@ -3443,14 +3444,35 @@ isConductorEvent(const MDEvent *ep, int32_t position, void *inUserData)
 	[self unselectAllEventsInAllTracks:self];
 
 	/*  Merge new events  */
-	for (i = 0; i < numberOfTracks; i++) {
+    n = 1;
+	for (i = 0; trackList[i] >= 0; i++) {
 		int newTrackNo = trackList[i];
+        MDTrack *seqTrack;
 		if (trackList[i] >= trackCount) {
 			[self insertTrack: nil atIndex: trackCount];
+            [self changeTrackName:[NSString stringWithFormat:@"**Paste %d**", n] forTrack:trackCount];
+            n++;
 			newTrackNo = trackCount;
 			trackCount++;
 		}
-		[self insertMultipleEvents: [[[MDTrackObject allocWithZone: [self zone]] initWithMDTrack: MDSequenceGetTrack(seq, i)] autorelease] at: nil toTrack: newTrackNo selectInsertedEvents: YES insertedPositions: NULL];
+        if (i < numberOfTracks)
+            seqTrack = MDSequenceGetTrack(seq, i);
+        else {
+            /*  Use the existing tracks repeatedly  */
+            if (trackList[0] == 0) {
+                /*  ...except for the conductor track  */
+                if (numberOfTracks == 1)
+                    break;  /*  No track to repeat  */
+                /*  Repeat like 0,1,2,3,1,2,3,...
+                   (when numberOfTracks == 4) */
+                seqTrack = MDSequenceGetTrack(seq, 1 + (i - 1) % (numberOfTracks - 1));
+            } else {
+                /*  Repeat like 0,1,2,3,0,1,2,3,...
+                   (when numberOfTracks == 4) */
+                seqTrack = MDSequenceGetTrack(seq, i % numberOfTracks);
+            }
+        }
+		[self insertMultipleEvents: [[[MDTrackObject allocWithZone: [self zone]] initWithMDTrack: seqTrack] autorelease] at: nil toTrack: newTrackNo selectInsertedEvents: YES insertedPositions: NULL];
 	}
 	
 	/*  Merge conductor-only events  */

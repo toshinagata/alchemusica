@@ -168,6 +168,11 @@
 		E4CCB4701F8FA2F9005F2A76 /* NSMenuAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = E4CCB46F1F8FA2F9005F2A76 /* NSMenuAdditions.m */; };
 		E4D701EB13F540C5005EE5B3 /* RecordPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4D701E913F540C5005EE5B3 /* RecordPanel.xib */; };
 		E4E825101F94F264009C5FE6 /* double_triangle.png in Resources */ = {isa = PBXBuildFile; fileRef = E4E8250F1F94F264009C5FE6 /* double_triangle.png */; };
+		E4ED56E5241C85F6000C7DB7 /* PasteWarningTooManyTargets.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4ED56E3241C85F5000C7DB7 /* PasteWarningTooManyTargets.xib */; };
+		E4ED56E8241C8AB9000C7DB7 /* PasteWarningTooFewTargets.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4ED56E6241C8AB9000C7DB7 /* PasteWarningTooFewTargets.xib */; };
+		E4ED56EB241C8BA7000C7DB7 /* PasteWarningConductorShouldNotBeEditable.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4ED56E9241C8BA7000C7DB7 /* PasteWarningConductorShouldNotBeEditable.xib */; };
+		E4ED56EE241C8CC7000C7DB7 /* PasteWarningConductorShouldBeEditable.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4ED56EC241C8CC7000C7DB7 /* PasteWarningConductorShouldBeEditable.xib */; };
+		E4ED56F1241C8D86000C7DB7 /* PasteWarningPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E4ED56F0241C8D86000C7DB7 /* PasteWarningPanelController.m */; };
 		E4F81DC214C1CBE000F63BA6 /* QuantizePanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4F81DC014C1CBE000F63BA6 /* QuantizePanel.xib */; };
 		E4F81DC714C1CC3100F63BA6 /* QuantizePanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E4F81DC614C1CC3100F63BA6 /* QuantizePanelController.m */; };
 		E4FB54C313FA851A001C1290 /* horizontal_move_zoom.png in Resources */ = {isa = PBXBuildFile; fileRef = E4FB54C213FA851A001C1290 /* horizontal_move_zoom.png */; };
@@ -375,6 +380,12 @@
 		E4E44B93074CFB9D0034031C /* shrink.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = shrink.png; path = icons/shrink.png; sourceTree = "<group>"; };
 		E4E8250F1F94F264009C5FE6 /* double_triangle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = double_triangle.png; path = icons/double_triangle.png; sourceTree = "<group>"; };
 		E4ECB32B06E231BB00A80105 /* RecButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = RecButton.png; path = icons/RecButton.png; sourceTree = "<group>"; };
+		E4ED56E4241C85F5000C7DB7 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/PasteWarningTooManyTargets.xib; sourceTree = "<group>"; };
+		E4ED56E7241C8AB9000C7DB7 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/PasteWarningTooFewTargets.xib; sourceTree = "<group>"; };
+		E4ED56EA241C8BA7000C7DB7 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/PasteWarningConductorShouldNotBeEditable.xib; sourceTree = "<group>"; };
+		E4ED56ED241C8CC7000C7DB7 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/PasteWarningConductorShouldBeEditable.xib; sourceTree = "<group>"; };
+		E4ED56EF241C8D86000C7DB7 /* PasteWarningPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PasteWarningPanelController.h; path = Classes/PasteWarningPanelController.h; sourceTree = "<group>"; };
+		E4ED56F0241C8D86000C7DB7 /* PasteWarningPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PasteWarningPanelController.m; path = Classes/PasteWarningPanelController.m; sourceTree = "<group>"; };
 		E4F45EF5104A75B8008C7814 /* horizontal_move_plus.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = horizontal_move_plus.png; path = icons/horizontal_move_plus.png; sourceTree = "<group>"; };
 		E4F45EF6104A75B8008C7814 /* vertical_move_plus.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = vertical_move_plus.png; path = icons/vertical_move_plus.png; sourceTree = "<group>"; };
 		E4F81DC114C1CBE000F63BA6 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/QuantizePanel.xib; sourceTree = "<group>"; };
@@ -621,6 +632,8 @@
 				E430D72C0D79700F00717A72 /* EventFilterPanelController.m */,
 				E467A8DB240EA60400F7DD6F /* SaveErrorPanelController.h */,
 				E467A8DA240EA60400F7DD6F /* SaveErrorPanelController.m */,
+				E4ED56EF241C8D86000C7DB7 /* PasteWarningPanelController.h */,
+				E4ED56F0241C8D86000C7DB7 /* PasteWarningPanelController.m */,
 				E46A94AD1F776B23008477D2 /* ContextMenuTextFieldCell.h */,
 				E46A94AE1F776B23008477D2 /* ContextMenuTextFieldCell.m */,
 			);
@@ -659,6 +672,10 @@
 				E4C383F11411124C006F2661 /* AboutPanel.xib */,
 				E4F81DC014C1CBE000F63BA6 /* QuantizePanel.xib */,
 				E467A8D7240D55B700F7DD6F /* SaveErrorPanel.xib */,
+				E4ED56EC241C8CC7000C7DB7 /* PasteWarningConductorShouldBeEditable.xib */,
+				E4ED56E9241C8BA7000C7DB7 /* PasteWarningConductorShouldNotBeEditable.xib */,
+				E4ED56E6241C8AB9000C7DB7 /* PasteWarningTooFewTargets.xib */,
+				E4ED56E3241C85F5000C7DB7 /* PasteWarningTooManyTargets.xib */,
 				089C165FFE840EACC02AAC07 /* InfoPlist.strings */,
 				F5FFC0B30237AAD301A80002 /* Localizable.strings */,
 				E40C7A53140A884400969DC3 /* icons */,
@@ -843,6 +860,7 @@
 				E400BBDF11D627650032B969 /* shrink.png in Resources */,
 				E400BBE011D627650032B969 /* loupe.png in Resources */,
 				E400BBE111D627650032B969 /* selection.png in Resources */,
+				E4ED56EB241C8BA7000C7DB7 /* PasteWarningConductorShouldNotBeEditable.xib in Resources */,
 				E400BBE211D627650032B969 /* pencil.png in Resources */,
 				E48BC3822302A89F0087B726 /* FFButton.png in Resources */,
 				E400BBE311D627650032B969 /* sigmoid.png in Resources */,
@@ -894,6 +912,8 @@
 				E4D701EB13F540C5005EE5B3 /* RecordPanel.xib in Resources */,
 				E4FB54C313FA851A001C1290 /* horizontal_move_zoom.png in Resources */,
 				E40C7A1F140A85A200969DC3 /* MainMenu.xib in Resources */,
+				E4ED56EE241C8CC7000C7DB7 /* PasteWarningConductorShouldBeEditable.xib in Resources */,
+				E4ED56E5241C85F6000C7DB7 /* PasteWarningTooManyTargets.xib in Resources */,
 				E40C7A23140A85DB00969DC3 /* TrackWindow.xib in Resources */,
 				E40C7A27140A860B00969DC3 /* ListWindow.xib in Resources */,
 				E40C7A2B140A862D00969DC3 /* GraphicWindow.xib in Resources */,
@@ -903,6 +923,7 @@
 				E40C7A40140A879F00969DC3 /* AudioRecordPanel.xib in Resources */,
 				E40C7A44140A87B400969DC3 /* EventFilterPanel.xib in Resources */,
 				E40C7A4C140A87E100969DC3 /* RubyDialog.xib in Resources */,
+				E4ED56E8241C8AB9000C7DB7 /* PasteWarningTooFewTargets.xib in Resources */,
 				E40C7A50140A87FD00969DC3 /* RubyConsoleWindow.xib in Resources */,
 				E40C7AC7140A94F700969DC3 /* MetronomeSettingsPanel.xib in Resources */,
 				E4C383F31411124C006F2661 /* AboutPanel.xib in Resources */,
@@ -1013,6 +1034,7 @@
 				E400BC4311D627730032B969 /* MDAudioUtility.c in Sources */,
 				E400BC4411D627730032B969 /* ruby_dialog.c in Sources */,
 				E400BC4511D627730032B969 /* RubyDialogController.m in Sources */,
+				E4ED56F1241C8D86000C7DB7 /* PasteWarningPanelController.m in Sources */,
 				E400BC4611D627730032B969 /* AudioSettingsPanelController.m in Sources */,
 				E4951EA411D63CD000D827EC /* AUViewWindowController.m in Sources */,
 				E40C7ACC140A95D700969DC3 /* MetronomeSettingsPanelController.m in Sources */,
@@ -1191,6 +1213,38 @@
 				E4D701EA13F540C5005EE5B3 /* English */,
 			);
 			name = RecordPanel.xib;
+			sourceTree = "<group>";
+		};
+		E4ED56E3241C85F5000C7DB7 /* PasteWarningTooManyTargets.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E4ED56E4241C85F5000C7DB7 /* English */,
+			);
+			name = PasteWarningTooManyTargets.xib;
+			sourceTree = "<group>";
+		};
+		E4ED56E6241C8AB9000C7DB7 /* PasteWarningTooFewTargets.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E4ED56E7241C8AB9000C7DB7 /* English */,
+			);
+			name = PasteWarningTooFewTargets.xib;
+			sourceTree = "<group>";
+		};
+		E4ED56E9241C8BA7000C7DB7 /* PasteWarningConductorShouldNotBeEditable.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E4ED56EA241C8BA7000C7DB7 /* English */,
+			);
+			name = PasteWarningConductorShouldNotBeEditable.xib;
+			sourceTree = "<group>";
+		};
+		E4ED56EC241C8CC7000C7DB7 /* PasteWarningConductorShouldBeEditable.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E4ED56ED241C8CC7000C7DB7 /* English */,
+			);
+			name = PasteWarningConductorShouldBeEditable.xib;
 			sourceTree = "<group>";
 		};
 		E4F81DC014C1CBE000F63BA6 /* QuantizePanel.xib */ = {

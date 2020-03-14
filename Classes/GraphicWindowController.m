@@ -35,6 +35,7 @@
 #import "RemapDevicePanelController.h"
 #import "RecordPanelController.h"
 #import "MyAppController.h"
+#import "PasteWarningPanelController.h"
 
 const float kMinimumTickIntervalsInPixels = 8.0f;
 
@@ -2705,10 +2706,14 @@ row:(int)rowIndex
                     continue;
             }
 			sel = [doc selectionOfTrack: i];
-			if (selArray != NULL)
-				selArray[i] = sel;
-			if (sel != nil)
-				numberOfSelectedTracks++;
+            if ((sel->pointSet != NULL && IntGroupGetCount(sel->pointSet) > 0) ||
+                (sel->startTick >= 0 && sel->endTick > sel->startTick)) {
+                /*  Handle only non-empty selections  */
+                if (selArray != NULL)
+                    selArray[i] = sel;
+                if (sel != nil)
+                    numberOfSelectedTracks++;
+            }
 		}
 		if (outStartTick != NULL && outEndTick != NULL)
 			[doc getEditingRangeStart: outStartTick end: outEndTick];
@@ -2789,7 +2794,8 @@ row:(int)rowIndex
 	MyDocument *doc = (MyDocument *)[self document];
 	MDSequence *seq;
 	MDCatalog *catalog;
-    int i, j, numberOfTracks, trackCount, hasConductorTrack;
+    PasteWarningPanelController *warningCont;
+    int i, j, numberOfTracks, trackCount, hasConductorTrack, result;
 	int *trackList;
 	id firstResponder;
     int focusTrack;
@@ -2799,9 +2805,13 @@ row:(int)rowIndex
     hasConductorTrack = (catalog->catTrack[0].originalTrackNo == 0);
 	trackCount = [[doc myMIDISequence] trackCount];
 	numberOfTracks = MDSequenceGetNumberOfTracks(seq);
-	trackList = (int *)calloc(sizeof(int), numberOfTracks);
-	if (trackList == NULL)
-		return;
+    i = (numberOfTracks > trackCount ? numberOfTracks : trackCount);
+	trackList = (int *)calloc(sizeof(int), i + 1);
+    if (trackList == NULL) {
+        MDSequenceRelease(seq);
+        free(catalog);
+        return;
+    }
 
 	firstResponder = [[self window] firstResponder];
     focusTrack = -1;  /*  Only meaningful for the strip chart view  */
@@ -2827,7 +2837,7 @@ row:(int)rowIndex
             if (kind == kMDEventTempo) {
                 /*  Only conductor events can be pasted  */
                 if (!hasConductorTrack)
-                    return;  /*  Do nothing  */
+                    goto exit;  /*  Do nothing  */
                 while (MDSequenceGetNumberOfTracks(seq) > 1)
                     MDSequenceDeleteTrack(seq, 1);
                 numberOfTracks = 1;
@@ -2863,7 +2873,7 @@ row:(int)rowIndex
         }
         
 	} else if (firstResponder != myTableView) {
-        return;
+        goto exit;
     }
 	
     /*  Build track list from the "editing" tracks
@@ -2883,17 +2893,46 @@ row:(int)rowIndex
                 continue;  /*  We should not target the conductor track  */
             if (hasConductorTrack && i != 0) {
                 /*  We should target the conductor track  */
+                warningCont = [PasteWarningPanelController createPasteWarningPanelControllerOfType:kPasteWarningTypeConductorShouldBeEditable];
+                result = [warningCont runSheetModalWithWindow:[self window]];
+                if (result == 0)
+                    goto exit;  /*  Canceled  */
                 trackList[j++] = 0;
-                if (j >= numberOfTracks)
-                    break;
             }
         }
         trackList[j++] = i;
-        if (j >= numberOfTracks)
-            break;
     }
-    while (j < numberOfTracks) {
-        trackList[j++] = i++;
+    if (j > numberOfTracks) {
+        /*  Too many editable tracks  */
+        warningCont = [PasteWarningPanelController createPasteWarningPanelControllerOfType:kPasteWarningTypeTooManyTargets];
+        [warningCont setMainMessageWithInteger:numberOfTracks and:j];
+        result = [warningCont runSheetModalWithWindow:[self window]];
+        if (result == 0)
+            goto exit;  /*  Canceled  */
+        else if (result == 1) {
+            /*  Paste only once  */
+            trackList[numberOfTracks] = -1;
+        } else {
+            /*  Paste repeatedly  */
+            trackList[j] = -1;
+        }
+    } else if (j < numberOfTracks) {
+        /*  Too few editable tracks  */
+        warningCont = [PasteWarningPanelController createPasteWarningPanelControllerOfType:kPasteWarningTypeTooFewTargets];
+        [warningCont setMainMessageWithInteger:numberOfTracks and:j];
+        result = [warningCont runSheetModalWithWindow:[self window]];
+        if (result == 0)
+            goto exit;  /*  Canceled  */
+        else if (result == 1) {
+            /*  Ignore extra tracks  */
+            trackList[j] = -1;
+        } else {
+            /*  Create new tracks  */
+            while (j < numberOfTracks) {
+                trackList[j++] = i++;
+            }
+            trackList[j] = -1;
+        }
     }
 
     i = [doc doPaste: seq toTracks: trackList rangeStart: catalog->startTick rangeEnd: catalog->endTick mergeFlag: mergeFlag];
@@ -2904,6 +2943,7 @@ row:(int)rowIndex
 			break;
 	}
 
+exit:
 	free(catalog);
 	MDSequenceRelease(seq);
 	free(trackList);

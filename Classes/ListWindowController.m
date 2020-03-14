@@ -1585,7 +1585,7 @@ static NSString *sTickIdentifiers[] = { @"bar", @"sec", @"msec", @"count", @"del
 	MyDocument *doc = (MyDocument *)[self document];
 	MDSequence *seq;
 	MDCatalog *catalog;
-	int targetTrack, result;
+	int targetTrack[2], result;
 
 	if (![doc getPasteboardSequence: &seq catalog: &catalog])
 		return;
@@ -1594,8 +1594,9 @@ static NSString *sTickIdentifiers[] = { @"bar", @"sec", @"msec", @"count", @"del
 		return;
 	}
 	
-	targetTrack = myTrackNumber;
-	result = [doc doPaste: seq toTracks: &targetTrack rangeStart: catalog->startTick rangeEnd: catalog->endTick mergeFlag: mergeFlag];
+	targetTrack[0] = myTrackNumber;
+    targetTrack[1] = -1;
+	result = [doc doPaste: seq toTracks: targetTrack rangeStart: catalog->startTick rangeEnd: catalog->endTick mergeFlag: mergeFlag];
 	
 	switch (result) {
 		case 1:  /*  Trying to paste MIDI track to the conductor track  */
