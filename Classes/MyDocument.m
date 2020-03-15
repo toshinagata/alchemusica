@@ -1080,12 +1080,12 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 {
     MDSequence *sequence = [[self myMIDISequence] mySequence];
     if (sequence != NULL) {
-        NSData *attr = [self getTrackAttributes];
+    //    NSData *attr = [self getTrackAttributes];
         if (MDSequenceSetRecordFlagOnTrack(sequence, trackNo, flag)) {
-            [[[self undoManager] prepareWithInvocationTarget: self]
-                setTrackAttributes: attr];
-            [self enqueueTrackModifiedNotification: trackNo];
-            [self updateTrackDestinations];
+        //    [[[self undoManager] prepareWithInvocationTarget: self]
+        //        setTrackAttributes: attr];
+        //    [self enqueueTrackModifiedNotification: trackNo];
+        //    [self updateTrackDestinations];
             return YES;
         }
     }
@@ -1096,10 +1096,10 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 {
     MDSequence *sequence = [[self myMIDISequence] mySequence];
     if (sequence != NULL) {
-        NSData *attr = [self getTrackAttributes];
+    //    NSData *attr = [self getTrackAttributes];
         if (MDSequenceSetMuteFlagOnTrack(sequence, trackNo, flag)) {
-            [[[self undoManager] prepareWithInvocationTarget: self]
-                setTrackAttributes: attr];
+       //     [[[self undoManager] prepareWithInvocationTarget: self]
+       //         setTrackAttributes: attr];
        //     [self enqueueTrackModifiedNotification: trackNo];
        //     [self updateTrackDestinations];
             return YES;
@@ -1112,10 +1112,10 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 {
     MDSequence *sequence = [[self myMIDISequence] mySequence];
     if (sequence != NULL) {
-        NSData *attr = [self getTrackAttributes];
+    //    NSData *attr = [self getTrackAttributes];
         if (MDSequenceSetSoloFlagOnTrack(sequence, trackNo, flag)) {
-            [[[self undoManager] prepareWithInvocationTarget: self]
-                setTrackAttributes: attr];
+        //    [[[self undoManager] prepareWithInvocationTarget: self]
+        //        setTrackAttributes: attr];
         //    [self enqueueTrackModifiedNotification: trackNo];
         //    [self updateTrackDestinations];
             return YES;

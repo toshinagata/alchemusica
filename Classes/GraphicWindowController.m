@@ -2324,8 +2324,8 @@ row:(int)rowIndex
 			if (![myTableView isRowSelected: row])
 				continue;
 			attr = [doc trackAttributeForTrack: row];
-			if (idnum == kEditableID && (attr & kMDTrackAttributeHidden))
-				continue;
+			//if (idnum == kEditableID && (attr & kMDTrackAttributeHidden))
+			//	continue;
 			if ((attr & attrMask) == 0) {
 				attr |= attrMask;
 				[doc setTrackAttribute: attr forTrack: row];
@@ -2338,8 +2338,8 @@ row:(int)rowIndex
 				if (![myTableView isRowSelected: row])
 					continue;
 				attr = [doc trackAttributeForTrack: row];
-				if (idnum == kEditableID && (attr & kMDTrackAttributeHidden))
-					continue;
+				//if (idnum == kEditableID && (attr & kMDTrackAttributeHidden))
+				//	continue;
 				attr &= ~attrMask;
 				if (idnum == kVisibleID) {
 					//  Hidden tracks are non-editable
@@ -2351,6 +2351,10 @@ row:(int)rowIndex
 				[doc setTrackAttribute: attr forTrack: row];
 			}
 		}
+        if (attrMask == kMDTrackAttributeSolo || attrMask == kMDTrackAttributeMute) {
+            /*  Update 'mute by solo' flags  */
+            MDSequenceUpdateMuteBySoloFlag([seq mySequence]);
+        }
 	} else {
 		//  Check whether mouseUp occurred within the same cell as mouseDown
 		frame = [myTableView frameOfCellAtColumn: column row: row];
