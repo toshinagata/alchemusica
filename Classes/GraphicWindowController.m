@@ -2936,6 +2936,8 @@ row:(int)rowIndex
             }
             trackList[j] = -1;
         }
+    } else {
+        trackList[j] = -1;  /*  Number of tracks just matches  */
     }
 
     i = [doc doPaste: seq toTracks: trackList rangeStart: catalog->startTick rangeEnd: catalog->endTick mergeFlag: mergeFlag];
