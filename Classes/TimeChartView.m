@@ -510,11 +510,7 @@ typedef struct TimeScalingRecord {
 				if (IntGroupAdd(pset, pos1, pos2 - pos1) != kMDNoError)
 					break;
             }
-            /*  startTick and endTick are set in the selection object
-                (even if there are no events in between)  */
             obj = [[MDSelectionObject allocWithZone: [self zone]] initWithMDPointSet: pset];
-            obj->startTick = tick1;
-            obj->endTick = tick2;
             obj->track = track;
             if (shiftDown) {
                 [document toggleSelection: obj inTrack: trackNo sender: self];

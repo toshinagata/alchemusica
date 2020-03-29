@@ -103,7 +103,6 @@ static int sNumTrackInfo, sMaxTrackInfo;
 		for (i = 0; i < [myMIDISequence trackCount]; i++) {
 			[selections addObject: [[[MDSelectionObject allocWithZone: [self zone]] init] autorelease]];
 		}
-	//	[self setNeedsUpdateEditingRange: YES];
 		[[NSNotificationCenter defaultCenter]
 			addObserver: self
 			selector: @selector(selectionWillChange:)
@@ -568,7 +567,7 @@ callback(float progress, void *data)
         MDTrackSetExtraInfo(tp, "color", newValue);
         free(newValue);
     }
-    [self enqueueTrackModifiedNotification: track];
+    [self enqueueTrackAttributeChangedNotification: track];
 }
 
 + (NSColor *)colorForEditingRange
@@ -734,12 +733,14 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	}
 }
 
-- (void)enqueueTrackModifiedNotification: (int32_t)trackNo
+- (void)enqueueTrackModifiedNotification: (int32_t)trackNo withEventEdited: (BOOL)eventEdited
 {
 	int i;
 
 	/*  Calibrators should be reset  */
-	MDSequenceResetCalibrators([myMIDISequence mySequence]);
+    if (eventEdited) {
+        MDSequenceResetCalibrators([myMIDISequence mySequence]);
+    }
 
 	/*  Add a track to the modifiedTracks array (if not already present)  */
 	for (i = (int)[modifiedTracks count] - 1; i >= 0; i--) {
@@ -762,10 +763,26 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 		forModes: nil];
 	
 	/*  Update editing range  */
-	[self updateEditingRange];
-	
+    if (eventEdited) {
+        /*  Clear the cached tick range in the selection  */
+        MDSelectionObject *selection = (MDSelectionObject *)[selections objectAtIndex: trackNo];
+        selection->startTick = kMDNegativeTick;
+        selection->endTick = kMDNegativeTick;
+        [self updateEditingRange];
+    }
+    
 	/*  Any track modification should clear the selection undo stack  */
 	[self enqueueSelectionUndoerWithKey: sStackShouldBeCleared value: sStackShouldBeCleared];
+}
+
+- (void)enqueueTrackModifiedNotification: (int32_t)trackNo
+{
+    [self enqueueTrackModifiedNotification:trackNo withEventEdited:YES];
+}
+
+- (void)enqueueTrackAttributeChangedNotification: (int32_t)trackNo
+{
+    [self enqueueTrackModifiedNotification:trackNo withEventEdited:NO];
 }
 
 - (void)postPlayPositionNotification: (MDTickType)tick
@@ -1061,7 +1078,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
         //  Probably we do not want undo registration
 		//	[[[self undoManager] prepareWithInvocationTarget: self]
 		//		setTrackAttribute: oldAttr forTrack: trackNo];
-			[self enqueueTrackModifiedNotification: trackNo];
+			[self enqueueTrackAttributeChangedNotification: trackNo];
 		}
 	}	
 }
@@ -1080,12 +1097,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 {
     MDSequence *sequence = [[self myMIDISequence] mySequence];
     if (sequence != NULL) {
-    //    NSData *attr = [self getTrackAttributes];
         if (MDSequenceSetRecordFlagOnTrack(sequence, trackNo, flag)) {
-        //    [[[self undoManager] prepareWithInvocationTarget: self]
-        //        setTrackAttributes: attr];
-        //    [self enqueueTrackModifiedNotification: trackNo];
-        //    [self updateTrackDestinations];
             return YES;
         }
     }
@@ -1160,7 +1172,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
         [[[self undoManager] prepareWithInvocationTarget: self]
             changeDevice: [NSString stringWithUTF8String: oldname] forTrack: trackNo];
         [self updateDeviceNumberForTrack: trackNo];
-		[self enqueueTrackModifiedNotification: trackNo];
+		[self enqueueTrackAttributeChangedNotification: trackNo];
         return YES;
 	} else return NO;
 }
@@ -1209,7 +1221,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
         MDTrackSetTrackChannel(track, channel);
         [[[self undoManager] prepareWithInvocationTarget: self]
             changeTrackChannel: oldchannel forTrack: trackNo];
-		[self enqueueTrackModifiedNotification: trackNo];
+		[self enqueueTrackAttributeChangedNotification: trackNo];
         [self updateTrackDestinations];
         return YES;
     }
@@ -1229,7 +1241,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
         MDTrackSetName(track, name);
         [[[self undoManager] prepareWithInvocationTarget: self]
             changeTrackName: [NSString stringWithUTF8String: oldname] forTrack: trackNo];
-		[self enqueueTrackModifiedNotification: trackNo];
+		[self enqueueTrackAttributeChangedNotification: trackNo];
         return YES;
 	}
 	return NO;
@@ -2455,15 +2467,8 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 
 #pragma mark ====== Editing range ======
 
-//- (void)setNeedsUpdateEditingRange: (BOOL)flag
-//{
-//	needsUpdateEditingRange = YES;
-//}
-
 - (void)getEditingRangeStart: (MDTickType *)startTick end: (MDTickType *)endTick
 {
-//	if (needsUpdateEditingRange)
-//		[self updateEditingRange];
 	*startTick = startEditingRange;
 	*endTick = endEditingRange;
 }
@@ -2482,8 +2487,6 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	[self enqueueSelectionUndoerWithKey: sEditingRangeKey value: [[[MDTickRangeObject alloc] initWithStartTick: startEditingRange endTick: endEditingRange] autorelease]];
 	startEditingRange = startTick;
 	endEditingRange = endTick;
-//	needsUpdateEditingRange = NO;
-//	[self postEditingRangeDidChangeNotification];
 }
 
 #pragma mark ====== Selection ======
@@ -2493,24 +2496,11 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 
 - (BOOL)setSelection: (MDSelectionObject *)set inTrack: (int32_t)trackNo sender: (id)sender
 {
-/*    MDSelectionObject *diffSet = [[[MDSelectionObject allocWithZone: [self zone]] init] autorelease]; */
     MDSelectionObject *oldSet = (MDSelectionObject *)[[[selections objectAtIndex: trackNo] retain] autorelease];
 
 	[selections replaceObjectAtIndex: trackNo withObject: set];
 	[self enqueueSelectionUndoerWithKey: [NSNumber numberWithInt: (int)trackNo] value: oldSet];
 	return YES;
-/*    MDStatus sts = IntGroupXor([oldSet pointSet], [set pointSet], [diffSet pointSet]);
-    if (sts == kMDNoError) {
-        [selections replaceObjectAtIndex: trackNo withObject: set];
-#if DEBUG
-        if (gMDVerbose > 0)
-            IntGroupDump([set pointSet]);
-#endif
-		[self setNeedsUpdateEditingRange: YES];
-        [self postSelectionDidChangeNotification: trackNo selectionChange: diffSet sender: sender];
-		[self postEditingRangeDidChangeNotification];
-        return YES;
-    } else return NO; */
 }
 
 - (BOOL)toggleSelection: (MDSelectionObject *)pointSet inTrack: (int32_t)trackNo sender: (id)sender
@@ -2519,10 +2509,6 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     MDSelectionObject *oldSet = (MDSelectionObject *)[[[selections objectAtIndex: trackNo] retain] autorelease];
     MDStatus sts = IntGroupXor([oldSet pointSet], [pointSet pointSet], [newSet pointSet]);
     if (sts == kMDNoError) {
-        /*  Register undo action  */
-   /*     [[[self undoManager] prepareWithInvocationTarget: self]
-            toggleSelection: pointSet inTrack: trackNo sender: self]; */
-        /*  Do set selection  */
         [selections replaceObjectAtIndex: trackNo withObject: newSet];
         /*  For debug  */
 #if DEBUG
@@ -2530,12 +2516,6 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
             IntGroupDump([newSet pointSet]);
 #endif
 		[self enqueueSelectionUndoerWithKey: [NSNumber numberWithInt: (int)trackNo] value: oldSet];
-
-		/*  Update editing range  */
-	//	[self setNeedsUpdateEditingRange: YES];
-        /*  Post notification  */
-    //  [self postSelectionDidChangeNotification: trackNo selectionChange: pointSet sender: sender];
-	//	[self postEditingRangeDidChangeNotification];
         return YES;
     } else return NO;
 }

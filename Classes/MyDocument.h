@@ -67,7 +67,6 @@ typedef enum MyDocumentModifyMode {
 	
 	//  Editing range
 	MDTickType startEditingRange, endEditingRange;
-	BOOL needsUpdateEditingRange;
 	
 	//  Selection stack (for undo/redo selection)
 	NSMutableArray *selectionStack;
@@ -100,6 +99,7 @@ typedef enum MyDocumentModifyMode {
 - (NSArray *)getDestinationNames;
 
 - (void)enqueueTrackModifiedNotification: (int32_t)trackNo;
+- (void)enqueueTrackAttributeChangedNotification: (int32_t)trackNo;
 - (void)postTrackModifiedNotification: (NSNotification *)notification;
 - (void)postPlayPositionNotification: (MDTickType)tick;
 //- (void)postSelectionDidChangeNotification: (int32_t)trackNo selectionChange: (IntGroupObject *)set sender: (id)sender;
@@ -164,7 +164,6 @@ typedef enum MyDocumentModifyMode {
 - (void)trackDeleted: (NSNotification *)notification;
 - (void)documentSelectionDidChange: (NSNotification *)notification;
 
-//- (void)setNeedsUpdateEditingRange: (BOOL)flag;
 - (void)getEditingRangeStart: (MDTickType *)startTick end: (MDTickType *)endTick;
 - (void)setEditingRangeStart: (MDTickType)startTick end: (MDTickType)endTick;
 - (void)getSelectionStartTick: (MDTickType *)startTickPtr endTick: (MDTickType *)endTickPtr editableTracksOnly: (BOOL)flag;
