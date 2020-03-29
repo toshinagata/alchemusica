@@ -343,10 +343,6 @@ typedef struct TimeScalingRecord {
                 }
 			}
 		}
-	} else if ((initialModifierFlags & NSCommandKeyMask)) {
-		/*  Command + click/drag is similar to shift + click/drag, except that
-		 all events in the new editing range are added to the selection  */
-		/*  Do nothing; this avoids deselecting the current selection  */
 	} else {
 		[super doMouseDown: theEvent];
 	}
@@ -375,24 +371,6 @@ typedef struct TimeScalingRecord {
 
 		rect = [selectionPath bounds];
 
-		/*  Command + drag: modify selection path with current editing range  */
-		if (initialModifierFlags & NSCommandKeyMask) {
-			MDTickType tick1, tick2;
-			[(MyDocument *)[dataSource document] getEditingRangeStart: &tick1 end: &tick2];
-			if (tick1 >= 0 && tick2 < kMDMaxTick && tick1 <= tick2) {
-				float ppt = [dataSource pixelsPerTick];
-				float x1 = tick1 * ppt;
-				float x2 = tick2 * ppt;
-				float x3 = rect.origin.x + rect.size.width;
-				if (x2 > x3)
-					x3 = x2;
-				if (x1 < rect.origin.x)
-					rect.origin.x = x1;
-				rect.size.width = x3 - rect.origin.x;
-				[self setSelectRegion: [NSBezierPath bezierPathWithRect: rect]];
-			}
-		}
-		
 		/*  Set the selection paths for other clientViews  */
 		for (i = 1; (view = [dataSource clientViewAtIndex: i]) != nil; i++) {
 			NSRect viewRect = [view bounds];
@@ -502,16 +480,6 @@ typedef struct TimeScalingRecord {
 			MDTickType tick3 = tick1;
 			tick1 = tick2;
 			tick2 = tick3;
-		}
-		if (initialModifierFlags & NSCommandKeyMask) {
-			MDTickType rtick1, rtick2;
-			[document getEditingRangeStart: &rtick1 end: &rtick2];
-			if (rtick1 >= 0 && rtick2 < kMDMaxTick && rtick1 <= rtick2) {
-				if (rtick1 < tick1)
-					tick1 = rtick1;
-				if (rtick2 > tick2)
-					tick2 = rtick2;
-			}
 		}
 	}
 	
