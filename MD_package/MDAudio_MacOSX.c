@@ -621,8 +621,8 @@ sMDAudioUpdateSoftwareDeviceInfo(int music_or_effect)
 {
 	AudioComponentDescription ccd, fcd;
 	AudioComponent cmp = NULL;
-	const char *cName;
-	int len, n, i;
+	char *cName;
+	int n, i;
 	UInt32 propSize;
     MDAudioMusicDeviceInfo info, *ip;
     MDArray **basep;
@@ -636,25 +636,37 @@ sMDAudioUpdateSoftwareDeviceInfo(int music_or_effect)
 			return kMDErrorOutOfMemory;
 		}
 	}
-	
+
 	memset(&fcd, 0, sizeof(fcd));
     fcd.componentType = (music_or_effect ? kAudioUnitType_MusicDevice : kAudioUnitType_Effect);
 	n = 0;
 	while ((cmp = AudioComponentFindNext(cmp, &fcd)) != 0) {
 		AudioUnit unit;
         CFStringRef nameRef;
-
+        CFIndex cflen;
+    
 		/*  Get the component information  */
-        AudioComponentCopyName(cmp, &nameRef);
-        cName = CFStringGetCStringPtr(nameRef, kCFStringEncodingUTF8);
-        len = (int)strlen(cName);
         memset(&info, 0, sizeof(info));
-        AudioComponentGetDescription(cmp, &ccd);
-		info.code = (((UInt64)ccd.componentSubType) << 32) + ((UInt64)ccd.componentManufacturer);
-        info.name = strdup(cName);
+        err = AudioComponentGetDescription(cmp, &ccd);
+        if (err != noErr)
+            continue;  /*  Cannot get valid description  */
+        info.code = (((UInt64)ccd.componentSubType) << 32) + ((UInt64)ccd.componentManufacturer);
+
+        /*  Get the component name  */
+        err = AudioComponentCopyName(cmp, &nameRef);
+        if (err != noErr)
+            continue;  /*  Cannot get valid name  */
+        cflen = CFStringGetLength(nameRef);
+        if (cflen == 0)
+            continue;  /*  Empty device name  */
+        cName = malloc(cflen * 4 + 1);
+        if (!CFStringGetCString(nameRef, cName, cflen * 4, kCFStringEncodingUTF8))
+            continue;  /*  Cannot get valid name  */
+
+        info.name = cName;
 
         for (i = 0; (ip = MDArrayFetchPtr(*basep, i)) != NULL; i++) {
-			if (ip->code == info.code && strncmp(ip->name, cName, len) == 0) {
+			if (ip->code == info.code && strncmp(ip->name, cName, cflen) == 0) {
 				free(info.name);
 				info.name = NULL;
 				break;
