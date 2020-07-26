@@ -485,12 +485,11 @@ static void printCFdata(CFTypeRef ref, int nestLevel)
 			[view setEnabled: YES];
 			if (isInput) {
 				view = [self viewWithTag: kCustomViewButtonBase + tagOffset];
-				if (n >= kMDAudioMusicDeviceIndexOffset && (mp = MDAudioMusicDeviceInfoAtIndex(n - kMDAudioMusicDeviceIndexOffset)) != NULL && mp->hasCustomView) {
+				if (n >= kMDAudioMusicDeviceIndexOffset &&
+                    (mp = MDAudioMusicDeviceInfoAtIndex(n - kMDAudioMusicDeviceIndexOffset)) != NULL &&
+                    (mp->hasCustomView || [AudioSettingsPrefPanelController shouldCallApplicationForDeviceName:mp->name] != nil)) {
 					[view setEnabled: YES];
 					[view setState: NSOnState];
-                } else if ([AudioSettingsPrefPanelController shouldCallApplicationForDeviceName:mp->name] != nil) {
-                    [view setEnabled: YES];
-                    [view setState: NSOnState];
 				} else {
 					[view setEnabled: NO];
 					[view setState: NSOffState];
