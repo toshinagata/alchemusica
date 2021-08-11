@@ -23,6 +23,7 @@
 	MyPopUpButton *codePopup;
     MyPopUpButton *trackPopup;
     NSTextField *trackLabelText;
+    NSMenu *controlSubmenu;
 }
 
 - (void)setKindAndCode: (int32_t)kindAndCode;

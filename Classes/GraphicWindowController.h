@@ -203,7 +203,7 @@ enum {
 
 - (void)setStripChartAtIndex: (int)index kind: (int)kind code: (int)code;
 - (IBAction)kindPopUpPressed: (id)sender;
-- (IBAction)codeMenuItemSelected: (id)sender;
+- (void)codeMenuItemSelected: (NSMenuItem *)item inSplitterView: (GraphicSplitterView *)view;
 - (IBAction)trackPopUpPressedInSplitterView: (id)sender;
 
 - (IBAction)expandHorizontally: (id)sender;

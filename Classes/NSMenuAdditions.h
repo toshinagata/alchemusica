@@ -20,4 +20,6 @@
 
 @interface NSMenu (MyMenuAddition)
 - (void)changeMenuTitleAttributes:(NSDictionary *)attributes;
+- (NSMenuItem *)searchMenuItemWithTag:(int)tag;
+- (NSMenu *)findSubmenuContainingItem:(NSMenuItem *)anItem outIndex:(int *)outIndex;
 @end

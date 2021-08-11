@@ -25,6 +25,7 @@
 {
     NSColor *textColor;
     NSColor *backgroundColor;
+    NSMenuItem *selectedItem; /* non-nil if an item in the submenu is selected */
 }
 + (NSImage *)triangleImage;
 + (NSImage *)doubleTriangleImage;

@@ -36,4 +36,47 @@
     }
 }
 
+static NSMenuItem *
+searchMenuItemWithTagSub(NSMenu *menu, int tag)
+{
+    int i;
+    NSMenuItem *item;
+    for (i = (int)[menu numberOfItems] - 1; i >= 0; i--) {
+        item = (NSMenuItem *)[menu itemAtIndex: i];
+        if ([item tag] == tag)
+            return item;
+        if ([item hasSubmenu]) {
+            item = searchMenuItemWithTagSub([item submenu], tag);
+            if (item != nil)
+                return item;
+        }
+    }
+    return nil;
+}
+
+- (NSMenuItem *)searchMenuItemWithTag:(int)tag
+{
+    return searchMenuItemWithTagSub(self, tag);
+}
+
+- (NSMenu *)findSubmenuContainingItem:(NSMenuItem *)anItem outIndex:(int *)outIndex
+{
+    int i;
+    NSMenuItem *item;
+    for (i = (int)[self numberOfItems] - 1; i >= 0; i--) {
+        item = (NSMenuItem *)[self itemAtIndex: i];
+        if (item == anItem) {
+            if (outIndex != NULL)
+                *outIndex = i;
+            return self;
+        }
+        if ([item hasSubmenu]) {
+            NSMenu *menu = [[item submenu] findSubmenuContainingItem:anItem outIndex:outIndex];
+            if (menu != nil)
+                return menu;
+        }
+    }
+    return nil;
+}
+
 @end

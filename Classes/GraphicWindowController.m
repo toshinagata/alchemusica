@@ -1209,12 +1209,12 @@ sTableColumnIDToInt(id identifier)
 	}
 }
 
-- (IBAction)codeMenuItemSelected: (id)sender
+- (void)codeMenuItemSelected: (NSMenuItem *)item inSplitterView: (GraphicSplitterView *)view
 {
 	int i, code;
 	for (i = 1; i < myClientViewsCount; i++) {
-		if (records[i].splitter == (GraphicSplitterView *)[sender superview]) {
-            code = (int)[[sender selectedItem] tag];
+		if (records[i].splitter == view) {
+            code = (int)[item tag];
 			[self setStripChartAtIndex: i kind: -1 code: code];
 			break;
 		}

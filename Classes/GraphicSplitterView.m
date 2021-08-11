@@ -20,11 +20,12 @@
 #import "MyDocument.h"
 #import "MyMIDISequence.h"
 #import "NSCursorAdditions.h"
+#import "NSMenuAdditions.h"
 #import "MDObjects.h"
 
 @implementation GraphicSplitterView
 
-static NSMenu *sControlSubmenu;
+// static NSMenu *sControlSubmenu;
 // static NSMenu *sKeyPresSubmenu;
 
 static struct sKindMenuItems {
@@ -40,7 +41,7 @@ static struct sKindMenuItems {
 	{ kMDEventTempo, @"Tempo" }
 };
 
-static NSMenuItem *
+/*static NSMenuItem *
 searchMenuItemWithTag(NSMenu *menu, int tag)
 {
 	int i;
@@ -56,7 +57,7 @@ searchMenuItemWithTag(NSMenu *menu, int tag)
 		}
 	}
 	return nil;		
-}
+}*/
 
 - (id)initWithFrame:(NSRect)frame {
 	int i;
@@ -114,6 +115,13 @@ searchMenuItemWithTag(NSMenu *menu, int tag)
     return self;
 }
 
+- (void)dealloc
+{
+    if (controlSubmenu != nil)
+        [controlSubmenu release];
+    [super dealloc];
+}
+
 - (NSMenu *)makeTrackPopup
 {
     NSMenu *menu;
@@ -154,9 +162,9 @@ searchMenuItemWithTag(NSMenu *menu, int tag)
 	id target = [[[self superview] window] windowController];
 	[kindPopup setTarget: target];
 	[kindPopup setAction: @selector(kindPopUpPressed:)];
-	if (sControlSubmenu == nil) {
-		sControlSubmenu = [MDMenuWithControlNames(nil, nil, 0) retain];
-	}
+	if (controlSubmenu == nil) {
+        controlSubmenu = [MDMenuWithControlNames(self, @selector(codeMenuItemSelected:), 0) retain];
+    }
     [codePopup setTarget: target];
     [codePopup setAction: @selector(codeMenuItemSelected:)];
     [trackPopup setTarget:target];
@@ -213,6 +221,12 @@ searchMenuItemWithTag(NSMenu *menu, int tag)
 {
 }
 
+- (IBAction)codeMenuItemSelected:(id)sender
+{
+    GraphicWindowController *controller = (GraphicWindowController *)[[self window] windowController];
+    [controller codeMenuItemSelected:(NSMenuItem *)sender inSplitterView:self];
+}
+
 - (void)setKindAndCode: (int32_t)kindAndCode
 {
 	int kind, code;
@@ -220,11 +234,11 @@ searchMenuItemWithTag(NSMenu *menu, int tag)
 	code = (kindAndCode & 65535);
 	kind = ((kindAndCode >> 16) & 65535);
 	if (kind != 65535) {
-		item = searchMenuItemWithTag([kindPopup menu], kind);
+        item = [[kindPopup menu] searchMenuItemWithTag:kind];
 		if (item != nil) {
 			[kindPopup selectItem: item];
 			if (kind == kMDEventControl) {
-				[codePopup setMenu: sControlSubmenu];
+				[codePopup setMenu: controlSubmenu];
 				[codePopup setEnabled: YES];
 			} else {
 				[codePopup setMenu: [[[NSMenu allocWithZone: [self zone]] initWithTitle: @""] autorelease]];
@@ -233,7 +247,7 @@ searchMenuItemWithTag(NSMenu *menu, int tag)
 		}
 	}
 	if (code != 65535) {
-		item = searchMenuItemWithTag([codePopup menu], code);
+        item = [[codePopup menu] searchMenuItemWithTag:code];
 		if (item != nil) {
 			[codePopup selectItem: item];
 		}

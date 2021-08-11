@@ -144,4 +144,28 @@ static NSImage *sTriangleImage, *sDoubleTriangleImage;
     return backgroundColor;
 }
 
+//  Implement the menu item selection with hierarchical menus
+- (NSMenuItem *)selectedItem
+{
+    NSMenuItem *item = [super selectedItem];
+    if (item == nil && selectedItem != nil)
+        return selectedItem;
+    else return item;
+}
+
+- (void)selectItem:(NSMenuItem *)anItem
+{
+    NSMenuItem *item;
+    if (selectedItem)
+        [selectedItem setState:NSOffState];
+    [super selectItem:anItem];
+    item = [super selectedItem];
+    if (item == nil) {
+        //  Should be a submenu item
+        selectedItem = anItem;
+        [selectedItem setState:NSOnState];
+    }
+    else selectedItem = nil;
+}
+
 @end
