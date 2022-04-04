@@ -301,6 +301,14 @@ getYValue(const MDEvent *ep, int eventKind)
 	return aRange;
 }
 
+- (NSColor *)verticalLineColor: (BOOL)beforeEndOfSequence;
+{
+	if (beforeEndOfSequence)
+		return [NSColor lightGrayColor];
+	else
+		return [NSColor grayColor];
+}
+
 - (void)drawContentsInRect: (NSRect)aRect
 {
 	NSPoint pt;
@@ -308,6 +316,7 @@ getYValue(const MDEvent *ep, int eventKind)
 	float y, grid;
 	NSEraseRect(aRect);
 	[self paintEditingRange: aRect startX: NULL endX: NULL];
+	[self drawVerticalLinesInRect: aRect];
 	if (eventKind == kMDEventNote || eventKind == kMDEventInternalNoteOff)
 		[self drawVelocityInRect: aRect];
 	else

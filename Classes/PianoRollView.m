@@ -27,10 +27,6 @@
 
 @implementation PianoRollView
 
-static CGFloat sLineDash1[] = {6.0f, 2.0f};
-static CGFloat sLineDash2[] = {2.0f, 6.0f};
-static CGFloat sDashWidth = 8.0f;
-
 - (id)initWithFrame: (NSRect)rect
 {
     self = [super initWithFrame: rect];
@@ -50,85 +46,6 @@ static CGFloat sDashWidth = 8.0f;
 	return kGraphicPianoRollViewType;
 }
 
-- (void)drawVerticalLinesInRect: (NSRect)aRect
-{
-	float ppt;
-	MDTickType beginTick, endTick, duration;
-	float originx, limitx;
-	NSPoint pt1, pt2;
-	int i, numLines;
-	NSBezierPath *lines, *subLines;
-	ppt = [dataSource pixelsPerTick];
-	beginTick = aRect.origin.x / ppt;
-	endTick = (aRect.origin.x + aRect.size.width) / ppt + 1;
-	duration = [dataSource sequenceDuration];
-	limitx = duration * ppt;
-	pt1.y = (CGFloat)(floor(aRect.origin.y / sDashWidth) * sDashWidth);
-	pt2.y = (CGFloat)(ceil((aRect.origin.y + aRect.size.height) / sDashWidth) * sDashWidth);
-	lines = [[NSBezierPath allocWithZone: [self zone]] init];
-	subLines = [[NSBezierPath allocWithZone: [self zone]] init];
-	originx = aRect.origin.x;
-	if (originx == 0.0f)
-		originx = 1.0f;	/*  Avoid drawing line at tick = 0  */
-	pt2.x = 0.0f;
-	while (beginTick < endTick) {
-		int mediumCount, majorCount;
-		MDEvent *sig1, *sig2;
-		MDTickType sigTick, nextSigTick;
-		float interval, startx;
-		[dataSource verticalLinesFromTick: beginTick timeSignature: &sig1 nextTimeSignature: &sig2 lineIntervalInPixels: &interval mediumCount: &mediumCount majorCount: &majorCount];
-		sigTick = (sig1 == NULL ? 0 : MDGetTick(sig1));
-		nextSigTick = (sig2 == NULL ? kMDMaxTick : MDGetTick(sig2));
-		if (nextSigTick > endTick)
-			nextSigTick = endTick;
-		startx = sigTick * ppt;
-		numLines = (int)floor((nextSigTick - sigTick) * ppt / interval) + 1;
-		i = (startx >= originx ? 0 : (int)floor((originx - startx) / interval));
-		for ( ; i < numLines; i++) {
-			pt1.x = (CGFloat)(floor(startx + i * interval) + 0.5);
-			if (pt1.x >= originx && pt1.x <= aRect.origin.x + aRect.size.width) {
-				if (pt1.x > limitx && pt2.x <= limitx) {
-					/*  Draw the lines and set the color to gray  */
-					[lines setLineDash: sLineDash1 count: 2 phase: 0.0f];
-					[subLines setLineDash: sLineDash2 count: 2 phase: 0.0f];
-					[lines stroke];
-					[subLines stroke];
-					[lines removeAllPoints];
-					[subLines removeAllPoints];
-					[[NSColor grayColor] set];
-				}
-				pt2.x = pt1.x;
-				if (i % majorCount == 0) {
-					[lines moveToPoint: pt1];
-					[lines lineToPoint: pt2];
-				} else {
-					[subLines moveToPoint: pt1];
-					[subLines lineToPoint: pt2];
-				}
-			}
-		}
-		beginTick = nextSigTick;
-	}
-	[lines setLineDash: sLineDash1 count: 2 phase: 0.0f];
-	[subLines setLineDash: sLineDash2 count: 2 phase: 0.0f];
-	[lines stroke];
-	[subLines stroke];
-	[lines release];
-	[subLines release];
-
-	[[NSColor blackColor] set];
-	if (limitx < aRect.origin.x + aRect.size.width) {
-		/*  Draw the "end of sequence" line  */
-		float width = [NSBezierPath defaultLineWidth];
-		pt1.x = pt2.x = limitx;
-		[NSBezierPath strokeLineFromPoint: pt1 toPoint: pt2];
-		[NSBezierPath setDefaultLineWidth: 2.0f];
-		pt1.x = pt2.x += 3.0f;
-		[NSBezierPath strokeLineFromPoint: pt1 toPoint: pt2];
-		[NSBezierPath setDefaultLineWidth: width];
-	}
-}
-
 - (void)drawStavesInRect: (NSRect)aRect
 {
 	int index, n, i;
@@ -141,15 +58,15 @@ static CGFloat sDashWidth = 8.0f;
 	limitx = [dataSource sequenceDuration] * [dataSource pixelsPerTick];
 	index = 0;
 	/*  Line start/end points are set to multiples of sDashWidth to avoid complication of calculating appropriate phase for setLineDash: */
-	startx = (float)(sDashWidth * floor(aRect.origin.x / sDashWidth));
-	endx = (float)(sDashWidth * ceil((aRect.origin.x + aRect.size.width) / sDashWidth + 1.0));
+	startx = (float)(gDashWidth * floor(aRect.origin.x / gDashWidth));
+	endx = (float)(gDashWidth * ceil((aRect.origin.x + aRect.size.width) / gDashWidth + 1.0));
 	ys = [self yScale];
 	for (i = 0; i < 2; i++) {
 		if (i == 0) {
 			if (limitx >= aRect.origin.x + aRect.size.width)
 				continue;
 			[[NSColor grayColor] set];
-			pt1.x = sDashWidth * (float)floor(limitx / sDashWidth);
+			pt1.x = gDashWidth * (float)floor(limitx / gDashWidth);
 			pt2.x = endx;
 		} else {
 			[staves removeAllPoints];
@@ -170,8 +87,8 @@ static CGFloat sDashWidth = 8.0f;
 			[path moveToPoint: pt1];
 			[path lineToPoint: pt2];
 		}
-		[staves setLineDash: sLineDash1 count: 2 phase: 0.0f];
-		[subStaves setLineDash: sLineDash2 count: 2 phase: 0.0f];
+		[staves setLineDash: gLineDash1 count: 2 phase: 0.0f];
+		[subStaves setLineDash: gLineDash2 count: 2 phase: 0.0f];
 		[staves stroke];
 		[subStaves stroke];
 	}

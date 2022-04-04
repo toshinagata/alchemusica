@@ -23,6 +23,10 @@ enum {
 	kGraphicStripChartViewType = 3
 };
 
+extern CGFloat gLineDash1[];
+extern CGFloat gLineDash2[];
+extern CGFloat gDashWidth;
+
 @interface GraphicClientView : NSView {
     id dataSource;				//  The data source
     float minValue, maxValue;
@@ -78,6 +82,8 @@ enum {
 
 //  Drawing
 - (void)drawContentsInRect:(NSRect)aRect;
+- (void)drawVerticalLinesInRect: (NSRect)aRect;
+- (NSColor *)verticalLineColor: (BOOL)beforeEndOfSequence;
 
 //- (int)selectMode;
 - (BOOL)isDragging;
