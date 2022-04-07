@@ -45,6 +45,9 @@ enum {
     int32_t initialDraggedTick; //  The initial tick value of the dragged event
     int deltaDraggedValue;
     int32_t deltaDraggedTick;
+    
+    //  The center y coordinate when dragging is started; this is the baseline for add/sub or scale tool
+    CGFloat centerY;
 }
 
 - (void)setKindAndCode: (int32_t)kindAndCode;

@@ -1954,6 +1954,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 
 - (IBAction)modeSelected: (id)sender
 {
+    int index;
 	switch ([sender tag]) {
 		case kSetMenuTag:      graphicEditingMode = kGraphicSetMode; break;
 		case kAddMenuTag:      graphicEditingMode = kGraphicAddMode; break;
@@ -1961,6 +1962,11 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 		case kLimitMaxMenuTag: graphicEditingMode = kGraphicLimitMaxMode; break;
 		case kLimitMinMenuTag: graphicEditingMode = kGraphicLimitMinMode; break;
 	}
+    //  Redraw the strip chart views
+    for (index = 0; index < myClientViewsCount; index++) {
+        if ([records[index].client isKindOfClass: [StripChartView class]])
+            [records[index].client setNeedsDisplay:YES];
+    }
 }
 
 - (IBAction)quantizeSelected: (id)sender

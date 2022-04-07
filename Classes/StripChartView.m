@@ -78,6 +78,39 @@ static const int sVerticalMargin = 2;
 }
 */
 
+- (void)updateCenterY
+{
+	NSRect bounds = [[self superview] bounds];
+	float y = floor(bounds.origin.y + bounds.size.height * 0.5);
+	//  Round to the nearest Y value
+	float newCenterY = [self convertFromYValue:[self convertToYValue:y]] + 0.5;
+	//  If lineShape > 0, then we do not update the baseline
+	if (lineShape == 0 && centerY != newCenterY) {
+		[self invalidateCenterLine];
+		centerY = newCenterY;
+		[self invalidateCenterLine];
+	}
+}
+
+//  Respond when the scroll position changed
+- (void)superBoundsDidChange: (NSNotification *)aNotification
+{
+	[self updateCenterY];
+}
+
+//  Respond when the frame of the superview changed
+//  i.e. the scroll view containing the client view is resized
+- (void)superFrameDidChange: (NSNotification *)aNotification
+{
+	[self updateCenterY];
+}
+
+//  Respond when the frame of the client view, i.e. data range and/or scale are changed
+- (void)frameDidChange: (NSNotification *)aNotification
+{
+	[self updateCenterY];
+}
+
 static float
 getYValue(const MDEvent *ep, int eventKind)
 {
@@ -88,6 +121,18 @@ getYValue(const MDEvent *ep, int eventKind)
 	else if (eventKind == kMDEventTempo)
 		return MDGetTempo(ep);
 	else return MDGetData1(ep);
+}
+
+- (CGFloat)convertFromYValue:(float)yValue
+{
+	NSRect bounds = [self bounds];
+	return (CGFloat)(floor(bounds.origin.y + (yValue - minValue) * ((bounds.size.height - sVerticalMargin * 2) / (maxValue - minValue)) + 0.5) + sVerticalMargin);
+}
+
+- (float)convertToYValue:(CGFloat)y
+{
+	NSRect bounds = [self bounds];
+	return (float)(floor((y - bounds.origin.y - sVerticalMargin) * (maxValue - minValue) / (bounds.size.height - sVerticalMargin * 2) + 0.5) + minValue);
 }
 
 - (void)drawVelocityInRect: (NSRect)aRect
@@ -135,7 +180,8 @@ getYValue(const MDEvent *ep, int eventKind)
 		while ((ep = MDPointerForward(pt)) != NULL && MDGetTick(ep) < endTick) {
 			if (MDGetKind(ep) != kMDEventNote)
 				continue;
-			y = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - sVerticalMargin * 2)) + 0.5) + sVerticalMargin;
+			//y = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - sVerticalMargin * 2)) + 0.5) + sVerticalMargin;
+			y = [self convertFromYValue:getYValue(ep, eventKind)];
 			x = (float)(floor(MDGetTick(ep) * ppt) + 0.5);
 			if (y >= aRect.origin.y) {
 				if ([[dataSource document] isSelectedAtPosition: MDPointerGetPosition(pt) inTrack: trackNo]) {
@@ -229,7 +275,8 @@ getYValue(const MDEvent *ep, int eventKind)
 			xlast = ylast = 0;
 			poslast = -1;
 		} else {
-			ylast = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - sVerticalMargin * 2))) + sVerticalMargin;
+			//ylast = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - sVerticalMargin * 2))) + sVerticalMargin;
+			ylast = [self convertFromYValue:getYValue(ep, eventKind)];
 			xlast = (float)(floor(MDGetTick(ep) * ppt));
 			poslast = MDPointerGetPosition(pt);
 		}
@@ -240,7 +287,8 @@ getYValue(const MDEvent *ep, int eventKind)
 					continue;
 				if (eventCode != -1 && MDGetCode(ep) != eventCode)
 					continue;
-				y = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - sVerticalMargin * 2))) + sVerticalMargin;
+				//y = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - sVerticalMargin * 2))) + sVerticalMargin;
+				y = [self convertFromYValue:getYValue(ep, eventKind)];
 				x = (float)(floor(MDGetTick(ep) * ppt));
 			} else {
 				x = [self bounds].size.width;
@@ -329,8 +377,26 @@ getYValue(const MDEvent *ep, int eventKind)
 	[[NSColor lightGrayColor] set];
 	for (y = minValue; y <= maxValue + 1; y += grid) {
 		float y0 = (y > maxValue ? maxValue : y);
-		pt.y = (CGFloat)(floor(bounds.origin.y + y0 * ((bounds.size.height - sVerticalMargin * 2) / (maxValue - minValue)) + sVerticalMargin) + 0.5);
+		//pt.y = (CGFloat)(floor(bounds.origin.y + y0 * ((bounds.size.height - sVerticalMargin * 2) / (maxValue - minValue)) + sVerticalMargin) + 0.5);
+		pt.y = [self convertFromYValue:y0];
 		[NSBezierPath strokeLineFromPoint: pt toPoint: NSMakePoint(pt.x + bounds.size.width, pt.y)];
+	}
+	int editingMode = [[self dataSource] graphicEditingMode];
+	if (editingMode == kGraphicAddMode || editingMode == kGraphicScaleMode) {
+		//  Draw baseline
+		pt.y = centerY;
+		if (pt.y >= bounds.origin.y && pt.y < bounds.origin.y + bounds.size.height) {
+			float saveLineWidth = [NSBezierPath defaultLineWidth];
+			[NSBezierPath setDefaultLineWidth: saveLineWidth * 2];
+			[[NSColor colorWithDeviceRed:1.0 green:1.0 blue:1.0 alpha:0.5] set];
+			[NSBezierPath strokeLineFromPoint: pt toPoint: NSMakePoint(pt.x + bounds.size.width, pt.y)];
+			[NSBezierPath setDefaultLineWidth: saveLineWidth];
+			if (editingMode == kGraphicAddMode)
+				[[NSColor blueColor] set];
+			else
+				[[NSColor redColor] set];
+			[NSBezierPath strokeLineFromPoint: pt toPoint: NSMakePoint(pt.x + bounds.size.width, pt.y)];
+		}
 	}
 	if ([self isDragging])
 		[self drawSelectRegion];
@@ -402,6 +468,7 @@ getYValue(const MDEvent *ep, int eventKind)
 		[self reloadData];
 		[self setNeedsDisplay: YES];
 	}
+	[self updateCenterY];
 }
 
 - (BOOL)isFocusTrack: (int)trackNum
@@ -473,6 +540,16 @@ getYValue(const MDEvent *ep, int eventKind)
 		rect.size.height += draggingPoint.y - draggingStartPoint.y;
 	rect = NSInsetRect(rect, -2, -2);
 	dprintf(2, "invalidateDraggingRegion: (%g %g %g %g)\n", rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+	[self setNeedsDisplayInRect: rect];
+}
+
+//  Invalidate the region including the center line
+//  (Should be only called when centerY is valid, i.e. during add/sub or scale dragging)
+- (void)invalidateCenterLine
+{
+	NSRect rect = [self bounds];
+	rect.origin.y = centerY - 1;
+	rect.size.height = 2;
 	[self setNeedsDisplayInRect: rect];
 }
 
@@ -569,7 +646,8 @@ getYValue(const MDEvent *ep, int eventKind)
 			xlast = ylast = 0;
 			poslast = -1;
 		} else {
-			ylast = (float)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - sVerticalMargin * 2)) + sVerticalMargin;
+			//ylast = (float)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - sVerticalMargin * 2)) + sVerticalMargin;
+			ylast = [self convertFromYValue:getYValue(ep, eventKind)];
 			xlast = (float)floor(MDGetTick(ep) * ppt);
 			poslast = MDPointerGetPosition(pt);
 		}
@@ -580,7 +658,8 @@ getYValue(const MDEvent *ep, int eventKind)
 					continue;
 				if (eventCode != -1 && MDGetCode(ep) != eventCode)
 					continue;
-				y = (float)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - sVerticalMargin * 2)) + sVerticalMargin;
+				//y = (float)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - sVerticalMargin * 2)) + sVerticalMargin;
+				y = [self convertFromYValue:getYValue(ep, eventKind)];
 				x = (float)floor(MDGetTick(ep) * ppt);
 			} else {
 				x = [self bounds].size.width + 2;
@@ -777,7 +856,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 - (int)modifyLocalGraphicTool:(int)originalGraphicTool
 {
 	NSEvent *event = [NSApp currentEvent];
-	NSUInteger flags = [event modifierFlags];
+	NSUInteger flags = (isDragging ? initialModifierFlags : [event modifierFlags]);
 	int tool = originalGraphicTool;
 	if ((flags & NSCommandKeyMask) != 0) {
 		if (tool == kGraphicPencilTool)
@@ -800,7 +879,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 	float fromValue, toValue;
 	float pixelsPerTick, height;
 	const float *p;
-	int v1, v2;
+	float v1, v2;
 	int editingMode;
 	BOOL shiftFlag = (([[NSApp currentEvent] modifierFlags] & NSShiftKeyMask) != 0);
 	MyDocument *doc = (MyDocument *)[dataSource document];
@@ -817,8 +896,10 @@ cubicReverseFunc(float x, const float *points, float tt)
 	height = [self bounds].size.height;
 	t1 = (MDTickType)floor(pt1.x / pixelsPerTick + 0.5);
 	t2 = (MDTickType)floor(pt2.x / pixelsPerTick + 0.5);
-	v1 = (int)floor((pt1.y - sVerticalMargin) * (maxValue - minValue) / (height - sVerticalMargin * 2) + 0.5 + minValue);
-	v2 = (int)floor((pt2.y - sVerticalMargin) * (maxValue - minValue) / (height - sVerticalMargin * 2) + 0.5 + minValue);
+	//v1 = (int)floor((pt1.y - sVerticalMargin) * (maxValue - minValue) / (height - sVerticalMargin * 2) + 0.5 + minValue);
+	//v2 = (int)floor((pt2.y - sVerticalMargin) * (maxValue - minValue) / (height - sVerticalMargin * 2) + 0.5 + minValue);
+	v1 = [self convertToYValue:pt1.y];
+	v2 = [self convertToYValue:pt2.y];
 	if (v1 < minValue)
 		v1 = minValue;
 	if (v2 < minValue)
@@ -1068,7 +1149,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 							y = cubicFunc(t, pp + 1);
 						} else break;
 					} else break;
-					v = (float)floor(y * (v2 - v1) + v1 + 0.5);
+					v = y * (v2 - v1) + v1;
 				}
 				switch (eventKind) {
 					case kMDEventNote:
@@ -1085,15 +1166,22 @@ cubicReverseFunc(float x, const float *points, float tt)
 						break;
 				}
 				if (editingMode == kGraphicAddMode) {
-					/*  The vertical center will be zero  */
-					v = v0 + v - (maxValue - minValue + 1) * 0.5f;
+					//  The center line will be zero
+					float cy = [self convertToYValue:centerY];
+					v = v0 + floor(v + 0.5 - cy);
 				} else if (editingMode == kGraphicScaleMode) {
-					/*  The full scale is 0..200%  */
-					v = v0 * (v - minValue) / (maxValue - minValue + 1) * 2.0f;
+					//  The visible vertical range is 0..200%
+					float visibleHeight = [[self superview] bounds].size.height;
+					float cy = [self convertToYValue:centerY];
+					float fully = [self convertToYValue:(centerY + visibleHeight * 0.5)];
+					if (fully > cy)
+						v = floor(v0 * ((v - cy) / (fully - cy) + 1.0) + 0.5);
 				} else if (editingMode == kGraphicLimitMaxMode) {
+					v = floor(v + 0.5);
 					if (v0 < v)
 						v = v0;
 				} else if (editingMode == kGraphicLimitMinMode) {
+					v = floor(v + 0.5);
 					if (v0 > v)
 						v = v0;
 				}
@@ -1116,7 +1204,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 - (NSString *)infoTextForMousePoint:(NSPoint)pt dragging:(BOOL)flag option:(int *)option
 {
 	int yval;
-	NSString *s;
+	NSString *s = nil;
 	if (option != NULL)
 		*option = 0;
 	if (stripDraggingMode > 0) {
@@ -1127,12 +1215,30 @@ cubicReverseFunc(float x, const float *points, float tt)
 			*option = 1;
 		return s;
 	}
-	yval = (int)floor((maxValue - minValue) * (pt.y - sVerticalMargin) / ([self frame].size.height - sVerticalMargin * 2) + minValue + 0.5);
+	//yval = (int)floor((maxValue - minValue) * (pt.y - sVerticalMargin) / ([self frame].size.height - sVerticalMargin * 2) + minValue + 0.5);
+	yval = [self convertToYValue:pt.y];
 	if (yval < minValue)
 		yval = minValue;
 	if (yval > maxValue)
 		yval = maxValue;
-	s = [[NSString stringWithFormat:@"%d, ", yval] stringByAppendingString:[super infoTextForMousePoint:pt dragging:flag option:option]];
+	if (localGraphicTool == kGraphicPencilTool) {
+		int editingMode = [[self dataSource] graphicEditingMode];
+		float cy = [self convertToYValue:centerY];
+		if (editingMode == kGraphicAddMode) {
+			s = [NSString stringWithFormat:@"%+d, ", (int)(floor(yval + 0.5 - cy))];
+		} else if (editingMode == kGraphicScaleMode) {
+			float visibleHeight = [[self superview] bounds].size.height;
+			float fully = [self convertToYValue:(centerY + visibleHeight * 0.5)];
+			if (fully > cy)
+				yval = floor(((yval - cy) / (fully - cy) + 1.0) * 100);
+			else yval = 100;
+			s = [NSString stringWithFormat:@"%d%%, ", yval];
+		}
+	}
+	if (s == nil) {
+		s = [NSString stringWithFormat:@"%d, ", yval];
+	}
+	s = [s stringByAppendingString:[super infoTextForMousePoint:pt dragging:flag option:option]];
 	if (!flag) {
 		return s;
 	} else {
@@ -1155,6 +1261,17 @@ cubicReverseFunc(float x, const float *points, float tt)
 	localGraphicTool = [self modifyLocalGraphicTool:[[self dataSource] graphicTool]];
 	if (localGraphicTool == kGraphicPencilTool) {
 		[[NSCursor pencilCursor] set];
+		//  Set the vertical center of the visible rect
+/*		NSRect bounds = [[self superview] bounds];
+		float y = floor(bounds.origin.y + bounds.size.height * 0.5);
+		//  Round to the nearest Y value
+		float newCenterY = [self convertFromYValue:[self convertToYValue:y]] + 0.5;
+		if (centerY != newCenterY) {
+			[self invalidateCenterLine];
+			centerY = newCenterY;
+			[self invalidateCenterLine];
+			[self displayIfNeeded];
+		} */
 		return;
 	}
 	n = [self findStripUnderPoint: pt track: &track position: &pos mdEvent: &ep];
@@ -1210,6 +1327,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 		//  for this class.
 		[super doMouseDown: theEvent];
 		lineShape = [[self dataSource] graphicLineShape];
+		[self invalidateCenterLine];
 		return;
 	}
 	
@@ -1260,6 +1378,8 @@ cubicReverseFunc(float x, const float *points, float tt)
 	//  for this class.
 	if (lineShape > 0) {
 		[super doMouseDragged: theEvent];
+		//  Redraw the baseline region
+		[self invalidateCenterLine];
 		return;
 	}
 	
@@ -1332,6 +1452,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 	if (lineShape > 0) {
 		[self doPencilEdit];
 		lineShape = 0;
+		[self updateCenterY];
 		return;
 	}
 	
@@ -1387,7 +1508,9 @@ cubicReverseFunc(float x, const float *points, float tt)
 				continue;
 			if (eventCode != -1 && MDGetCode(ep) != eventCode)
 				continue;
-			point.y = (CGFloat)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - 2)) + 1;
+			
+		//	point.y = (CGFloat)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - 2)) + 1;
+			point.y = [self convertFromYValue:getYValue(ep, eventKind)];
 			point.x = (CGFloat)floor(MDGetTick(ep) * ppt);
 		//	point.x = floor(MDGetTick(ep) * ppt);
 		//	point.y = floor(MDGetCode(ep) * ys + 0.5) + 0.5 * ys;

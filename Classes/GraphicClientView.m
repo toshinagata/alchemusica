@@ -57,11 +57,45 @@
 	[super dealloc];
 }
 
+//  Respond when the scroll position changed
+- (void)superBoundsDidChange: (NSNotification *)aNotification
+{
+}
+
+//  Respond when the frame of the superview changed
+//  i.e. the scroll view containing the client view is resized
+- (void)superFrameDidChange: (NSNotification *)aNotification
+{
+}
+
+//  Respond when the frame of the client view, i.e. data range and/or scale are changed
+- (void)frameDidChange: (NSNotification *)aNotification
+{
+}
+
 - (void)setDataSource: (id)object
 {
 	if (dataSource != nil)
 		[dataSource release];
 	dataSource = [object retain];
+
+    //  Listen to notifications
+    //  This should be somewhere after creation of GraphicClientView
+    [[NSNotificationCenter defaultCenter]
+     addObserver: self
+     selector: @selector(superBoundsDidChange:)
+     name: NSViewBoundsDidChangeNotification
+     object: [self superview]];
+    [[NSNotificationCenter defaultCenter]
+     addObserver: self
+     selector: @selector(superFrameDidChange:)
+     name: NSViewFrameDidChangeNotification
+     object: [self superview]];
+    [[NSNotificationCenter defaultCenter]
+     addObserver: self
+     selector: @selector(frameDidChange:)
+     name: NSViewFrameDidChangeNotification
+     object: self];
 }
 
 - (id)dataSource
