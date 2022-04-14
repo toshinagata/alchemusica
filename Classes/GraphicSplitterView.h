@@ -22,7 +22,9 @@
 	MyPopUpButton *kindPopup;
 	MyPopUpButton *codePopup;
     MyPopUpButton *trackPopup;
+    MyPopUpButton *resolutionPopup;
     NSTextField *trackLabelText;
+    NSTextField *resolutionLabelText;
     NSMenu *controlSubmenu;
 }
 

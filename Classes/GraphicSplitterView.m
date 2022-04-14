@@ -41,6 +41,17 @@ static struct sKindMenuItems {
 	{ kMDEventTempo, @"Tempo" }
 };
 
+static struct sResolutionMenuItems {
+    float resolution;
+    NSString *title;
+} sResolutionMenuItems[] = {
+    { 4.0f, @"4" },
+    { 2.0f, @"2" },
+    { 1.0f, @"1" },
+    { 0.5f, @"0.5" },
+    { 0.25f, @"0.25" }
+};
+
 /*static NSMenuItem *
 searchMenuItemWithTag(NSMenu *menu, int tag)
 {
@@ -84,11 +95,22 @@ searchMenuItemWithTag(NSMenu *menu, int tag)
         trackLabelText = [[[NSTextField allocWithZone:[self zone]] initWithFrame:rect] autorelease];
         rect.origin.y += 2;
         rect.origin.x += rect.size.width + 4.0f;
-        rect.size.width = 160.0f;
+        rect.size.width = 120.0f;
         trackPopup = [[[MyPopUpButton allocWithZone:[self zone]] initWithFrame:rect] autorelease];
         [trackPopup setBezelStyle: NSShadowlessSquareBezelStyle];
         [trackPopup setBackgroundColor:[NSColor whiteColor]];
         [[trackPopup cell] setControlSize:NSMiniControlSize];
+        rect.origin.x += rect.size.width + 16.0f;
+        rect.size.width = 80.0f;
+        rect.origin.y -= 2;
+        resolutionLabelText = [[[NSTextField allocWithZone:[self zone]] initWithFrame:rect] autorelease];
+        rect.origin.y += 2;
+        rect.origin.x += rect.size.width + 4.0f;
+        rect.size.width = 40.0f;
+        resolutionPopup = [[[MyPopUpButton allocWithZone:[self zone]] initWithFrame:rect] autorelease];
+        [resolutionPopup setBezelStyle: NSShadowlessSquareBezelStyle];
+        [resolutionPopup setBackgroundColor:[NSColor whiteColor]];
+        [[resolutionPopup cell] setControlSize:NSMiniControlSize];
 		font = [NSFont systemFontOfSize: [NSFont smallSystemFontSize]];
 		[kindPopup setFont: font];
 		[codePopup setFont: font];
@@ -96,10 +118,16 @@ searchMenuItemWithTag(NSMenu *menu, int tag)
         [trackLabelText setSelectable:NO];
         [trackLabelText setDrawsBackground:NO];
         [trackPopup setFont: font];
+        [resolutionLabelText setBezeled:NO];
+        [resolutionLabelText setSelectable:NO];
+        [resolutionLabelText setDrawsBackground:NO];
+        [resolutionPopup setFont: font];
 		[self addSubview: kindPopup];
 		[self addSubview: codePopup];
         [self addSubview: trackLabelText];
         [self addSubview: trackPopup];
+        [self addSubview: resolutionLabelText];
+        [self addSubview: resolutionPopup];
 		for (i = 0; i < sizeof(sKindMenuItems) / sizeof(sKindMenuItems[0]); i++) {
 			[kindPopup addItemWithTitle: sKindMenuItems[i].title];
 			[[kindPopup itemAtIndex: i] setTag: sKindMenuItems[i].kind];
@@ -108,9 +136,16 @@ searchMenuItemWithTag(NSMenu *menu, int tag)
 		[kindPopup setEnabled: YES];
 		[codePopup setEnabled: NO];
         [trackPopup setEnabled: YES];
+        for (i = 0; i < sizeof(sResolutionMenuItems) / sizeof(sResolutionMenuItems[0]); i++) {
+            [resolutionPopup addItemWithTitle: sResolutionMenuItems[i].title];
+        }
+        [resolutionPopup selectItemAtIndex:2];
+        [resolutionPopup setEnabled: YES];
 		font = [NSFont systemFontOfSize: [NSFont smallSystemFontSize] - 2];
         [trackLabelText setFont: font];
         [trackLabelText setStringValue:@"Track:"];
+        [resolutionLabelText setFont: font];
+        [resolutionLabelText setStringValue:@"Resolution:"];
     }
     return self;
 }
@@ -170,6 +205,8 @@ searchMenuItemWithTag(NSMenu *menu, int tag)
     [trackPopup setTarget:target];
     [trackPopup setAction:@selector(trackPopUpPressedInSplitterView:)];
     [trackPopup setMenu:[self makeTrackPopup]];
+    [resolutionPopup setTarget: self];
+    [resolutionPopup setAction: @selector(resolutionMenuItemSelected:)];
 }
 
 - (void)drawRect:(NSRect)rect {
@@ -225,6 +262,15 @@ searchMenuItemWithTag(NSMenu *menu, int tag)
 {
     GraphicWindowController *controller = (GraphicWindowController *)[[self window] windowController];
     [controller codeMenuItemSelected:(NSMenuItem *)sender inSplitterView:self];
+}
+
+- (IBAction)resolutionMenuItemSelected:(id)sender
+{
+    int i;
+    GraphicWindowController *controller = (GraphicWindowController *)[[self window] windowController];
+    i = (int)[resolutionPopup indexOfSelectedItem];
+    if (i >= 0 && i < sizeof(sResolutionMenuItems) / sizeof(sResolutionMenuItems[0]))
+        [controller setResolution:sResolutionMenuItems[i].resolution inSplitterView:self];
 }
 
 - (void)setKindAndCode: (int32_t)kindAndCode

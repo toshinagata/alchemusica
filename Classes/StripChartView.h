@@ -46,12 +46,16 @@ enum {
     int deltaDraggedValue;
     int32_t deltaDraggedTick;
     
+    //  Resolution of the y value. Usually 1.0, but can be other values.
+    float resolution;
+    
     //  The center y coordinate when dragging is started; this is the baseline for add/sub or scale tool
     CGFloat centerY;
 }
 
 - (void)setKindAndCode: (int32_t)kindAndCode;
 - (int32_t)kindAndCode;
+- (void)setResolution: (float)resolution;
 
 //  Dragging support (accompanying PianoRollView)
 - (void)startExternalDraggingAtPoint:(NSPoint)aPoint mode:(int)aMode;

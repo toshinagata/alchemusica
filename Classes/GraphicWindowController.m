@@ -1180,6 +1180,13 @@ sTableColumnIDToInt(id identifier)
 	[records[index].ruler setNeedsDisplay: YES];
 }
 
+- (void)setStripChartAtIndex:(int)index resolution:(float)resolution
+{
+    if (![records[index].client isKindOfClass: [StripChartView class]])
+        return;
+    [(StripChartView *)records[index].client setResolution:resolution];
+}
+
 - (void)setStripChartAtIndex:(int)index track:(int)track
 {
     int32_t kindAndCode, kind, code;
@@ -1219,6 +1226,17 @@ sTableColumnIDToInt(id identifier)
 			break;
 		}
 	}
+}
+
+- (void)setResolution: (float)resolution inSplitterView: (GraphicSplitterView *)view
+{
+    int i, code;
+    for (i = 1; i < myClientViewsCount; i++) {
+        if (records[i].splitter == view) {
+            [self setStripChartAtIndex: i resolution: resolution];
+            break;
+        }
+    }
 }
 
 - (IBAction)trackPopUpPressedInSplitterView: (id)sender

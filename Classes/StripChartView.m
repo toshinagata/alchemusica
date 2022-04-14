@@ -60,6 +60,7 @@ static const int sVerticalMargin = 2;
 		maxValue = 128.0f;
 		calib = NULL;
 		focusTrack = -1;
+		resolution = 1.0;
     }
     return self;
 }
@@ -132,7 +133,7 @@ getYValue(const MDEvent *ep, int eventKind)
 - (float)convertToYValue:(CGFloat)y
 {
 	NSRect bounds = [self bounds];
-	return (float)(floor((y - bounds.origin.y - sVerticalMargin) * (maxValue - minValue) / (bounds.size.height - sVerticalMargin * 2) + 0.5) + minValue);
+	return (float)(floor(((y - bounds.origin.y - sVerticalMargin) * (maxValue - minValue) / (bounds.size.height - sVerticalMargin * 2)) / resolution + 0.5) * resolution + minValue);
 }
 
 - (void)drawVelocityInRect: (NSRect)aRect
@@ -471,12 +472,19 @@ getYValue(const MDEvent *ep, int eventKind)
 	[self updateCenterY];
 }
 
+- (void)setResolution: (float)resolution
+{
+	self->resolution = resolution;
+}
+
+
 - (BOOL)isFocusTrack: (int)trackNum
 {
 	if (focusTrack >= 0)
 		return (trackNum == focusTrack);
 	else return [super isFocusTrack:trackNum];
 }
+
 - (int32_t)visibleTrackCount
 {
 	if (focusTrack >= 0)
@@ -878,6 +886,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 	MDPointer *mdptr;
 	float fromValue, toValue;
 	float pixelsPerTick, height;
+	float valueResolution = resolution;
 	const float *p;
 	float v1, v2;
 	int editingMode;
@@ -971,10 +980,13 @@ cubicReverseFunc(float x, const float *points, float tt)
 				v = v * (toValue - fromValue) + fromValue;
 				//  Generate an event
 				MDSetTick(&event, tick);
-				if (eventKind == kMDEventTempo)
-					MDSetTempo(&event, (float)floor(v));
-				else
-					MDSetData1(&event, (int)floor(v));
+				if (eventKind == kMDEventTempo) {
+					v = floor(v / valueResolution) * valueResolution;
+					MDSetTempo(&event, v);
+				} else {
+					v = floor(floor(v / valueResolution) * valueResolution);
+					MDSetData1(&event, (int)(v));
+				}
 				if (v != v0 || tick >= toTick) {
 					MDPointerInsertAnEvent(mdptr, &event);
 					v0 = v;
@@ -990,7 +1002,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 					if (fabs(toValue - fromValue) < 1e-6)
 						tick3 = toTick;
 					else
-						tick3 = tick + (MDTickType)floor(fabs(sValueResolution / (toValue - fromValue) * (toTick - fromTick)));
+						tick3 = tick + (MDTickType)floor(fabs(valueResolution / (toValue - fromValue) * (toTick - fromTick)));
 					if (tick3 > tick2)
 						tick2 = tick3;
 				}
@@ -1016,10 +1028,13 @@ cubicReverseFunc(float x, const float *points, float tt)
 						//  Generate an event
 						MDSetTick(&event, (MDTickType)(x * (t2 - t1) + t1));
 						v = y * (v2 - v1) + v1;
-						if (eventKind == kMDEventTempo)
-							MDSetTempo(&event, (float)floor(v));
-						else
-							MDSetData1(&event, (int)floor(v));
+						if (eventKind == kMDEventTempo) {
+							v = floor(v / valueResolution) * valueResolution;
+							MDSetTempo(&event, v);
+						} else {
+							v = floor(floor(v / valueResolution) * valueResolution);
+							MDSetData1(&event, (int)v);
+						}
 						MDPointerInsertAnEvent(mdptr, &event);
 					//	NSLog(@"t=%f tick=%ld value=%d", t, (MDTickType)(x * (t2 - t1) + t1), (int)floor(v));
 					}
@@ -1047,7 +1062,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 					if (v1 == v2 || p[1] == p[7]) {
 						tc = 1.0f;
 					} else {
-						yc = (float)((double)sValueResolution / (v2 - v1));
+						yc = valueResolution / (v2 - v1);
 						if (p[1] < p[7]) {
 							yc = y + (float)fabs(yc);
 							if (yc < p[7])
@@ -1168,20 +1183,18 @@ cubicReverseFunc(float x, const float *points, float tt)
 				if (editingMode == kGraphicAddMode) {
 					//  The center line will be zero
 					float cy = [self convertToYValue:centerY];
-					v = v0 + floor(v + 0.5 - cy);
+					v = v0 + v - cy;
 				} else if (editingMode == kGraphicScaleMode) {
 					//  The visible vertical range is 0..200%
 					float visibleHeight = [[self superview] bounds].size.height;
 					float cy = [self convertToYValue:centerY];
 					float fully = [self convertToYValue:(centerY + visibleHeight * 0.5)];
 					if (fully > cy)
-						v = floor(v0 * ((v - cy) / (fully - cy) + 1.0) + 0.5);
+						v = v0 * ((v - cy) / (fully - cy) + 1.0);
 				} else if (editingMode == kGraphicLimitMaxMode) {
-					v = floor(v + 0.5);
 					if (v0 < v)
 						v = v0;
 				} else if (editingMode == kGraphicLimitMinMode) {
-					v = floor(v + 0.5);
 					if (v0 > v)
 						v = v0;
 				}
@@ -1189,6 +1202,9 @@ cubicReverseFunc(float x, const float *points, float tt)
 					v = minValue;
 				else if (v > maxValue)
 					v = maxValue;
+				v = floor(v / valueResolution) * valueResolution;
+				if (eventKind != kMDEventTempo)
+					v = floor(v);
 				fp[j] = v;
 			}
 			MDPointerRelease(mdptr);
