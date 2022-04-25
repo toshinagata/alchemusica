@@ -41,9 +41,9 @@ enum {
 
     //  Used for showing cursor info when stripDraggingMode > 0
     //  (i.e. while dragging the selected event(s))
-    int initialDraggedValue;    //  The initial strip value of the dragged event
+    float initialDraggedValue;    //  The initial strip value of the dragged event
     int32_t initialDraggedTick; //  The initial tick value of the dragged event
-    int deltaDraggedValue;
+    float deltaDraggedValue;
     int32_t deltaDraggedTick;
     
     //  Resolution of the y value. Usually 1.0, but can be other values.

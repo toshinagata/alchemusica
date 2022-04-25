@@ -1219,14 +1219,15 @@ cubicReverseFunc(float x, const float *points, float tt)
 
 - (NSString *)infoTextForMousePoint:(NSPoint)pt dragging:(BOOL)flag option:(int *)option
 {
-	int yval;
+	float yval;
 	NSString *s = nil;
+	float valueResolution = resolution;
 	if (option != NULL)
 		*option = 0;
 	if (stripDraggingMode > 0) {
 		int32_t measure, beat, tick;
 		[dataSource convertTick:initialDraggedTick + deltaDraggedTick toMeasure:&measure beat:&beat andTick:&tick];
-		s = [NSString stringWithFormat:@"%d, %d.%d.%d", initialDraggedValue + deltaDraggedValue, measure, beat, tick];
+		s = [NSString stringWithFormat:@"%g, %d.%d.%d", initialDraggedValue + deltaDraggedValue, measure, beat, tick];
 		if (option != NULL)
 			*option = 1;
 		return s;
@@ -1241,18 +1242,18 @@ cubicReverseFunc(float x, const float *points, float tt)
 		int editingMode = [[self dataSource] graphicEditingMode];
 		float cy = [self convertToYValue:centerY];
 		if (editingMode == kGraphicAddMode) {
-			s = [NSString stringWithFormat:@"%+d, ", (int)(floor(yval + 0.5 - cy))];
+			s = [NSString stringWithFormat:@"%+g, ", floor((yval - cy) / valueResolution + 0.5) * valueResolution];
 		} else if (editingMode == kGraphicScaleMode) {
 			float visibleHeight = [[self superview] bounds].size.height;
 			float fully = [self convertToYValue:(centerY + visibleHeight * 0.5)];
 			if (fully > cy)
 				yval = floor(((yval - cy) / (fully - cy) + 1.0) * 100);
 			else yval = 100;
-			s = [NSString stringWithFormat:@"%d%%, ", yval];
+			s = [NSString stringWithFormat:@"%d%%, ", (int)yval];
 		}
 	}
 	if (s == nil) {
-		s = [NSString stringWithFormat:@"%d, ", yval];
+		s = [NSString stringWithFormat:@"%g, ", yval];
 	}
 	s = [s stringByAppendingString:[super infoTextForMousePoint:pt dragging:flag option:option]];
 	if (!flag) {
@@ -1402,6 +1403,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 	if (stripDraggingMode > 0) {
 		NSPoint pt = [self convertPoint: [theEvent locationInWindow] fromView: nil];
 		BOOL optionDown = (([theEvent modifierFlags] & NSAlternateKeyMask) != 0);
+		float valueResolution = resolution;
 		pt.x = [dataSource quantizedPixelFromPixel: pt.x];
 		//  Support autoscroll (cf. GraphicClientView.mouseDragged)
 	/*	if (autoscrollTimer != nil) {
@@ -1449,7 +1451,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 		pt.x = pt.x - draggingStartPoint.x;
 		pt.y = pt.y - draggingStartPoint.y;
 		deltaDraggedTick = (MDTickType)floor(pt.x / [dataSource pixelsPerTick] + 0.5);
-		deltaDraggedValue = (MDTickType)floor(pt.y * (maxValue - minValue) / ([self bounds].size.height - sVerticalMargin * 2) + 0.5);
+		deltaDraggedValue = floor((pt.y * (maxValue - minValue) / ([self bounds].size.height - sVerticalMargin * 2)) / valueResolution + 0.5) * valueResolution;
 		[self displayIfNeeded];
 	} else [super doMouseDragged: theEvent];
 }
@@ -1462,6 +1464,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 	MyDocument *document;
 	MDTickType minTick, maxTick;
 	NSRect bounds;
+	float valueResolution = resolution;
 	
 	//  Pencil mode: edit the strip chart values according to the line shape and 
 	//  editing mode
@@ -1481,7 +1484,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 		pt.x = draggingPoint.x - draggingStartPoint.x;
 		pt.y = draggingPoint.y - draggingStartPoint.y;
 		deltaTick = (MDTickType)floor(pt.x / [dataSource pixelsPerTick] + 0.5);
-		deltaValue = (MDTickType)floor(pt.y * (maxValue - minValue) / ([self bounds].size.height - sVerticalMargin * 2) + 0.5);
+		deltaValue = floor((pt.y * (maxValue - minValue) / ([self bounds].size.height - sVerticalMargin * 2)) / valueResolution + 0.5) * valueResolution;
 		[dataSource dragEventsOfKind: eventKind andCode: eventCode byTick: deltaTick andValue: deltaValue sender: self optionFlag: optionDown];
 		stripDraggingMode = 0;
 		[dataSource updateCursorInfoForView:self atPosition:draggingPoint];
