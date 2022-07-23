@@ -706,6 +706,13 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	selectionQueue = nil;	
 }
 
+/*  Register undo for restoring current selection  */
+- (void)registerUndoForRestoringCurrentSelectionInTrack: (int32_t)trackNo
+{
+    MDSelectionObject *oldSel = (MDSelectionObject *)[[[selections objectAtIndex: trackNo] retain] autorelease];
+    [[[self undoManager] prepareWithInvocationTarget: self]
+     setSelection: oldSel inTrack: trackNo sender: self];
+}
 
 #pragma mark ====== Posting notifications ======
 
@@ -1302,8 +1309,10 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 					IntGroupClear(temp1);
 					sts = IntGroupConvolute([(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet], temp2, temp1);
 				}
-				if (sts == kMDNoError)
+                if (sts == kMDNoError) {
+                    [self registerUndoForRestoringCurrentSelectionInTrack: trackNo];
 					[self setSelection: [[[MDSelectionObject allocWithZone: [self zone]] initWithMDPointSet: temp1] autorelease] inTrack: trackNo sender: self];
+                }
 				IntGroupRelease(temp1);
 				IntGroupRelease(temp2);
 
@@ -1351,8 +1360,10 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 					IntGroupClear(temp1);
 					sts = IntGroupDeconvolute([(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet], temp2, temp1);
 				}
-				if (sts == kMDNoError)
+                if (sts == kMDNoError) {
+                    [self registerUndoForRestoringCurrentSelectionInTrack: trackNo];
 					[self setSelection: [[[MDSelectionObject allocWithZone: [self zone]] initWithMDPointSet: temp1] autorelease] inTrack: trackNo sender: self];
+                }
 				IntGroupRelease(temp1);
 				IntGroupRelease(temp2);
 
@@ -1410,8 +1421,10 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 						IntGroupClear(temp2);
 						sts = IntGroupConvolute(temp1, temp3, temp2);
 					}
-					if (sts == kMDNoError)
+                    if (sts == kMDNoError) {
+                        [self registerUndoForRestoringCurrentSelectionInTrack: trackNo];
 						[self setSelection: [[[MDSelectionObject allocWithZone: [self zone]] initWithMDPointSet: temp2] autorelease] inTrack: trackNo sender: self];
+                    }
 					IntGroupRelease(temp1);
 					IntGroupRelease(temp2);
 					IntGroupRelease(temp3);
@@ -1453,6 +1466,7 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 		if (outPtr != NULL)
 			*outPtr = pset;
         /*  Update selection  */
+        [self registerUndoForRestoringCurrentSelectionInTrack: trackNo];
 		if (flag) {
 			[self setSelection: [[[MDSelectionObject allocWithZone: [self zone]] initWithMDPointSet: pset] autorelease] inTrack: trackNo sender: self];
 		} else {
@@ -1512,8 +1526,10 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 			if (sts == kMDNoError)
 				sts = IntGroupDeconvolute([(MDSelectionObject *)[selections objectAtIndex: trackNo] pointSet], temp, newSelection);
 		} */
-		if (sts == kMDNoError)
+        if (sts == kMDNoError) {
+            [self registerUndoForRestoringCurrentSelectionInTrack: trackNo];
 			[self setSelection: [[[MDSelectionObject allocWithZone: [self zone]] initWithMDPointSet: newSelection] autorelease] inTrack: trackNo sender: self];
+        }
 		trackObj = [[[MDTrackObject allocWithZone: [self zone]] initWithMDTrack: newTrack] autorelease];
 		/*  Register undo action for change of track duration (if necessary)  */
 		[self registerUndoChangeTrackDuration: oduration ofTrack: trackNo];
@@ -1792,6 +1808,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 
         /*  Set selection  */
         if (setSelection) {
+            [doc registerUndoForRestoringCurrentSelectionInTrack: trackNo];
             [doc setSelection: newDestPointSet inTrack: trackNo sender: doc];
         }
 
@@ -2234,6 +2251,34 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 		if (sts == kMDNoError) {
 			/*  The position of the event after moving  */
 			npos = MDPointerGetPosition(pt1);
+            /*  The selection after moving the event  */
+            if (npos != position) {
+                MDSelectionObject *newSet = [[[MDSelectionObject allocWithZone: [self zone]] init] autorelease];
+                MDSelectionObject *oldSet = (MDSelectionObject *)[[[selections objectAtIndex: trackNo] retain] autorelease];
+                IntGroup *newpset = [newSet pointSet];
+                IntGroup *oldpset = [oldSet pointSet];
+                IntGroupIterator iter;
+                IntGroupIteratorInit(oldpset, &iter);
+                int32_t pos;
+                /*  For each point in oldSet, add the new position  */
+                while ((pos = IntGroupIteratorNext(&iter)) >= 0) {
+                    if (pos == position)
+                        IntGroupAdd(newpset, npos, 1);  /*  Add the new position  */
+                    else {
+                        if (position < npos) {
+                            if (pos > position && pos <= npos)
+                                pos--;   /*  Move one event backward  */
+                        } else {
+                            if (pos >= npos && pos < position)
+                                pos++;   /*  Move one event forward  */
+                        }
+                        IntGroupAdd(newpset, pos, 1);
+                    }
+                }
+                [[[self undoManager] prepareWithInvocationTarget: self]
+                 setSelection: oldSet inTrack: trackNo sender: self];
+                [self setSelection: newSet inTrack: trackNo sender: self];
+            }
 			/*  Register undo action with the current values  */
 			duration = MDTrackGetDuration(track);
 			if (oduration != duration)
