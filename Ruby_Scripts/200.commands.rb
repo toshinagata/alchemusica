@@ -205,8 +205,97 @@ def thin_events
   message_box("#{nev} events were replaced with #{nev_new} events.", "", :ok)
 end
 
+@@tremolo_len = "60"
+@@tremolo_len2 = "90"
+@@tremolo_accel = "4"
+@@tremolo_ofs = "1"
+@@tremolo_fluct = "10"
+
+def create_tremolo
+    values = [@@tremolo_len, @@tremolo_len2, @@tremolo_accel, @@tremolo_ofs, @@tremolo_fluct]
+    hash = Dialog.run("Create Tremolo") {
+        layout(1,
+               layout(2,
+                      item(:text, :title=>"Note length (ms)"),
+                      item(:textfield, :width=>40, :tag=>"len", :value=>values[0]),
+                      item(:text, :title=>"First note length (ms)"),
+                      item(:textfield, :width=>40, :tag=>"len2", :value=>values[1]),
+                      item(:text, :title=>"Accelerate count"),
+                      item(:textfield, :width=>40, :tag=>"accel", :value=>values[2]),
+                      item(:text, :title=>"Note offset"),
+                      item(:textfield, :width=>40, :tag=>"ofs", :value=>values[3]),
+                      item(:text, :title=>"Length fluctuate (%)"),
+                      item(:textfield, :width=>40, :tag=>"fluct", :value=>values[4])))
+    }
+    #    p hash
+    if hash[:status] == 0
+        len = hash["len"].to_f / 1000
+        len2 = hash["len2"].to_f / 1000
+        if len2 == 0.0
+            len2 = len
+        end
+        accel = hash["accel"].to_i
+        ofs = hash["ofs"].to_i
+        fluct = hash["fluct"].to_f / 100.0
+        if fluct < 0.0
+            fluct = 0.0
+            elsif fluct >= 1.0
+            fluct = 1.0
+        end
+        @@tremolo_len = hash["len"]
+        @@tremolo_len2 = hash["len2"]
+        @@tremolo_accel = hash["accel"]
+        @@tremolo_ofs = hash["ofs"]
+        @@tremolo_fluct = hash["fluct"]
+        if accel <= 0
+            r = 1.0
+            else
+            r = (len / len2) ** (1.0 / accel)
+        end
+        each_track { |tr|
+            next if tr.selection.length == 0
+            trnew = Track.new
+            tr.each_selected { |p|
+                next if p.kind != :note
+                stick = p.tick
+                etick = p.tick + p.duration
+                vel = p.velocity
+                ctick = stick  #  Start tick of next note
+                code = p.code  #  Key number of next note
+                clen = len2    #  Length of next note
+                n = 0          #  Note count
+                while (ctick < etick)
+                    ntick = time_to_tick(tick_to_time(ctick) + clen * (1 + (rand - 0.5) * fluct * 2))
+                    if ntick < ctick + 5
+                        ntick = ctick + 5
+                    end
+                    break if ntick >= etick
+                    cvel = vel * (1 + (rand - 0.5) * fluct * 2)
+                    c = (code < 0 ? 0 : (code > 127 ? 127 : code))
+                    trnew.add(ctick, c, ntick - ctick, cvel)
+                    ctick = ntick
+                    if n < accel
+                        clen = clen * r
+                        else
+                        clen = len
+                    end
+                    if n % 2 == 0
+                        code = code + ofs
+                        else
+                        code = code - ofs
+                    end
+                    n = n + 1
+                end
+            }
+            tr.cut(tr.selection)
+            tr.merge(trnew)
+        }
+    end
+end
+
 end
 
 register_menu("Change Timebase...", :change_timebase)
 register_menu("Randomize Ticks...", :randomize_ticks, 1)
 register_menu("Thin Selected Events...", :thin_events, 1)
+register_menu("Create tremolo...", :create_tremolo, 1)
