@@ -149,14 +149,16 @@
 	}
 
 	/*  Adjust the row position  */
-	if (dRow != 0) {
-		row += dRow;
-		if (oldRow < newRow && (oldRow < row && row <= newRow))
-			row--;
-		else if (oldRow > newRow && (oldRow > row && row >= newRow))
-			row++;
-	} else {
-		row = newRow;
+    if (newRow != oldRow) {
+        row = newRow;
+    } else {
+        if (dRow != 0) {
+            row += dRow;
+            if (oldRow < newRow && (oldRow < row && row <= newRow))
+                row--;
+            else if (oldRow > newRow && (oldRow > row && row >= newRow))
+                row++;
+        }
 	}
 	if (row < 0)
 		row = 0;
