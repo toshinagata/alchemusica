@@ -1,0 +1,9 @@
+.*
+!.gitignore
+_*
+memo.txt
+lastBuild.txt
+latest_binaries
+Alchemusica.xcodeproj/project.xcworkspace/xcuserdata
+Alchemusica.xcodeproj/xcuserdata
+
