@@ -2308,7 +2308,8 @@ row:(int)rowIndex
 	NSRect frame;
 	BOOL editableTrackWasHidden = NO;
 	BOOL shiftFlag = (([[NSApp currentEvent] modifierFlags] & NSShiftKeyMask) != 0);
-
+    BOOL commandFlag = (([[NSApp currentEvent] modifierFlags] & NSCommandKeyMask) != 0);
+    
     row = (int)[myTableView clickedRow];
     column = (int)[myTableView clickedColumn];
 
@@ -2390,8 +2391,43 @@ row:(int)rowIndex
 				// if (attr & kMDTrackAttributeHidden)
 				//	break;
 				if (![self isFocusTrack: row]) {
-					[self setFocusFlag: YES onTrack: row extending: shiftFlag];
-				} else if (shiftFlag) {
+                    if (!shiftFlag)
+                        [self setFocusFlag: YES onTrack: row extending: commandFlag];
+                    else {
+                        /*  Extend selection continuously  */
+                        int i1, i2, n;
+                        n = [seq trackCount];
+                        /*  Find first editable track  */
+                        for (i1 = 0; i1 < n; i1++) {
+                            if ([self isFocusTrack: i1])
+                                break;
+                        }
+                        if (i1 == n) {
+                            /*  Just make this track editable  */
+                            [self setFocusFlag: YES onTrack: row extending: NO];
+                        } else if (row < i1) {
+                            /*  Make tracks row..i1-1 editable  */
+                            for (i2 = row; i2 < i1; i2++) {
+                                [self setFocusFlag: YES onTrack: i2 extending: YES];
+                            }
+                        } else {
+                            /*  Find last editable track  */
+                            for (i1 = n - 1; i1 >= 0; i1--) {
+                                if ([self isFocusTrack: i1])
+                                    break;
+                            }
+                            if (i1 < row) {
+                                /*  Make tracks i1+1..row editable  */
+                                for (i2 = i1 + 1; i2 <= row; i2++) {
+                                    [self setFocusFlag: YES onTrack: i2 extending: YES];
+                                }
+                            } else {
+                                /*  Make track row editable  */
+                                [self setFocusFlag: YES onTrack: row extending: YES];
+                            }
+                        }
+                    }
+				} else if (shiftFlag || commandFlag) {
 					[self setFocusFlag: NO onTrack: row extending: YES];
 				}
 				break;
