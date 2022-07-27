@@ -952,7 +952,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"$BUILD_STYLE\" = \"Deployment\" ]; then\n  cd $PROJECT_DIR\n  sh make_release_package.sh\nfi\n";
+			shellScript = "cd $PROJECT_DIR\nruby add_revision_to_infoplist.rb\nif [ \"$BUILD_STYLE\" = \"Deployment\" ]; then\n  cd $PROJECT_DIR\n  sh make_release_package.sh\nfi\n";
 		};
 		E4C3848414111D93006F2661 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
