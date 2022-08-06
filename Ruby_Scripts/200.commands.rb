@@ -341,6 +341,36 @@ def move_selected_events_to_track
     end
 end
 
+@@modify_durations_delta = "0"
+
+def modify_durations
+    values = [@@modify_durations_delta]
+    hash = Dialog.run("Modify Durations") {
+        layout(1,
+               layout(2,
+                      item(:text, :title=>"Duration delta (tick)"),
+                      item(:textfield, :width=>40, :tag=>"delta", :value=>values[0])))
+    }
+    #    p hash
+    if hash[:status] == 0
+        delta = hash["delta"].to_f
+        @@modify_durations_delta = hash["delta"]
+        if delta != 0.0
+            each_track { |tr|
+                next if tr.selection.length == 0
+                tr.each_selected { |p|
+                    next if p.kind != :note
+                    d = p.duration + delta
+                    if d <= 0
+                        d = 1
+                    end
+                    p.duration = d
+                }
+            }
+        end
+    end
+end
+
 end
 
 register_menu("Change Timebase...", :change_timebase)
@@ -348,3 +378,4 @@ register_menu("Randomize Ticks...", :randomize_ticks, 1)
 register_menu("Thin Selected Events...", :thin_events, 1)
 register_menu("Create tremolo...", :create_tremolo, 1)
 register_menu("Move selected events to track...", :move_selected_events_to_track, 1)
+register_menu("Modify durations...", :modify_durations, 1)
