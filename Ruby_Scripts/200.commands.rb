@@ -293,9 +293,58 @@ def create_tremolo
     end
 end
 
+@@move_selected_events_to_track_no = 1
+
+def move_selected_events_to_track
+    values = [@@move_selected_events_to_track_no]
+    names = []
+    each_with_index { |tr, i|
+        next if i == 0
+        names.push("#{i}:#{tr.name}")
+    }
+    hash = Dialog.run("Move to Track") {
+        layout(1,
+               layout(2,
+                      item(:text, :title=>"To track"),
+                      item(:popup, :subitems=>names, :tag=>"totrack", :value=>values[0] - 1)))
+    }
+    #    p hash
+    if hash[:status] == 0
+        count = 0
+        each_with_index { |tr, i|
+            next if i == 0
+            if tr.selection.length > 0
+                count = count + 1
+            end
+        }
+        if count == 0
+            message_box("No movable events", "Cannot move events", :ok, :error)
+            return
+        end
+        if count > 1
+            if !message_box("Selected events are contained in #{count} tracks. Do you want to move all selected events to one track?")
+                return
+            end
+        end
+        totrack = hash["totrack"].to_i + 1
+        @@move_selected_events_to_track_no = totrack
+        trnew = Track.new
+        trdest = track(totrack)
+        each_with_index { |tr, i|
+            next if i == 0 || tr.selection.length == 0
+            tr.each_selected { |p|
+                trnew.add(p.tick, p)
+            }
+            tr.cut(tr.selection)
+        }
+        trdest.merge(trnew)
+    end
+end
+
 end
 
 register_menu("Change Timebase...", :change_timebase)
 register_menu("Randomize Ticks...", :randomize_ticks, 1)
 register_menu("Thin Selected Events...", :thin_events, 1)
 register_menu("Create tremolo...", :create_tremolo, 1)
+register_menu("Move selected events to track...", :move_selected_events_to_track, 1)

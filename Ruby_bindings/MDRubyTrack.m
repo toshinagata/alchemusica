@@ -725,6 +725,7 @@ s_raise_if_missing_parameter(int argc, int expect_argc, const char *msg)
  *  call-seq:
  *     track.add(tick, type, data,...) -> self
  *     track << [tick, type, data,...] -> self
+ *     track.add(tick, pointer) -> self
  *
  *  Create a new midi event. Type is an integer or a note-number string for note events,
  *  and a symbol for other events.
@@ -745,6 +746,7 @@ s_raise_if_missing_parameter(int argc, int expect_argc, const char *msg)
  *    :pitch_bend     value (-8192..8191)
  *    :channel_pressure value
  *    :key_pressure   note_on (Integer) or note_name (String), value
+ *  If the second argument is a pointer, then a copy of the event is created and added to the track.
  */
 static VALUE
 s_MRTrack_Add(VALUE self, VALUE sval)
@@ -767,199 +769,205 @@ s_MRTrack_Add(VALUE self, VALUE sval)
 	tick = NUM2INT(rb_Integer(argv[0]));
 	if (tick < 0)
 		rb_raise(rb_eArgError, "the tick value must be non-negative");
-	kind = MREventKindAndCodeFromEventSymbol(argv[1], &code, &is_generic);
-	if (kind < 0) {
-		volatile VALUE v = rb_inspect(argv[1]);
-		rb_raise(rb_eArgError, "unknown event type: %s", StringValuePtr(v));
-	}
-	eobj = [[[MDEventObject alloc] init] autorelease];
-	ep = [eobj eventPtr];
-	MDSetTick(ep, tick);
-	MDSetKind(ep, kind);
-	argc -= 2;
-	argv += 2;
-	switch (kind) {
-		case kMDEventNote:
-			if (is_generic) {
-				s_raise_if_missing_parameter(argc, 3, "note number, duration, velocity");
-				if (FIXNUM_P(argv[0]))
-					code = FIX2INT(argv[0]);
-				else
-					code = MDEventNoteNameToNoteNumber(StringValuePtr(argv[0]));
-				if (code < 0 || code >= 128)
-					rb_raise(rb_eArgError, "note number (%d) out of range", code);
-				argc--;
-				argv++;
-			} else s_raise_if_missing_parameter(argc, 2, "duration, velocity");
-			MDSetCode(ep, code);
-			n1 = NUM2INT(rb_Integer(argv[0]));
-			n2 = NUM2INT(rb_Integer(argv[1]));
-			if (n1 <= 0)
-				rb_raise(rb_eArgError, "note duration (%d) must be positive", n1);
-			if (n2 <= 0 || n2 >= 128)
-				rb_raise(rb_eArgError, "note velocity (%d) is out of range", n2);
-			MDSetDuration(ep, n1);
-			MDSetNoteOnVelocity(ep, n2);
-			if (argc > 2) {
-				n1 = NUM2INT(rb_Integer(argv[2]));
-				if (n1 < 0 || n1 >= 128)
-					rb_raise(rb_eArgError, "release velocity (%d) is out of range", n1);
-				MDSetNoteOffVelocity(ep, n1);
-			}
-			break;
-		case kMDEventTempo:
-			s_raise_if_missing_parameter(argc, 1, "tempo");
-			MDSetTempo(ep, (float)NUM2DBL(rb_Float(argv[0])));
-			break;
-		case kMDEventTimeSignature:
-			s_raise_if_missing_parameter(argc, 2, "n/m");
-			ucp = MDGetMetaDataPtr(ep);
-			ucp[0] = NUM2INT(rb_Integer(argv[0]));
-			ucp[1] = NUM2INT(rb_Integer(argv[1]));
-			if (argc > 2)
-				ucp[2] = NUM2INT(rb_Integer(argv[2]));
-			if (argc > 3)
-				ucp[3] = NUM2INT(rb_Integer(argv[3]));
-			break;
-		case kMDEventKey:
-			s_raise_if_missing_parameter(argc, 2, "number of accidentals, major/minor");
-			ucp = MDGetMetaDataPtr(ep);
-			ucp[0] = NUM2INT(rb_Integer(argv[0]));
-			if (ucp[0] + 7 > 14)
-				rb_raise(rb_eArgError, "number of accidentals (%d) is out of range", (int)(signed char)ucp[0]);
-			if ((n1 = TYPE(argv[1])) == T_STRING || n1 == T_SYMBOL) {
-				p = StringValuePtr(argv[1]);
-				if (strcasecmp(p, "major") == 0)
-					ucp[1] = 0;
-				else if (strcasecmp(p, "minor") == 0)
-					ucp[1] = 1;
-				else
-					rb_raise(rb_eArgError, "unknown word '%s' for key specification", p);
-			} else ucp[1] = (0 != NUM2INT(rb_Integer(argv[1])));
-			break;
-		case kMDEventSMPTE:
-			s_raise_if_missing_parameter(argc, 5, "hour, min, sec, frame, subframe");
-			smp = MDGetSMPTERecordPtr(ep);
-			smp->hour = NUM2INT(rb_Integer(argv[0]));
-			smp->min = NUM2INT(rb_Integer(argv[1]));
-			smp->sec = NUM2INT(rb_Integer(argv[2]));
-			smp->frame = NUM2INT(rb_Integer(argv[3]));
-			smp->subframe = NUM2INT(rb_Integer(argv[4]));
-			break;
-		case kMDEventPortNumber:
-			s_raise_if_missing_parameter(argc, 1, "port number");
-			MDSetData1(ep, NUM2INT(rb_Integer(argv[0])));
-			break;
-		case kMDEventMetaText:
-			if (is_generic) {
-				s_raise_if_missing_parameter(argc, 2, "text kind number (0-15), string");
-				code = NUM2INT(rb_Integer(argv[0]));
-				argc--;
-				argv++;
-			} else s_raise_if_missing_parameter(argc, 1, "string");
-			if (code < 0 || code > 15)
-				rb_raise(rb_eArgError, "text kind number (%d) is out of range", code);
-			MDSetCode(ep, code);
-			StringValue(argv[0]);
-			MDSetMessageLength(ep, (int)RSTRING_LEN(argv[0]));
-			MDSetMessage(ep, (unsigned char *)(RSTRING_PTR(argv[0])));
-			break;
-		case kMDEventMetaMessage:
-		case kMDEventSysex:
-		case kMDEventSysexCont:
-			if (kind == kMDEventMetaMessage) {
-				s_raise_if_missing_parameter(argc, 2, "code, string or array of integers");
-				code = NUM2INT(rb_Integer(argv[0]));
-				if (code < 16 || code > 127)
-					rb_raise(rb_eArgError, "meta code (%d) is out of range", code);
-				MDSetCode(ep, code);
-				argc--;
-				argv++;
-			} else {
-				s_raise_if_missing_parameter(argc, 1, "string or array of integers");
-			}
-			if ((n1 = TYPE(argv[0])) == T_STRING) {
-				n2 = (int)RSTRING_LEN(argv[0]);
-				ucp = (unsigned char *)(RSTRING_PTR(argv[0]));
-			} else {
-				val = rb_ary_to_ary(argv[0]);
-				n2 = (int)RARRAY_LEN(val);
-				ucp = (unsigned char *)malloc(n2);
-				for (n3 = 0; n3 < n2; n3++)
-					ucp[n3] = NUM2INT(rb_Integer(RARRAY_PTR(val)[n3]));
-			}
-			if (n2 > 0) {
-				if (kind == kMDEventSysex || kind == kMDEventSysexCont) {
-					if (kind == kMDEventSysex) {
-						if (ucp[0] != 0xf0)
-							rb_raise(rb_eArgError, "sysex must start with 0xf0");
-						n3 = 1;
-					} else n3 = 0;
-					for ( ; n3 < n2; n3++) {
-						if (ucp[n3] >= 128 && (n3 != n2 - 1 || ucp[n3] != 0xf7))
-							rb_raise(rb_eArgError, "sysex must not contain numbers >= 128");
-					}
-				}
-			}
-			MDSetMessageLength(ep, n2);
-			MDSetMessage(ep, ucp);
-			if (n1 != T_STRING)
-				free(ucp);
-			break;
-		case kMDEventProgram:
-			s_raise_if_missing_parameter(argc, 1, "program number");
-			n1 = NUM2INT(rb_Integer(argv[0]));
-			if (n1 < 0 || n1 >= 128)
-				rb_raise(rb_eArgError, "program number (%d) is out of range", n1);
-			MDSetData1(ep, n1);
-			break;
-		case kMDEventControl:
-			if (is_generic) {
-				s_raise_if_missing_parameter(argc, 2, "control number, value");
-				code = NUM2INT(rb_Integer(argv[0]));
-				argc--;
-				argv++;
-			} else s_raise_if_missing_parameter(argc, 1, "control value");
-			if (code < 0 || code >= 128)
-				rb_raise(rb_eArgError, "control code (%d) is out of range", code);
-			n1 = NUM2INT(rb_Integer(argv[0]));
-			if (n1 < 0 || n1 >= 128)
-				rb_raise(rb_eArgError, "control value (%d) is out of range", n1);
-			MDSetCode(ep, code);
-			MDSetData1(ep, n1);
-			break;
-		case kMDEventPitchBend:
-			s_raise_if_missing_parameter(argc, 1, "pitch bend");
-			n1 = NUM2INT(rb_Integer(argv[0]));
-			if (n1 < -8192 || n1 >= 8192)
-				rb_raise(rb_eArgError, "pitch bend value (%d) is out of range", n1);
-			MDSetData1(ep, n1);
-			break;
-		case kMDEventChanPres:
-			s_raise_if_missing_parameter(argc, 1, "channel pressure");
-			n1 = NUM2INT(rb_Integer(argv[0]));
-			if (n1 < 0 || n1 >= 128)
-				rb_raise(rb_eArgError, "channel pressure value (%d) is out of range", n1);
-			MDSetData1(ep, n1);
-			break;
-		case kMDEventKeyPres:
-			s_raise_if_missing_parameter(argc, 2, "note number, key pressure");
-			if (FIXNUM_P(argv[0]))
-				code = FIX2INT(argv[0]);
-			else
-				code = MDEventNoteNameToNoteNumber(StringValuePtr(argv[0]));
-			if (code < 0 || code >= 128)
-				rb_raise(rb_eArgError, "note number (%d) out of range", code);
-			n1 = NUM2INT(rb_Integer(argv[1]));
-			if (n1 < 0 || n1 >= 128)
-				rb_raise(rb_eArgError, "key pressure value (%d) is out of range", n1);
-			MDSetCode(ep, code);
-			MDSetData1(ep, n1);
-			break;
-		default:
-			rb_raise(rb_eArgError, "internal error? unknown event kind (%d)", kind);
-	}
-	
+    eobj = [[[MDEventObject alloc] init] autorelease];
+    ep = [eobj eventPtr];
+    MDSetTick(ep, tick);
+    if (rb_obj_is_kind_of(argv[1], rb_cMRPointer)) {
+        MDPointer *ptsrc = MDPointerFromMRPointerValue(argv[1]);
+        MDEvent *epsrc = MDPointerCurrent(ptsrc);
+        MDEventCopy(ep, epsrc, 1);
+    } else {
+        kind = MREventKindAndCodeFromEventSymbol(argv[1], &code, &is_generic);
+        if (kind < 0) {
+            volatile VALUE v = rb_inspect(argv[1]);
+            rb_raise(rb_eArgError, "unknown event type: %s", StringValuePtr(v));
+        }
+        MDSetKind(ep, kind);
+        argc -= 2;
+        argv += 2;
+        switch (kind) {
+            case kMDEventNote:
+                if (is_generic) {
+                    s_raise_if_missing_parameter(argc, 3, "note number, duration, velocity");
+                    if (FIXNUM_P(argv[0]))
+                        code = FIX2INT(argv[0]);
+                    else
+                        code = MDEventNoteNameToNoteNumber(StringValuePtr(argv[0]));
+                    if (code < 0 || code >= 128)
+                        rb_raise(rb_eArgError, "note number (%d) out of range", code);
+                    argc--;
+                    argv++;
+                } else s_raise_if_missing_parameter(argc, 2, "duration, velocity");
+                MDSetCode(ep, code);
+                n1 = NUM2INT(rb_Integer(argv[0]));
+                n2 = NUM2INT(rb_Integer(argv[1]));
+                if (n1 <= 0)
+                    rb_raise(rb_eArgError, "note duration (%d) must be positive", n1);
+                if (n2 <= 0 || n2 >= 128)
+                    rb_raise(rb_eArgError, "note velocity (%d) is out of range", n2);
+                MDSetDuration(ep, n1);
+                MDSetNoteOnVelocity(ep, n2);
+                if (argc > 2) {
+                    n1 = NUM2INT(rb_Integer(argv[2]));
+                    if (n1 < 0 || n1 >= 128)
+                        rb_raise(rb_eArgError, "release velocity (%d) is out of range", n1);
+                    MDSetNoteOffVelocity(ep, n1);
+                }
+                break;
+            case kMDEventTempo:
+                s_raise_if_missing_parameter(argc, 1, "tempo");
+                MDSetTempo(ep, (float)NUM2DBL(rb_Float(argv[0])));
+                break;
+            case kMDEventTimeSignature:
+                s_raise_if_missing_parameter(argc, 2, "n/m");
+                ucp = MDGetMetaDataPtr(ep);
+                ucp[0] = NUM2INT(rb_Integer(argv[0]));
+                ucp[1] = NUM2INT(rb_Integer(argv[1]));
+                if (argc > 2)
+                    ucp[2] = NUM2INT(rb_Integer(argv[2]));
+                if (argc > 3)
+                    ucp[3] = NUM2INT(rb_Integer(argv[3]));
+                break;
+            case kMDEventKey:
+                s_raise_if_missing_parameter(argc, 2, "number of accidentals, major/minor");
+                ucp = MDGetMetaDataPtr(ep);
+                ucp[0] = NUM2INT(rb_Integer(argv[0]));
+                if (ucp[0] + 7 > 14)
+                    rb_raise(rb_eArgError, "number of accidentals (%d) is out of range", (int)(signed char)ucp[0]);
+                if ((n1 = TYPE(argv[1])) == T_STRING || n1 == T_SYMBOL) {
+                    p = StringValuePtr(argv[1]);
+                    if (strcasecmp(p, "major") == 0)
+                        ucp[1] = 0;
+                    else if (strcasecmp(p, "minor") == 0)
+                        ucp[1] = 1;
+                    else
+                        rb_raise(rb_eArgError, "unknown word '%s' for key specification", p);
+                } else ucp[1] = (0 != NUM2INT(rb_Integer(argv[1])));
+                break;
+            case kMDEventSMPTE:
+                s_raise_if_missing_parameter(argc, 5, "hour, min, sec, frame, subframe");
+                smp = MDGetSMPTERecordPtr(ep);
+                smp->hour = NUM2INT(rb_Integer(argv[0]));
+                smp->min = NUM2INT(rb_Integer(argv[1]));
+                smp->sec = NUM2INT(rb_Integer(argv[2]));
+                smp->frame = NUM2INT(rb_Integer(argv[3]));
+                smp->subframe = NUM2INT(rb_Integer(argv[4]));
+                break;
+            case kMDEventPortNumber:
+                s_raise_if_missing_parameter(argc, 1, "port number");
+                MDSetData1(ep, NUM2INT(rb_Integer(argv[0])));
+                break;
+            case kMDEventMetaText:
+                if (is_generic) {
+                    s_raise_if_missing_parameter(argc, 2, "text kind number (0-15), string");
+                    code = NUM2INT(rb_Integer(argv[0]));
+                    argc--;
+                    argv++;
+                } else s_raise_if_missing_parameter(argc, 1, "string");
+                if (code < 0 || code > 15)
+                    rb_raise(rb_eArgError, "text kind number (%d) is out of range", code);
+                MDSetCode(ep, code);
+                StringValue(argv[0]);
+                MDSetMessageLength(ep, (int)RSTRING_LEN(argv[0]));
+                MDSetMessage(ep, (unsigned char *)(RSTRING_PTR(argv[0])));
+                break;
+            case kMDEventMetaMessage:
+            case kMDEventSysex:
+            case kMDEventSysexCont:
+                if (kind == kMDEventMetaMessage) {
+                    s_raise_if_missing_parameter(argc, 2, "code, string or array of integers");
+                    code = NUM2INT(rb_Integer(argv[0]));
+                    if (code < 16 || code > 127)
+                        rb_raise(rb_eArgError, "meta code (%d) is out of range", code);
+                    MDSetCode(ep, code);
+                    argc--;
+                    argv++;
+                } else {
+                    s_raise_if_missing_parameter(argc, 1, "string or array of integers");
+                }
+                if ((n1 = TYPE(argv[0])) == T_STRING) {
+                    n2 = (int)RSTRING_LEN(argv[0]);
+                    ucp = (unsigned char *)(RSTRING_PTR(argv[0]));
+                } else {
+                    val = rb_ary_to_ary(argv[0]);
+                    n2 = (int)RARRAY_LEN(val);
+                    ucp = (unsigned char *)malloc(n2);
+                    for (n3 = 0; n3 < n2; n3++)
+                        ucp[n3] = NUM2INT(rb_Integer(RARRAY_PTR(val)[n3]));
+                }
+                if (n2 > 0) {
+                    if (kind == kMDEventSysex || kind == kMDEventSysexCont) {
+                        if (kind == kMDEventSysex) {
+                            if (ucp[0] != 0xf0)
+                                rb_raise(rb_eArgError, "sysex must start with 0xf0");
+                            n3 = 1;
+                        } else n3 = 0;
+                        for ( ; n3 < n2; n3++) {
+                            if (ucp[n3] >= 128 && (n3 != n2 - 1 || ucp[n3] != 0xf7))
+                                rb_raise(rb_eArgError, "sysex must not contain numbers >= 128");
+                        }
+                    }
+                }
+                MDSetMessageLength(ep, n2);
+                MDSetMessage(ep, ucp);
+                if (n1 != T_STRING)
+                    free(ucp);
+                break;
+            case kMDEventProgram:
+                s_raise_if_missing_parameter(argc, 1, "program number");
+                n1 = NUM2INT(rb_Integer(argv[0]));
+                if (n1 < 0 || n1 >= 128)
+                    rb_raise(rb_eArgError, "program number (%d) is out of range", n1);
+                MDSetData1(ep, n1);
+                break;
+            case kMDEventControl:
+                if (is_generic) {
+                    s_raise_if_missing_parameter(argc, 2, "control number, value");
+                    code = NUM2INT(rb_Integer(argv[0]));
+                    argc--;
+                    argv++;
+                } else s_raise_if_missing_parameter(argc, 1, "control value");
+                if (code < 0 || code >= 128)
+                    rb_raise(rb_eArgError, "control code (%d) is out of range", code);
+                n1 = NUM2INT(rb_Integer(argv[0]));
+                if (n1 < 0 || n1 >= 128)
+                    rb_raise(rb_eArgError, "control value (%d) is out of range", n1);
+                MDSetCode(ep, code);
+                MDSetData1(ep, n1);
+                break;
+            case kMDEventPitchBend:
+                s_raise_if_missing_parameter(argc, 1, "pitch bend");
+                n1 = NUM2INT(rb_Integer(argv[0]));
+                if (n1 < -8192 || n1 >= 8192)
+                    rb_raise(rb_eArgError, "pitch bend value (%d) is out of range", n1);
+                MDSetData1(ep, n1);
+                break;
+            case kMDEventChanPres:
+                s_raise_if_missing_parameter(argc, 1, "channel pressure");
+                n1 = NUM2INT(rb_Integer(argv[0]));
+                if (n1 < 0 || n1 >= 128)
+                    rb_raise(rb_eArgError, "channel pressure value (%d) is out of range", n1);
+                MDSetData1(ep, n1);
+                break;
+            case kMDEventKeyPres:
+                s_raise_if_missing_parameter(argc, 2, "note number, key pressure");
+                if (FIXNUM_P(argv[0]))
+                    code = FIX2INT(argv[0]);
+                else
+                    code = MDEventNoteNameToNoteNumber(StringValuePtr(argv[0]));
+                if (code < 0 || code >= 128)
+                    rb_raise(rb_eArgError, "note number (%d) out of range", code);
+                n1 = NUM2INT(rb_Integer(argv[1]));
+                if (n1 < 0 || n1 >= 128)
+                    rb_raise(rb_eArgError, "key pressure value (%d) is out of range", n1);
+                MDSetCode(ep, code);
+                MDSetData1(ep, n1);
+                break;
+            default:
+                rb_raise(rb_eArgError, "internal error? unknown event kind (%d)", kind);
+        }
+    }
+    
 	/*  Insert the new event to the track  */
 	if (ip->doc != nil) {
 		[ip->doc insertEvent: eobj toTrack: ip->num];
