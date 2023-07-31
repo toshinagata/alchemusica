@@ -321,7 +321,7 @@
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <subviews>
                                     <customView id="220">
-                                        <rect key="frame" x="0.0" y="573" width="708" height="16"/>
+                                        <rect key="frame" x="0.0" y="570" width="708" height="18"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                         <subviews>
                                             <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" id="273">
@@ -334,7 +334,7 @@
                                                 </textFieldCell>
                                             </textField>
                                             <textField verticalHuggingPriority="750" tag="3007" allowsCharacterPickerTouchBarItem="YES" id="272">
-                                                <rect key="frame" x="88" y="0.0" width="80" height="16"/>
+                                                <rect key="frame" x="88" y="2" width="80" height="16"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <textFieldCell key="cell" controlSize="mini" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="left" tag="3007" drawsBackground="YES" id="290">
                                                     <font key="font" metaFont="miniSystem"/>
@@ -346,7 +346,7 @@
                                                 </connections>
                                             </textField>
                                             <textField verticalHuggingPriority="750" tag="3006" allowsCharacterPickerTouchBarItem="YES" id="178">
-                                                <rect key="frame" x="0.0" y="0.0" width="80" height="16"/>
+                                                <rect key="frame" x="0.0" y="2" width="80" height="16"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <textFieldCell key="cell" controlSize="mini" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="left" tag="3006" drawsBackground="YES" id="287">
                                                     <font key="font" metaFont="miniSystem"/>
@@ -359,7 +359,7 @@
                                                 </connections>
                                             </textField>
                                             <textField verticalHuggingPriority="750" tag="3005" allowsCharacterPickerTouchBarItem="YES" id="163">
-                                                <rect key="frame" x="170" y="0.0" width="351" height="16"/>
+                                                <rect key="frame" x="170" y="2" width="351" height="16"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                 <textFieldCell key="cell" controlSize="mini" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="left" tag="3005" drawsBackground="YES" id="286">
                                                     <font key="font" metaFont="miniSystem"/>
@@ -368,7 +368,7 @@
                                                 </textFieldCell>
                                             </textField>
                                             <popUpButton verticalHuggingPriority="750" tag="3020" id="264" customClass="MyPopUpButton">
-                                                <rect key="frame" x="524" y="0.0" width="24" height="15"/>
+                                                <rect key="frame" x="524" y="2" width="24" height="15"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                                                 <popUpButtonCell key="cell" type="push" title="(no quantize)" bezelStyle="rounded" alignment="left" controlSize="mini" lineBreakMode="clipping" state="on" borderStyle="borderAndBezel" tag="3100" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="269" id="289">
                                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -385,7 +385,7 @@
                                                 </popUpButtonCell>
                                             </popUpButton>
                                             <button tag="3000" id="183">
-                                                <rect key="frame" x="548" y="0.0" width="24" height="16"/>
+                                                <rect key="frame" x="548" y="2" width="24" height="16"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                                                 <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="selection" imagePosition="only" alignment="center" state="on" borderStyle="border" tag="3000" inset="2" id="288">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
@@ -396,7 +396,7 @@
                                                 </connections>
                                             </button>
                                             <popUpButton verticalHuggingPriority="750" tag="3004" id="159" customClass="MyPopUpButton">
-                                                <rect key="frame" x="638" y="0.0" width="71" height="15"/>
+                                                <rect key="frame" x="638" y="2" width="71" height="15"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                                                 <popUpButtonCell key="cell" type="push" title="Set Value" bezelStyle="rounded" alignment="left" controlSize="mini" lineBreakMode="clipping" state="on" borderStyle="borderAndBezel" tag="3050" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="156" id="285">
                                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -433,7 +433,7 @@
                                                 </popUpButtonCell>
                                             </popUpButton>
                                             <popUpButton verticalHuggingPriority="750" tag="3003" id="148" customClass="MyPopUpButton">
-                                                <rect key="frame" x="616" y="0.0" width="24" height="15"/>
+                                                <rect key="frame" x="616" y="2" width="24" height="15"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                                                 <popUpButtonCell key="cell" type="push" title="linear" bezelStyle="rounded" alignment="left" controlSize="mini" lineBreakMode="clipping" state="on" borderStyle="borderAndBezel" tag="3021" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="147" id="284">
                                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -473,7 +473,7 @@
                                                 </connections>
                                             </popUpButton>
                                             <button tag="3001" id="129">
-                                                <rect key="frame" x="571" y="0.0" width="24" height="16"/>
+                                                <rect key="frame" x="571" y="2" width="24" height="16"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                                                 <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="ibeam" imagePosition="only" alignment="center" borderStyle="border" tag="3001" inset="2" id="283">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
@@ -484,7 +484,7 @@
                                                 </connections>
                                             </button>
                                             <button tag="3002" id="128">
-                                                <rect key="frame" x="594" y="0.0" width="24" height="16"/>
+                                                <rect key="frame" x="594" y="2" width="24" height="16"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                                                 <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="pencil" imagePosition="only" alignment="center" borderStyle="border" tag="3002" inset="2" id="282">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
@@ -497,15 +497,15 @@
                                         </subviews>
                                     </customView>
                                     <customView id="39">
-                                        <rect key="frame" x="0.0" y="16" width="709" height="557"/>
+                                        <rect key="frame" x="0.0" y="16" width="709" height="555"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         <subviews>
                                             <customView id="109" customClass="GraphicBackgroundView">
-                                                <rect key="frame" x="0.0" y="0.0" width="709" height="555"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="709" height="553"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             </customView>
                                             <customView id="108" customClass="GraphicFloatingView">
-                                                <rect key="frame" x="0.0" y="0.0" width="709" height="555"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="709" height="553"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
                                                     <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="3008" id="kQm-fP-pX4">
@@ -522,11 +522,11 @@
                                         </subviews>
                                     </customView>
                                     <customView id="117">
-                                        <rect key="frame" x="0.0" y="0.0" width="709" height="16"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="709" height="17"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                         <subviews>
                                             <button tag="2001" id="119">
-                                                <rect key="frame" x="16" y="0.0" width="16" height="15"/>
+                                                <rect key="frame" x="16" y="1" width="16" height="15"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES"/>
                                                 <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="expand" imagePosition="above" alignment="center" borderStyle="border" tag="2001" id="281">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -537,7 +537,7 @@
                                                 </connections>
                                             </button>
                                             <button tag="2000" id="118">
-                                                <rect key="frame" x="0.0" y="0.0" width="16" height="15"/>
+                                                <rect key="frame" x="0.0" y="1" width="16" height="15"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES"/>
                                                 <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="shrink" imagePosition="above" alignment="center" borderStyle="border" tag="2000" id="280">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>

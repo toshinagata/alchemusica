@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E400BBC811D627650032B969 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165FFE840EACC02AAC07 /* InfoPlist.strings */; };
-		E400BBD111D627650032B969 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5FFC0B30237AAD301A80002 /* Localizable.strings */; };
 		E400BBD211D627650032B969 /* G-clef.icns in Resources */ = {isa = PBXBuildFile; fileRef = F520EC10023D1DC601A80002 /* G-clef.icns */; };
 		E400BBD411D627650032B969 /* plus.png in Resources */ = {isa = PBXBuildFile; fileRef = E48885ED04523E4B00A80006 /* plus.png */; };
 		E400BBD511D627650032B969 /* minus.png in Resources */ = {isa = PBXBuildFile; fileRef = E45323310452743D00A80006 /* minus.png */; };
@@ -158,7 +156,6 @@
 		E48BC3862302A9210087B726 /* PauseButton.png in Resources */ = {isa = PBXBuildFile; fileRef = E48BC3852302A9210087B726 /* PauseButton.png */; };
 		E48BC3882302A9990087B726 /* RewindButton.png in Resources */ = {isa = PBXBuildFile; fileRef = E48BC3872302A9990087B726 /* RewindButton.png */; };
 		E48F300111D8EE7B00491B45 /* AUViewWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E48F2FFF11D8EE7B00491B45 /* AUViewWindow.xib */; };
-		E48F30F111DB8B8D00491B45 /* AUCarbonWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E48F30EF11DB8B8D00491B45 /* AUCarbonWindow.xib */; };
 		E4951EA411D63CD000D827EC /* AUViewWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = E4951EA311D63CD000D827EC /* AUViewWindowController.m */; };
 		E4C383F31411124C006F2661 /* AboutPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4C383F11411124C006F2661 /* AboutPanel.xib */; };
 		E4C383FC141117F9006F2661 /* AboutWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = E4C383FB141117F9006F2661 /* AboutWindowController.m */; };
@@ -167,6 +164,8 @@
 		E4C8B26F1F83DE020003BD42 /* AudioEffectPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4C8B26D1F83DE020003BD42 /* AudioEffectPanel.xib */; };
 		E4CCB4701F8FA2F9005F2A76 /* NSMenuAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = E4CCB46F1F8FA2F9005F2A76 /* NSMenuAdditions.m */; };
 		E4D701EB13F540C5005EE5B3 /* RecordPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4D701E913F540C5005EE5B3 /* RecordPanel.xib */; };
+		E4D87B7F2A77F3F6001E5EBC /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E4D87B7D2A77F3F6001E5EBC /* InfoPlist.strings */; };
+		E4D87B822A77F402001E5EBC /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = E4D87B802A77F402001E5EBC /* Localizable.strings */; };
 		E4E825101F94F264009C5FE6 /* double_triangle.png in Resources */ = {isa = PBXBuildFile; fileRef = E4E8250F1F94F264009C5FE6 /* double_triangle.png */; };
 		E4ED56E5241C85F6000C7DB7 /* PasteWarningTooManyTargets.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4ED56E3241C85F5000C7DB7 /* PasteWarningTooManyTargets.xib */; };
 		E4ED56E8241C8AB9000C7DB7 /* PasteWarningTooFewTargets.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4ED56E6241C8AB9000C7DB7 /* PasteWarningTooFewTargets.xib */; };
@@ -196,7 +195,6 @@
 		00FBF1B800C9C4767F000001 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = /System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<absolute>"; };
 		00FBF1BC00C9C7EA7F000001 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		0217E8F300D51D2B7F000001 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = /System/Library/Frameworks/CoreAudio.framework; sourceTree = "<absolute>"; };
-		089C1660FE840EACC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1058C7A7FEA54F5311CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		2A37F4B0FDCFA73011CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		2A37F4C4FDCFA73011CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
@@ -224,17 +222,6 @@
 		E400BBBF11D627550032B969 /* Alchemusica-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Alchemusica-Info.plist"; sourceTree = "<group>"; };
 		E405989D0D311A9700161E25 /* MDAudio_MacOSX.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MDAudio_MacOSX.c; path = MD_package/MDAudio_MacOSX.c; sourceTree = "<group>"; };
 		E40598B80D311C9B00161E25 /* MDAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDAudio.h; path = MD_package/MDAudio.h; sourceTree = "<group>"; };
-		E40C7A1E140A85A200969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/MainMenu.xib; sourceTree = "<group>"; };
-		E40C7A22140A85DB00969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/TrackWindow.xib; sourceTree = "<group>"; };
-		E40C7A26140A860B00969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/ListWindow.xib; sourceTree = "<group>"; };
-		E40C7A2A140A862D00969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/GraphicWindow.xib; sourceTree = "<group>"; };
-		E40C7A2E140A865800969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/LoadingPanel.xib; sourceTree = "<group>"; };
-		E40C7A32140A867A00969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/RemapDevicePanel.xib; sourceTree = "<group>"; };
-		E40C7A3F140A879F00969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/AudioRecordPanel.xib; sourceTree = "<group>"; };
-		E40C7A43140A87B400969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/EventFilterPanel.xib; sourceTree = "<group>"; };
-		E40C7A4B140A87E100969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/RubyDialog.xib; sourceTree = "<group>"; };
-		E40C7A4F140A87FD00969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/RubyConsoleWindow.xib; sourceTree = "<group>"; };
-		E40C7AC6140A94F700969DC3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/MetronomeSettingsPanel.xib; sourceTree = "<group>"; };
 		E40C7ACA140A95D700969DC3 /* MetronomeSettingsPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MetronomeSettingsPanelController.h; path = Classes/MetronomeSettingsPanelController.h; sourceTree = "<group>"; };
 		E40C7ACB140A95D700969DC3 /* MetronomeSettingsPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MetronomeSettingsPanelController.m; path = Classes/MetronomeSettingsPanelController.m; sourceTree = "<group>"; };
 		E40D6F3F0636BF0100A80105 /* horizontal_move.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = horizontal_move.png; path = icons/horizontal_move.png; sourceTree = "<group>"; };
@@ -255,7 +242,6 @@
 		E4280BEB0A44465800DCD341 /* EndEditingRange.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = EndEditingRange.png; path = icons/EndEditingRange.png; sourceTree = "<group>"; };
 		E42BF87D0DB1D1100095F74F /* RubyDialogController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RubyDialogController.h; path = Ruby_bindings/RubyDialogController.h; sourceTree = "<group>"; };
 		E42BF87E0DB1D1100095F74F /* RubyDialogController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RubyDialogController.m; path = Ruby_bindings/RubyDialogController.m; sourceTree = "<group>"; };
-		E42D332422E4913D00788C29 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/AudioSettingsPrefPanel.xib; sourceTree = "<group>"; };
 		E42D332622E4954900788C29 /* AudioSettingsPrefPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioSettingsPrefPanelController.h; path = Classes/AudioSettingsPrefPanelController.h; sourceTree = "<group>"; };
 		E42D332722E4954900788C29 /* AudioSettingsPrefPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AudioSettingsPrefPanelController.m; path = Classes/AudioSettingsPrefPanelController.m; sourceTree = "<group>"; };
 		E430D72B0D79700F00717A72 /* EventFilterPanelController.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = EventFilterPanelController.h; path = Classes/EventFilterPanelController.h; sourceTree = "<group>"; };
@@ -286,13 +272,11 @@
 		E46394320A0E0C5400FD0629 /* MyPopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyPopUpButtonCell.m; path = Classes/MyPopUpButtonCell.m; sourceTree = "<group>"; };
 		E46394F10A0E52D900FD0629 /* MyComboBoxCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MyComboBoxCell.h; path = Classes/MyComboBoxCell.h; sourceTree = "<group>"; };
 		E46394F20A0E52D900FD0629 /* MyComboBoxCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyComboBoxCell.m; path = Classes/MyComboBoxCell.m; sourceTree = "<group>"; };
-		E467A8D8240D55B700F7DD6F /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/SaveErrorPanel.xib; sourceTree = "<group>"; };
 		E467A8DA240EA60400F7DD6F /* SaveErrorPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SaveErrorPanelController.m; path = Classes/SaveErrorPanelController.m; sourceTree = "<group>"; };
 		E467A8DB240EA60400F7DD6F /* SaveErrorPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SaveErrorPanelController.h; path = Classes/SaveErrorPanelController.h; sourceTree = "<group>"; };
 		E468AD5A1FAEBFDF00EE393E /* speaker_cursor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = speaker_cursor.png; path = icons/speaker_cursor.png; sourceTree = "<group>"; };
 		E46A94AD1F776B23008477D2 /* ContextMenuTextFieldCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ContextMenuTextFieldCell.h; path = Classes/ContextMenuTextFieldCell.h; sourceTree = "<group>"; };
 		E46A94AE1F776B23008477D2 /* ContextMenuTextFieldCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ContextMenuTextFieldCell.m; path = Classes/ContextMenuTextFieldCell.m; sourceTree = "<group>"; };
-		E46A94B11F776E81008477D2 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/EventKindContextMenu.xib; sourceTree = "<group>"; };
 		E4743AE60456EAE900A80006 /* GraphicFloatingView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GraphicFloatingView.h; path = Classes/GraphicFloatingView.h; sourceTree = "<group>"; };
 		E4743AE70456EAE900A80006 /* GraphicFloatingView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GraphicFloatingView.m; path = Classes/GraphicFloatingView.m; sourceTree = "<group>"; };
 		E476192C0454425A00A80006 /* MenuTags.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MenuTags.h; path = Classes/MenuTags.h; sourceTree = "<group>"; };
@@ -310,8 +294,6 @@
 		E48BC3832302A8DB0087B726 /* PlayButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = PlayButton.png; path = icons/PlayButton.png; sourceTree = "<group>"; };
 		E48BC3852302A9210087B726 /* PauseButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = PauseButton.png; path = icons/PauseButton.png; sourceTree = "<group>"; };
 		E48BC3872302A9990087B726 /* RewindButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = RewindButton.png; path = icons/RewindButton.png; sourceTree = "<group>"; };
-		E48F300011D8EE7B00491B45 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/AUViewWindow.xib; sourceTree = "<group>"; };
-		E48F30F011DB8B8D00491B45 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/AUCarbonWindow.xib; sourceTree = "<group>"; };
 		E4951EA211D63CD000D827EC /* AUViewWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AUViewWindowController.h; path = Classes/AUViewWindowController.h; sourceTree = "<group>"; };
 		E4951EA311D63CD000D827EC /* AUViewWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AUViewWindowController.m; path = Classes/AUViewWindowController.m; sourceTree = "<group>"; };
 		E49B98060D9F79B100F61755 /* MDRubyPointer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDRubyPointer.h; path = Ruby_bindings/MDRubyPointer.h; sourceTree = "<group>"; };
@@ -330,7 +312,6 @@
 		E4B2E8E50D93F92600781995 /* MDRubySequence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MDRubySequence.m; path = Ruby_bindings/MDRubySequence.m; sourceTree = "<group>"; wrapsLines = 1; };
 		E4B2EB320D9AA05600781995 /* MDRubyTrack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDRubyTrack.h; path = Ruby_bindings/MDRubyTrack.h; sourceTree = "<group>"; };
 		E4B2EB330D9AA05600781995 /* MDRubyTrack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MDRubyTrack.m; path = Ruby_bindings/MDRubyTrack.m; sourceTree = "<group>"; wrapsLines = 1; };
-		E4B4C25A11C3ED4C00FE7593 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/AudioSettingsPanel.xib; sourceTree = "<group>"; };
 		E4B4C26711C3EDAC00FE7593 /* AudioSettingsPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioSettingsPanelController.h; path = Classes/AudioSettingsPanelController.h; sourceTree = "<group>"; };
 		E4B4C26811C3EDAC00FE7593 /* AudioSettingsPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AudioSettingsPanelController.m; path = Classes/AudioSettingsPanelController.m; sourceTree = "<group>"; };
 		E4B5C7BA060C9406000BC127 /* NSStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = NSStringAdditions.h; path = Classes/NSStringAdditions.h; sourceTree = "<group>"; };
@@ -341,12 +322,10 @@
 		E4BAFF300C1B005600A5EAED /* PlayingViewController.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = PlayingViewController.m; path = Classes/PlayingViewController.m; sourceTree = "<group>"; };
 		E4BAFFAD0C1C3ED800A5EAED /* eye_open.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = eye_open.png; path = icons/eye_open.png; sourceTree = "<group>"; };
 		E4BAFFC20C1C44D800A5EAED /* eye_close.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = eye_close.png; path = icons/eye_close.png; sourceTree = "<group>"; };
-		E4C383F21411124C006F2661 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/AboutPanel.xib; sourceTree = "<group>"; };
 		E4C383FA141117F9006F2661 /* AboutWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AboutWindowController.h; path = Classes/AboutWindowController.h; sourceTree = "<group>"; };
 		E4C383FB141117F9006F2661 /* AboutWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AboutWindowController.m; path = Classes/AboutWindowController.m; sourceTree = "<group>"; };
 		E4C3844314111D23006F2661 /* lastBuild.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = lastBuild.txt; sourceTree = "<group>"; };
 		E4C384E414112400006F2661 /* Version */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Version; sourceTree = "<group>"; };
-		E4C8B26E1F83DE020003BD42 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/AudioEffectPanel.xib; sourceTree = "<group>"; };
 		E4CCB46E1F8FA2F9005F2A76 /* NSMenuAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSMenuAdditions.h; path = Classes/NSMenuAdditions.h; sourceTree = "<group>"; };
 		E4CCB46F1F8FA2F9005F2A76 /* NSMenuAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSMenuAdditions.m; path = Classes/NSMenuAdditions.m; sourceTree = "<group>"; };
 		E4CD4D710C106B9800AF6017 /* speaker.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = speaker.png; path = icons/speaker.png; sourceTree = "<group>"; };
@@ -366,9 +345,35 @@
 		E4CF0D5D0746E734000ADE20 /* MDTrack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDTrack.h; path = MD_package/MDTrack.h; sourceTree = "<group>"; wrapsLines = 1; };
 		E4CF0D5E0746E734000ADE20 /* MDUtility.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDUtility.c; path = MD_package/MDUtility.c; sourceTree = "<group>"; };
 		E4CF0D5F0746E734000ADE20 /* MDUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDUtility.h; path = MD_package/MDUtility.h; sourceTree = "<group>"; };
-		E4D701EA13F540C5005EE5B3 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/RecordPanel.xib; sourceTree = "<group>"; };
 		E4D803D80737CD3500EB5804 /* horizontal_split.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = horizontal_split.png; path = icons/horizontal_split.png; sourceTree = "<group>"; };
 		E4D803DC0737D6F400EB5804 /* move_around.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = move_around.png; path = icons/move_around.png; sourceTree = "<group>"; };
+		E4D87B322A77F215001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		E4D87B362A77F222001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/TrackWindow.xib; sourceTree = "<group>"; };
+		E4D87B3A2A77F238001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ListWindow.xib; sourceTree = "<group>"; };
+		E4D87B3D2A77F2B4001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/GraphicWindow.xib; sourceTree = "<group>"; };
+		E4D87B402A77F2D1001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/LoadingPanel.xib; sourceTree = "<group>"; };
+		E4D87B432A77F2DE001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/RemapDevicePanel.xib; sourceTree = "<group>"; };
+		E4D87B462A77F2E8001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/AudioRecordPanel.xib; sourceTree = "<group>"; };
+		E4D87B492A77F2F2001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/EventFilterPanel.xib; sourceTree = "<group>"; };
+		E4D87B4C2A77F2FE001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/EventKindContextMenu.xib; sourceTree = "<group>"; };
+		E4D87B4F2A77F306001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/RubyDialog.xib; sourceTree = "<group>"; };
+		E4D87B522A77F30C001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/RubyConsoleWindow.xib; sourceTree = "<group>"; };
+		E4D87B552A77F314001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/RecordPanel.xib; sourceTree = "<group>"; };
+		E4D87B582A77F31B001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/AudioSettingsPanel.xib; sourceTree = "<group>"; };
+		E4D87B5B2A77F324001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/AudioEffectPanel.xib; sourceTree = "<group>"; };
+		E4D87B5E2A77F32C001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/AudioSettingsPrefPanel.xib; sourceTree = "<group>"; };
+		E4D87B612A77F334001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/AUViewWindow.xib; sourceTree = "<group>"; };
+		E4D87B622A77F33F001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/AUCarbonWindow.xib; sourceTree = "<group>"; };
+		E4D87B652A77F350001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MetronomeSettingsPanel.xib; sourceTree = "<group>"; };
+		E4D87B682A77F35A001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/AboutPanel.xib; sourceTree = "<group>"; };
+		E4D87B6B2A77F363001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/QuantizePanel.xib; sourceTree = "<group>"; };
+		E4D87B6E2A77F36A001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/SaveErrorPanel.xib; sourceTree = "<group>"; };
+		E4D87B712A77F370001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/PasteWarningConductorShouldBeEditable.xib; sourceTree = "<group>"; };
+		E4D87B742A77F378001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/PasteWarningConductorShouldNotBeEditable.xib; sourceTree = "<group>"; };
+		E4D87B772A77F380001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/PasteWarningTooFewTargets.xib; sourceTree = "<group>"; };
+		E4D87B7A2A77F389001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/PasteWarningTooManyTargets.xib; sourceTree = "<group>"; };
+		E4D87B7E2A77F3F6001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		E4D87B812A77F402001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		E4DB1648063B485600A80105 /* stretch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = stretch.png; path = icons/stretch.png; sourceTree = "<group>"; };
 		E4DB164A063B529800A80105 /* NSEventAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSEventAdditions.h; path = Classes/NSEventAdditions.h; sourceTree = "<group>"; };
 		E4DB164B063B529800A80105 /* NSEventAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSEventAdditions.m; path = Classes/NSEventAdditions.m; sourceTree = "<group>"; };
@@ -380,15 +385,10 @@
 		E4E44B93074CFB9D0034031C /* shrink.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = shrink.png; path = icons/shrink.png; sourceTree = "<group>"; };
 		E4E8250F1F94F264009C5FE6 /* double_triangle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = double_triangle.png; path = icons/double_triangle.png; sourceTree = "<group>"; };
 		E4ECB32B06E231BB00A80105 /* RecButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = RecButton.png; path = icons/RecButton.png; sourceTree = "<group>"; };
-		E4ED56E4241C85F5000C7DB7 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/PasteWarningTooManyTargets.xib; sourceTree = "<group>"; };
-		E4ED56E7241C8AB9000C7DB7 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/PasteWarningTooFewTargets.xib; sourceTree = "<group>"; };
-		E4ED56EA241C8BA7000C7DB7 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/PasteWarningConductorShouldNotBeEditable.xib; sourceTree = "<group>"; };
-		E4ED56ED241C8CC7000C7DB7 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/PasteWarningConductorShouldBeEditable.xib; sourceTree = "<group>"; };
 		E4ED56EF241C8D86000C7DB7 /* PasteWarningPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PasteWarningPanelController.h; path = Classes/PasteWarningPanelController.h; sourceTree = "<group>"; };
 		E4ED56F0241C8D86000C7DB7 /* PasteWarningPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PasteWarningPanelController.m; path = Classes/PasteWarningPanelController.m; sourceTree = "<group>"; };
 		E4F45EF5104A75B8008C7814 /* horizontal_move_plus.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = horizontal_move_plus.png; path = icons/horizontal_move_plus.png; sourceTree = "<group>"; };
 		E4F45EF6104A75B8008C7814 /* vertical_move_plus.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = vertical_move_plus.png; path = icons/vertical_move_plus.png; sourceTree = "<group>"; };
-		E4F81DC114C1CBE000F63BA6 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/QuantizePanel.xib; sourceTree = "<group>"; };
 		E4F81DC514C1CC3100F63BA6 /* QuantizePanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = QuantizePanelController.h; path = Classes/QuantizePanelController.h; sourceTree = "<group>"; };
 		E4F81DC614C1CC3100F63BA6 /* QuantizePanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = QuantizePanelController.m; path = Classes/QuantizePanelController.m; sourceTree = "<group>"; };
 		E4F95D80073D909700F1D121 /* document_icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = document_icon.icns; path = icons/document_icon.icns; sourceTree = "<group>"; };
@@ -434,7 +434,6 @@
 		F5D6C49303E0489301A80002 /* GraphicClientView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GraphicClientView.m; path = Classes/GraphicClientView.m; sourceTree = "<group>"; wrapsLines = 1; };
 		F5F9405D00EE2B4E01000001 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = /System/Library/Frameworks/CoreMIDI.framework; sourceTree = "<absolute>"; };
 		F5FB767800F88D8601000001 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
-		F5FFC0B40237AAD301A80002 /* Localizable.strings */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = English.lproj/Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -676,9 +675,9 @@
 				E4ED56E9241C8BA7000C7DB7 /* PasteWarningConductorShouldNotBeEditable.xib */,
 				E4ED56E6241C8AB9000C7DB7 /* PasteWarningTooFewTargets.xib */,
 				E4ED56E3241C85F5000C7DB7 /* PasteWarningTooManyTargets.xib */,
-				089C165FFE840EACC02AAC07 /* InfoPlist.strings */,
-				F5FFC0B30237AAD301A80002 /* Localizable.strings */,
 				E40C7A53140A884400969DC3 /* icons */,
+				E4D87B7D2A77F3F6001E5EBC /* InfoPlist.strings */,
+				E4D87B802A77F402001E5EBC /* Localizable.strings */,
 				E4C3844314111D23006F2661 /* lastBuild.txt */,
 				E4C384E414112400006F2661 /* Version */,
 			);
@@ -820,13 +819,14 @@
 			};
 			buildConfigurationList = E428451A09AA2B7A00CB93B9 /* Build configuration list for PBXProject "Alchemusica" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 1;
 			knownRegions = (
-				English,
 				Japanese,
 				French,
 				German,
+				en,
+				Base,
 			);
 			mainGroup = 2A37F4AAFDCFA73011CA2CEA /* MIDI-cocoa-2 */;
 			projectDirPath = "";
@@ -842,8 +842,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E400BBC811D627650032B969 /* InfoPlist.strings in Resources */,
-				E400BBD111D627650032B969 /* Localizable.strings in Resources */,
 				E400BBD211D627650032B969 /* G-clef.icns in Resources */,
 				E400BBD411D627650032B969 /* plus.png in Resources */,
 				E400BBD511D627650032B969 /* minus.png in Resources */,
@@ -869,10 +867,12 @@
 				E48BC3882302A9990087B726 /* RewindButton.png in Resources */,
 				E400BBE611D627650032B969 /* triangle.png in Resources */,
 				E400BBE711D627650032B969 /* pencil_cursor.png in Resources */,
+				E4D87B822A77F402001E5EBC /* Localizable.strings in Resources */,
 				E400BBE811D627650032B969 /* arc.png in Resources */,
 				E400BBE911D627650032B969 /* parabola.png in Resources */,
 				E400BBEA11D627650032B969 /* pencil_small.png in Resources */,
 				E4E825101F94F264009C5FE6 /* double_triangle.png in Resources */,
+				E4D87B7F2A77F3F6001E5EBC /* InfoPlist.strings in Resources */,
 				E400BBEB11D627650032B969 /* StartEditingRange.png in Resources */,
 				E400BBEC11D627650032B969 /* EndEditingRange.png in Resources */,
 				E400BBED11D627650032B969 /* ibeam.png in Resources */,
@@ -906,7 +906,6 @@
 				E400BC0E11D627650032B969 /* AudioSettingsPanel.xib in Resources */,
 				E48BC3862302A9210087B726 /* PauseButton.png in Resources */,
 				E48F300111D8EE7B00491B45 /* AUViewWindow.xib in Resources */,
-				E48F30F111DB8B8D00491B45 /* AUCarbonWindow.xib in Resources */,
 				E48BC3842302A8DB0087B726 /* PlayButton.png in Resources */,
 				E4C8B26F1F83DE020003BD42 /* AudioEffectPanel.xib in Resources */,
 				E4D701EB13F540C5005EE5B3 /* RecordPanel.xib in Resources */,
@@ -1047,18 +1046,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		089C165FFE840EACC02AAC07 /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				089C1660FE840EACC02AAC07 /* English */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
 		E40C7A1D140A85A200969DC3 /* MainMenu.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E40C7A1E140A85A200969DC3 /* English */,
+				E4D87B322A77F215001E5EBC /* en */,
 			);
 			name = MainMenu.xib;
 			sourceTree = "<group>";
@@ -1066,7 +1057,7 @@
 		E40C7A21140A85DB00969DC3 /* TrackWindow.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E40C7A22140A85DB00969DC3 /* English */,
+				E4D87B362A77F222001E5EBC /* en */,
 			);
 			name = TrackWindow.xib;
 			sourceTree = "<group>";
@@ -1074,7 +1065,7 @@
 		E40C7A25140A860B00969DC3 /* ListWindow.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E40C7A26140A860B00969DC3 /* English */,
+				E4D87B3A2A77F238001E5EBC /* en */,
 			);
 			name = ListWindow.xib;
 			sourceTree = "<group>";
@@ -1082,7 +1073,7 @@
 		E40C7A29140A862D00969DC3 /* GraphicWindow.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E40C7A2A140A862D00969DC3 /* English */,
+				E4D87B3D2A77F2B4001E5EBC /* en */,
 			);
 			name = GraphicWindow.xib;
 			sourceTree = "<group>";
@@ -1090,7 +1081,7 @@
 		E40C7A2D140A865800969DC3 /* LoadingPanel.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E40C7A2E140A865800969DC3 /* English */,
+				E4D87B402A77F2D1001E5EBC /* en */,
 			);
 			name = LoadingPanel.xib;
 			sourceTree = "<group>";
@@ -1098,7 +1089,7 @@
 		E40C7A31140A867A00969DC3 /* RemapDevicePanel.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E40C7A32140A867A00969DC3 /* English */,
+				E4D87B432A77F2DE001E5EBC /* en */,
 			);
 			name = RemapDevicePanel.xib;
 			sourceTree = "<group>";
@@ -1106,7 +1097,7 @@
 		E40C7A3E140A879F00969DC3 /* AudioRecordPanel.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E40C7A3F140A879F00969DC3 /* English */,
+				E4D87B462A77F2E8001E5EBC /* en */,
 			);
 			name = AudioRecordPanel.xib;
 			sourceTree = "<group>";
@@ -1114,7 +1105,7 @@
 		E40C7A42140A87B400969DC3 /* EventFilterPanel.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E40C7A43140A87B400969DC3 /* English */,
+				E4D87B492A77F2F2001E5EBC /* en */,
 			);
 			name = EventFilterPanel.xib;
 			sourceTree = "<group>";
@@ -1122,7 +1113,7 @@
 		E40C7A4A140A87E100969DC3 /* RubyDialog.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E40C7A4B140A87E100969DC3 /* English */,
+				E4D87B4F2A77F306001E5EBC /* en */,
 			);
 			name = RubyDialog.xib;
 			sourceTree = "<group>";
@@ -1130,7 +1121,7 @@
 		E40C7A4E140A87FD00969DC3 /* RubyConsoleWindow.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E40C7A4F140A87FD00969DC3 /* English */,
+				E4D87B522A77F30C001E5EBC /* en */,
 			);
 			name = RubyConsoleWindow.xib;
 			sourceTree = "<group>";
@@ -1138,7 +1129,7 @@
 		E40C7AC5140A94F700969DC3 /* MetronomeSettingsPanel.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E40C7AC6140A94F700969DC3 /* English */,
+				E4D87B652A77F350001E5EBC /* en */,
 			);
 			name = MetronomeSettingsPanel.xib;
 			sourceTree = "<group>";
@@ -1146,7 +1137,7 @@
 		E42D332322E4913D00788C29 /* AudioSettingsPrefPanel.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E42D332422E4913D00788C29 /* English */,
+				E4D87B5E2A77F32C001E5EBC /* en */,
 			);
 			name = AudioSettingsPrefPanel.xib;
 			sourceTree = "<group>";
@@ -1154,7 +1145,7 @@
 		E467A8D7240D55B700F7DD6F /* SaveErrorPanel.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E467A8D8240D55B700F7DD6F /* English */,
+				E4D87B6E2A77F36A001E5EBC /* en */,
 			);
 			name = SaveErrorPanel.xib;
 			sourceTree = "<group>";
@@ -1162,7 +1153,7 @@
 		E46A94B01F776E81008477D2 /* EventKindContextMenu.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E46A94B11F776E81008477D2 /* English */,
+				E4D87B4C2A77F2FE001E5EBC /* en */,
 			);
 			name = EventKindContextMenu.xib;
 			sourceTree = "<group>";
@@ -1170,7 +1161,7 @@
 		E48F2FFF11D8EE7B00491B45 /* AUViewWindow.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E48F300011D8EE7B00491B45 /* English */,
+				E4D87B612A77F334001E5EBC /* en */,
 			);
 			name = AUViewWindow.xib;
 			sourceTree = "<group>";
@@ -1178,7 +1169,7 @@
 		E48F30EF11DB8B8D00491B45 /* AUCarbonWindow.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E48F30F011DB8B8D00491B45 /* English */,
+				E4D87B622A77F33F001E5EBC /* en */,
 			);
 			name = AUCarbonWindow.xib;
 			sourceTree = "<group>";
@@ -1186,7 +1177,7 @@
 		E4B4C25911C3ED4C00FE7593 /* AudioSettingsPanel.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E4B4C25A11C3ED4C00FE7593 /* English */,
+				E4D87B582A77F31B001E5EBC /* en */,
 			);
 			name = AudioSettingsPanel.xib;
 			sourceTree = "<group>";
@@ -1194,7 +1185,7 @@
 		E4C383F11411124C006F2661 /* AboutPanel.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E4C383F21411124C006F2661 /* English */,
+				E4D87B682A77F35A001E5EBC /* en */,
 			);
 			name = AboutPanel.xib;
 			sourceTree = "<group>";
@@ -1202,7 +1193,7 @@
 		E4C8B26D1F83DE020003BD42 /* AudioEffectPanel.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E4C8B26E1F83DE020003BD42 /* English */,
+				E4D87B5B2A77F324001E5EBC /* en */,
 			);
 			name = AudioEffectPanel.xib;
 			sourceTree = "<group>";
@@ -1210,15 +1201,31 @@
 		E4D701E913F540C5005EE5B3 /* RecordPanel.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E4D701EA13F540C5005EE5B3 /* English */,
+				E4D87B552A77F314001E5EBC /* en */,
 			);
 			name = RecordPanel.xib;
+			sourceTree = "<group>";
+		};
+		E4D87B7D2A77F3F6001E5EBC /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E4D87B7E2A77F3F6001E5EBC /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		E4D87B802A77F402001E5EBC /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E4D87B812A77F402001E5EBC /* en */,
+			);
+			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 		E4ED56E3241C85F5000C7DB7 /* PasteWarningTooManyTargets.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E4ED56E4241C85F5000C7DB7 /* English */,
+				E4D87B7A2A77F389001E5EBC /* en */,
 			);
 			name = PasteWarningTooManyTargets.xib;
 			sourceTree = "<group>";
@@ -1226,7 +1233,7 @@
 		E4ED56E6241C8AB9000C7DB7 /* PasteWarningTooFewTargets.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E4ED56E7241C8AB9000C7DB7 /* English */,
+				E4D87B772A77F380001E5EBC /* en */,
 			);
 			name = PasteWarningTooFewTargets.xib;
 			sourceTree = "<group>";
@@ -1234,7 +1241,7 @@
 		E4ED56E9241C8BA7000C7DB7 /* PasteWarningConductorShouldNotBeEditable.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E4ED56EA241C8BA7000C7DB7 /* English */,
+				E4D87B742A77F378001E5EBC /* en */,
 			);
 			name = PasteWarningConductorShouldNotBeEditable.xib;
 			sourceTree = "<group>";
@@ -1242,7 +1249,7 @@
 		E4ED56EC241C8CC7000C7DB7 /* PasteWarningConductorShouldBeEditable.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E4ED56ED241C8CC7000C7DB7 /* English */,
+				E4D87B712A77F370001E5EBC /* en */,
 			);
 			name = PasteWarningConductorShouldBeEditable.xib;
 			sourceTree = "<group>";
@@ -1250,17 +1257,9 @@
 		E4F81DC014C1CBE000F63BA6 /* QuantizePanel.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E4F81DC114C1CBE000F63BA6 /* English */,
+				E4D87B6B2A77F363001E5EBC /* en */,
 			);
 			name = QuantizePanel.xib;
-			sourceTree = "<group>";
-		};
-		F5FFC0B30237AAD301A80002 /* Localizable.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F5FFC0B40237AAD301A80002 /* Localizable.strings */,
-			);
-			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -1270,7 +1269,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD)";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -1294,7 +1293,7 @@
 				PREBINDING = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "jp.sourceforge.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = Alchemusica;
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx10.12;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
@@ -1307,7 +1306,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD)";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
@@ -1328,7 +1327,7 @@
 				PREBINDING = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "jp.sourceforge.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = Alchemusica;
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx10.12;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
@@ -1342,7 +1341,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD)";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
@@ -1362,7 +1361,7 @@
 				PREBINDING = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "jp.sourceforge.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = Alchemusica;
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx10.12;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
@@ -1396,7 +1395,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx10.12;
 			};
 			name = Development;
 		};
@@ -1422,7 +1421,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx10.12;
 			};
 			name = Deployment;
 		};
@@ -1448,7 +1447,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx10.12;
 			};
 			name = Default;
 		};
