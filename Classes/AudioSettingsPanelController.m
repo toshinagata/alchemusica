@@ -59,6 +59,7 @@ static AudioSettingsPanelController *sharedAudioSettingsPanelController;
 }
 
 /*  For debug  */
+#if 0
 static void printCFdata(CFTypeRef ref, int nestLevel)
 {
     int i, count, typeid;
@@ -102,6 +103,7 @@ static void printCFdata(CFTypeRef ref, int nestLevel)
         fprintf(stderr, "value of type %d (%p)\n", (int)CFGetTypeID(ref), (void *)ref);
     }
 }
+#endif
 
 - (id)exportAudioSettingsToPropertyList
 {

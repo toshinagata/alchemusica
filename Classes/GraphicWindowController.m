@@ -1230,7 +1230,7 @@ sTableColumnIDToInt(id identifier)
 
 - (void)setResolution: (float)resolution inSplitterView: (GraphicSplitterView *)view
 {
-    int i, code;
+    int i;
     for (i = 1; i < myClientViewsCount; i++) {
         if (records[i].splitter == view) {
             [self setStripChartAtIndex: i resolution: resolution];

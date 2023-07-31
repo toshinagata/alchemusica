@@ -300,7 +300,7 @@ callback(float progress, void *data)
 - (BOOL)writeToURL:(NSURL *)url ofType:(NSString *)typeName forSaveOperation:(NSSaveOperationType)saveOperation originalContentsURL:(NSURL *)absoluteOriginalContentsURL error:(NSError * _Nullable *)outError
 {
     NSString *fileName = [url path];
-    NSString *originalFile = [absoluteOriginalContentsURL path];
+    /* NSString *originalFile = [absoluteOriginalContentsURL path]; */
     MDStatus result;
     LoadingPanelController *controller;
     NSString *title = NSLocalizedString(@"Alchemusica: Saving...", @"");

@@ -39,7 +39,7 @@ static const float sSigmoidPoints[] = {0, 0, 0.45f, 0, 0.55f, 1, 1, 1, -1};
     these values. */
 static MDTimeType sTimeResolution = 5000;
 static MDTickType sTickResolution = 1;
-static float sValueResolution = 1.0f;
+/* static float sValueResolution = 1.0f; */
 
 static const int sVerticalMargin = 2;
 
@@ -621,7 +621,7 @@ getYValue(const MDEvent *ep, int eventKind)
 	MDEvent *ep;
 	float ppt = [dataSource pixelsPerTick];
 	float x, y, xlast, ylast;
-	float height = [self bounds].size.height;
+/*	float height = [self bounds].size.height; */
 	MyDocument *document = (MyDocument *)[dataSource document];
 	MDTickType theTick;
 
