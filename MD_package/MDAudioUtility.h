@@ -20,7 +20,7 @@
 
 #include <CoreAudio/CoreAudio.h>
 #include <CoreAudio/CoreAudioTypes.h>
-#include <Carbon/Carbon.h> // for CompareAndSwap
+/* #include <Carbon/Carbon.h> // for CompareAndSwap  */
 
 enum {
 	kMDRingBufferError_WayBehind = -2, /* both fetch times are earlier than buffer start time */

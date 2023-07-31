@@ -17,6 +17,8 @@
 
 #include "MDAudioUtility.h"
 
+#include <libkern/OSAtomic.h>  /*  For OSAtomicCompareAndSwap32()  */
+
 #pragma mark ====== MDRingBuffer ======
 
 static UInt32
@@ -317,5 +319,5 @@ MDRingBufferSetTimeBounds(MDRingBuffer *ring, MDSampleTime startTime, MDSampleTi
 	ring->timeBoundsQueue[index].endTime = endTime;
 	ring->timeBoundsQueue[index].updateCounter = nextPtr;
 	
-	CompareAndSwap(ring->timeBoundsQueuePtr, ring->timeBoundsQueuePtr + 1, &ring->timeBoundsQueuePtr);
+	OSAtomicCompareAndSwap32(ring->timeBoundsQueuePtr, ring->timeBoundsQueuePtr + 1, (SInt32 *)(&ring->timeBoundsQueuePtr));
 }
