@@ -3,7 +3,7 @@
  *  Alchemusica
  *
  *  Created by Toshi Nagata on 08/03/21.
- *  Copyright 2008-2017 Toshi Nagata. All rights reserved.
+ *  Copyright 2008-2022 Toshi Nagata. All rights reserved.
  *
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by

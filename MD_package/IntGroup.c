@@ -2,7 +2,7 @@
    IntGroup.c
    Created by Toshi Nagata, 2000.12.3.
 
-   Copyright (c) 2000-2016 Toshi Nagata.
+   Copyright (c) 2000-2022 Toshi Nagata.
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by

@@ -4,7 +4,7 @@
 //
 //  Created by Toshi Nagata on Sun Jan 1 2006.
 /*
-    Copyright (c) 2006-2011 Toshi Nagata. All rights reserved.
+    Copyright (c) 2006-2022 Toshi Nagata. All rights reserved.
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by

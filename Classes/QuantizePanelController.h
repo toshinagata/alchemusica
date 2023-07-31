@@ -3,7 +3,7 @@
 //  Alchemusica
 //
 //  Created by Toshi Nagata on 12/01/14.
-//  Copyright 2012 __MyCompanyName__. All rights reserved.
+//  Copyright 2012-2022 __MyCompanyName__. All rights reserved.
 //
 
 #import <Cocoa/Cocoa.h>
