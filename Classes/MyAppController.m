@@ -51,7 +51,7 @@ static BOOL sStartupCompleted = NO;  //  If NO, then Ruby interrupt check is dis
 
 - (void)applicationWillFinishLaunching:(NSNotification *)aNotification
 {
-	[AboutWindowController showSplashWindow];
+//	[AboutWindowController showSplashWindow];
 	
 	//  Initialize Audio/MIDI devices
 	MDAudioInitialize();
@@ -101,7 +101,7 @@ static BOOL sStartupCompleted = NO;  //  If NO, then Ruby interrupt check is dis
 	
 	[MetronomeSettingsPanelController initializeMetronomeSettings];
 
-	[AboutWindowController hideSplashWindow];
+//	[AboutWindowController hideSplashWindow];
 
     sStartupCompleted = YES;
 }
