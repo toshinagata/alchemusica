@@ -623,7 +623,6 @@ sMDAudioUpdateSoftwareDeviceInfo(int music_or_effect)
 	AudioComponent cmp = NULL;
 	char *cName;
 	int n, i;
-	UInt32 propSize;
     MDAudioMusicDeviceInfo info, *ip;
     MDArray **basep;
 	OSStatus err;
@@ -675,38 +674,13 @@ sMDAudioUpdateSoftwareDeviceInfo(int music_or_effect)
 		if (ip != NULL)
 			continue;  /*  This device is already known  */
 		
-		MyAppCallback_startupMessage("Loading %s...", info.name);
+        info.formatCached = 0;  /*  The information will be cached when first loaded  */
 		
-		/*  Get the audio output format  */
-		err = AudioComponentInstanceNew(cmp, &unit);
-		if (err == noErr) {
-            propSize = sizeof(MDAudioFormat);
-            err = AudioUnitGetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &info.format, &propSize);
-            info.acceptsCanonicalFormat = sMDAudioCompareFormat(&info.format, &gAudio->preferredFormat);
-		} else {
-			unit = NULL;
-		}
-		if (err == noErr) {
-            err = AudioUnitGetPropertyInfo(unit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global, 0, &propSize, NULL);
-            if (err == noErr && propSize > 0)
-                info.hasCustomView = kMDAudioHasCocoaView;
-            else {
-                err = AudioUnitGetPropertyInfo(unit, kAudioUnitProperty_GetUIComponentList, kAudioUnitScope_Global, 0, &propSize, NULL);
-                if (err == noErr && propSize > 0)
-                    info.hasCustomView = kMDAudioHasCarbonView;
-                else {
-                    info.hasCustomView = 0;
-                    err = noErr;
-                }
-            }
-		}
 		if (err == noErr) {
 			status = MDArrayInsert(*basep, MDArrayCount(*basep), 1, &info);
 		} else {
 			status = kMDErrorCannotSetupAudio;
 		}
-		if (unit != NULL)
-			AudioComponentInstanceDispose(unit);
 		if (status == kMDNoError)
 			n++;
 		else {
@@ -943,6 +917,7 @@ MDAudioSelectIOStreamDevice(int idx, int deviceIndex)
 	MDAudioMusicDeviceInfo *mp = NULL;
     MDAudioEffectChain *cp;
     MDStatus sts;
+    UInt32 propSize;
 	AudioDeviceID audioDeviceID;
 	AURenderCallbackStruct callback;
 	unsigned char midiSetupChanged = 0;
@@ -972,7 +947,6 @@ MDAudioSelectIOStreamDevice(int idx, int deviceIndex)
                 result = AudioUnitSetProperty(gAudio->outputUnit, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0, &audioDeviceID, sizeof(AudioDeviceID));
 				if (result == noErr) {
                     MDAudioFormat format;
-                    UInt32 propSize;
                     /*  Initialize the audio unit  */
                     //CHECK_ERR(result, AudioUnitInitialize(gAudio->outputUnit));
                     /*  Set the preferred format of the output unit to the output side of the converter unit */
@@ -1011,7 +985,7 @@ MDAudioSelectIOStreamDevice(int idx, int deviceIndex)
 		if (deviceIndex >= kMDAudioMusicDeviceIndexOffset) {
 			mp = MDAudioMusicDeviceInfoAtIndex(deviceIndex - kMDAudioMusicDeviceIndexOffset);
 			newDeviceID = (mp != NULL ? mp->code : kMDAudioMusicDeviceUnknown);
-            if (mp != NULL)
+            if (mp != NULL && mp->formatCached)
                 format = mp->format;
 		} else {
 			dp = MDAudioDeviceInfoAtIndex(deviceIndex, 1);
@@ -1088,6 +1062,18 @@ MDAudioSelectIOStreamDevice(int idx, int deviceIndex)
                 /*  Open component  */
                 CHECK_ERR(result, AUGraphOpen(gAudio->graph));
                 CHECK_ERR(result, AUGraphNodeInfo(gAudio->graph, ip->node, NULL, &ip->unit));
+                /*  If this is the first load of this music device, then cache the internal information */
+                if (!mp->formatCached) {
+                    /*  Get the audio output format  */
+                    propSize = sizeof(MDAudioFormat);
+                    CHECK_ERR(result, AudioUnitGetProperty(ip->unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &(mp->format), &propSize));
+                    format = mp->format;
+                    mp->acceptsCanonicalFormat = sMDAudioCompareFormat(&(mp->format), &gAudio->preferredFormat);
+                    CHECK_ERR(result, AudioUnitGetPropertyInfo(ip->unit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global, 0, &propSize, NULL));
+                    if (propSize > 0)
+                        mp->hasCustomView = kMDAudioHasCocoaView;
+                    mp->formatCached = 1;
+                }
                 /*  Connect the output to the converter unit(s) and set format  */
                 for (i = 0; i < ip->nchains; i++) {
                     cp = ip->chains + i;

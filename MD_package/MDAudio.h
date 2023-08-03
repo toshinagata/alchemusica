@@ -66,6 +66,7 @@ typedef struct MDAudioMusicDeviceInfo {
 	MDAudioFormat format;
 	unsigned char hasCustomView;
     unsigned char acceptsCanonicalFormat;  /*  For effects  */
+    unsigned char formatCached;  /* format, hasCustomView, acceptsCanonicalFormat are cached */
 } MDAudioMusicDeviceInfo;
 
 #define kMDAudioNumberOfInputStreams 40
