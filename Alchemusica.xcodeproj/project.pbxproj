@@ -1293,7 +1293,7 @@
 				PREBINDING = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "jp.sourceforge.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = Alchemusica;
-				SDKROOT = macosx10.12;
+				SDKROOT = macosx10.6;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
@@ -1327,7 +1327,7 @@
 				PREBINDING = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "jp.sourceforge.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = Alchemusica;
-				SDKROOT = macosx10.12;
+				SDKROOT = macosx10.6;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
@@ -1361,7 +1361,7 @@
 				PREBINDING = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "jp.sourceforge.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = Alchemusica;
-				SDKROOT = macosx10.12;
+				SDKROOT = macosx10.6;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
