@@ -25,7 +25,7 @@
                 <rect key="frame" x="0.0" y="0.0" width="331" height="185"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="107">
+                    <button verticalHuggingPriority="750" fixedFrame="YES" id="107">
                         <rect key="frame" x="221" y="13" width="90" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="push" title="Paste" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="108">
@@ -39,7 +39,7 @@ DQ
                             <action selector="pastePressed:" target="-2" id="N5M-vE-Zg1"/>
                         </connections>
                     </button>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="105">
+                    <button verticalHuggingPriority="750" fixedFrame="YES" id="105">
                         <rect key="frame" x="14" y="13" width="98" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="push" title="Cancel" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="106">
@@ -53,7 +53,7 @@ Gw
                             <action selector="cancelPressed:" target="-2" id="6lS-OZ-vQ5"/>
                         </connections>
                     </button>
-                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EQl-dM-m7g">
+                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" id="EQl-dM-m7g">
                         <rect key="frame" x="18" y="145" width="288" height="34"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <textFieldCell key="cell" controlSize="small" selectable="YES" title="The pasteboard has fewer MIDI tracks (%1) than the editable MIDI tracks (%2)." id="9bq-Zb-g7O">
@@ -62,7 +62,7 @@ Gw
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="d4B-uY-n4F">
+                    <button verticalHuggingPriority="750" fixedFrame="YES" tag="2" id="d4B-uY-n4F">
                         <rect key="frame" x="27" y="60" width="244" height="34"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="radio" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="Dah-1V-nhW">
@@ -75,7 +75,7 @@ all editable tracks are targeted</string>
                             <action selector="radioSelected:" target="-2" id="EnI-3T-FFa"/>
                         </connections>
                     </button>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="l6A-lU-6tL">
+                    <button verticalHuggingPriority="750" fixedFrame="YES" tag="1" id="l6A-lU-6tL">
                         <rect key="frame" x="27" y="103" width="240" height="34"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="radio" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="XNt-p9-x7q">

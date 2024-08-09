@@ -156,6 +156,173 @@
 		E48BC3882302A9990087B726 /* RewindButton.png in Resources */ = {isa = PBXBuildFile; fileRef = E48BC3872302A9990087B726 /* RewindButton.png */; };
 		E48F300111D8EE7B00491B45 /* AUViewWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E48F2FFF11D8EE7B00491B45 /* AUViewWindow.xib */; };
 		E4951EA411D63CD000D827EC /* AUViewWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = E4951EA311D63CD000D827EC /* AUViewWindowController.m */; };
+		E4BB67442C6625CB00EDCDA4 /* G-clef.icns in Resources */ = {isa = PBXBuildFile; fileRef = F520EC10023D1DC601A80002 /* G-clef.icns */; };
+		E4BB67452C6625CB00EDCDA4 /* plus.png in Resources */ = {isa = PBXBuildFile; fileRef = E48885ED04523E4B00A80006 /* plus.png */; };
+		E4BB67462C6625CB00EDCDA4 /* minus.png in Resources */ = {isa = PBXBuildFile; fileRef = E45323310452743D00A80006 /* minus.png */; };
+		E4BB67472C6625CB00EDCDA4 /* horizontal_move.png in Resources */ = {isa = PBXBuildFile; fileRef = E40D6F3F0636BF0100A80105 /* horizontal_move.png */; };
+		E4BB67482C6625CB00EDCDA4 /* AudioSettingsPrefPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E42D332322E4913D00788C29 /* AudioSettingsPrefPanel.xib */; };
+		E4BB67492C6625CB00EDCDA4 /* vertical_move.png in Resources */ = {isa = PBXBuildFile; fileRef = E40D6F450636C6B700A80105 /* vertical_move.png */; };
+		E4BB674A2C6625CB00EDCDA4 /* stretch.png in Resources */ = {isa = PBXBuildFile; fileRef = E4DB1648063B485600A80105 /* stretch.png */; };
+		E4BB674B2C6625CB00EDCDA4 /* RecButton.png in Resources */ = {isa = PBXBuildFile; fileRef = E4ECB32B06E231BB00A80105 /* RecButton.png */; };
+		E4BB674C2C6625CB00EDCDA4 /* horizontal_split.png in Resources */ = {isa = PBXBuildFile; fileRef = E4D803D80737CD3500EB5804 /* horizontal_split.png */; };
+		E4BB674D2C6625CB00EDCDA4 /* move_around.png in Resources */ = {isa = PBXBuildFile; fileRef = E4D803DC0737D6F400EB5804 /* move_around.png */; };
+		E4BB674E2C6625CB00EDCDA4 /* document_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = E4F95D80073D909700F1D121 /* document_icon.icns */; };
+		E4BB674F2C6625CB00EDCDA4 /* expand.png in Resources */ = {isa = PBXBuildFile; fileRef = E4E44B92074CFB9D0034031C /* expand.png */; };
+		E4BB67502C6625CB00EDCDA4 /* SaveErrorPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E467A8D7240D55B700F7DD6F /* SaveErrorPanel.xib */; };
+		E4BB67512C6625CB00EDCDA4 /* shrink.png in Resources */ = {isa = PBXBuildFile; fileRef = E4E44B93074CFB9D0034031C /* shrink.png */; };
+		E4BB67522C6625CB00EDCDA4 /* loupe.png in Resources */ = {isa = PBXBuildFile; fileRef = E44A56B8074F99DB002034A7 /* loupe.png */; };
+		E4BB67532C6625CB00EDCDA4 /* selection.png in Resources */ = {isa = PBXBuildFile; fileRef = E4266C730966379B00C04A48 /* selection.png */; };
+		E4BB67542C6625CB00EDCDA4 /* PasteWarningConductorShouldNotBeEditable.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4ED56E9241C8BA7000C7DB7 /* PasteWarningConductorShouldNotBeEditable.xib */; };
+		E4BB67552C6625CB00EDCDA4 /* pencil.png in Resources */ = {isa = PBXBuildFile; fileRef = E4266C81096647F100C04A48 /* pencil.png */; };
+		E4BB67562C6625CB00EDCDA4 /* FFButton.png in Resources */ = {isa = PBXBuildFile; fileRef = E48BC3812302A89E0087B726 /* FFButton.png */; };
+		E4BB67572C6625CB00EDCDA4 /* sigmoid.png in Resources */ = {isa = PBXBuildFile; fileRef = E4332325096841C800D5DAD8 /* sigmoid.png */; };
+		E4BB67582C6625CB00EDCDA4 /* random.png in Resources */ = {isa = PBXBuildFile; fileRef = E4332326096841C800D5DAD8 /* random.png */; };
+		E4BB67592C6625CB00EDCDA4 /* linear.png in Resources */ = {isa = PBXBuildFile; fileRef = E49DF713096935AA00A91C40 /* linear.png */; };
+		E4BB675A2C6625CB00EDCDA4 /* RewindButton.png in Resources */ = {isa = PBXBuildFile; fileRef = E48BC3872302A9990087B726 /* RewindButton.png */; };
+		E4BB675B2C6625CB00EDCDA4 /* triangle.png in Resources */ = {isa = PBXBuildFile; fileRef = E49DF721096935FA00A91C40 /* triangle.png */; };
+		E4BB675C2C6625CB00EDCDA4 /* pencil_cursor.png in Resources */ = {isa = PBXBuildFile; fileRef = E49DF79709694BDC00A91C40 /* pencil_cursor.png */; };
+		E4BB675D2C6625CB00EDCDA4 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = E4D87B802A77F402001E5EBC /* Localizable.strings */; };
+		E4BB675E2C6625CB00EDCDA4 /* arc.png in Resources */ = {isa = PBXBuildFile; fileRef = E49DF811096A3E2400A91C40 /* arc.png */; };
+		E4BB675F2C6625CB00EDCDA4 /* parabola.png in Resources */ = {isa = PBXBuildFile; fileRef = E49DF812096A3E2400A91C40 /* parabola.png */; };
+		E4BB67602C6625CB00EDCDA4 /* pencil_small.png in Resources */ = {isa = PBXBuildFile; fileRef = E49DF944096A9B8500A91C40 /* pencil_small.png */; };
+		E4BB67612C6625CB00EDCDA4 /* double_triangle.png in Resources */ = {isa = PBXBuildFile; fileRef = E4E8250F1F94F264009C5FE6 /* double_triangle.png */; };
+		E4BB67622C6625CB00EDCDA4 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E4D87B7D2A77F3F6001E5EBC /* InfoPlist.strings */; };
+		E4BB67632C6625CB00EDCDA4 /* StartEditingRange.png in Resources */ = {isa = PBXBuildFile; fileRef = E4280AFF0A44164600DCD341 /* StartEditingRange.png */; };
+		E4BB67642C6625CB00EDCDA4 /* EndEditingRange.png in Resources */ = {isa = PBXBuildFile; fileRef = E4280BEB0A44465800DCD341 /* EndEditingRange.png */; };
+		E4BB67652C6625CB00EDCDA4 /* ibeam.png in Resources */ = {isa = PBXBuildFile; fileRef = E4402B790BF592170076972C /* ibeam.png */; };
+		E4BB67662C6625CB00EDCDA4 /* speaker.png in Resources */ = {isa = PBXBuildFile; fileRef = E4CD4D710C106B9800AF6017 /* speaker.png */; };
+		E4BB67672C6625CB00EDCDA4 /* eye_open.png in Resources */ = {isa = PBXBuildFile; fileRef = E4BAFFAD0C1C3ED800A5EAED /* eye_open.png */; };
+		E4BB67682C6625CB00EDCDA4 /* eye_close.png in Resources */ = {isa = PBXBuildFile; fileRef = E4BAFFC20C1C44D800A5EAED /* eye_close.png */; };
+		E4BB67692C6625CB00EDCDA4 /* note4.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081650C4B547E009D0A87 /* note4.png */; };
+		E4BB676A2C6625CB00EDCDA4 /* note16.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081720C4B57AA009D0A87 /* note16.png */; };
+		E4BB676B2C6625CB00EDCDA4 /* note8.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081740C4B57B2009D0A87 /* note8.png */; };
+		E4BB676C2C6625CB00EDCDA4 /* note32.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081760C4B58F5009D0A87 /* note32.png */; };
+		E4BB676D2C6625CB00EDCDA4 /* note1.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081780C4B5E62009D0A87 /* note1.png */; };
+		E4BB676E2C6625CB00EDCDA4 /* StopButton.png in Resources */ = {isa = PBXBuildFile; fileRef = E48BC37F2302A7BD0087B726 /* StopButton.png */; };
+		E4BB676F2C6625CB00EDCDA4 /* note2.png in Resources */ = {isa = PBXBuildFile; fileRef = E400817A0C4B5E69009D0A87 /* note2.png */; };
+		E4BB67702C6625CB00EDCDA4 /* note1_3.png in Resources */ = {isa = PBXBuildFile; fileRef = E400817C0C4B6795009D0A87 /* note1_3.png */; };
+		E4BB67712C6625CB00EDCDA4 /* note1d.png in Resources */ = {isa = PBXBuildFile; fileRef = E400817D0C4B6795009D0A87 /* note1d.png */; };
+		E4BB67722C6625CB00EDCDA4 /* note2_3.png in Resources */ = {isa = PBXBuildFile; fileRef = E400817E0C4B6795009D0A87 /* note2_3.png */; };
+		E4BB67732C6625CB00EDCDA4 /* speaker_cursor.png in Resources */ = {isa = PBXBuildFile; fileRef = E468AD5A1FAEBFDF00EE393E /* speaker_cursor.png */; };
+		E4BB67742C6625CB00EDCDA4 /* note2d.png in Resources */ = {isa = PBXBuildFile; fileRef = E400817F0C4B6795009D0A87 /* note2d.png */; };
+		E4BB67752C6625CB00EDCDA4 /* note4_3.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081800C4B6795009D0A87 /* note4_3.png */; };
+		E4BB67762C6625CB00EDCDA4 /* note4d.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081810C4B6795009D0A87 /* note4d.png */; };
+		E4BB67772C6625CB00EDCDA4 /* note8_3.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081820C4B6795009D0A87 /* note8_3.png */; };
+		E4BB67782C6625CB00EDCDA4 /* note8d.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081830C4B6795009D0A87 /* note8d.png */; };
+		E4BB67792C6625CB00EDCDA4 /* note16_3.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081840C4B6795009D0A87 /* note16_3.png */; };
+		E4BB677A2C6625CB00EDCDA4 /* note16d.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081850C4B6795009D0A87 /* note16d.png */; };
+		E4BB677B2C6625CB00EDCDA4 /* note32_3.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081860C4B6795009D0A87 /* note32_3.png */; };
+		E4BB677C2C6625CB00EDCDA4 /* note32d.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081870C4B6795009D0A87 /* note32d.png */; };
+		E4BB677D2C6625CB00EDCDA4 /* NQ.png in Resources */ = {isa = PBXBuildFile; fileRef = E40081B50C4B73D5009D0A87 /* NQ.png */; };
+		E4BB677E2C6625CB00EDCDA4 /* Ruby_Scripts in Resources */ = {isa = PBXBuildFile; fileRef = E44BC0081044332E00978A1A /* Ruby_Scripts */; };
+		E4BB677F2C6625CB00EDCDA4 /* horizontal_move_plus.png in Resources */ = {isa = PBXBuildFile; fileRef = E4F45EF5104A75B8008C7814 /* horizontal_move_plus.png */; };
+		E4BB67802C6625CB00EDCDA4 /* vertical_move_plus.png in Resources */ = {isa = PBXBuildFile; fileRef = E4F45EF6104A75B8008C7814 /* vertical_move_plus.png */; };
+		E4BB67812C6625CB00EDCDA4 /* AudioSettingsPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4B4C25911C3ED4C00FE7593 /* AudioSettingsPanel.xib */; };
+		E4BB67822C6625CB00EDCDA4 /* PauseButton.png in Resources */ = {isa = PBXBuildFile; fileRef = E48BC3852302A9210087B726 /* PauseButton.png */; };
+		E4BB67832C6625CB00EDCDA4 /* AUViewWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E48F2FFF11D8EE7B00491B45 /* AUViewWindow.xib */; };
+		E4BB67842C6625CB00EDCDA4 /* PlayButton.png in Resources */ = {isa = PBXBuildFile; fileRef = E48BC3832302A8DB0087B726 /* PlayButton.png */; };
+		E4BB67852C6625CB00EDCDA4 /* AudioEffectPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4C8B26D1F83DE020003BD42 /* AudioEffectPanel.xib */; };
+		E4BB67862C6625CB00EDCDA4 /* RecordPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4D701E913F540C5005EE5B3 /* RecordPanel.xib */; };
+		E4BB67872C6625CB00EDCDA4 /* horizontal_move_zoom.png in Resources */ = {isa = PBXBuildFile; fileRef = E4FB54C213FA851A001C1290 /* horizontal_move_zoom.png */; };
+		E4BB67882C6625CB00EDCDA4 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A1D140A85A200969DC3 /* MainMenu.xib */; };
+		E4BB67892C6625CB00EDCDA4 /* PasteWarningConductorShouldBeEditable.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4ED56EC241C8CC7000C7DB7 /* PasteWarningConductorShouldBeEditable.xib */; };
+		E4BB678A2C6625CB00EDCDA4 /* PasteWarningTooManyTargets.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4ED56E3241C85F5000C7DB7 /* PasteWarningTooManyTargets.xib */; };
+		E4BB678B2C6625CB00EDCDA4 /* TrackWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A21140A85DB00969DC3 /* TrackWindow.xib */; };
+		E4BB678C2C6625CB00EDCDA4 /* ListWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A25140A860B00969DC3 /* ListWindow.xib */; };
+		E4BB678D2C6625CB00EDCDA4 /* GraphicWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A29140A862D00969DC3 /* GraphicWindow.xib */; };
+		E4BB678E2C6625CB00EDCDA4 /* LoadingPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A2D140A865800969DC3 /* LoadingPanel.xib */; };
+		E4BB678F2C6625CB00EDCDA4 /* RemapDevicePanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A31140A867A00969DC3 /* RemapDevicePanel.xib */; };
+		E4BB67902C6625CB00EDCDA4 /* EventKindContextMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = E46A94B01F776E81008477D2 /* EventKindContextMenu.xib */; };
+		E4BB67912C6625CB00EDCDA4 /* AudioRecordPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A3E140A879F00969DC3 /* AudioRecordPanel.xib */; };
+		E4BB67922C6625CB00EDCDA4 /* EventFilterPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A42140A87B400969DC3 /* EventFilterPanel.xib */; };
+		E4BB67932C6625CB00EDCDA4 /* RubyDialog.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A4A140A87E100969DC3 /* RubyDialog.xib */; };
+		E4BB67942C6625CB00EDCDA4 /* PasteWarningTooFewTargets.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4ED56E6241C8AB9000C7DB7 /* PasteWarningTooFewTargets.xib */; };
+		E4BB67952C6625CB00EDCDA4 /* RubyConsoleWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A4E140A87FD00969DC3 /* RubyConsoleWindow.xib */; };
+		E4BB67962C6625CB00EDCDA4 /* MetronomeSettingsPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7AC5140A94F700969DC3 /* MetronomeSettingsPanel.xib */; };
+		E4BB67972C6625CB00EDCDA4 /* AboutPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4C383F11411124C006F2661 /* AboutPanel.xib */; };
+		E4BB67982C6625CB00EDCDA4 /* lastBuild.txt in Resources */ = {isa = PBXBuildFile; fileRef = E4C3844314111D23006F2661 /* lastBuild.txt */; };
+		E4BB67992C6625CB00EDCDA4 /* Version in Resources */ = {isa = PBXBuildFile; fileRef = E4C384E414112400006F2661 /* Version */; };
+		E4BB679A2C6625CB00EDCDA4 /* mute.png in Resources */ = {isa = PBXBuildFile; fileRef = E44590C81413C1C400F5C20D /* mute.png */; };
+		E4BB679B2C6625CB00EDCDA4 /* mute_non.png in Resources */ = {isa = PBXBuildFile; fileRef = E44590C91413C1C400F5C20D /* mute_non.png */; };
+		E4BB679C2C6625CB00EDCDA4 /* speaker_gray.png in Resources */ = {isa = PBXBuildFile; fileRef = E44591191413CC0500F5C20D /* speaker_gray.png */; };
+		E4BB679D2C6625CB00EDCDA4 /* solo.png in Resources */ = {isa = PBXBuildFile; fileRef = E44591971413D9F200F5C20D /* solo.png */; };
+		E4BB679E2C6625CB00EDCDA4 /* solo_non.png in Resources */ = {isa = PBXBuildFile; fileRef = E445919B1413DA2D00F5C20D /* solo_non.png */; };
+		E4BB679F2C6625CB00EDCDA4 /* QuantizePanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4F81DC014C1CBE000F63BA6 /* QuantizePanel.xib */; };
+		E4BB67A12C6625CB00EDCDA4 /* ContextMenuTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E46A94AE1F776B23008477D2 /* ContextMenuTextFieldCell.m */; };
+		E4BB67A22C6625CB00EDCDA4 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 2A37F4B0FDCFA73011CA2CEA /* main.m */; };
+		E4BB67A32C6625CB00EDCDA4 /* MDEvent.c in Sources */ = {isa = PBXBuildFile; fileRef = E4CF0D510746E734000ADE20 /* MDEvent.c */; };
+		E4BB67A42C6625CB00EDCDA4 /* MDTrack.c in Sources */ = {isa = PBXBuildFile; fileRef = E4CF0D5C0746E734000ADE20 /* MDTrack.c */; };
+		E4BB67A52C6625CB00EDCDA4 /* MDSequence.c in Sources */ = {isa = PBXBuildFile; fileRef = E4CF0D590746E734000ADE20 /* MDSequence.c */; };
+		E4BB67A62C6625CB00EDCDA4 /* MDSequenceSMF.c in Sources */ = {isa = PBXBuildFile; fileRef = E4CF0D5B0746E734000ADE20 /* MDSequenceSMF.c */; };
+		E4BB67A72C6625CB00EDCDA4 /* MDCalibrator.c in Sources */ = {isa = PBXBuildFile; fileRef = E4CF0D4E0746E734000ADE20 /* MDCalibrator.c */; };
+		E4BB67A82C6625CB00EDCDA4 /* MDUtility.c in Sources */ = {isa = PBXBuildFile; fileRef = E4CF0D5E0746E734000ADE20 /* MDUtility.c */; };
+		E4BB67A92C6625CB00EDCDA4 /* MDPlayer_MacOSX.c in Sources */ = {isa = PBXBuildFile; fileRef = E4CF0D540746E734000ADE20 /* MDPlayer_MacOSX.c */; };
+		E4BB67AA2C6625CB00EDCDA4 /* MDAudio_MacOSX.c in Sources */ = {isa = PBXBuildFile; fileRef = E405989D0D311A9700161E25 /* MDAudio_MacOSX.c */; };
+		E4BB67AB2C6625CB00EDCDA4 /* SaveErrorPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E467A8DA240EA60400F7DD6F /* SaveErrorPanelController.m */; };
+		E4BB67AC2C6625CB00EDCDA4 /* AudioEffectPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E47643C11F889F62009A206D /* AudioEffectPanelController.m */; };
+		E4BB67AD2C6625CB00EDCDA4 /* MDRubyCore.m in Sources */ = {isa = PBXBuildFile; fileRef = E43E5F210D92AD49002FDD1E /* MDRubyCore.m */; };
+		E4BB67AE2C6625CB00EDCDA4 /* MDObjects.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D2EB090244AFAF01A80002 /* MDObjects.m */; };
+		E4BB67AF2C6625CB00EDCDA4 /* LoadingPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D2EB070244AFAF01A80002 /* LoadingPanelController.m */; };
+		E4BB67B02C6625CB00EDCDA4 /* MyAppController.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D2EB0B0244AFAF01A80002 /* MyAppController.m */; };
+		E4BB67B12C6625CB00EDCDA4 /* MyDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D2EB0D0244AFAF01A80002 /* MyDocument.m */; };
+		E4BB67B22C6625CB00EDCDA4 /* ListWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D2EB0F0244AFAF01A80002 /* ListWindowController.m */; };
+		E4BB67B32C6625CB00EDCDA4 /* MyMIDISequence.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D2EB110244AFAF01A80002 /* MyMIDISequence.m */; };
+		E4BB67B42C6625CB00EDCDA4 /* MyTableHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D2EB130244AFAF01A80002 /* MyTableHeaderView.m */; };
+		E4BB67B52C6625CB00EDCDA4 /* MyTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D2EB150244AFAF01A80002 /* MyTableView.m */; };
+		E4BB67B62C6625CB00EDCDA4 /* MyClipView.m in Sources */ = {isa = PBXBuildFile; fileRef = E47643CA1F8B236F009A206D /* MyClipView.m */; };
+		E4BB67B72C6625CB00EDCDA4 /* RemapDevicePanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D2EB1B0244AFAF01A80002 /* RemapDevicePanelController.m */; };
+		E4BB67B82C6625CB00EDCDA4 /* GraphicWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = F5048CB203D5C06101A80002 /* GraphicWindowController.m */; };
+		E4BB67B92C6625CB00EDCDA4 /* PianoRollView.m in Sources */ = {isa = PBXBuildFile; fileRef = F5048CB603D5C07201A80002 /* PianoRollView.m */; };
+		E4BB67BA2C6625CB00EDCDA4 /* PianoRollRulerView.m in Sources */ = {isa = PBXBuildFile; fileRef = F569756903DADD0A01A80002 /* PianoRollRulerView.m */; };
+		E4BB67BB2C6625CB00EDCDA4 /* GraphicClientView.m in Sources */ = {isa = PBXBuildFile; fileRef = F5D6C49303E0489301A80002 /* GraphicClientView.m */; };
+		E4BB67BC2C6625CB00EDCDA4 /* GraphicRulerView.m in Sources */ = {isa = PBXBuildFile; fileRef = F52B39A903E17D2101A80002 /* GraphicRulerView.m */; };
+		E4BB67BD2C6625CB00EDCDA4 /* TimeChartView.m in Sources */ = {isa = PBXBuildFile; fileRef = F52B39AF03E18DEF01A80002 /* TimeChartView.m */; };
+		E4BB67BE2C6625CB00EDCDA4 /* NSMenuAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = E4CCB46F1F8FA2F9005F2A76 /* NSMenuAdditions.m */; };
+		E4BB67BF2C6625CB00EDCDA4 /* StripChartView.m in Sources */ = {isa = PBXBuildFile; fileRef = F554D6E703E3FB8401A80002 /* StripChartView.m */; };
+		E4BB67C02C6625CB00EDCDA4 /* StripChartRulerView.m in Sources */ = {isa = PBXBuildFile; fileRef = F554D6EB03E3FC8901A80002 /* StripChartRulerView.m */; };
+		E4BB67C12C6625CB00EDCDA4 /* GraphicSplitterView.m in Sources */ = {isa = PBXBuildFile; fileRef = F50273C403F6969A01A80002 /* GraphicSplitterView.m */; };
+		E4BB67C22C6625CB00EDCDA4 /* GraphicFloatingView.m in Sources */ = {isa = PBXBuildFile; fileRef = E4743AE70456EAE900A80006 /* GraphicFloatingView.m */; };
+		E4BB67C32C6625CB00EDCDA4 /* ColorCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E4335F910472902100A80006 /* ColorCell.m */; };
+		E4BB67C42C6625CB00EDCDA4 /* NSStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = E4B5C7BB060C9406000BC127 /* NSStringAdditions.m */; };
+		E4BB67C52C6625CB00EDCDA4 /* NSEventAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = E4DB164B063B529800A80105 /* NSEventAdditions.m */; };
+		E4BB67C62C6625CB00EDCDA4 /* TrackAttributeCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E4811680071C26C700A80105 /* TrackAttributeCell.m */; };
+		E4BB67C72C6625CB00EDCDA4 /* AudioSettingsPrefPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E42D332722E4954900788C29 /* AudioSettingsPrefPanelController.m */; };
+		E4BB67C82C6625CB00EDCDA4 /* AudioEffectLayoutView.m in Sources */ = {isa = PBXBuildFile; fileRef = E47643C41F88B29B009A206D /* AudioEffectLayoutView.m */; };
+		E4BB67C92C6625CB00EDCDA4 /* NSWindowControllerAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = E426A2CE073E73B00039474B /* NSWindowControllerAdditions.m */; };
+		E4BB67CA2C6625CB00EDCDA4 /* NSCursorAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = E44A56BB074F9A6F002034A7 /* NSCursorAdditions.m */; };
+		E4BB67CB2C6625CB00EDCDA4 /* MyPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = E4266D0D0966681100C04A48 /* MyPopUpButton.m */; };
+		E4BB67CC2C6625CB00EDCDA4 /* MyPopUpButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E46394320A0E0C5400FD0629 /* MyPopUpButtonCell.m */; };
+		E4BB67CD2C6625CB00EDCDA4 /* MyComboBoxCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E46394F20A0E52D900FD0629 /* MyComboBoxCell.m */; };
+		E4BB67CE2C6625CB00EDCDA4 /* GraphicBackgroundView.m in Sources */ = {isa = PBXBuildFile; fileRef = E40EDA4C0BBFFD2600B3FE78 /* GraphicBackgroundView.m */; };
+		E4BB67CF2C6625CB00EDCDA4 /* TextureView.m in Sources */ = {isa = PBXBuildFile; fileRef = E4DB28E10C1458D500B6E980 /* TextureView.m */; };
+		E4BB67D02C6625CB00EDCDA4 /* MyWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = E4BAFD810C18613600A5EAED /* MyWindow.m */; };
+		E4BB67D12C6625CB00EDCDA4 /* PlayingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E4BAFF300C1B005600A5EAED /* PlayingViewController.m */; };
+		E4BB67D22C6625CB00EDCDA4 /* RecordPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E44C7AC80C1D9E33004138AB /* RecordPanelController.m */; };
+		E4BB67D32C6625CB00EDCDA4 /* EventFilterPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E430D72C0D79700F00717A72 /* EventFilterPanelController.m */; };
+		E4BB67D42C6625CB00EDCDA4 /* MDRubySequence.m in Sources */ = {isa = PBXBuildFile; fileRef = E4B2E8E50D93F92600781995 /* MDRubySequence.m */; };
+		E4BB67D52C6625CB00EDCDA4 /* MDRubyTrack.m in Sources */ = {isa = PBXBuildFile; fileRef = E4B2EB330D9AA05600781995 /* MDRubyTrack.m */; };
+		E4BB67D62C6625CB00EDCDA4 /* MDRubyPointer.m in Sources */ = {isa = PBXBuildFile; fileRef = E49B98070D9F79B100F61755 /* MDRubyPointer.m */; };
+		E4BB67D72C6625CB00EDCDA4 /* RubyConsoleWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = E41CC3E00F599ACF006E6817 /* RubyConsoleWindowController.m */; };
+		E4BB67D82C6625CB00EDCDA4 /* MDRubyEventSet.m in Sources */ = {isa = PBXBuildFile; fileRef = E4AA82341053F41D0052CF7F /* MDRubyEventSet.m */; };
+		E4BB67D92C6625CB00EDCDA4 /* MDAudioUtility.c in Sources */ = {isa = PBXBuildFile; fileRef = E4B0B25F10A30F78007B7360 /* MDAudioUtility.c */; };
+		E4BB67DA2C6625CB00EDCDA4 /* ruby_dialog.c in Sources */ = {isa = PBXBuildFile; fileRef = E4DC0CE910A6623600377275 /* ruby_dialog.c */; };
+		E4BB67DB2C6625CB00EDCDA4 /* RubyDialogController.m in Sources */ = {isa = PBXBuildFile; fileRef = E42BF87E0DB1D1100095F74F /* RubyDialogController.m */; };
+		E4BB67DC2C6625CB00EDCDA4 /* PasteWarningPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E4ED56F0241C8D86000C7DB7 /* PasteWarningPanelController.m */; };
+		E4BB67DD2C6625CB00EDCDA4 /* AudioSettingsPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E4B4C26811C3EDAC00FE7593 /* AudioSettingsPanelController.m */; };
+		E4BB67DE2C6625CB00EDCDA4 /* AUViewWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = E4951EA311D63CD000D827EC /* AUViewWindowController.m */; };
+		E4BB67DF2C6625CB00EDCDA4 /* MetronomeSettingsPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E40C7ACB140A95D700969DC3 /* MetronomeSettingsPanelController.m */; };
+		E4BB67E02C6625CB00EDCDA4 /* AboutWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = E4C383FB141117F9006F2661 /* AboutWindowController.m */; };
+		E4BB67E12C6625CB00EDCDA4 /* QuantizePanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = E4F81DC614C1CC3100F63BA6 /* QuantizePanelController.m */; };
+		E4BB67E22C6625CB00EDCDA4 /* IntGroup.c in Sources */ = {isa = PBXBuildFile; fileRef = E4216C1F19D6CD3E00533630 /* IntGroup.c */; };
+		E4BB67E42C6625CB00EDCDA4 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A7FEA54F5311CA2CBB /* Cocoa.framework */; };
+		E4BB67E52C6625CB00EDCDA4 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00FBF1B800C9C4767F000001 /* AudioToolbox.framework */; };
+		E4BB67E62C6625CB00EDCDA4 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00FBF1BC00C9C7EA7F000001 /* Carbon.framework */; };
+		E4BB67E72C6625CB00EDCDA4 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0217E8F300D51D2B7F000001 /* CoreAudio.framework */; };
+		E4BB67E82C6625CB00EDCDA4 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00FB976F00D7AF2F7F000001 /* CoreServices.framework */; };
+		E4BB67E92C6625CB00EDCDA4 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5F9405D00EE2B4E01000001 /* CoreMIDI.framework */; };
+		E4BB67EA2C6625CB00EDCDA4 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5FB767800F88D8601000001 /* AudioUnit.framework */; };
+		E4BB67EB2C6625CB00EDCDA4 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5835E0702292DC201A80002 /* CoreFoundation.framework */; };
+		E4BB67EC2C6625CB00EDCDA4 /* CoreAudioKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4562EC211D10A8800EBD2AA /* CoreAudioKit.framework */; };
 		E4C383F31411124C006F2661 /* AboutPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4C383F11411124C006F2661 /* AboutPanel.xib */; };
 		E4C383FC141117F9006F2661 /* AboutWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = E4C383FB141117F9006F2661 /* AboutWindowController.m */; };
 		E4C3844414111D23006F2661 /* lastBuild.txt in Resources */ = {isa = PBXBuildFile; fileRef = E4C3844314111D23006F2661 /* lastBuild.txt */; };
@@ -308,6 +475,8 @@
 		E4BAFF300C1B005600A5EAED /* PlayingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = PlayingViewController.m; path = Classes/PlayingViewController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
 		E4BAFFAD0C1C3ED800A5EAED /* eye_open.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = eye_open.png; path = icons/eye_open.png; sourceTree = "<group>"; };
 		E4BAFFC20C1C44D800A5EAED /* eye_close.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = eye_close.png; path = icons/eye_close.png; sourceTree = "<group>"; };
+		E4BB67F22C6625CB00EDCDA4 /* Alchemusica-Legacy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Alchemusica-Legacy.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E4BB67F32C6625CB00EDCDA4 /* Alchemusica-Legacy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Alchemusica-Legacy-Info.plist"; path = "/Users/toshi_n/Development/Alchemusica/Alchemusica-Legacy-Info.plist"; sourceTree = "<absolute>"; };
 		E4C383FA141117F9006F2661 /* AboutWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = AboutWindowController.h; path = Classes/AboutWindowController.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
 		E4C383FB141117F9006F2661 /* AboutWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = AboutWindowController.m; path = Classes/AboutWindowController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
 		E4C3844314111D23006F2661 /* lastBuild.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = lastBuild.txt; sourceTree = "<group>"; };
@@ -439,6 +608,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E4BB67E32C6625CB00EDCDA4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E4BB67E42C6625CB00EDCDA4 /* Cocoa.framework in Frameworks */,
+				E4BB67E52C6625CB00EDCDA4 /* AudioToolbox.framework in Frameworks */,
+				E4BB67E62C6625CB00EDCDA4 /* Carbon.framework in Frameworks */,
+				E4BB67E72C6625CB00EDCDA4 /* CoreAudio.framework in Frameworks */,
+				E4BB67E82C6625CB00EDCDA4 /* CoreServices.framework in Frameworks */,
+				E4BB67E92C6625CB00EDCDA4 /* CoreMIDI.framework in Frameworks */,
+				E4BB67EA2C6625CB00EDCDA4 /* AudioUnit.framework in Frameworks */,
+				E4BB67EB2C6625CB00EDCDA4 /* CoreFoundation.framework in Frameworks */,
+				E4BB67EC2C6625CB00EDCDA4 /* CoreAudioKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -501,6 +686,7 @@
 			isa = PBXGroup;
 			children = (
 				E400BBBD11D627550032B969 /* Alchemusica.app */,
+				E4BB67F22C6625CB00EDCDA4 /* Alchemusica-Legacy.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -517,6 +703,7 @@
 				19C28FB0FE9D524F11CA2CBB /* Products */,
 				E44BC0081044332E00978A1A /* Ruby_Scripts */,
 				E400BBBF11D627550032B969 /* Alchemusica-Info.plist */,
+				E4BB67F32C6625CB00EDCDA4 /* Alchemusica-Legacy-Info.plist */,
 			);
 			name = "MIDI-cocoa-2";
 			sourceTree = "<group>";
@@ -794,6 +981,25 @@
 			productReference = E400BBBD11D627550032B969 /* Alchemusica.app */;
 			productType = "com.apple.product-type.application";
 		};
+		E4BB67412C6625CB00EDCDA4 /* Alchemusica-Legacy */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E4BB67EE2C6625CB00EDCDA4 /* Build configuration list for PBXNativeTarget "Alchemusica-Legacy" */;
+			buildPhases = (
+				E4BB67422C6625CB00EDCDA4 /* ShellScript */,
+				E4BB67432C6625CB00EDCDA4 /* Resources */,
+				E4BB67A02C6625CB00EDCDA4 /* Sources */,
+				E4BB67E32C6625CB00EDCDA4 /* Frameworks */,
+				E4BB67ED2C6625CB00EDCDA4 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Alchemusica-Legacy";
+			productName = Alchemusica;
+			productReference = E4BB67F22C6625CB00EDCDA4 /* Alchemusica-Legacy.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -818,6 +1024,7 @@
 			projectRoot = "";
 			targets = (
 				E400BBBC11D627550032B969 /* Alchemusica */,
+				E4BB67412C6625CB00EDCDA4 /* Alchemusica-Legacy */,
 			);
 		};
 /* End PBXProject section */
@@ -922,6 +1129,105 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E4BB67432C6625CB00EDCDA4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E4BB67442C6625CB00EDCDA4 /* G-clef.icns in Resources */,
+				E4BB67452C6625CB00EDCDA4 /* plus.png in Resources */,
+				E4BB67462C6625CB00EDCDA4 /* minus.png in Resources */,
+				E4BB67472C6625CB00EDCDA4 /* horizontal_move.png in Resources */,
+				E4BB67482C6625CB00EDCDA4 /* AudioSettingsPrefPanel.xib in Resources */,
+				E4BB67492C6625CB00EDCDA4 /* vertical_move.png in Resources */,
+				E4BB674A2C6625CB00EDCDA4 /* stretch.png in Resources */,
+				E4BB674B2C6625CB00EDCDA4 /* RecButton.png in Resources */,
+				E4BB674C2C6625CB00EDCDA4 /* horizontal_split.png in Resources */,
+				E4BB674D2C6625CB00EDCDA4 /* move_around.png in Resources */,
+				E4BB674E2C6625CB00EDCDA4 /* document_icon.icns in Resources */,
+				E4BB674F2C6625CB00EDCDA4 /* expand.png in Resources */,
+				E4BB67502C6625CB00EDCDA4 /* SaveErrorPanel.xib in Resources */,
+				E4BB67512C6625CB00EDCDA4 /* shrink.png in Resources */,
+				E4BB67522C6625CB00EDCDA4 /* loupe.png in Resources */,
+				E4BB67532C6625CB00EDCDA4 /* selection.png in Resources */,
+				E4BB67542C6625CB00EDCDA4 /* PasteWarningConductorShouldNotBeEditable.xib in Resources */,
+				E4BB67552C6625CB00EDCDA4 /* pencil.png in Resources */,
+				E4BB67562C6625CB00EDCDA4 /* FFButton.png in Resources */,
+				E4BB67572C6625CB00EDCDA4 /* sigmoid.png in Resources */,
+				E4BB67582C6625CB00EDCDA4 /* random.png in Resources */,
+				E4BB67592C6625CB00EDCDA4 /* linear.png in Resources */,
+				E4BB675A2C6625CB00EDCDA4 /* RewindButton.png in Resources */,
+				E4BB675B2C6625CB00EDCDA4 /* triangle.png in Resources */,
+				E4BB675C2C6625CB00EDCDA4 /* pencil_cursor.png in Resources */,
+				E4BB675D2C6625CB00EDCDA4 /* Localizable.strings in Resources */,
+				E4BB675E2C6625CB00EDCDA4 /* arc.png in Resources */,
+				E4BB675F2C6625CB00EDCDA4 /* parabola.png in Resources */,
+				E4BB67602C6625CB00EDCDA4 /* pencil_small.png in Resources */,
+				E4BB67612C6625CB00EDCDA4 /* double_triangle.png in Resources */,
+				E4BB67622C6625CB00EDCDA4 /* InfoPlist.strings in Resources */,
+				E4BB67632C6625CB00EDCDA4 /* StartEditingRange.png in Resources */,
+				E4BB67642C6625CB00EDCDA4 /* EndEditingRange.png in Resources */,
+				E4BB67652C6625CB00EDCDA4 /* ibeam.png in Resources */,
+				E4BB67662C6625CB00EDCDA4 /* speaker.png in Resources */,
+				E4BB67672C6625CB00EDCDA4 /* eye_open.png in Resources */,
+				E4BB67682C6625CB00EDCDA4 /* eye_close.png in Resources */,
+				E4BB67692C6625CB00EDCDA4 /* note4.png in Resources */,
+				E4BB676A2C6625CB00EDCDA4 /* note16.png in Resources */,
+				E4BB676B2C6625CB00EDCDA4 /* note8.png in Resources */,
+				E4BB676C2C6625CB00EDCDA4 /* note32.png in Resources */,
+				E4BB676D2C6625CB00EDCDA4 /* note1.png in Resources */,
+				E4BB676E2C6625CB00EDCDA4 /* StopButton.png in Resources */,
+				E4BB676F2C6625CB00EDCDA4 /* note2.png in Resources */,
+				E4BB67702C6625CB00EDCDA4 /* note1_3.png in Resources */,
+				E4BB67712C6625CB00EDCDA4 /* note1d.png in Resources */,
+				E4BB67722C6625CB00EDCDA4 /* note2_3.png in Resources */,
+				E4BB67732C6625CB00EDCDA4 /* speaker_cursor.png in Resources */,
+				E4BB67742C6625CB00EDCDA4 /* note2d.png in Resources */,
+				E4BB67752C6625CB00EDCDA4 /* note4_3.png in Resources */,
+				E4BB67762C6625CB00EDCDA4 /* note4d.png in Resources */,
+				E4BB67772C6625CB00EDCDA4 /* note8_3.png in Resources */,
+				E4BB67782C6625CB00EDCDA4 /* note8d.png in Resources */,
+				E4BB67792C6625CB00EDCDA4 /* note16_3.png in Resources */,
+				E4BB677A2C6625CB00EDCDA4 /* note16d.png in Resources */,
+				E4BB677B2C6625CB00EDCDA4 /* note32_3.png in Resources */,
+				E4BB677C2C6625CB00EDCDA4 /* note32d.png in Resources */,
+				E4BB677D2C6625CB00EDCDA4 /* NQ.png in Resources */,
+				E4BB677E2C6625CB00EDCDA4 /* Ruby_Scripts in Resources */,
+				E4BB677F2C6625CB00EDCDA4 /* horizontal_move_plus.png in Resources */,
+				E4BB67802C6625CB00EDCDA4 /* vertical_move_plus.png in Resources */,
+				E4BB67812C6625CB00EDCDA4 /* AudioSettingsPanel.xib in Resources */,
+				E4BB67822C6625CB00EDCDA4 /* PauseButton.png in Resources */,
+				E4BB67832C6625CB00EDCDA4 /* AUViewWindow.xib in Resources */,
+				E4BB67842C6625CB00EDCDA4 /* PlayButton.png in Resources */,
+				E4BB67852C6625CB00EDCDA4 /* AudioEffectPanel.xib in Resources */,
+				E4BB67862C6625CB00EDCDA4 /* RecordPanel.xib in Resources */,
+				E4BB67872C6625CB00EDCDA4 /* horizontal_move_zoom.png in Resources */,
+				E4BB67882C6625CB00EDCDA4 /* MainMenu.xib in Resources */,
+				E4BB67892C6625CB00EDCDA4 /* PasteWarningConductorShouldBeEditable.xib in Resources */,
+				E4BB678A2C6625CB00EDCDA4 /* PasteWarningTooManyTargets.xib in Resources */,
+				E4BB678B2C6625CB00EDCDA4 /* TrackWindow.xib in Resources */,
+				E4BB678C2C6625CB00EDCDA4 /* ListWindow.xib in Resources */,
+				E4BB678D2C6625CB00EDCDA4 /* GraphicWindow.xib in Resources */,
+				E4BB678E2C6625CB00EDCDA4 /* LoadingPanel.xib in Resources */,
+				E4BB678F2C6625CB00EDCDA4 /* RemapDevicePanel.xib in Resources */,
+				E4BB67902C6625CB00EDCDA4 /* EventKindContextMenu.xib in Resources */,
+				E4BB67912C6625CB00EDCDA4 /* AudioRecordPanel.xib in Resources */,
+				E4BB67922C6625CB00EDCDA4 /* EventFilterPanel.xib in Resources */,
+				E4BB67932C6625CB00EDCDA4 /* RubyDialog.xib in Resources */,
+				E4BB67942C6625CB00EDCDA4 /* PasteWarningTooFewTargets.xib in Resources */,
+				E4BB67952C6625CB00EDCDA4 /* RubyConsoleWindow.xib in Resources */,
+				E4BB67962C6625CB00EDCDA4 /* MetronomeSettingsPanel.xib in Resources */,
+				E4BB67972C6625CB00EDCDA4 /* AboutPanel.xib in Resources */,
+				E4BB67982C6625CB00EDCDA4 /* lastBuild.txt in Resources */,
+				E4BB67992C6625CB00EDCDA4 /* Version in Resources */,
+				E4BB679A2C6625CB00EDCDA4 /* mute.png in Resources */,
+				E4BB679B2C6625CB00EDCDA4 /* mute_non.png in Resources */,
+				E4BB679C2C6625CB00EDCDA4 /* speaker_gray.png in Resources */,
+				E4BB679D2C6625CB00EDCDA4 /* solo.png in Resources */,
+				E4BB679E2C6625CB00EDCDA4 /* solo_non.png in Resources */,
+				E4BB679F2C6625CB00EDCDA4 /* QuantizePanel.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -936,7 +1242,34 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd $PROJECT_DIR\nruby add_revision_to_infoplist.rb\nif [ \"$BUILD_STYLE\" = \"Deployment\" ]; then\n  cd $PROJECT_DIR\n  sh make_release_package.sh\nfi\n";
+			shellScript = "# rm -rf \"$TARGET_BUILD_DIR/Molby.app/Contents/Resources/MolbyDoc\"\n# cp -a \"$PROJECT_DIR/../docs/MolbyDoc\" \"$TARGET_BUILD_DIR/Molby.app/Contents/Resources/\"\nif [ \"${BUILD_STYLE:=$CONFIGURATION}\" = \"Deployment\" ]; then\n  rm -rf \"$PROJECT_DIR/latest_binaries/Alchemusica.app\" || exit 1\n  (cd \"$TARGET_BUILD_DIR\"; cp -a Alchemusica.app \"$PROJECT_DIR/latest_binaries\") || exit 1\nfi\nexit 0\n\n\ncd $PROJECT_DIR\nruby add_revision_to_infoplist.rb\nif [ \"$BUILD_STYLE\" = \"Deployment\" ]; then\n  cd $PROJECT_DIR\n  sh make_release_package.sh\nfi\n";
+		};
+		E4BB67422C6625CB00EDCDA4 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd $PROJECT_DIR\nsh record_build_date.sh\nif [ \"${BUILD_STYLE:=$CONFIGURATION}\" = \"Deployment\" ]; then\n  ruby update_version.rb\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		E4BB67ED2C6625CB00EDCDA4 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"${BUILD_STYLE:=$CONFIGURATION}\" = \"Deployment\" ]; then\n  rm -rf \"$PROJECT_DIR/latest_binaries/Alchemusica-Legacy.app\" || exit 1\n  (cd \"$TARGET_BUILD_DIR\"; cp -a Alchemusica-Legacy.app \"$PROJECT_DIR/latest_binaries\") || exit 1\nfi\nexit 0\n\ncd $PROJECT_DIR\nruby add_revision_to_infoplist.rb\nif [ \"$BUILD_STYLE\" = \"Deployment\" ]; then\n  cd $PROJECT_DIR\n  sh make_release_package.sh\nfi\n";
 		};
 		E4C3848414111D93006F2661 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -949,7 +1282,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd $PROJECT_DIR\nsh record_build_date.sh\nif [ \"$BUILD_STYLE\" = \"Deployment\" ]; then\n  ruby update_version.rb\nfi\n";
+			shellScript = "cd $PROJECT_DIR\nsh record_build_date.sh\nif [ \"${BUILD_STYLE:=$CONFIGURATION}\" = \"Deployment\" ]; then\n  ruby update_version.rb\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -1025,6 +1358,79 @@
 				E4C383FC141117F9006F2661 /* AboutWindowController.m in Sources */,
 				E4F81DC714C1CC3100F63BA6 /* QuantizePanelController.m in Sources */,
 				E4216C2119D6CD3E00533630 /* IntGroup.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E4BB67A02C6625CB00EDCDA4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E4BB67A12C6625CB00EDCDA4 /* ContextMenuTextFieldCell.m in Sources */,
+				E4BB67A22C6625CB00EDCDA4 /* main.m in Sources */,
+				E4BB67A32C6625CB00EDCDA4 /* MDEvent.c in Sources */,
+				E4BB67A42C6625CB00EDCDA4 /* MDTrack.c in Sources */,
+				E4BB67A52C6625CB00EDCDA4 /* MDSequence.c in Sources */,
+				E4BB67A62C6625CB00EDCDA4 /* MDSequenceSMF.c in Sources */,
+				E4BB67A72C6625CB00EDCDA4 /* MDCalibrator.c in Sources */,
+				E4BB67A82C6625CB00EDCDA4 /* MDUtility.c in Sources */,
+				E4BB67A92C6625CB00EDCDA4 /* MDPlayer_MacOSX.c in Sources */,
+				E4BB67AA2C6625CB00EDCDA4 /* MDAudio_MacOSX.c in Sources */,
+				E4BB67AB2C6625CB00EDCDA4 /* SaveErrorPanelController.m in Sources */,
+				E4BB67AC2C6625CB00EDCDA4 /* AudioEffectPanelController.m in Sources */,
+				E4BB67AD2C6625CB00EDCDA4 /* MDRubyCore.m in Sources */,
+				E4BB67AE2C6625CB00EDCDA4 /* MDObjects.m in Sources */,
+				E4BB67AF2C6625CB00EDCDA4 /* LoadingPanelController.m in Sources */,
+				E4BB67B02C6625CB00EDCDA4 /* MyAppController.m in Sources */,
+				E4BB67B12C6625CB00EDCDA4 /* MyDocument.m in Sources */,
+				E4BB67B22C6625CB00EDCDA4 /* ListWindowController.m in Sources */,
+				E4BB67B32C6625CB00EDCDA4 /* MyMIDISequence.m in Sources */,
+				E4BB67B42C6625CB00EDCDA4 /* MyTableHeaderView.m in Sources */,
+				E4BB67B52C6625CB00EDCDA4 /* MyTableView.m in Sources */,
+				E4BB67B62C6625CB00EDCDA4 /* MyClipView.m in Sources */,
+				E4BB67B72C6625CB00EDCDA4 /* RemapDevicePanelController.m in Sources */,
+				E4BB67B82C6625CB00EDCDA4 /* GraphicWindowController.m in Sources */,
+				E4BB67B92C6625CB00EDCDA4 /* PianoRollView.m in Sources */,
+				E4BB67BA2C6625CB00EDCDA4 /* PianoRollRulerView.m in Sources */,
+				E4BB67BB2C6625CB00EDCDA4 /* GraphicClientView.m in Sources */,
+				E4BB67BC2C6625CB00EDCDA4 /* GraphicRulerView.m in Sources */,
+				E4BB67BD2C6625CB00EDCDA4 /* TimeChartView.m in Sources */,
+				E4BB67BE2C6625CB00EDCDA4 /* NSMenuAdditions.m in Sources */,
+				E4BB67BF2C6625CB00EDCDA4 /* StripChartView.m in Sources */,
+				E4BB67C02C6625CB00EDCDA4 /* StripChartRulerView.m in Sources */,
+				E4BB67C12C6625CB00EDCDA4 /* GraphicSplitterView.m in Sources */,
+				E4BB67C22C6625CB00EDCDA4 /* GraphicFloatingView.m in Sources */,
+				E4BB67C32C6625CB00EDCDA4 /* ColorCell.m in Sources */,
+				E4BB67C42C6625CB00EDCDA4 /* NSStringAdditions.m in Sources */,
+				E4BB67C52C6625CB00EDCDA4 /* NSEventAdditions.m in Sources */,
+				E4BB67C62C6625CB00EDCDA4 /* TrackAttributeCell.m in Sources */,
+				E4BB67C72C6625CB00EDCDA4 /* AudioSettingsPrefPanelController.m in Sources */,
+				E4BB67C82C6625CB00EDCDA4 /* AudioEffectLayoutView.m in Sources */,
+				E4BB67C92C6625CB00EDCDA4 /* NSWindowControllerAdditions.m in Sources */,
+				E4BB67CA2C6625CB00EDCDA4 /* NSCursorAdditions.m in Sources */,
+				E4BB67CB2C6625CB00EDCDA4 /* MyPopUpButton.m in Sources */,
+				E4BB67CC2C6625CB00EDCDA4 /* MyPopUpButtonCell.m in Sources */,
+				E4BB67CD2C6625CB00EDCDA4 /* MyComboBoxCell.m in Sources */,
+				E4BB67CE2C6625CB00EDCDA4 /* GraphicBackgroundView.m in Sources */,
+				E4BB67CF2C6625CB00EDCDA4 /* TextureView.m in Sources */,
+				E4BB67D02C6625CB00EDCDA4 /* MyWindow.m in Sources */,
+				E4BB67D12C6625CB00EDCDA4 /* PlayingViewController.m in Sources */,
+				E4BB67D22C6625CB00EDCDA4 /* RecordPanelController.m in Sources */,
+				E4BB67D32C6625CB00EDCDA4 /* EventFilterPanelController.m in Sources */,
+				E4BB67D42C6625CB00EDCDA4 /* MDRubySequence.m in Sources */,
+				E4BB67D52C6625CB00EDCDA4 /* MDRubyTrack.m in Sources */,
+				E4BB67D62C6625CB00EDCDA4 /* MDRubyPointer.m in Sources */,
+				E4BB67D72C6625CB00EDCDA4 /* RubyConsoleWindowController.m in Sources */,
+				E4BB67D82C6625CB00EDCDA4 /* MDRubyEventSet.m in Sources */,
+				E4BB67D92C6625CB00EDCDA4 /* MDAudioUtility.c in Sources */,
+				E4BB67DA2C6625CB00EDCDA4 /* ruby_dialog.c in Sources */,
+				E4BB67DB2C6625CB00EDCDA4 /* RubyDialogController.m in Sources */,
+				E4BB67DC2C6625CB00EDCDA4 /* PasteWarningPanelController.m in Sources */,
+				E4BB67DD2C6625CB00EDCDA4 /* AudioSettingsPanelController.m in Sources */,
+				E4BB67DE2C6625CB00EDCDA4 /* AUViewWindowController.m in Sources */,
+				E4BB67DF2C6625CB00EDCDA4 /* MetronomeSettingsPanelController.m in Sources */,
+				E4BB67E02C6625CB00EDCDA4 /* AboutWindowController.m in Sources */,
+				E4BB67E12C6625CB00EDCDA4 /* QuantizePanelController.m in Sources */,
+				E4BB67E22C6625CB00EDCDA4 /* IntGroup.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1442,6 +1848,113 @@
 			};
 			name = Default;
 		};
+		E4BB67EF2C6625CB00EDCDA4 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_LINK_OBJC_RUNTIME = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				GCC_VERSION = "";
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx106/include/ruby-2.0.0",
+					"$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx106/include/ruby-2.0.0/x86_64-darwin18.7.0",
+				);
+				INFOPLIST_FILE = "Alchemusica-Legacy-Info.plist";
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx106/lib";
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "-lruby-static";
+				PREBINDING = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "jp.sourceforge.${PRODUCT_NAME:identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Development;
+		};
+		E4BB67F02C6625CB00EDCDA4 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_LINK_OBJC_RUNTIME = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				GCC_VERSION = "";
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx106/include/ruby-2.0.0",
+					"$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx106/include/ruby-2.0.0/x86_64-darwin18.7.0",
+				);
+				INFOPLIST_FILE = "Alchemusica-Legacy-Info.plist";
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx106/lib";
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "-lruby-static";
+				PREBINDING = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "jp.sourceforge.${PRODUCT_NAME:identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Deployment;
+		};
+		E4BB67F12C6625CB00EDCDA4 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_LINK_OBJC_RUNTIME = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				GCC_VERSION = "";
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx106/include/ruby-2.0.0",
+					"$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx106/include/ruby-2.0.0/x86_64-darwin18.7.0",
+				);
+				INFOPLIST_FILE = "Alchemusica-Legacy-Info.plist";
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx106/lib";
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "-lruby-static";
+				PREBINDING = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "jp.sourceforge.${PRODUCT_NAME:identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Default;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1461,6 +1974,16 @@
 				E428451B09AA2B7A00CB93B9 /* Development */,
 				E428451C09AA2B7A00CB93B9 /* Deployment */,
 				E428451D09AA2B7A00CB93B9 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		E4BB67EE2C6625CB00EDCDA4 /* Build configuration list for PBXNativeTarget "Alchemusica-Legacy" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E4BB67EF2C6625CB00EDCDA4 /* Development */,
+				E4BB67F02C6625CB00EDCDA4 /* Deployment */,
+				E4BB67F12C6625CB00EDCDA4 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Default;

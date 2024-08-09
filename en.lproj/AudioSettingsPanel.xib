@@ -24,7 +24,7 @@
                 <rect key="frame" x="0.0" y="0.0" width="540" height="376"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="28">
+                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="28">
                         <rect key="frame" x="70" y="357" width="120" height="17"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Device/Virtual Synth" id="29">
@@ -33,7 +33,7 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="65">
+                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="65">
                         <rect key="frame" x="216" y="357" width="32" height="17"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Pan" id="66">
@@ -42,7 +42,7 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="67">
+                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="67">
                         <rect key="frame" x="271" y="357" width="60" height="17"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Volume" id="68">
@@ -51,7 +51,7 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="69">
+                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="69">
                         <rect key="frame" x="385" y="357" width="44" height="17"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Level" id="70">
@@ -60,7 +60,7 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <slider verticalHuggingPriority="750" fixedFrame="YES" tag="350" translatesAutoresizingMaskIntoConstraints="NO" id="209">
+                    <slider verticalHuggingPriority="750" fixedFrame="YES" tag="350" id="209">
                         <rect key="frame" x="249" y="11" width="103" height="20"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <sliderCell key="cell" controlSize="small" continuous="YES" state="on" alignment="left" maxValue="100" doubleValue="50" tickMarkPosition="below" numberOfTickMarks="11" sliderType="linear" id="226">
@@ -70,21 +70,21 @@
                             <action selector="volumeSliderMoved:" target="-2" id="244"/>
                         </connections>
                     </slider>
-                    <levelIndicator verticalHuggingPriority="750" fixedFrame="YES" tag="550" translatesAutoresizingMaskIntoConstraints="NO" id="210">
+                    <levelIndicator verticalHuggingPriority="750" fixedFrame="YES" tag="550" id="210">
                         <rect key="frame" x="358" y="9" width="97" height="13"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <levelIndicatorCell key="cell" controlSize="small" alignment="left" maxValue="100" warningValue="80" criticalValue="90" levelIndicatorStyle="continuousCapacity" id="225">
                             <font key="font" metaFont="smallSystem"/>
                         </levelIndicatorCell>
                     </levelIndicator>
-                    <levelIndicator verticalHuggingPriority="750" fixedFrame="YES" tag="450" translatesAutoresizingMaskIntoConstraints="NO" id="211">
+                    <levelIndicator verticalHuggingPriority="750" fixedFrame="YES" tag="450" id="211">
                         <rect key="frame" x="358" y="24" width="97" height="13"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <levelIndicatorCell key="cell" controlSize="small" alignment="left" maxValue="100" warningValue="80" criticalValue="90" levelIndicatorStyle="continuousCapacity" id="224">
                             <font key="font" metaFont="smallSystem"/>
                         </levelIndicatorCell>
                     </levelIndicator>
-                    <slider horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" tag="250" translatesAutoresizingMaskIntoConstraints="NO" id="212">
+                    <slider horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" tag="250" id="212">
                         <rect key="frame" x="212" y="8" width="28" height="30"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <sliderCell key="cell" continuous="YES" enabled="NO" alignment="left" maxValue="100" allowsTickMarkValuesOnly="YES" sliderType="circular" id="223">
@@ -94,7 +94,7 @@
                             <action selector="panKnobMoved:" target="-2" id="235"/>
                         </connections>
                     </slider>
-                    <popUpButton verticalHuggingPriority="750" fixedFrame="YES" tag="150" translatesAutoresizingMaskIntoConstraints="NO" id="213">
+                    <popUpButton verticalHuggingPriority="750" fixedFrame="YES" tag="150" id="213">
                         <rect key="frame" x="52" y="11" width="155" height="22"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <popUpButtonCell key="cell" type="push" title="Item1" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="222" id="218">
@@ -112,7 +112,7 @@
                             <action selector="myPopUpAction:" target="-2" id="261"/>
                         </connections>
                     </popUpButton>
-                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="214">
+                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="214">
                         <rect key="frame" x="7" y="13" width="95" height="17"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Output" id="217">
@@ -121,18 +121,18 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <scrollView fixedFrame="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="271">
+                    <scrollView fixedFrame="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" id="271">
                         <rect key="frame" x="-1" y="41" width="542" height="317"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <clipView key="contentView" id="61K-j4-mIF">
                             <rect key="frame" x="1" y="1" width="529" height="315"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
-                                <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="274">
+                                <customView id="274">
                                     <rect key="frame" x="0.0" y="0.0" width="541" height="315"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <slider verticalHuggingPriority="750" fixedFrame="YES" tag="300" translatesAutoresizingMaskIntoConstraints="NO" id="19">
+                                        <slider verticalHuggingPriority="750" tag="300" id="19">
                                             <rect key="frame" x="249" y="285" width="95" height="20"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <sliderCell key="cell" controlSize="small" continuous="YES" state="on" alignment="left" maxValue="100" doubleValue="50" tickMarkPosition="below" numberOfTickMarks="11" sliderType="linear" id="20">
@@ -142,21 +142,21 @@
                                                 <action selector="volumeSliderMoved:" target="-2" id="236"/>
                                             </connections>
                                         </slider>
-                                        <levelIndicator verticalHuggingPriority="750" fixedFrame="YES" tag="500" translatesAutoresizingMaskIntoConstraints="NO" id="22">
+                                        <levelIndicator verticalHuggingPriority="750" tag="500" id="22">
                                             <rect key="frame" x="358" y="283" width="97" height="13"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <levelIndicatorCell key="cell" controlSize="small" alignment="left" maxValue="100" warningValue="80" criticalValue="90" levelIndicatorStyle="continuousCapacity" id="23">
                                                 <font key="font" metaFont="smallSystem"/>
                                             </levelIndicatorCell>
                                         </levelIndicator>
-                                        <levelIndicator verticalHuggingPriority="750" fixedFrame="YES" tag="400" translatesAutoresizingMaskIntoConstraints="NO" id="49">
+                                        <levelIndicator verticalHuggingPriority="750" tag="400" id="49">
                                             <rect key="frame" x="358" y="298" width="97" height="13"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <levelIndicatorCell key="cell" controlSize="small" alignment="left" maxValue="100" warningValue="80" criticalValue="90" levelIndicatorStyle="continuousCapacity" id="50">
                                                 <font key="font" metaFont="smallSystem"/>
                                             </levelIndicatorCell>
                                         </levelIndicator>
-                                        <slider horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" tag="200" translatesAutoresizingMaskIntoConstraints="NO" id="53">
+                                        <slider horizontalHuggingPriority="750" verticalHuggingPriority="750" tag="200" id="53">
                                             <rect key="frame" x="212" y="282" width="28" height="30"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="100" doubleValue="88.007689584853068" allowsTickMarkValuesOnly="YES" sliderType="circular" id="54">
@@ -166,7 +166,7 @@
                                                 <action selector="panKnobMoved:" target="-2" id="227"/>
                                             </connections>
                                         </slider>
-                                        <popUpButton verticalHuggingPriority="750" fixedFrame="YES" tag="100" translatesAutoresizingMaskIntoConstraints="NO" id="55">
+                                        <popUpButton verticalHuggingPriority="750" tag="100" id="55">
                                             <rect key="frame" x="52" y="285" width="155" height="22"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                                             <popUpButtonCell key="cell" type="push" title="Item1" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="62" id="58">
@@ -184,7 +184,7 @@
                                                 <action selector="myPopUpAction:" target="-2" id="253"/>
                                             </connections>
                                         </popUpButton>
-                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" tag="800" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="56">
+                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" tag="800" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="56">
                                             <rect key="frame" x="6" y="287" width="95" height="17"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                                             <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Bus 1" id="57">
@@ -193,7 +193,7 @@
                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
-                                        <button verticalHuggingPriority="750" fixedFrame="YES" tag="600" translatesAutoresizingMaskIntoConstraints="NO" id="71">
+                                        <button verticalHuggingPriority="750" tag="600" id="71">
                                             <rect key="frame" x="471" y="295" width="48" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="squareTextured" title="View..." bezelStyle="texturedSquare" imagePosition="overlaps" alignment="center" controlSize="mini" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="72">
@@ -204,11 +204,11 @@
                                                 <action selector="customViewButtonPressed:" target="-2" id="245"/>
                                             </connections>
                                         </button>
-                                        <box verticalHuggingPriority="750" fixedFrame="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="80">
+                                        <box verticalHuggingPriority="750" boxType="separator" id="80">
                                             <rect key="frame" x="7" y="277" width="516" height="5"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                         </box>
-                                        <button verticalHuggingPriority="750" fixedFrame="YES" tag="700" translatesAutoresizingMaskIntoConstraints="NO" id="eo2-Dt-Ffg">
+                                        <button verticalHuggingPriority="750" tag="700" id="eo2-Dt-Ffg">
                                             <rect key="frame" x="471" y="279" width="48" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="squareTextured" title="Effects..." bezelStyle="texturedSquare" imagePosition="overlaps" alignment="center" controlSize="mini" enabled="NO" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="RUv-Kh-Pkg">

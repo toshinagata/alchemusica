@@ -36,7 +36,7 @@
                 <rect key="frame" x="0.0" y="0.0" width="359" height="333"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="48">
+                    <button verticalHuggingPriority="750" fixedFrame="YES" id="48">
                         <rect key="frame" x="223" y="13" width="121" height="28"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <buttonCell key="cell" type="push" title="Start Recording" bezelStyle="rounded" alignment="center" controlSize="small" borderStyle="border" inset="2" id="156">
@@ -50,7 +50,7 @@ DQ
                             <action selector="startButtonPressed:" target="-2" id="59"/>
                         </connections>
                     </button>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="49">
+                    <button verticalHuggingPriority="750" fixedFrame="YES" id="49">
                         <rect key="frame" x="13" y="13" width="80" height="28"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <buttonCell key="cell" type="push" title="Cancel" bezelStyle="rounded" alignment="center" controlSize="small" borderStyle="border" inset="2" id="157">
@@ -64,14 +64,14 @@ Gw
                             <action selector="cancelButtonPressed:" target="-2" id="58"/>
                         </connections>
                     </button>
-                    <box fixedFrame="YES" title="Sequence Settings" translatesAutoresizingMaskIntoConstraints="NO" id="87">
+                    <box fixedFrame="YES" title="Sequence Settings" id="87">
                         <rect key="frame" x="17" y="46" width="325" height="139"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <view key="contentView" id="aXC-eT-Nsh">
                             <rect key="frame" x="3" y="3" width="319" height="121"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
-                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="16">
+                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="16">
                                     <rect key="frame" x="11" y="92" width="89" height="14"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Target track" id="164">
@@ -80,7 +80,7 @@ Gw
                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                     </textFieldCell>
                                 </textField>
-                                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="17">
+                                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" id="17">
                                     <rect key="frame" x="102" y="87" width="206" height="22"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <popUpButtonCell key="cell" type="push" title="Item1" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="21" id="165">
@@ -98,7 +98,7 @@ Gw
                                         <action selector="myPopUpAction:" target="-2" id="56"/>
                                     </connections>
                                 </popUpButton>
-                                <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="99">
+                                <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" id="99">
                                     <rect key="frame" x="45" y="38" width="90" height="19"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="center" placeholderString="----:--:----" drawsBackground="YES" id="166">
@@ -111,7 +111,7 @@ Gw
                                         <outlet property="delegate" destination="-2" id="kOt-KW-1cQ"/>
                                     </connections>
                                 </textField>
-                                <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="101">
+                                <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" id="101">
                                     <rect key="frame" x="215" y="38" width="90" height="19"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="center" placeholderString="----:--:----" drawsBackground="YES" id="167">
@@ -124,7 +124,7 @@ Gw
                                         <outlet property="delegate" destination="-2" id="Df5-OU-hLK"/>
                                     </connections>
                                 </textField>
-                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="102">
+                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="102">
                                     <rect key="frame" x="11" y="40" width="43" height="14"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Start" id="168">
@@ -133,7 +133,7 @@ Gw
                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                     </textFieldCell>
                                 </textField>
-                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="104">
+                                <button fixedFrame="YES" id="104">
                                     <rect key="frame" x="149" y="38" width="60" height="18"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <buttonCell key="cell" type="check" title="Stop at" bezelStyle="regularSquare" imagePosition="left" alignment="left" controlSize="small" inset="2" id="169">
@@ -144,7 +144,7 @@ Gw
                                         <action selector="stopCheckboxClicked:" target="-2" id="153"/>
                                     </connections>
                                 </button>
-                                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="105">
+                                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" id="105">
                                     <rect key="frame" x="48" y="9" width="122" height="22"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <popUpButtonCell key="cell" type="push" title="Count off" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" enabled="NO" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="108" id="170">
@@ -161,7 +161,7 @@ Gw
                                         <action selector="myPopUpAction:" target="-2" id="148"/>
                                     </connections>
                                 </popUpButton>
-                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="111">
+                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="111">
                                     <rect key="frame" x="11" y="14" width="43" height="14"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Mode" id="171">
@@ -170,7 +170,7 @@ Gw
                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                     </textFieldCell>
                                 </textField>
-                                <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="112">
+                                <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" id="112">
                                     <rect key="frame" x="180" y="12" width="33" height="19"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="center" drawsBackground="YES" id="172">
@@ -183,7 +183,7 @@ Gw
                                         <outlet property="delegate" destination="-2" id="qYK-GL-wfk"/>
                                     </connections>
                                 </textField>
-                                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="124">
+                                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" id="124">
                                     <rect key="frame" x="218" y="9" width="90" height="22"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <popUpButtonCell key="cell" type="push" title="bars" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" enabled="NO" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="126" id="173">
@@ -200,7 +200,7 @@ Gw
                                         <action selector="myPopUpAction:" target="-2" id="152"/>
                                     </connections>
                                 </popUpButton>
-                                <matrix verticalHuggingPriority="750" fixedFrame="YES" allowsEmptySelection="NO" autosizesCells="NO" translatesAutoresizingMaskIntoConstraints="NO" id="129">
+                                <matrix verticalHuggingPriority="750" fixedFrame="YES" allowsEmptySelection="NO" autosizesCells="NO" id="129">
                                     <rect key="frame" x="9" y="63" width="140" height="21"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -231,14 +231,14 @@ Gw
                             </subviews>
                         </view>
                     </box>
-                    <box fixedFrame="YES" title="Device Settings" translatesAutoresizingMaskIntoConstraints="NO" id="73">
+                    <box fixedFrame="YES" title="Device Settings" id="73">
                         <rect key="frame" x="17" y="189" width="326" height="133"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <view key="contentView" id="zos-cu-qZO">
                             <rect key="frame" x="3" y="3" width="320" height="115"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
-                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="10">
+                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="10">
                                     <rect key="frame" x="11" y="90" width="95" height="14"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Source" id="158">
@@ -247,7 +247,7 @@ Gw
                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                     </textFieldCell>
                                 </textField>
-                                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="11">
+                                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" id="11">
                                     <rect key="frame" x="102" y="85" width="207" height="22"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <popUpButtonCell key="cell" type="push" title="Item1" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="13" id="159">
@@ -265,7 +265,7 @@ Gw
                                         <action selector="myPopUpAction:" target="-2" id="57"/>
                                     </connections>
                                 </popUpButton>
-                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="22">
+                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="22">
                                     <rect key="frame" x="11" y="64" width="95" height="14"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Destination" id="160">
@@ -274,7 +274,7 @@ Gw
                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                     </textFieldCell>
                                 </textField>
-                                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="23">
+                                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" id="23">
                                     <rect key="frame" x="102" y="60" width="207" height="22"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <popUpButtonCell key="cell" type="push" title="Item1" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="27" id="161">
@@ -292,7 +292,7 @@ Gw
                                         <action selector="myPopUpAction:" target="-2" id="55"/>
                                     </connections>
                                 </popUpButton>
-                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="28">
+                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="28">
                                     <rect key="frame" x="35" y="37" width="71" height="14"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Channel" id="162">
@@ -301,7 +301,7 @@ Gw
                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                     </textFieldCell>
                                 </textField>
-                                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="29">
+                                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" id="29">
                                     <rect key="frame" x="142" y="33" width="167" height="22"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <popUpButtonCell key="cell" type="push" title="Keep Incoming Channel" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" tag="17" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="154" id="163">
@@ -333,23 +333,23 @@ Gw
                                         <action selector="myPopUpAction:" target="-2" id="54"/>
                                     </connections>
                                 </popUpButton>
-                                <box horizontalHuggingPriority="750" fixedFrame="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="75">
+                                <box horizontalHuggingPriority="750" fixedFrame="YES" boxType="separator" id="75">
                                     <rect key="frame" x="20" y="44" width="5" height="17"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </box>
-                                <box verticalHuggingPriority="750" fixedFrame="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="81">
+                                <box verticalHuggingPriority="750" fixedFrame="YES" boxType="separator" id="81">
                                     <rect key="frame" x="22" y="42" width="11" height="5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </box>
-                                <box horizontalHuggingPriority="750" fixedFrame="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="83">
+                                <box horizontalHuggingPriority="750" fixedFrame="YES" boxType="separator" id="83">
                                     <rect key="frame" x="125" y="44" width="5" height="14"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </box>
-                                <box verticalHuggingPriority="750" fixedFrame="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="85">
+                                <box verticalHuggingPriority="750" fixedFrame="YES" boxType="separator" id="85">
                                     <rect key="frame" x="127" y="42" width="11" height="5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </box>
-                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="A6c-RA-RIN">
+                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="A6c-RA-RIN">
                                     <rect key="frame" x="11" y="12" width="95" height="14"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Transpose" id="S4J-RO-7gc">
@@ -358,7 +358,7 @@ Gw
                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                     </textFieldCell>
                                 </textField>
-                                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="c0c-ui-3BP">
+                                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" id="c0c-ui-3BP">
                                     <rect key="frame" x="102" y="7" width="93" height="22"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <popUpButtonCell key="cell" type="push" title="0" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="1Rf-N6-i3I" id="4XA-vt-vSa">
@@ -400,7 +400,7 @@ Gw
                                         <action selector="myPopUpAction:" target="-2" id="YGZ-Of-HFb"/>
                                     </connections>
                                 </popUpButton>
-                                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rll-Ss-YRR">
+                                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" id="rll-Ss-YRR">
                                     <rect key="frame" x="204" y="7" width="105" height="22"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <popUpButtonCell key="cell" type="push" title="C (Do)" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="wZ9-NO-TMj" id="7Sa-mo-IPA">
