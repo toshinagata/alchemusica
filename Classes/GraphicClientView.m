@@ -47,6 +47,7 @@
 		visibleRangeMin = 0.0f;
 		visibleRangeMax = 1.0f;
 		autoScaleOnResizing = YES;
+        lastTimeIndicatorPos = -1.0;
     }
     return self;
 }
@@ -222,6 +223,47 @@ CGFloat gDashWidth = 8.0f;
     }
 }
 
+- (CGFloat)timeIndicatorLocationFromPos:(float)pos
+{
+    id dataSource = [self dataSource];
+    CGFloat ox = [self frame].origin.x;
+    return floor(ox + [dataSource pixelsPerTick] * pos) + 0.5;
+}
+
+- (void)drawTimeIndicatorInRect: (NSRect)aRect
+{
+    float pos;
+    NSPoint pt1, pt2;
+    NSRect frame = [self frame];
+    [self invalidateTimeIndicator];
+    pos = [[self dataSource] timeIndicatorPos];
+    if (pos >= 0) {
+        pt1.x = [self timeIndicatorLocationFromPos:pos];
+        pt1.y = frame.origin.y;
+        pt2.x = pt1.x;
+        pt2.y = pt1.y + frame.size.height;
+        [[NSColor blackColor] set];
+        [NSBezierPath strokeLineFromPoint:pt1 toPoint:pt2];
+    }
+    lastTimeIndicatorPos = pos;
+    [self invalidateTimeIndicator];
+}
+
+- (void)invalidateTimeIndicator
+{
+    NSRect frame = [self frame];
+    NSRect rect = NSMakeRect(0.0, frame.origin.y, 3.0, frame.size.height);
+    float pos;
+    if (lastTimeIndicatorPos >= 0) {
+        rect.origin.x = [self timeIndicatorLocationFromPos:lastTimeIndicatorPos];
+        [self setNeedsDisplayInRect:rect];
+    }
+    pos = [[self dataSource] timeIndicatorPos];
+    if (pos >= 0) {
+        rect.origin.x = [self timeIndicatorLocationFromPos:pos];
+        [self setNeedsDisplayInRect:rect];
+    }
+}
 
 //  Should be overridden in subclasses
 - (void)drawContentsInRect: (NSRect)aRect
@@ -231,6 +273,7 @@ CGFloat gDashWidth = 8.0f;
 - (void)drawRect: (NSRect)aRect
 {
     [self drawContentsInRect:aRect];
+    [self drawTimeIndicatorInRect:aRect];
 }
 
 - (void)paintEditingRange: (NSRect)aRect startX: (float *)startp endX: (float *)endp

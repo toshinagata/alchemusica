@@ -47,6 +47,9 @@ extern CGFloat gDashWidth;
     NSBezierPath *selectionPath;
 	NSRect initialSelectionRect;
     NSTimer *autoscrollTimer;
+    
+    // Playing time indicator
+    float lastTimeIndicatorPos;
 }
 
 //  Should be overridden in subclasses
@@ -129,5 +132,7 @@ extern CGFloat gDashWidth;
 
 - (float)scrollVerticalPosition;
 - (void)scrollToVerticalPosition:(float)pos;
+
+- (void)invalidateTimeIndicator;
 
 @end

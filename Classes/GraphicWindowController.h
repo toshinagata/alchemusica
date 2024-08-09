@@ -115,10 +115,10 @@ enum {
 	float noteCacheBeginBeat, noteCacheEndBeat;
 
 	//  The position of the time indicator during playing
-	MDTickType timeIndicatorPos;	//  In tick
+	float timeIndicatorPos;	    //  In tick, but described in float
 	NSRect timeIndicatorRect;	    //  In MyFloatingView coordinates
 //    NSBitmapImageRep *cachedImage;  //  Image
-    MDTickType endOfSequencePos;    //  In tick
+    float endOfSequencePos;     //  In tick, but described in float
     
     //  Tracking rect
     NSTrackingRectTag trackingRectTag;
@@ -286,5 +286,6 @@ enum {
 //  Show/hide time indicator
 - (void)showTimeIndicatorAtBeat: (float)beat;
 - (void)hideTimeIndicator;
+- (float)timeIndicatorPos;
 
 @end

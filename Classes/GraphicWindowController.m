@@ -320,97 +320,29 @@ sTableColumnIDToInt(id identifier)
 
 #pragma mark ==== Time Indicator ====
 
-- (NSBezierPath *)timeIndicatorPathAtBeat: (float)beat
-{
-	NSRect aRect;
-	NSPoint pt;
-	NSBezierPath *path;
-	int n;
-	aRect = [[records[0].client superview] bounds];
-	pt.x = beat * [self pixelsPerQuarter];
-	if (pt.x < aRect.origin.x || pt.x > aRect.origin.x + aRect.size.width)
-		return nil;
-	pt.y = 0;
-	pt = [myFloatingView convertPoint: pt fromView: records[0].client];
-	path = [NSBezierPath bezierPath];
-	for (n = 0; n < myClientViewsCount; n++) {
-		aRect = [myFloatingView convertRect: [[records[n].client superview] bounds] fromView: records[n].client];
-		pt.y = aRect.origin.y + aRect.size.height;
-		[path moveToPoint: pt];
-		pt.y = aRect.origin.y;
-		[path lineToPoint: pt];
-	}
-	return path;
-}
-
-- (NSBezierPath *)bouncingBallPathAtBeat: (float)beat
-{
-	return nil;
-}
-
 - (void)showTimeIndicatorAtBeat: (float)beat
 {
-    NSBezierPath *path, *bpath;
-	if (beat < 0 || ![myMainView canDraw] || ![myFloatingView canDraw])
-		return;
-	path = [self timeIndicatorPathAtBeat: beat];
-	if (path) {
-        NSRect bounds = [path bounds];
-        NSPoint origin;
-        [self hideTimeIndicator];
-		bpath = [self bouncingBallPathAtBeat: beat];
-		if (bpath)
-			bounds = NSUnionRect(bounds, [bpath bounds]);
-        bounds = NSInsetRect(bounds, -2, -1);
-        bounds = [myMainView convertRect: bounds fromView: myFloatingView];
-        origin.x = (CGFloat)floor(bounds.origin.x);
-        origin.y = (CGFloat)floor(bounds.origin.y);
-        bounds.size.width = (CGFloat)ceil(bounds.origin.x + bounds.size.width - origin.x);
-        bounds.size.height = (CGFloat)ceil(bounds.origin.y + bounds.size.height - origin.y);
-        bounds.origin = origin;
-        [myFloatingView lockFocus];
-        [path stroke];
-        if (bpath)
-            [bpath fill];
-        [myFloatingView unlockFocus];
-        timeIndicatorRect = bounds;
-	}
-    timeIndicatorPos = beat;
+    int n;
+    timeIndicatorPos = (beat >= 0.0 ? beat * [[self document] timebase] : -1.0);
     endOfSequencePos = [[[self document] myMIDISequence] sequenceDuration];
+    for (n = 0; n < myClientViewsCount; n++) {
+        [records[n].client invalidateTimeIndicator];
+    }
 }
 
 - (void)hideTimeIndicator
 {
     int n;
-    if (!NSIsEmptyRect(timeIndicatorRect)) {
-        if ([myFloatingView canDraw]) {
-            [myFloatingView lockFocus];
-            NSRect tRect = [myFloatingView convertRect:timeIndicatorRect fromView:myMainView];
-            for (n = 0; n < myClientViewsCount; n++) {
-                NSRect aRect = [myFloatingView convertRect: [[records[n].client superview] bounds] fromView: records[n].client];
-                aRect = NSIntersectionRect(aRect, tRect);
-                NSEraseRect(aRect);
-            }
-            [myFloatingView unlockFocus];
-        }
-        [myMainView displayRect:timeIndicatorRect];
+    timeIndicatorPos = -1.0;
+    endOfSequencePos = [[[self document] myMIDISequence] sequenceDuration];
+    for (n = 0; n < myClientViewsCount; n++) {
+        [records[n].client invalidateTimeIndicator];
     }
-    timeIndicatorRect = NSZeroRect;
 }
 
-- (void)invalidateTimeIndicatorRect
+- (float)timeIndicatorPos
 {
-	int n;
-	NSView *view;
-	if (!NSIsEmptyRect(timeIndicatorRect)) {
-		/*  Redraw the 'timeIndicatorRect' portion of each splitter view  */
-		for (n = 0; n < myClientViewsCount; n++) {
-			view = records[n].client;
-			[view setNeedsDisplayInRect: [view convertRect: timeIndicatorRect fromView: nil]];
-            view = records[n].splitter;
-            [view setNeedsDisplayInRect: [view convertRect: timeIndicatorRect fromView: nil]];
-		}
-	}
+    return timeIndicatorPos;
 }
 
 - (void)showPlayPosition: (NSNotification *)notification
