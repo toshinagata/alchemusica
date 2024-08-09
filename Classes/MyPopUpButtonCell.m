@@ -61,7 +61,7 @@
                 r.origin.x = center.x - size.width / 2;
                 r.origin.y = center.y - size.height / 2;
                 r.size = size;
-                [theImage drawInRect:r fromRect:NSZeroRect operation:NSCompositeSourceAtop fraction:fraction respectFlipped:YES hints:nil];
+                [theImage drawInRect:r fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:fraction respectFlipped:YES hints:nil];
 			}
 			break;
 		default:
@@ -72,7 +72,7 @@
     r.origin.y = theRect.origin.y + theRect.size.height - 7;
     r.size.width = 5;
     r.size.height = 5;
-    [[MyPopUpButton triangleImage] drawInRect:r fromRect:NSZeroRect operation:NSCompositeSourceAtop fraction:fraction respectFlipped:YES hints:nil];
+    [[MyPopUpButton triangleImage] drawInRect:r fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:fraction respectFlipped:YES hints:nil];
 }
 
 @end

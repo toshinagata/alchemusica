@@ -50,7 +50,7 @@
         r.size = sz;
 	//	if ([[NSView focusView] isFlipped])
 	//		pt.y += sz.height;
-        [(NSImage *)image drawInRect: r fromRect: NSZeroRect operation: NSCompositeSourceAtop fraction: 1.0f respectFlipped:YES hints:nil];
+        [(NSImage *)image drawInRect: r fromRect: NSZeroRect operation: NSCompositeSourceOver fraction: 1.0f respectFlipped:YES hints:nil];
 	}
 }
 
