@@ -3,7 +3,7 @@
  *
  *  Created by Toshi Nagata on Sun Jun 17 2001.
  
-   Copyright (c) 2000-2022 Toshi Nagata. All rights reserved.
+   Copyright (c) 2000-2024 Toshi Nagata. All rights reserved.
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -127,4 +127,3 @@ enum {
 extern void MyAppCallback_startupMessage(const char *message, ...);
 
 #endif  /*  __MDCommon__  */
-

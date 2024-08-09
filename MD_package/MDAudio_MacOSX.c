@@ -3,7 +3,7 @@
  *  Alchemusica
  *
  *  Created by Toshi Nagata on 08/01/06.
- *  Copyright 2008-2022 Toshi Nagata. All rights reserved.
+ *  Copyright 2008-2024 Toshi Nagata. All rights reserved.
  *
 
  This program is free software; you can redistribute it and/or modify
@@ -2086,4 +2086,3 @@ UInt32
 MDAudioFormatGetFormatID(MDAudioFormat *fmt)
 {	return fmt->formatID;  }
 */
-
