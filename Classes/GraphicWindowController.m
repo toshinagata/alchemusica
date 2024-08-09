@@ -1684,11 +1684,12 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
         [field setHidden:YES];
     } else {
         CGFloat width, height;
+        NSRect bounds = NSMakeRect(0, 0, 200, 15);
         [field setHidden:NO];
         [field setStringValue: string];
-        width = [[field cell] cellSizeForBounds:[field bounds]].width;
-        height = [[field cell] cellSizeForBounds:[field bounds]].height;
-        [field setFrameSize:NSMakeSize(width + 1, height + 1)];
+        width = [[field cell] cellSizeForBounds:bounds].width;
+        height = [[field cell] cellSizeForBounds:bounds].height;
+        [field setFrameSize:NSMakeSize(width, height)];
     }
 }
 
