@@ -459,7 +459,6 @@ sTableColumnIDToInt(id identifier)
 //    majorCount: every majorCount lines, a vertical line with "large thickness" appears
 - (void)verticalLinesFromTick: (MDTickType)fromTick timeSignature: (MDEvent **)timeSignature nextTimeSignature: (MDEvent **)nextTimeSignature lineIntervalInPixels: (float *)lineIntervalInPixels mediumCount: (int *)mediumCount majorCount: (int *)majorCount
 {
-    MDTickType sTick, nsTick;
     float ppb;
     float interval;
     int mdCount, mjCount;
@@ -475,20 +474,16 @@ sTableColumnIDToInt(id identifier)
     if (ep1 == NULL) {
         /*  Assume 4/4  */
         sig0 = sig1 = 4;
-        sTick = 0;
     } else {
         const unsigned char *p = MDGetMetaDataPtr(ep1);
         sig0 = p[0];
         sig1 = (1 << p[1]);
         if (sig1 == 0)
             sig1 = 4;
-        sTick = MDGetTick(ep1);
     }
-    if (calib != NULL && (ep2 = MDCalibratorGetNextEvent(calib, NULL, kMDEventTimeSignature, -1)) != NULL)
-        nsTick = MDGetTick(ep2);
-    else {
+    if (calib != NULL && (ep2 = MDCalibratorGetNextEvent(calib, NULL, kMDEventTimeSignature, -1)) != NULL) {
+    } else {
         ep2 = NULL;
-        nsTick = kMDMaxTick;
     }
     ppb = [self pixelsPerTick] * [[self document] timebase] * 4 / sig1;
     if (ppb * 0.125 >= kMinimumTickIntervalsInPixels) {
@@ -643,7 +638,7 @@ sTableColumnIDToInt(id identifier)
     if (trackingRectTag != 0)
         [myMainView removeTrackingRect: trackingRectTag];
     bounds = [myMainView bounds];
-    mouseLoc = [myMainView convertPoint: [[self window] convertScreenToBase: [NSEvent mouseLocation]] fromView: nil];
+    mouseLoc = [myMainView convertPoint: [[self window] mouseLocationOutsideOfEventStream] fromView: nil];
     trackingRectTag = [myMainView addTrackingRect: bounds owner: self userData: nil assumeInside: NSMouseInRect(mouseLoc, bounds, [myMainView isFlipped])];
 }
 
@@ -779,7 +774,13 @@ sTableColumnIDToInt(id identifier)
 - (float)clientViewWidth
 {
     float width = (float)(([self sequenceDurationInQuarter] + 4.0) * [self pixelsPerQuarter]);
-    float minWidth = (float)([myMainView bounds].size.width - [self rulerWidth] - [NSScroller scrollerWidth]);
+    float scrollerWidth;
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7
+    scrollerWidth = [NSScroller scrollerWidthForControlSize:NSRegularControlSize scrollerStyle:NSScrollerStyleLegacy];
+#else
+    scrollerWidth = [NSScroller scrollerWidth];
+#endif
+    float minWidth = (float)([myMainView bounds].size.width - [self rulerWidth] - scrollerWidth);
 	if (width > minWidth)
 		return width;
 	else return minWidth;
@@ -881,7 +882,11 @@ sTableColumnIDToInt(id identifier)
 		return;   //  Too many client views
 	
 	aRect = [myMainView bounds];
-	scrollerWidth = [NSScroller scrollerWidth];
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7
+    scrollerWidth = [NSScroller scrollerWidthForControlSize:NSRegularControlSize scrollerStyle:NSScrollerStyleLegacy];
+#else
+    scrollerWidth = [NSScroller scrollerWidth];
+#endif
 	minHeight = [chartClass minHeight];
 
 	if (myClientViewsCount == 0) {
@@ -1137,7 +1142,6 @@ sTableColumnIDToInt(id identifier)
 - (void)setStripChartAtIndex: (int)index kind: (int)kind code: (int)code
 {
 	int32_t kindAndCode;
-	MDSequence *sequence;
 	int newKind;
     dprintf(1, "setStripChartAtIndex: %d %d %d\n", index, kind, code);
 	if (![records[index].client isKindOfClass: [StripChartView class]])
@@ -1158,7 +1162,7 @@ sTableColumnIDToInt(id identifier)
 
 /*	if (records[index].calib != NULL)
 		MDCalibratorRelease(records[index].calib); */
-	sequence = [[[self document] myMIDISequence] mySequence];
+/*	sequence = [[[self document] myMIDISequence] mySequence]; */
 /*
 	if (newKind == kMDEventTempo) {
 		calib = MDCalibratorNew(sequence, NULL, newKind, -1);
@@ -1189,12 +1193,11 @@ sTableColumnIDToInt(id identifier)
 
 - (void)setStripChartAtIndex:(int)index track:(int)track
 {
-    int32_t kindAndCode, kind, code;
+    int32_t kindAndCode, kind;
     if (![records[index].client isKindOfClass: [StripChartView class]])
         return;
     kindAndCode = [(StripChartView *)records[index].client kindAndCode];
     kind = (kindAndCode > 16) & 65535;
-    code = kindAndCode & 65535;
     if (kind == kMDEventTempo) {
         /*  Only conductor track is allowed  */
         track = 0;
@@ -2047,9 +2050,9 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 - (void)mouseMoved: (NSEvent *)theEvent
 {
     int i;
-    NSWindow *window = [self window];
+//    NSWindow *window = [self window];
 //    NSLog(@"GraphicWindowController.mouseMoved");
-    if ([NSWindow windowNumberAtPoint:[window convertBaseToScreen:[theEvent locationInWindow]] belowWindowWithWindowNumber:0] != [[self window] windowNumber]) {
+    if ([NSWindow windowNumberAtPoint:[NSEvent mouseLocation] belowWindowWithWindowNumber:0] != [[self window] windowNumber]) {
         [[NSCursor arrowCursor] set];
         return;
     }
@@ -2087,7 +2090,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 {
 	BOOL startFlag;
 	int32_t bar, beat, subtick;
-	MDTickType tick, duration, endtick;
+	MDTickType tick, endtick;
 	const char *s;
 	if ([sender tag] == kEditingRangeStartTextTag)
 		startFlag = YES;
@@ -2101,7 +2104,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 		if (MDEventParseTickString(s, &bar, &beat, &subtick) < 3)
 			return;
 		tick = MDCalibratorMeasureToTick(calib, bar, beat, subtick);
-		duration = [[[self document] myMIDISequence] sequenceDuration];
+	//	duration = [[[self document] myMIDISequence] sequenceDuration];
 		if (tick < 0)
 			tick = 0;
 	//	if (tick > duration)
@@ -2306,7 +2309,7 @@ row:(int)rowIndex
 	MDTrackAttribute attr;
 	int idnum;
 	NSRect frame;
-	BOOL editableTrackWasHidden = NO;
+	// BOOL editableTrackWasHidden = NO;
 	BOOL shiftFlag = (([[NSApp currentEvent] modifierFlags] & NSShiftKeyMask) != 0);
     BOOL commandFlag = (([[NSApp currentEvent] modifierFlags] & NSCommandKeyMask) != 0);
     
@@ -2370,7 +2373,7 @@ row:(int)rowIndex
 					//  Hidden tracks are non-editable
 					if (attr & kMDTrackAttributeEditable) {
 						attr &= ~kMDTrackAttributeEditable;
-						editableTrackWasHidden = YES;
+						// editableTrackWasHidden = YES;
 					}
 				}
 				[doc setTrackAttribute: attr forTrack: row];
@@ -2490,10 +2493,9 @@ row:(int)rowIndex
 
 - (void)trackTableDoubleAction:(id)sender
 {
-    int column, row, idnum;
+    int column, idnum;
     NSTableColumn *tableColumn;
 
-    row = (int)[myTableView clickedRow];
     column = (int)[myTableView clickedColumn];
 
 	if (column < 0)

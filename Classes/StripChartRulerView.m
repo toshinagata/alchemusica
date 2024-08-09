@@ -35,7 +35,7 @@
 
 - (void)drawRect:(NSRect)aRect
 {
-	NSRect frame, bounds, visibleRect;
+	NSRect frame, bounds;
 	NSFont *font;
 	NSDictionary *attr;
 	float grid;
@@ -47,7 +47,6 @@
 	NSString *str;
 	frame = [self frame];
 	bounds = [self bounds];
-	visibleRect = [(NSClipView *)[self superview] documentVisibleRect];
 	x = frame.size.width - 0.5f;
 	[NSBezierPath strokeLineFromPoint: NSMakePoint(x, 0) toPoint: NSMakePoint(x, bounds.size.height)];
 	minValue = [(StripChartView *)[self clientView] minValue];

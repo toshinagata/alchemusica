@@ -843,6 +843,7 @@ s_RubyDialog_Run(VALUE self)
 
 	iflag = Ruby_SetInterruptFlag(Qfalse);
 	retval = RubyDialogCallback_runModal(dref);
+  rb_iv_set(self, "_retval", INT2NUM(retval));
 	Ruby_SetInterruptFlag(iflag);
 	RubyDialogCallback_destroy(dref);
 	s_RubyDialog_Forget(self);
@@ -935,14 +936,14 @@ s_RubyDialog_Layout(int argc, VALUE *argv, VALUE self)
 	float f, fmin;
 	RDSize *sizes;
 	RDItem *layoutView, *ditem;
-	RDSize contentMinSize;
+/*	RDSize contentMinSize; */
 	RDRect layoutFrame;
 	float col_padding = 8.0f;  /*  Padding between columns  */
 	float row_padding = 8.0f;  /*  Padding between rows  */
 	float margin = 10.0f;
 
 	dref = s_RubyDialog_GetController(self);
-	contentMinSize = RubyDialogCallback_windowMinSize(dref);
+/*	contentMinSize = RubyDialogCallback_windowMinSize(dref); */
 	items = rb_iv_get(self, "_items");
 	nitems = (int)RARRAY_LEN(items);
 	
@@ -1815,26 +1816,26 @@ s_RubyDialog_doTableAction(VALUE val)
 		vp[3] = (void *)(intptr_t)(NUM2INT(rb_Integer(retval)));
 		return retval;
 	} else if (sym == sOnGetValueSymbol) {
-		args[1] = INT2NUM((int)vp[3]);
-		args[2] = INT2NUM((int)vp[4]);
+		args[1] = LONG2NUM((long)vp[3]);
+		args[2] = LONG2NUM((long)vp[4]);
 		retval = s_RubyDialog_CallActionProc(self, pval, 3, args);
 		retval = rb_str_to_str(retval);
 		vp[5] = strdup(EncodedStringValuePtr(retval));
 		return retval;
 	} else if (sym == sOnSetValueSymbol) {
-		args[1] = INT2NUM((int)vp[3]);
-		args[2] = INT2NUM((int)vp[4]);
+		args[1] = LONG2NUM((long)vp[3]);
+		args[2] = LONG2NUM((long)vp[4]);
 		args[3] = rb_str_new2((char *)vp[5]);
 		retval = s_RubyDialog_CallActionProc(self, pval, 4, args);
 		vp[6] = (void *)(intptr_t)(NUM2INT(rb_Integer(retval)));
 		return retval;
 	} else if (sym == sOnDragSelectionToRowSymbol) {
-		args[1] = INT2NUM((int)vp[3]);
+		args[1] = LONG2NUM((long)vp[3]);
 		retval = s_RubyDialog_CallActionProc(self, pval, 2, args);
 		return retval;
 	} else if (sym == sIsItemEditableSymbol) {
-		args[1] = INT2NUM((int)vp[3]);
-		args[2] = INT2NUM((int)vp[4]);
+		args[1] = LONG2NUM((long)vp[3]);
+		args[2] = LONG2NUM((long)vp[4]);
 		retval = s_RubyDialog_CallActionProc(self, pval, 3, args);
 		vp[5] = (void *)(intptr_t)(RTEST(retval) ? 1 : 0);
 		return retval;
@@ -1851,8 +1852,8 @@ s_RubyDialog_doTableAction(VALUE val)
 		float *bg = (float *)vp[6];
 		int i, n = 0;
 		VALUE cval;
-		args[1] = INT2NUM((int)vp[3]);
-		args[2] = INT2NUM((int)vp[4]);
+		args[1] = LONG2NUM((long)vp[3]);
+		args[2] = LONG2NUM((long)vp[4]);
 		retval = s_RubyDialog_CallActionProc(self, pval, 3, args);
 		if (retval == Qnil)
 			return Qnil;
@@ -1876,8 +1877,8 @@ s_RubyDialog_doTableAction(VALUE val)
 		vp[7] = (void *)(intptr_t)n;
 		return retval;
 	} else if (sym == sHasPopUpMenuSymbol) {
-		args[1] = INT2NUM((int)vp[3]);
-		args[2] = INT2NUM((int)vp[4]);
+		args[1] = LONG2NUM((long)vp[3]);
+		args[2] = LONG2NUM((long)vp[4]);
 		retval = s_RubyDialog_CallActionProc(self, pval, 3, args);
 		if (retval == Qnil) {
 			vp[6] = (void *)0;
@@ -1896,15 +1897,15 @@ s_RubyDialog_doTableAction(VALUE val)
 		}
 		return retval;
 	} else if (sym == sOnPopUpMenuSelectedSymbol) {
-		args[1] = INT2NUM((int)vp[3]);
-		args[2] = INT2NUM((int)vp[4]);
-		args[3] = INT2NUM((int)vp[5]);
+		args[1] = LONG2NUM((long)vp[3]);
+		args[2] = LONG2NUM((long)vp[4]);
+		args[3] = LONG2NUM((long)vp[5]);
 		retval = s_RubyDialog_CallActionProc(self, pval, 4, args);
 		return retval;
 	} else return Qnil;
 }
 
-int
+long
 RubyDialog_GetTableItemCount(RubyValue self, RDItem *ip)
 {
 	int status;
@@ -1915,7 +1916,7 @@ RubyDialog_GetTableItemCount(RubyValue self, RDItem *ip)
 		return 0;
 	} else if (val == Qnil)
 		return 0;
-	else return (int)vp[3];	
+	else return (long)vp[3];
 }
 
 void
@@ -1941,7 +1942,7 @@ RubyDialog_SetTableItemText(RubyValue self, RDItem *ip, int row, int column, con
 	if (status != 0 || val == Qnil) {
 		return -1;
 	} else
-		return (int)vp[6];
+		return (int)(intptr_t)vp[6];
 }
 
 void
@@ -1962,7 +1963,7 @@ RubyDialog_IsTableItemEditable(RubyValue self, RDItem *ip, int row, int column)
 	VALUE val = rb_protect(s_RubyDialog_doTableAction, (VALUE)vp, &status);
 	if (status != 0 || val == Qnil)
 		return 0;
-	else return (int)vp[5];	
+	else return (int)(intptr_t)vp[5];
 }
 
 int
@@ -1973,7 +1974,7 @@ RubyDialog_IsTableDragAndDropEnabled(RubyValue self, RDItem *ip)
 	VALUE val = rb_protect(s_RubyDialog_doTableAction, (VALUE)vp, &status);
 	if (status != 0 || val == Qnil)
 		return 0;
-	else return (int)vp[3];	
+	else return (int)(intptr_t)vp[3];
 }
 
 void
@@ -1994,7 +1995,7 @@ RubyDialog_SetTableItemColor(RubyValue self, RDItem *ip, int row, int column, fl
 	VALUE val = rb_protect(s_RubyDialog_doTableAction, (VALUE)vp, &status);
 	if (status != 0 || val == Qnil)
 		return 0;
-	else return (int)vp[7];
+	else return (int)(intptr_t)vp[7];
 }
 
 int
@@ -2005,7 +2006,7 @@ RubyDialog_HasPopUpMenu(RubyValue self, RDItem *ip, int row, int column, char **
 	VALUE val = rb_protect(s_RubyDialog_doTableAction, (VALUE)vp, &status);
 	if (status != 0 || val == Qnil)
 		return 0;
-	else return (int)vp[6];
+	else return (int)(intptr_t)vp[6];
 }
 
 void
@@ -2068,7 +2069,7 @@ s_RubyDialog_doItemAction(VALUE val)
 	VALUE flag;
 	RDItem *ip = (RDItem *)vp[1];
 	RDItem *ip2;
-	int options = (int)vp[2];
+	long options = (long)vp[2];
 	VALUE ival, itval, actval, tval, aval;
 	RubyDialog *dref = s_RubyDialog_GetController(self);
 	VALUE items = rb_iv_get(self, "_items");
@@ -2249,13 +2250,13 @@ s_RubyDialog_doKeyAction(VALUE val)
 {
 	void **values = (void **)val;
 	VALUE self = (VALUE)values[0];
-	int keyCode = (int)values[1];
+	long keyCode = (long)values[1];
 	VALUE actval = rb_iv_get(self, "_key_action");
 	if (actval != Qnil) {
 		if (TYPE(actval) == T_SYMBOL)
-			rb_funcall(self, SYM2ID(actval), 1, INT2NUM(keyCode));
+			rb_funcall(self, SYM2ID(actval), 1, LONG2NUM(keyCode));
 		else
-			rb_funcall(actval, rb_intern("call"), 1, INT2NUM(keyCode));
+			rb_funcall(actval, rb_intern("call"), 1, LONG2NUM(keyCode));
 	}
 	return Qnil;
 }
@@ -2305,7 +2306,7 @@ RubyDialog_getFlexFlags(RubyValue self, RDItem *ip)
 		return -1;
 	else if (rval == Qnil)
 		return -1;
-	else return (int)args[2];
+	else return (int)(intptr_t)args[2];
 }
 
 static VALUE
@@ -2313,7 +2314,7 @@ s_RubyDialog_doCloseWindow(VALUE val)
 {
 	void **values = (void **)val;
 	VALUE self = (VALUE)values[0];
-	int isModal = (int)values[1];
+	long isModal = (long)values[1];
 	if (isModal) {
 		rb_funcall(self, rb_intern("end_modal"), 1, INT2NUM(1));
 		return Qnil;
@@ -2341,9 +2342,8 @@ void
 RubyDialog_doCloseWindow(RubyValue self, int isModal)
 {
 	int status;
-	VALUE rval;
 	void *args[2] = { (void *)self, (void *)(intptr_t)isModal };
-	rval = rb_protect(s_RubyDialog_doCloseWindow, (VALUE)args, &status);
+	rb_protect(s_RubyDialog_doCloseWindow, (VALUE)args, &status);
 	if (status != 0) {
 		Ruby_showError(status);
 	}

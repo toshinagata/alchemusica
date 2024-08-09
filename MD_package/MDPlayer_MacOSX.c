@@ -1314,11 +1314,10 @@ SendMIDIEventsBeforeTick(MDPlayer *inPlayer, MDTickType now_tick, MDTickType pre
 static int32_t
 MyTimerFunc(MDPlayer *player)
 {
-	MDTimeType now_time, last_time;
+	MDTimeType now_time;
     MDTimeType time_to_wait;
 	MDTickType now_tick, prefetch_tick, tick;
 	MDSequence *sequence;
-	int32_t n;
 	
 	if (player == NULL)
 		return -1;
@@ -1354,7 +1353,6 @@ MyTimerFunc(MDPlayer *player)
     player->time = now_time;
 	now_tick = MDCalibratorTimeToTick(player->calib, now_time);
 	prefetch_tick = MDCalibratorTimeToTick(player->calib, now_time + kMDPlayerPrefetchInterval);
-	last_time = 0;
 	
     if (MDSequenceTryLock(sequence) == 0) {
     /*    if (now_tick >= player->recordingStopTick) {
@@ -1364,7 +1362,7 @@ MyTimerFunc(MDPlayer *player)
                 MDAudioStopRecording();
             player->recordingStopTick = kMDMaxTick;
         } */
-        n = SendMIDIEventsBeforeTick(player, now_tick, prefetch_tick, &tick);
+        SendMIDIEventsBeforeTick(player, now_tick, prefetch_tick, &tick);
     //    printf("now_tick = %ld tick = %ld\n", now_tick, tick);
         if (tick >= kMDMaxTick) {
             player->status = kMDPlayer_exhausted;
@@ -1378,7 +1376,6 @@ MyTimerFunc(MDPlayer *player)
         }
 		MDSequenceUnlock(sequence);
     } else {
-        n = 0;
         time_to_wait = kMDPlayerPrefetchInterval;
     }
     return (int32_t)time_to_wait;
@@ -1520,12 +1517,12 @@ StopSoundInAllTracks(MDPlayer *inPlayer)
 int
 MDPlayerSendRawMIDI(MDPlayer *inPlayer, const unsigned char *p, int size, int destDevice, MDTimeType scheduledTime)
 {
-    MDDeviceIDRecord *rp;
+/*    MDDeviceIDRecord *rp; */
     UInt64 timeStamp;
     
     if (destDevice < 0 || destDevice >= sDeviceInfo.destNum)
 		return -1;
-    rp = &(sDeviceInfo.dest[destDevice]);
+/*    rp = &(sDeviceInfo.dest[destDevice]); */
     if (inPlayer != NULL && scheduledTime + inPlayer->startTime >= 0)
         timeStamp = ConvertMDTimeTypeToHostTime(scheduledTime + inPlayer->startTime);
     else if (scheduledTime >= 0)
@@ -2220,7 +2217,7 @@ MDPlayerBacktrackEvents(MDPlayer *inPlayer, MDTickType inTick, const int32_t *in
 		The value -1 is used for termination.  */
 	
     MDEvent *ep;
-    MDEvent **lastOnlyEvents;
+/*    MDEvent **lastOnlyEvents; */
 	MDDestinationInfo *info;
     int i, channel, num, lastOnlyCount, processedDest;
     static const int32_t sDefaultEventType = { -1 };
@@ -2234,9 +2231,9 @@ MDPlayerBacktrackEvents(MDPlayer *inPlayer, MDTickType inTick, const int32_t *in
     /*  Count the 'last only' types  */
     for (i = 0; inEventTypeLastOnly[i] != -1; i++);
     lastOnlyCount = i;
-    if (lastOnlyCount > 0)
+/*    if (lastOnlyCount > 0)
         lastOnlyEvents = (MDEvent **)calloc(sizeof(MDEvent *), lastOnlyCount * inPlayer->destNum * 16);
-    else lastOnlyEvents = NULL;
+    else lastOnlyEvents = NULL; */
     
     /*  Rewind to the top of the sequence  */
     MDPlayerJumpToTick(inPlayer, 0);

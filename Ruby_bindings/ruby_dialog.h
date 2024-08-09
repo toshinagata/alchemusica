@@ -79,7 +79,7 @@ extern int RubyDialog_getFlexFlags(RubyValue self, RDItem *ip);
 extern void RubyDialog_doCloseWindow(RubyValue self, int isModal);
 extern void RubyDialog_doPaintAction(RubyValue self, RDItem *ip);
 
-extern int RubyDialog_GetTableItemCount(RubyValue self, RDItem *ip);
+extern long RubyDialog_GetTableItemCount(RubyValue self, RDItem *ip);
 extern void RubyDialog_GetTableItemText(RubyValue self, RDItem *ip, int row, int column, char *buf, int blen);
 extern int RubyDialog_SetTableItemText(RubyValue self, RDItem *ip, int row, int column, const char *str);
 extern void RubyDialog_DragTableSelectionToRow(RubyValue self, RDItem *ip, int row);

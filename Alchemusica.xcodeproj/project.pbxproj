@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -121,7 +121,6 @@
 		E400BE1E11D627870032B969 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5FB767800F88D8601000001 /* AudioUnit.framework */; };
 		E400BE1F11D627870032B969 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5835E0702292DC201A80002 /* CoreFoundation.framework */; };
 		E400BE2011D627870032B969 /* CoreAudioKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4562EC211D10A8800EBD2AA /* CoreAudioKit.framework */; };
-		E400BE2411D627A60032B969 /* Ruby_Scripts in CopyFiles */ = {isa = PBXBuildFile; fileRef = E44BC0081044332E00978A1A /* Ruby_Scripts */; };
 		E40C7A1F140A85A200969DC3 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A1D140A85A200969DC3 /* MainMenu.xib */; };
 		E40C7A23140A85DB00969DC3 /* TrackWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A21140A85DB00969DC3 /* TrackWindow.xib */; };
 		E40C7A27140A860B00969DC3 /* ListWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = E40C7A25140A860B00969DC3 /* ListWindow.xib */; };
@@ -177,26 +176,13 @@
 		E4FB54C313FA851A001C1290 /* horizontal_move_zoom.png in Resources */ = {isa = PBXBuildFile; fileRef = E4FB54C213FA851A001C1290 /* horizontal_move_zoom.png */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		E400BE2511D627C40032B969 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				E400BE2411D627A60032B969 /* Ruby_Scripts in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
 		00FB976F00D7AF2F7F000001 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
 		00FBF1B800C9C4767F000001 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = /System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<absolute>"; };
 		00FBF1BC00C9C7EA7F000001 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		0217E8F300D51D2B7F000001 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = /System/Library/Frameworks/CoreAudio.framework; sourceTree = "<absolute>"; };
 		1058C7A7FEA54F5311CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
-		2A37F4B0FDCFA73011CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		2A37F4B0FDCFA73011CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = main.m; sourceTree = "<group>"; tabWidth = 4; };
 		2A37F4C4FDCFA73011CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		2A37F4C5FDCFA73011CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		E40081650C4B547E009D0A87 /* note4.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = note4.png; path = icons/note4.png; sourceTree = "<group>"; };
@@ -220,40 +206,40 @@
 		E40081B50C4B73D5009D0A87 /* NQ.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = NQ.png; path = icons/NQ.png; sourceTree = "<group>"; };
 		E400BBBD11D627550032B969 /* Alchemusica.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Alchemusica.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E400BBBF11D627550032B969 /* Alchemusica-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Alchemusica-Info.plist"; sourceTree = "<group>"; };
-		E405989D0D311A9700161E25 /* MDAudio_MacOSX.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MDAudio_MacOSX.c; path = MD_package/MDAudio_MacOSX.c; sourceTree = "<group>"; };
-		E40598B80D311C9B00161E25 /* MDAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDAudio.h; path = MD_package/MDAudio.h; sourceTree = "<group>"; };
-		E40C7ACA140A95D700969DC3 /* MetronomeSettingsPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MetronomeSettingsPanelController.h; path = Classes/MetronomeSettingsPanelController.h; sourceTree = "<group>"; };
-		E40C7ACB140A95D700969DC3 /* MetronomeSettingsPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MetronomeSettingsPanelController.m; path = Classes/MetronomeSettingsPanelController.m; sourceTree = "<group>"; };
+		E405989D0D311A9700161E25 /* MDAudio_MacOSX.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDAudio_MacOSX.c; path = MD_package/MDAudio_MacOSX.c; sourceTree = "<group>"; tabWidth = 4; };
+		E40598B80D311C9B00161E25 /* MDAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MDAudio.h; path = MD_package/MDAudio.h; sourceTree = "<group>"; tabWidth = 4; };
+		E40C7ACA140A95D700969DC3 /* MetronomeSettingsPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MetronomeSettingsPanelController.h; path = Classes/MetronomeSettingsPanelController.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E40C7ACB140A95D700969DC3 /* MetronomeSettingsPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = MetronomeSettingsPanelController.m; path = Classes/MetronomeSettingsPanelController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
 		E40D6F3F0636BF0100A80105 /* horizontal_move.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = horizontal_move.png; path = icons/horizontal_move.png; sourceTree = "<group>"; };
 		E40D6F450636C6B700A80105 /* vertical_move.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = vertical_move.png; path = icons/vertical_move.png; sourceTree = "<group>"; };
-		E40EDA4B0BBFFD2600B3FE78 /* GraphicBackgroundView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = GraphicBackgroundView.h; path = Classes/GraphicBackgroundView.h; sourceTree = "<group>"; };
-		E40EDA4C0BBFFD2600B3FE78 /* GraphicBackgroundView.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = GraphicBackgroundView.m; path = Classes/GraphicBackgroundView.m; sourceTree = "<group>"; };
-		E41CC3DF0F599ACF006E6817 /* RubyConsoleWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RubyConsoleWindowController.h; path = Classes/RubyConsoleWindowController.h; sourceTree = "<group>"; };
-		E41CC3E00F599ACF006E6817 /* RubyConsoleWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RubyConsoleWindowController.m; path = Classes/RubyConsoleWindowController.m; sourceTree = "<group>"; };
-		E4216C1F19D6CD3E00533630 /* IntGroup.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = IntGroup.c; path = MD_package/IntGroup.c; sourceTree = "<group>"; };
-		E4216C2019D6CD3E00533630 /* IntGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IntGroup.h; path = MD_package/IntGroup.h; sourceTree = "<group>"; };
+		E40EDA4B0BBFFD2600B3FE78 /* GraphicBackgroundView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = GraphicBackgroundView.h; path = Classes/GraphicBackgroundView.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E40EDA4C0BBFFD2600B3FE78 /* GraphicBackgroundView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = GraphicBackgroundView.m; path = Classes/GraphicBackgroundView.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E41CC3DF0F599ACF006E6817 /* RubyConsoleWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = RubyConsoleWindowController.h; path = Classes/RubyConsoleWindowController.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E41CC3E00F599ACF006E6817 /* RubyConsoleWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = RubyConsoleWindowController.m; path = Classes/RubyConsoleWindowController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4216C1F19D6CD3E00533630 /* IntGroup.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = IntGroup.c; path = MD_package/IntGroup.c; sourceTree = "<group>"; tabWidth = 4; };
+		E4216C2019D6CD3E00533630 /* IntGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = IntGroup.h; path = MD_package/IntGroup.h; sourceTree = "<group>"; tabWidth = 4; };
 		E4266C730966379B00C04A48 /* selection.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = selection.png; path = icons/selection.png; sourceTree = "<group>"; };
 		E4266C81096647F100C04A48 /* pencil.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = pencil.png; path = icons/pencil.png; sourceTree = "<group>"; };
-		E4266D0D0966681100C04A48 /* MyPopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyPopUpButton.m; path = Classes/MyPopUpButton.m; sourceTree = "<group>"; };
-		E4266D0E0966681100C04A48 /* MyPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MyPopUpButton.h; path = Classes/MyPopUpButton.h; sourceTree = "<group>"; };
-		E426A2CD073E73B00039474B /* NSWindowControllerAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSWindowControllerAdditions.h; path = Classes/NSWindowControllerAdditions.h; sourceTree = "<group>"; };
-		E426A2CE073E73B00039474B /* NSWindowControllerAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSWindowControllerAdditions.m; path = Classes/NSWindowControllerAdditions.m; sourceTree = "<group>"; };
+		E4266D0D0966681100C04A48 /* MyPopUpButton.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = MyPopUpButton.m; path = Classes/MyPopUpButton.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4266D0E0966681100C04A48 /* MyPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MyPopUpButton.h; path = Classes/MyPopUpButton.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E426A2CD073E73B00039474B /* NSWindowControllerAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = NSWindowControllerAdditions.h; path = Classes/NSWindowControllerAdditions.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E426A2CE073E73B00039474B /* NSWindowControllerAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = NSWindowControllerAdditions.m; path = Classes/NSWindowControllerAdditions.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
 		E4280AFF0A44164600DCD341 /* StartEditingRange.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = StartEditingRange.png; path = icons/StartEditingRange.png; sourceTree = "<group>"; };
 		E4280BEB0A44465800DCD341 /* EndEditingRange.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = EndEditingRange.png; path = icons/EndEditingRange.png; sourceTree = "<group>"; };
-		E42BF87D0DB1D1100095F74F /* RubyDialogController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RubyDialogController.h; path = Ruby_bindings/RubyDialogController.h; sourceTree = "<group>"; };
-		E42BF87E0DB1D1100095F74F /* RubyDialogController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RubyDialogController.m; path = Ruby_bindings/RubyDialogController.m; sourceTree = "<group>"; };
-		E42D332622E4954900788C29 /* AudioSettingsPrefPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioSettingsPrefPanelController.h; path = Classes/AudioSettingsPrefPanelController.h; sourceTree = "<group>"; };
-		E42D332722E4954900788C29 /* AudioSettingsPrefPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AudioSettingsPrefPanelController.m; path = Classes/AudioSettingsPrefPanelController.m; sourceTree = "<group>"; };
-		E430D72B0D79700F00717A72 /* EventFilterPanelController.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = EventFilterPanelController.h; path = Classes/EventFilterPanelController.h; sourceTree = "<group>"; };
-		E430D72C0D79700F00717A72 /* EventFilterPanelController.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = EventFilterPanelController.m; path = Classes/EventFilterPanelController.m; sourceTree = "<group>"; };
+		E42BF87D0DB1D1100095F74F /* RubyDialogController.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = RubyDialogController.h; path = Ruby_bindings/RubyDialogController.h; sourceTree = "<group>"; tabWidth = 4; };
+		E42BF87E0DB1D1100095F74F /* RubyDialogController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = RubyDialogController.m; path = Ruby_bindings/RubyDialogController.m; sourceTree = "<group>"; tabWidth = 4; };
+		E42D332622E4954900788C29 /* AudioSettingsPrefPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = AudioSettingsPrefPanelController.h; path = Classes/AudioSettingsPrefPanelController.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E42D332722E4954900788C29 /* AudioSettingsPrefPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = AudioSettingsPrefPanelController.m; path = Classes/AudioSettingsPrefPanelController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E430D72B0D79700F00717A72 /* EventFilterPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = EventFilterPanelController.h; path = Classes/EventFilterPanelController.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E430D72C0D79700F00717A72 /* EventFilterPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = EventFilterPanelController.m; path = Classes/EventFilterPanelController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
 		E4332325096841C800D5DAD8 /* sigmoid.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = sigmoid.png; path = icons/sigmoid.png; sourceTree = "<group>"; };
 		E4332326096841C800D5DAD8 /* random.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = random.png; path = icons/random.png; sourceTree = "<group>"; };
-		E4335F900472902100A80006 /* ColorCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ColorCell.h; path = Classes/ColorCell.h; sourceTree = "<group>"; };
-		E4335F910472902100A80006 /* ColorCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ColorCell.m; path = Classes/ColorCell.m; sourceTree = "<group>"; };
-		E43D1E0F10418C0F00B0104C /* MDRubyExtern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDRubyExtern.h; path = Ruby_bindings/MDRubyExtern.h; sourceTree = "<group>"; };
-		E43E5F200D92AD49002FDD1E /* MDRuby.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MDRuby.h; path = Ruby_bindings/MDRuby.h; sourceTree = "<group>"; };
-		E43E5F210D92AD49002FDD1E /* MDRubyCore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MDRubyCore.m; path = Ruby_bindings/MDRubyCore.m; sourceTree = "<group>"; };
-		E43E5F220D92AD49002FDD1E /* MDRubyCore.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MDRubyCore.h; path = Ruby_bindings/MDRubyCore.h; sourceTree = "<group>"; };
+		E4335F900472902100A80006 /* ColorCell.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = ColorCell.h; path = Classes/ColorCell.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4335F910472902100A80006 /* ColorCell.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = ColorCell.m; path = Classes/ColorCell.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E43D1E0F10418C0F00B0104C /* MDRubyExtern.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MDRubyExtern.h; path = Ruby_bindings/MDRubyExtern.h; sourceTree = "<group>"; tabWidth = 4; };
+		E43E5F200D92AD49002FDD1E /* MDRuby.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MDRuby.h; path = Ruby_bindings/MDRuby.h; sourceTree = "<group>"; tabWidth = 4; };
+		E43E5F210D92AD49002FDD1E /* MDRubyCore.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = MDRubyCore.m; path = Ruby_bindings/MDRubyCore.m; sourceTree = "<group>"; tabWidth = 4; };
+		E43E5F220D92AD49002FDD1E /* MDRubyCore.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MDRubyCore.h; path = Ruby_bindings/MDRubyCore.h; sourceTree = "<group>"; tabWidth = 4; };
 		E4402B790BF592170076972C /* ibeam.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ibeam.png; path = icons/ibeam.png; sourceTree = "<group>"; };
 		E44590C81413C1C400F5C20D /* mute.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = mute.png; path = icons/mute.png; sourceTree = "<group>"; };
 		E44590C91413C1C400F5C20D /* mute_non.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = mute_non.png; path = icons/mute_non.png; sourceTree = "<group>"; };
@@ -261,90 +247,90 @@
 		E44591971413D9F200F5C20D /* solo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = solo.png; path = icons/solo.png; sourceTree = "<group>"; };
 		E445919B1413DA2D00F5C20D /* solo_non.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = solo_non.png; path = icons/solo_non.png; sourceTree = "<group>"; };
 		E44A56B8074F99DB002034A7 /* loupe.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = loupe.png; path = icons/loupe.png; sourceTree = "<group>"; };
-		E44A56BA074F9A6F002034A7 /* NSCursorAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSCursorAdditions.h; path = Classes/NSCursorAdditions.h; sourceTree = "<group>"; };
-		E44A56BB074F9A6F002034A7 /* NSCursorAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSCursorAdditions.m; path = Classes/NSCursorAdditions.m; sourceTree = "<group>"; wrapsLines = 1; };
+		E44A56BA074F9A6F002034A7 /* NSCursorAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = NSCursorAdditions.h; path = Classes/NSCursorAdditions.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E44A56BB074F9A6F002034A7 /* NSCursorAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = NSCursorAdditions.m; path = Classes/NSCursorAdditions.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; wrapsLines = 1; };
 		E44BC0081044332E00978A1A /* Ruby_Scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Ruby_Scripts; sourceTree = "<group>"; };
-		E44C7AC70C1D9E33004138AB /* RecordPanelController.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = RecordPanelController.h; path = Classes/RecordPanelController.h; sourceTree = "<group>"; };
-		E44C7AC80C1D9E33004138AB /* RecordPanelController.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = RecordPanelController.m; path = Classes/RecordPanelController.m; sourceTree = "<group>"; };
+		E44C7AC70C1D9E33004138AB /* RecordPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = RecordPanelController.h; path = Classes/RecordPanelController.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E44C7AC80C1D9E33004138AB /* RecordPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = RecordPanelController.m; path = Classes/RecordPanelController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
 		E45323310452743D00A80006 /* minus.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = minus.png; path = icons/minus.png; sourceTree = "<group>"; };
 		E4562EC211D10A8800EBD2AA /* CoreAudioKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioKit.framework; path = /System/Library/Frameworks/CoreAudioKit.framework; sourceTree = "<absolute>"; };
-		E46394310A0E0C5400FD0629 /* MyPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MyPopUpButtonCell.h; path = Classes/MyPopUpButtonCell.h; sourceTree = "<group>"; };
-		E46394320A0E0C5400FD0629 /* MyPopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyPopUpButtonCell.m; path = Classes/MyPopUpButtonCell.m; sourceTree = "<group>"; };
-		E46394F10A0E52D900FD0629 /* MyComboBoxCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MyComboBoxCell.h; path = Classes/MyComboBoxCell.h; sourceTree = "<group>"; };
-		E46394F20A0E52D900FD0629 /* MyComboBoxCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyComboBoxCell.m; path = Classes/MyComboBoxCell.m; sourceTree = "<group>"; };
-		E467A8DA240EA60400F7DD6F /* SaveErrorPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SaveErrorPanelController.m; path = Classes/SaveErrorPanelController.m; sourceTree = "<group>"; };
-		E467A8DB240EA60400F7DD6F /* SaveErrorPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SaveErrorPanelController.h; path = Classes/SaveErrorPanelController.h; sourceTree = "<group>"; };
+		E46394310A0E0C5400FD0629 /* MyPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MyPopUpButtonCell.h; path = Classes/MyPopUpButtonCell.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E46394320A0E0C5400FD0629 /* MyPopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = MyPopUpButtonCell.m; path = Classes/MyPopUpButtonCell.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E46394F10A0E52D900FD0629 /* MyComboBoxCell.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MyComboBoxCell.h; path = Classes/MyComboBoxCell.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E46394F20A0E52D900FD0629 /* MyComboBoxCell.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = MyComboBoxCell.m; path = Classes/MyComboBoxCell.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E467A8DA240EA60400F7DD6F /* SaveErrorPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = SaveErrorPanelController.m; path = Classes/SaveErrorPanelController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E467A8DB240EA60400F7DD6F /* SaveErrorPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = SaveErrorPanelController.h; path = Classes/SaveErrorPanelController.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
 		E468AD5A1FAEBFDF00EE393E /* speaker_cursor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = speaker_cursor.png; path = icons/speaker_cursor.png; sourceTree = "<group>"; };
-		E46A94AD1F776B23008477D2 /* ContextMenuTextFieldCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ContextMenuTextFieldCell.h; path = Classes/ContextMenuTextFieldCell.h; sourceTree = "<group>"; };
-		E46A94AE1F776B23008477D2 /* ContextMenuTextFieldCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ContextMenuTextFieldCell.m; path = Classes/ContextMenuTextFieldCell.m; sourceTree = "<group>"; };
-		E4743AE60456EAE900A80006 /* GraphicFloatingView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GraphicFloatingView.h; path = Classes/GraphicFloatingView.h; sourceTree = "<group>"; };
-		E4743AE70456EAE900A80006 /* GraphicFloatingView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GraphicFloatingView.m; path = Classes/GraphicFloatingView.m; sourceTree = "<group>"; };
-		E476192C0454425A00A80006 /* MenuTags.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MenuTags.h; path = Classes/MenuTags.h; sourceTree = "<group>"; };
-		E47643C01F889F62009A206D /* AudioEffectPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioEffectPanelController.h; path = Classes/AudioEffectPanelController.h; sourceTree = "<group>"; };
-		E47643C11F889F62009A206D /* AudioEffectPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AudioEffectPanelController.m; path = Classes/AudioEffectPanelController.m; sourceTree = "<group>"; };
-		E47643C31F88B29B009A206D /* AudioEffectLayoutView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioEffectLayoutView.h; path = Classes/AudioEffectLayoutView.h; sourceTree = "<group>"; };
-		E47643C41F88B29B009A206D /* AudioEffectLayoutView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AudioEffectLayoutView.m; path = Classes/AudioEffectLayoutView.m; sourceTree = "<group>"; };
-		E47643C91F8B236F009A206D /* MyClipView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MyClipView.h; path = Classes/MyClipView.h; sourceTree = "<group>"; };
-		E47643CA1F8B236F009A206D /* MyClipView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyClipView.m; path = Classes/MyClipView.m; sourceTree = "<group>"; };
-		E481167F071C26C700A80105 /* TrackAttributeCell.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = TrackAttributeCell.h; path = Classes/TrackAttributeCell.h; sourceTree = "<group>"; };
-		E4811680071C26C700A80105 /* TrackAttributeCell.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = TrackAttributeCell.m; path = Classes/TrackAttributeCell.m; sourceTree = "<group>"; };
+		E46A94AD1F776B23008477D2 /* ContextMenuTextFieldCell.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = ContextMenuTextFieldCell.h; path = Classes/ContextMenuTextFieldCell.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E46A94AE1F776B23008477D2 /* ContextMenuTextFieldCell.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = ContextMenuTextFieldCell.m; path = Classes/ContextMenuTextFieldCell.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4743AE60456EAE900A80006 /* GraphicFloatingView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = GraphicFloatingView.h; path = Classes/GraphicFloatingView.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4743AE70456EAE900A80006 /* GraphicFloatingView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = GraphicFloatingView.m; path = Classes/GraphicFloatingView.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E476192C0454425A00A80006 /* MenuTags.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MenuTags.h; path = Classes/MenuTags.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E47643C01F889F62009A206D /* AudioEffectPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = AudioEffectPanelController.h; path = Classes/AudioEffectPanelController.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E47643C11F889F62009A206D /* AudioEffectPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = AudioEffectPanelController.m; path = Classes/AudioEffectPanelController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E47643C31F88B29B009A206D /* AudioEffectLayoutView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = AudioEffectLayoutView.h; path = Classes/AudioEffectLayoutView.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E47643C41F88B29B009A206D /* AudioEffectLayoutView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = AudioEffectLayoutView.m; path = Classes/AudioEffectLayoutView.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E47643C91F8B236F009A206D /* MyClipView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MyClipView.h; path = Classes/MyClipView.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E47643CA1F8B236F009A206D /* MyClipView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = MyClipView.m; path = Classes/MyClipView.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E481167F071C26C700A80105 /* TrackAttributeCell.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = TrackAttributeCell.h; path = Classes/TrackAttributeCell.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4811680071C26C700A80105 /* TrackAttributeCell.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = TrackAttributeCell.m; path = Classes/TrackAttributeCell.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
 		E48885ED04523E4B00A80006 /* plus.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = plus.png; path = icons/plus.png; sourceTree = "<group>"; };
 		E48BC37F2302A7BD0087B726 /* StopButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = StopButton.png; path = icons/StopButton.png; sourceTree = "<group>"; };
 		E48BC3812302A89E0087B726 /* FFButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = FFButton.png; path = icons/FFButton.png; sourceTree = "<group>"; };
 		E48BC3832302A8DB0087B726 /* PlayButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = PlayButton.png; path = icons/PlayButton.png; sourceTree = "<group>"; };
 		E48BC3852302A9210087B726 /* PauseButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = PauseButton.png; path = icons/PauseButton.png; sourceTree = "<group>"; };
 		E48BC3872302A9990087B726 /* RewindButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = RewindButton.png; path = icons/RewindButton.png; sourceTree = "<group>"; };
-		E4951EA211D63CD000D827EC /* AUViewWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AUViewWindowController.h; path = Classes/AUViewWindowController.h; sourceTree = "<group>"; };
-		E4951EA311D63CD000D827EC /* AUViewWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AUViewWindowController.m; path = Classes/AUViewWindowController.m; sourceTree = "<group>"; };
-		E49B98060D9F79B100F61755 /* MDRubyPointer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDRubyPointer.h; path = Ruby_bindings/MDRubyPointer.h; sourceTree = "<group>"; };
-		E49B98070D9F79B100F61755 /* MDRubyPointer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MDRubyPointer.m; path = Ruby_bindings/MDRubyPointer.m; sourceTree = "<group>"; wrapsLines = 1; };
+		E4951EA211D63CD000D827EC /* AUViewWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = AUViewWindowController.h; path = Classes/AUViewWindowController.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4951EA311D63CD000D827EC /* AUViewWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = AUViewWindowController.m; path = Classes/AUViewWindowController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E49B98060D9F79B100F61755 /* MDRubyPointer.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MDRubyPointer.h; path = Ruby_bindings/MDRubyPointer.h; sourceTree = "<group>"; tabWidth = 4; };
+		E49B98070D9F79B100F61755 /* MDRubyPointer.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = MDRubyPointer.m; path = Ruby_bindings/MDRubyPointer.m; sourceTree = "<group>"; tabWidth = 4; wrapsLines = 1; };
 		E49DF713096935AA00A91C40 /* linear.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = linear.png; path = icons/linear.png; sourceTree = "<group>"; };
 		E49DF721096935FA00A91C40 /* triangle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = triangle.png; path = icons/triangle.png; sourceTree = "<group>"; };
 		E49DF79709694BDC00A91C40 /* pencil_cursor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = pencil_cursor.png; path = icons/pencil_cursor.png; sourceTree = "<group>"; };
 		E49DF811096A3E2400A91C40 /* arc.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = arc.png; path = icons/arc.png; sourceTree = "<group>"; };
 		E49DF812096A3E2400A91C40 /* parabola.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = parabola.png; path = icons/parabola.png; sourceTree = "<group>"; };
 		E49DF944096A9B8500A91C40 /* pencil_small.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = pencil_small.png; path = icons/pencil_small.png; sourceTree = "<group>"; };
-		E4AA82341053F41D0052CF7F /* MDRubyEventSet.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = MDRubyEventSet.m; path = Ruby_bindings/MDRubyEventSet.m; sourceTree = "<group>"; };
-		E4AA82441053F8050052CF7F /* MDRubyEventSet.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MDRubyEventSet.h; path = Ruby_bindings/MDRubyEventSet.h; sourceTree = "<group>"; };
-		E4B0B25E10A30F78007B7360 /* MDAudioUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDAudioUtility.h; path = MD_package/MDAudioUtility.h; sourceTree = "<group>"; };
-		E4B0B25F10A30F78007B7360 /* MDAudioUtility.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MDAudioUtility.c; path = MD_package/MDAudioUtility.c; sourceTree = "<group>"; };
-		E4B2E8E40D93F92600781995 /* MDRubySequence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDRubySequence.h; path = Ruby_bindings/MDRubySequence.h; sourceTree = "<group>"; };
-		E4B2E8E50D93F92600781995 /* MDRubySequence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MDRubySequence.m; path = Ruby_bindings/MDRubySequence.m; sourceTree = "<group>"; wrapsLines = 1; };
-		E4B2EB320D9AA05600781995 /* MDRubyTrack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDRubyTrack.h; path = Ruby_bindings/MDRubyTrack.h; sourceTree = "<group>"; };
-		E4B2EB330D9AA05600781995 /* MDRubyTrack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MDRubyTrack.m; path = Ruby_bindings/MDRubyTrack.m; sourceTree = "<group>"; wrapsLines = 1; };
-		E4B4C26711C3EDAC00FE7593 /* AudioSettingsPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioSettingsPanelController.h; path = Classes/AudioSettingsPanelController.h; sourceTree = "<group>"; };
-		E4B4C26811C3EDAC00FE7593 /* AudioSettingsPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AudioSettingsPanelController.m; path = Classes/AudioSettingsPanelController.m; sourceTree = "<group>"; };
-		E4B5C7BA060C9406000BC127 /* NSStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = NSStringAdditions.h; path = Classes/NSStringAdditions.h; sourceTree = "<group>"; };
-		E4B5C7BB060C9406000BC127 /* NSStringAdditions.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = NSStringAdditions.m; path = Classes/NSStringAdditions.m; sourceTree = "<group>"; };
-		E4BAFD800C18613600A5EAED /* MyWindow.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MyWindow.h; path = Classes/MyWindow.h; sourceTree = "<group>"; };
-		E4BAFD810C18613600A5EAED /* MyWindow.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = MyWindow.m; path = Classes/MyWindow.m; sourceTree = "<group>"; };
-		E4BAFF2F0C1B005600A5EAED /* PlayingViewController.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = PlayingViewController.h; path = Classes/PlayingViewController.h; sourceTree = "<group>"; };
-		E4BAFF300C1B005600A5EAED /* PlayingViewController.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = PlayingViewController.m; path = Classes/PlayingViewController.m; sourceTree = "<group>"; };
+		E4AA82341053F41D0052CF7F /* MDRubyEventSet.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = MDRubyEventSet.m; path = Ruby_bindings/MDRubyEventSet.m; sourceTree = "<group>"; tabWidth = 4; };
+		E4AA82441053F8050052CF7F /* MDRubyEventSet.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MDRubyEventSet.h; path = Ruby_bindings/MDRubyEventSet.h; sourceTree = "<group>"; tabWidth = 4; };
+		E4B0B25E10A30F78007B7360 /* MDAudioUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MDAudioUtility.h; path = MD_package/MDAudioUtility.h; sourceTree = "<group>"; tabWidth = 4; };
+		E4B0B25F10A30F78007B7360 /* MDAudioUtility.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDAudioUtility.c; path = MD_package/MDAudioUtility.c; sourceTree = "<group>"; tabWidth = 4; };
+		E4B2E8E40D93F92600781995 /* MDRubySequence.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MDRubySequence.h; path = Ruby_bindings/MDRubySequence.h; sourceTree = "<group>"; tabWidth = 4; };
+		E4B2E8E50D93F92600781995 /* MDRubySequence.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = MDRubySequence.m; path = Ruby_bindings/MDRubySequence.m; sourceTree = "<group>"; tabWidth = 4; wrapsLines = 1; };
+		E4B2EB320D9AA05600781995 /* MDRubyTrack.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MDRubyTrack.h; path = Ruby_bindings/MDRubyTrack.h; sourceTree = "<group>"; tabWidth = 4; };
+		E4B2EB330D9AA05600781995 /* MDRubyTrack.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = MDRubyTrack.m; path = Ruby_bindings/MDRubyTrack.m; sourceTree = "<group>"; tabWidth = 4; wrapsLines = 1; };
+		E4B4C26711C3EDAC00FE7593 /* AudioSettingsPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = AudioSettingsPanelController.h; path = Classes/AudioSettingsPanelController.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4B4C26811C3EDAC00FE7593 /* AudioSettingsPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = AudioSettingsPanelController.m; path = Classes/AudioSettingsPanelController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4B5C7BA060C9406000BC127 /* NSStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = NSStringAdditions.h; path = Classes/NSStringAdditions.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4B5C7BB060C9406000BC127 /* NSStringAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = NSStringAdditions.m; path = Classes/NSStringAdditions.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4BAFD800C18613600A5EAED /* MyWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MyWindow.h; path = Classes/MyWindow.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4BAFD810C18613600A5EAED /* MyWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = MyWindow.m; path = Classes/MyWindow.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4BAFF2F0C1B005600A5EAED /* PlayingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = PlayingViewController.h; path = Classes/PlayingViewController.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4BAFF300C1B005600A5EAED /* PlayingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = PlayingViewController.m; path = Classes/PlayingViewController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
 		E4BAFFAD0C1C3ED800A5EAED /* eye_open.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = eye_open.png; path = icons/eye_open.png; sourceTree = "<group>"; };
 		E4BAFFC20C1C44D800A5EAED /* eye_close.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = eye_close.png; path = icons/eye_close.png; sourceTree = "<group>"; };
-		E4C383FA141117F9006F2661 /* AboutWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AboutWindowController.h; path = Classes/AboutWindowController.h; sourceTree = "<group>"; };
-		E4C383FB141117F9006F2661 /* AboutWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AboutWindowController.m; path = Classes/AboutWindowController.m; sourceTree = "<group>"; };
+		E4C383FA141117F9006F2661 /* AboutWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = AboutWindowController.h; path = Classes/AboutWindowController.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4C383FB141117F9006F2661 /* AboutWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = AboutWindowController.m; path = Classes/AboutWindowController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
 		E4C3844314111D23006F2661 /* lastBuild.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = lastBuild.txt; sourceTree = "<group>"; };
 		E4C384E414112400006F2661 /* Version */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Version; sourceTree = "<group>"; };
-		E4CCB46E1F8FA2F9005F2A76 /* NSMenuAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSMenuAdditions.h; path = Classes/NSMenuAdditions.h; sourceTree = "<group>"; };
-		E4CCB46F1F8FA2F9005F2A76 /* NSMenuAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSMenuAdditions.m; path = Classes/NSMenuAdditions.m; sourceTree = "<group>"; };
+		E4CCB46E1F8FA2F9005F2A76 /* NSMenuAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = NSMenuAdditions.h; path = Classes/NSMenuAdditions.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4CCB46F1F8FA2F9005F2A76 /* NSMenuAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = NSMenuAdditions.m; path = Classes/NSMenuAdditions.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
 		E4CD4D710C106B9800AF6017 /* speaker.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = speaker.png; path = icons/speaker.png; sourceTree = "<group>"; };
-		E4CF0D4E0746E734000ADE20 /* MDCalibrator.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MDCalibrator.c; path = MD_package/MDCalibrator.c; sourceTree = "<group>"; };
-		E4CF0D4F0746E734000ADE20 /* MDCalibrator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDCalibrator.h; path = MD_package/MDCalibrator.h; sourceTree = "<group>"; };
-		E4CF0D500746E734000ADE20 /* MDCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDCommon.h; path = MD_package/MDCommon.h; sourceTree = "<group>"; };
-		E4CF0D510746E734000ADE20 /* MDEvent.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDEvent.c; path = MD_package/MDEvent.c; sourceTree = "<group>"; };
-		E4CF0D520746E734000ADE20 /* MDEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDEvent.h; path = MD_package/MDEvent.h; sourceTree = "<group>"; };
-		E4CF0D530746E734000ADE20 /* MDHeaders.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MDHeaders.h; path = MD_package/MDHeaders.h; sourceTree = "<group>"; };
-		E4CF0D540746E734000ADE20 /* MDPlayer_MacOSX.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDPlayer_MacOSX.c; path = MD_package/MDPlayer_MacOSX.c; sourceTree = "<group>"; };
-		E4CF0D550746E734000ADE20 /* MDPlayer_MacOSX.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MDPlayer_MacOSX.h; path = MD_package/MDPlayer_MacOSX.h; sourceTree = "<group>"; };
-		E4CF0D560746E734000ADE20 /* MDPlayer.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MDPlayer.h; path = MD_package/MDPlayer.h; sourceTree = "<group>"; };
-		E4CF0D590746E734000ADE20 /* MDSequence.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDSequence.c; path = MD_package/MDSequence.c; sourceTree = "<group>"; };
-		E4CF0D5A0746E734000ADE20 /* MDSequence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDSequence.h; path = MD_package/MDSequence.h; sourceTree = "<group>"; };
-		E4CF0D5B0746E734000ADE20 /* MDSequenceSMF.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDSequenceSMF.c; path = MD_package/MDSequenceSMF.c; sourceTree = "<group>"; };
-		E4CF0D5C0746E734000ADE20 /* MDTrack.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MDTrack.c; path = MD_package/MDTrack.c; sourceTree = "<group>"; wrapsLines = 1; };
-		E4CF0D5D0746E734000ADE20 /* MDTrack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDTrack.h; path = MD_package/MDTrack.h; sourceTree = "<group>"; wrapsLines = 1; };
-		E4CF0D5E0746E734000ADE20 /* MDUtility.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDUtility.c; path = MD_package/MDUtility.c; sourceTree = "<group>"; };
-		E4CF0D5F0746E734000ADE20 /* MDUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MDUtility.h; path = MD_package/MDUtility.h; sourceTree = "<group>"; };
+		E4CF0D4E0746E734000ADE20 /* MDCalibrator.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDCalibrator.c; path = MD_package/MDCalibrator.c; sourceTree = "<group>"; tabWidth = 4; };
+		E4CF0D4F0746E734000ADE20 /* MDCalibrator.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MDCalibrator.h; path = MD_package/MDCalibrator.h; sourceTree = "<group>"; tabWidth = 4; };
+		E4CF0D500746E734000ADE20 /* MDCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MDCommon.h; path = MD_package/MDCommon.h; sourceTree = "<group>"; tabWidth = 4; };
+		E4CF0D510746E734000ADE20 /* MDEvent.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDEvent.c; path = MD_package/MDEvent.c; sourceTree = "<group>"; tabWidth = 4; };
+		E4CF0D520746E734000ADE20 /* MDEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MDEvent.h; path = MD_package/MDEvent.h; sourceTree = "<group>"; tabWidth = 4; };
+		E4CF0D530746E734000ADE20 /* MDHeaders.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MDHeaders.h; path = MD_package/MDHeaders.h; sourceTree = "<group>"; tabWidth = 4; };
+		E4CF0D540746E734000ADE20 /* MDPlayer_MacOSX.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDPlayer_MacOSX.c; path = MD_package/MDPlayer_MacOSX.c; sourceTree = "<group>"; tabWidth = 4; };
+		E4CF0D550746E734000ADE20 /* MDPlayer_MacOSX.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MDPlayer_MacOSX.h; path = MD_package/MDPlayer_MacOSX.h; sourceTree = "<group>"; tabWidth = 4; };
+		E4CF0D560746E734000ADE20 /* MDPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MDPlayer.h; path = MD_package/MDPlayer.h; sourceTree = "<group>"; tabWidth = 4; };
+		E4CF0D590746E734000ADE20 /* MDSequence.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDSequence.c; path = MD_package/MDSequence.c; sourceTree = "<group>"; tabWidth = 4; };
+		E4CF0D5A0746E734000ADE20 /* MDSequence.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MDSequence.h; path = MD_package/MDSequence.h; sourceTree = "<group>"; tabWidth = 4; };
+		E4CF0D5B0746E734000ADE20 /* MDSequenceSMF.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDSequenceSMF.c; path = MD_package/MDSequenceSMF.c; sourceTree = "<group>"; tabWidth = 4; };
+		E4CF0D5C0746E734000ADE20 /* MDTrack.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDTrack.c; path = MD_package/MDTrack.c; sourceTree = "<group>"; tabWidth = 4; wrapsLines = 1; };
+		E4CF0D5D0746E734000ADE20 /* MDTrack.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MDTrack.h; path = MD_package/MDTrack.h; sourceTree = "<group>"; tabWidth = 4; wrapsLines = 1; };
+		E4CF0D5E0746E734000ADE20 /* MDUtility.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = MDUtility.c; path = MD_package/MDUtility.c; sourceTree = "<group>"; tabWidth = 4; };
+		E4CF0D5F0746E734000ADE20 /* MDUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MDUtility.h; path = MD_package/MDUtility.h; sourceTree = "<group>"; tabWidth = 4; };
 		E4D803D80737CD3500EB5804 /* horizontal_split.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = horizontal_split.png; path = icons/horizontal_split.png; sourceTree = "<group>"; };
 		E4D803DC0737D6F400EB5804 /* move_around.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = move_around.png; path = icons/move_around.png; sourceTree = "<group>"; };
 		E4D87B322A77F215001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
@@ -375,63 +361,63 @@
 		E4D87B7E2A77F3F6001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		E4D87B812A77F402001E5EBC /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		E4DB1648063B485600A80105 /* stretch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = stretch.png; path = icons/stretch.png; sourceTree = "<group>"; };
-		E4DB164A063B529800A80105 /* NSEventAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSEventAdditions.h; path = Classes/NSEventAdditions.h; sourceTree = "<group>"; };
-		E4DB164B063B529800A80105 /* NSEventAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSEventAdditions.m; path = Classes/NSEventAdditions.m; sourceTree = "<group>"; };
-		E4DB28E00C1458D500B6E980 /* TextureView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = TextureView.h; path = Classes/TextureView.h; sourceTree = "<group>"; };
-		E4DB28E10C1458D500B6E980 /* TextureView.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = TextureView.m; path = Classes/TextureView.m; sourceTree = "<group>"; };
-		E4DC0CE910A6623600377275 /* ruby_dialog.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ruby_dialog.c; path = Ruby_bindings/ruby_dialog.c; sourceTree = "<group>"; };
-		E4DC0CEA10A6623600377275 /* ruby_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ruby_dialog.h; path = Ruby_bindings/ruby_dialog.h; sourceTree = "<group>"; };
+		E4DB164A063B529800A80105 /* NSEventAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = NSEventAdditions.h; path = Classes/NSEventAdditions.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4DB164B063B529800A80105 /* NSEventAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = NSEventAdditions.m; path = Classes/NSEventAdditions.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4DB28E00C1458D500B6E980 /* TextureView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = TextureView.h; path = Classes/TextureView.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4DB28E10C1458D500B6E980 /* TextureView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = TextureView.m; path = Classes/TextureView.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4DC0CE910A6623600377275 /* ruby_dialog.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = ruby_dialog.c; path = Ruby_bindings/ruby_dialog.c; sourceTree = "<group>"; tabWidth = 4; };
+		E4DC0CEA10A6623600377275 /* ruby_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = ruby_dialog.h; path = Ruby_bindings/ruby_dialog.h; sourceTree = "<group>"; tabWidth = 4; };
 		E4E44B92074CFB9D0034031C /* expand.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = expand.png; path = icons/expand.png; sourceTree = "<group>"; };
 		E4E44B93074CFB9D0034031C /* shrink.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = shrink.png; path = icons/shrink.png; sourceTree = "<group>"; };
 		E4E8250F1F94F264009C5FE6 /* double_triangle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = double_triangle.png; path = icons/double_triangle.png; sourceTree = "<group>"; };
 		E4ECB32B06E231BB00A80105 /* RecButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = RecButton.png; path = icons/RecButton.png; sourceTree = "<group>"; };
-		E4ED56EF241C8D86000C7DB7 /* PasteWarningPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PasteWarningPanelController.h; path = Classes/PasteWarningPanelController.h; sourceTree = "<group>"; };
-		E4ED56F0241C8D86000C7DB7 /* PasteWarningPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PasteWarningPanelController.m; path = Classes/PasteWarningPanelController.m; sourceTree = "<group>"; };
+		E4ED56EF241C8D86000C7DB7 /* PasteWarningPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = PasteWarningPanelController.h; path = Classes/PasteWarningPanelController.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4ED56F0241C8D86000C7DB7 /* PasteWarningPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = PasteWarningPanelController.m; path = Classes/PasteWarningPanelController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
 		E4F45EF5104A75B8008C7814 /* horizontal_move_plus.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = horizontal_move_plus.png; path = icons/horizontal_move_plus.png; sourceTree = "<group>"; };
 		E4F45EF6104A75B8008C7814 /* vertical_move_plus.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = vertical_move_plus.png; path = icons/vertical_move_plus.png; sourceTree = "<group>"; };
-		E4F81DC514C1CC3100F63BA6 /* QuantizePanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = QuantizePanelController.h; path = Classes/QuantizePanelController.h; sourceTree = "<group>"; };
-		E4F81DC614C1CC3100F63BA6 /* QuantizePanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = QuantizePanelController.m; path = Classes/QuantizePanelController.m; sourceTree = "<group>"; };
+		E4F81DC514C1CC3100F63BA6 /* QuantizePanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = QuantizePanelController.h; path = Classes/QuantizePanelController.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		E4F81DC614C1CC3100F63BA6 /* QuantizePanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = QuantizePanelController.m; path = Classes/QuantizePanelController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
 		E4F95D80073D909700F1D121 /* document_icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = document_icon.icns; path = icons/document_icon.icns; sourceTree = "<group>"; };
 		E4FB54C213FA851A001C1290 /* horizontal_move_zoom.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = horizontal_move_zoom.png; path = icons/horizontal_move_zoom.png; sourceTree = "<group>"; };
-		F50273C303F6969A01A80002 /* GraphicSplitterView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = GraphicSplitterView.h; path = Classes/GraphicSplitterView.h; sourceTree = "<group>"; };
-		F50273C403F6969A01A80002 /* GraphicSplitterView.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = GraphicSplitterView.m; path = Classes/GraphicSplitterView.m; sourceTree = "<group>"; };
-		F5048CB103D5C06101A80002 /* GraphicWindowController.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = GraphicWindowController.h; path = Classes/GraphicWindowController.h; sourceTree = "<group>"; wrapsLines = 1; };
-		F5048CB203D5C06101A80002 /* GraphicWindowController.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = GraphicWindowController.m; path = Classes/GraphicWindowController.m; sourceTree = "<group>"; wrapsLines = 1; };
-		F5048CB503D5C07201A80002 /* PianoRollView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = PianoRollView.h; path = Classes/PianoRollView.h; sourceTree = "<group>"; };
-		F5048CB603D5C07201A80002 /* PianoRollView.m */ = {isa = PBXFileReference; fileEncoding = 0; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; name = PianoRollView.m; path = Classes/PianoRollView.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 1; };
+		F50273C303F6969A01A80002 /* GraphicSplitterView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = GraphicSplitterView.h; path = Classes/GraphicSplitterView.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F50273C403F6969A01A80002 /* GraphicSplitterView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = GraphicSplitterView.m; path = Classes/GraphicSplitterView.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F5048CB103D5C06101A80002 /* GraphicWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = GraphicWindowController.h; path = Classes/GraphicWindowController.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; wrapsLines = 1; };
+		F5048CB203D5C06101A80002 /* GraphicWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = GraphicWindowController.m; path = Classes/GraphicWindowController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; wrapsLines = 1; };
+		F5048CB503D5C07201A80002 /* PianoRollView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = PianoRollView.h; path = Classes/PianoRollView.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F5048CB603D5C07201A80002 /* PianoRollView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = PianoRollView.m; path = Classes/PianoRollView.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
 		F520EC10023D1DC601A80002 /* G-clef.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "G-clef.icns"; path = "icons/G-clef.icns"; sourceTree = "<group>"; };
-		F52B39A803E17D2101A80002 /* GraphicRulerView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = GraphicRulerView.h; path = Classes/GraphicRulerView.h; sourceTree = "<group>"; };
-		F52B39A903E17D2101A80002 /* GraphicRulerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GraphicRulerView.m; path = Classes/GraphicRulerView.m; sourceTree = "<group>"; };
-		F52B39AE03E18DEF01A80002 /* TimeChartView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = TimeChartView.h; path = Classes/TimeChartView.h; sourceTree = "<group>"; };
-		F52B39AF03E18DEF01A80002 /* TimeChartView.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = TimeChartView.m; path = Classes/TimeChartView.m; sourceTree = "<group>"; };
-		F554D6E603E3FB8401A80002 /* StripChartView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = StripChartView.h; path = Classes/StripChartView.h; sourceTree = "<group>"; };
-		F554D6E703E3FB8401A80002 /* StripChartView.m */ = {isa = PBXFileReference; fileEncoding = 0; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; name = StripChartView.m; path = Classes/StripChartView.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 1; wrapsLines = 1; };
-		F554D6EA03E3FC8901A80002 /* StripChartRulerView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = StripChartRulerView.h; path = Classes/StripChartRulerView.h; sourceTree = "<group>"; };
-		F554D6EB03E3FC8901A80002 /* StripChartRulerView.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = StripChartRulerView.m; path = Classes/StripChartRulerView.m; sourceTree = "<group>"; };
-		F569756803DADD0A01A80002 /* PianoRollRulerView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = PianoRollRulerView.h; path = Classes/PianoRollRulerView.h; sourceTree = "<group>"; };
-		F569756903DADD0A01A80002 /* PianoRollRulerView.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = PianoRollRulerView.m; path = Classes/PianoRollRulerView.m; sourceTree = "<group>"; };
+		F52B39A803E17D2101A80002 /* GraphicRulerView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = GraphicRulerView.h; path = Classes/GraphicRulerView.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F52B39A903E17D2101A80002 /* GraphicRulerView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = GraphicRulerView.m; path = Classes/GraphicRulerView.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F52B39AE03E18DEF01A80002 /* TimeChartView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = TimeChartView.h; path = Classes/TimeChartView.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F52B39AF03E18DEF01A80002 /* TimeChartView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = TimeChartView.m; path = Classes/TimeChartView.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F554D6E603E3FB8401A80002 /* StripChartView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = StripChartView.h; path = Classes/StripChartView.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F554D6E703E3FB8401A80002 /* StripChartView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = StripChartView.m; path = Classes/StripChartView.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; wrapsLines = 1; };
+		F554D6EA03E3FC8901A80002 /* StripChartRulerView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = StripChartRulerView.h; path = Classes/StripChartRulerView.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F554D6EB03E3FC8901A80002 /* StripChartRulerView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = StripChartRulerView.m; path = Classes/StripChartRulerView.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F569756803DADD0A01A80002 /* PianoRollRulerView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = PianoRollRulerView.h; path = Classes/PianoRollRulerView.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F569756903DADD0A01A80002 /* PianoRollRulerView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = PianoRollRulerView.m; path = Classes/PianoRollRulerView.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
 		F5835E0702292DC201A80002 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
 		F59FEFE3022BD45101A80002 /* CoreMIDIServer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDIServer.framework; path = /System/Library/Frameworks/CoreMIDIServer.framework; sourceTree = "<absolute>"; };
-		F5D2EB060244AFAF01A80002 /* LoadingPanelController.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = LoadingPanelController.h; path = Classes/LoadingPanelController.h; sourceTree = "<group>"; };
-		F5D2EB070244AFAF01A80002 /* LoadingPanelController.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = LoadingPanelController.m; path = Classes/LoadingPanelController.m; sourceTree = "<group>"; };
-		F5D2EB080244AFAF01A80002 /* MDObjects.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MDObjects.h; path = Classes/MDObjects.h; sourceTree = "<group>"; };
-		F5D2EB090244AFAF01A80002 /* MDObjects.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = MDObjects.m; path = Classes/MDObjects.m; sourceTree = "<group>"; };
-		F5D2EB0A0244AFAF01A80002 /* MyAppController.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MyAppController.h; path = Classes/MyAppController.h; sourceTree = "<group>"; };
-		F5D2EB0B0244AFAF01A80002 /* MyAppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = MyAppController.m; path = Classes/MyAppController.m; sourceTree = "<group>"; wrapsLines = 1; };
-		F5D2EB0C0244AFAF01A80002 /* MyDocument.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MyDocument.h; path = Classes/MyDocument.h; sourceTree = "<group>"; wrapsLines = 1; };
-		F5D2EB0D0244AFAF01A80002 /* MyDocument.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyDocument.m; path = Classes/MyDocument.m; sourceTree = "<group>"; wrapsLines = 1; };
-		F5D2EB0E0244AFAF01A80002 /* ListWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ListWindowController.h; path = Classes/ListWindowController.h; sourceTree = "<group>"; };
-		F5D2EB0F0244AFAF01A80002 /* ListWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ListWindowController.m; path = Classes/ListWindowController.m; sourceTree = "<group>"; wrapsLines = 1; };
-		F5D2EB100244AFAF01A80002 /* MyMIDISequence.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MyMIDISequence.h; path = Classes/MyMIDISequence.h; sourceTree = "<group>"; };
-		F5D2EB110244AFAF01A80002 /* MyMIDISequence.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = MyMIDISequence.m; path = Classes/MyMIDISequence.m; sourceTree = "<group>"; };
-		F5D2EB120244AFAF01A80002 /* MyTableHeaderView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MyTableHeaderView.h; path = Classes/MyTableHeaderView.h; sourceTree = "<group>"; };
-		F5D2EB130244AFAF01A80002 /* MyTableHeaderView.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = MyTableHeaderView.m; path = Classes/MyTableHeaderView.m; sourceTree = "<group>"; };
-		F5D2EB140244AFAF01A80002 /* MyTableView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = MyTableView.h; path = Classes/MyTableView.h; sourceTree = "<group>"; };
-		F5D2EB150244AFAF01A80002 /* MyTableView.m */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.objc; name = MyTableView.m; path = Classes/MyTableView.m; sourceTree = "<group>"; };
-		F5D2EB1A0244AFAF01A80002 /* RemapDevicePanelController.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = RemapDevicePanelController.h; path = Classes/RemapDevicePanelController.h; sourceTree = "<group>"; };
-		F5D2EB1B0244AFAF01A80002 /* RemapDevicePanelController.m */ = {isa = PBXFileReference; fileEncoding = 0; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; name = RemapDevicePanelController.m; path = Classes/RemapDevicePanelController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
-		F5D6C49203E0489301A80002 /* GraphicClientView.h */ = {isa = PBXFileReference; fileEncoding = 0; lastKnownFileType = sourcecode.c.h; name = GraphicClientView.h; path = Classes/GraphicClientView.h; sourceTree = "<group>"; };
-		F5D6C49303E0489301A80002 /* GraphicClientView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GraphicClientView.m; path = Classes/GraphicClientView.m; sourceTree = "<group>"; wrapsLines = 1; };
+		F5D2EB060244AFAF01A80002 /* LoadingPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = LoadingPanelController.h; path = Classes/LoadingPanelController.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F5D2EB070244AFAF01A80002 /* LoadingPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = LoadingPanelController.m; path = Classes/LoadingPanelController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F5D2EB080244AFAF01A80002 /* MDObjects.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MDObjects.h; path = Classes/MDObjects.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F5D2EB090244AFAF01A80002 /* MDObjects.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = MDObjects.m; path = Classes/MDObjects.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F5D2EB0A0244AFAF01A80002 /* MyAppController.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MyAppController.h; path = Classes/MyAppController.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F5D2EB0B0244AFAF01A80002 /* MyAppController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = MyAppController.m; path = Classes/MyAppController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; wrapsLines = 1; };
+		F5D2EB0C0244AFAF01A80002 /* MyDocument.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MyDocument.h; path = Classes/MyDocument.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; wrapsLines = 1; };
+		F5D2EB0D0244AFAF01A80002 /* MyDocument.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = MyDocument.m; path = Classes/MyDocument.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; wrapsLines = 1; };
+		F5D2EB0E0244AFAF01A80002 /* ListWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = ListWindowController.h; path = Classes/ListWindowController.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F5D2EB0F0244AFAF01A80002 /* ListWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = ListWindowController.m; path = Classes/ListWindowController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; wrapsLines = 1; };
+		F5D2EB100244AFAF01A80002 /* MyMIDISequence.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MyMIDISequence.h; path = Classes/MyMIDISequence.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F5D2EB110244AFAF01A80002 /* MyMIDISequence.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = MyMIDISequence.m; path = Classes/MyMIDISequence.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F5D2EB120244AFAF01A80002 /* MyTableHeaderView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MyTableHeaderView.h; path = Classes/MyTableHeaderView.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F5D2EB130244AFAF01A80002 /* MyTableHeaderView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = MyTableHeaderView.m; path = Classes/MyTableHeaderView.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F5D2EB140244AFAF01A80002 /* MyTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = MyTableView.h; path = Classes/MyTableView.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F5D2EB150244AFAF01A80002 /* MyTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = MyTableView.m; path = Classes/MyTableView.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F5D2EB1A0244AFAF01A80002 /* RemapDevicePanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = RemapDevicePanelController.h; path = Classes/RemapDevicePanelController.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F5D2EB1B0244AFAF01A80002 /* RemapDevicePanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = RemapDevicePanelController.m; path = Classes/RemapDevicePanelController.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F5D6C49203E0489301A80002 /* GraphicClientView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = GraphicClientView.h; path = Classes/GraphicClientView.h; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; };
+		F5D6C49303E0489301A80002 /* GraphicClientView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = GraphicClientView.m; path = Classes/GraphicClientView.m; sourceTree = "<group>"; tabWidth = 4; usesTabs = 0; wrapsLines = 1; };
 		F5F9405D00EE2B4E01000001 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = /System/Library/Frameworks/CoreMIDI.framework; sourceTree = "<absolute>"; };
 		F5FB767800F88D8601000001 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
@@ -797,7 +783,6 @@
 				E400BBB911D627550032B969 /* Resources */,
 				E400BBBA11D627550032B969 /* Sources */,
 				E400BBBB11D627550032B969 /* Frameworks */,
-				E400BE2511D627C40032B969 /* CopyFiles */,
 				E41081A51ADAB1CE004D6482 /* ShellScript */,
 			);
 			buildRules = (
@@ -818,7 +803,7 @@
 				LastUpgradeCheck = 0820;
 			};
 			buildConfigurationList = E428451A09AA2B7A00CB93B9 /* Build configuration list for PBXProject "Alchemusica" */;
-			compatibilityVersion = "Xcode 3.2";
+			compatibilityVersion = "Xcode 10.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 1;
 			knownRegions = (
@@ -1283,18 +1268,20 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx/include/ruby-2.0.0",
-					"$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx/include/ruby-2.0.0/x86_64-darwin18.7.0",
+					"$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx/include/ruby-2.0.0/x86_64-darwin21.6.0",
 				);
 				INFOPLIST_FILE = "Alchemusica-Info.plist";
-				INSTALL_PATH = "$(HOME)/Applications";
+				INSTALL_PATH = "";
 				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx/lib";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-lruby-static";
 				PREBINDING = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "jp.sourceforge.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = Alchemusica;
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx;
 				WARNING_CFLAGS = (
+					"-Wno-compound-token-split-by-macro",
 					"-Wmost",
 					"-Wno-four-char-constants",
 					"-Wno-unknown-pragmas",
@@ -1317,22 +1304,23 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx/include/ruby-2.0.0",
-					"$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx/include/ruby-2.0.0/x86_64-darwin18.7.0",
+					"$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx/include/ruby-2.0.0/x86_64-darwin21.6.0",
 				);
 				INFOPLIST_FILE = "Alchemusica-Info.plist";
-				INSTALL_PATH = "$(HOME)/Applications";
+				INSTALL_PATH = "";
 				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx/lib";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-lruby-static";
 				PREBINDING = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "jp.sourceforge.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = Alchemusica;
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx;
 				WARNING_CFLAGS = (
+					"-Wno-compound-token-split-by-macro",
 					"-Wmost",
 					"-Wno-four-char-constants",
 					"-Wno-unknown-pragmas",
-					"-Wno-uninitialized",
 				);
 			};
 			name = Deployment;
@@ -1351,18 +1339,20 @@
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx/include/ruby-2.0.0",
-					"$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx/include/ruby-2.0.0/x86_64-darwin18.7.0",
+					"$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx/include/ruby-2.0.0/x86_64-darwin21.6.0",
 				);
 				INFOPLIST_FILE = "Alchemusica-Info.plist";
-				INSTALL_PATH = "$(HOME)/Applications";
+				INSTALL_PATH = "";
 				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx/lib";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-lruby-static";
 				PREBINDING = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "jp.sourceforge.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = Alchemusica;
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx;
 				WARNING_CFLAGS = (
+					"-Wno-compound-token-split-by-macro",
 					"-Wmost",
 					"-Wno-four-char-constants",
 					"-Wno-unknown-pragmas",
@@ -1395,7 +1385,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = macosx10.12;
+				SDKROOT = macosx;
 			};
 			name = Development;
 		};
@@ -1421,7 +1411,8 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				SDKROOT = macosx10.12;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
 			};
 			name = Deployment;
 		};
@@ -1447,7 +1438,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				SDKROOT = macosx10.12;
+				SDKROOT = macosx;
 			};
 			name = Default;
 		};

@@ -1486,14 +1486,15 @@ void
 RubyDialogCallback_drawText(RDDeviceContext *dc, const char *s, float x, float y)
 {
 	CGContextRef cref = (CGContextRef)dc;
-	CGContextShowTextAtPoint(cref, x, y, s, strlen(s));
+    CGContextSetTextDrawingMode(cref, kCGTextFill);
+    [[NSString stringWithUTF8String:s] drawAtPoint:CGPointMake(x, y) withAttributes:nil];
 }
 
 void
 RubyDialogCallback_setFont(RDDeviceContext *dc, void **args)
 {
 	int i;
-	float fontSize = 12;
+	float fontSize = -1;
 	const char *fontName = NULL;
 	CGContextRef cref = (CGContextRef)dc;
 	for (i = 0; args[i] != NULL; i += 2) {
@@ -1506,10 +1507,17 @@ RubyDialogCallback_setFont(RDDeviceContext *dc, void **args)
 			fontName = (const char *)args[i + 1];
 		}
 	}
-	if (fontName == NULL)
+    if (fontName != NULL) {
+        CFStringRef sref = CFStringCreateWithCString(kCFAllocatorDefault, fontName, kCFStringEncodingUTF8);
+        CGFontRef fref = CGFontCreateWithFontName(sref);
+        if (fref != NULL) {
+            CGContextSetFont(cref, fref);
+            CGFontRelease(fref);
+        }
+        CFRelease(sref);
+    }
+    if (fontSize != -1)
 		CGContextSetFontSize(cref, fontSize);
-	else
-		CGContextSelectFont(cref, fontName, fontSize, kCGEncodingFontSpecific);
 }
 
 void
@@ -1528,7 +1536,7 @@ RubyDialogCallback_setPen(RDDeviceContext *dc, void **args)
 				width = *((float *)(args[i + 1]));
 				CGContextSetLineWidth(cref, width);
 			} else if (strcmp((const char *)args[i], "style") == 0) {
-				int style = (int)(args[i + 1]);
+				long style = (long)(args[i + 1]);
 				CGFloat dash[4];
 				CGFloat *dashp = dash;
 				int dashLen;
@@ -1624,7 +1632,7 @@ RubyDialogCallback_saveBitmapToFile(RDBitmap *bitmap, const char *fname)
 		else if (strcasecmp(fname + len - 4, ".tif") == 0 || (len >= 5 && strcasecmp(fname + len - 5, ".tiff") == 0))
 			bitmapType = kUTTypeTIFF;
 	}
-    CGImageDestinationRef outDestination = CGImageDestinationCreateWithURL(outURL, kUTTypeJPEG, 1, NULL);
+    CGImageDestinationRef outDestination = CGImageDestinationCreateWithURL(outURL, bitmapType, 1, NULL);
     CGImageDestinationAddImage(outDestination, outImage, NULL);
     if (!CGImageDestinationFinalize(outDestination))
 		retval = 0;

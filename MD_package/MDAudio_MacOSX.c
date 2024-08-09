@@ -640,7 +640,6 @@ sMDAudioUpdateSoftwareDeviceInfo(int music_or_effect)
     fcd.componentType = (music_or_effect ? kAudioUnitType_MusicDevice : kAudioUnitType_Effect);
 	n = 0;
 	while ((cmp = AudioComponentFindNext(cmp, &fcd)) != 0) {
-		AudioUnit unit;
         CFStringRef nameRef;
         CFIndex cflen;
     

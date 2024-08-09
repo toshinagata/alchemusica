@@ -78,7 +78,7 @@ static BOOL sStartupCompleted = NO;  //  If NO, then Ruby interrupt check is dis
 		//  (Executed in alphabetical order)
 		NSFileManager *manager = [NSFileManager defaultManager];
 		int status = 0;
-		NSString *pluginDir = [[[NSBundle mainBundle] builtInPlugInsPath] stringByAppendingPathComponent: @"Ruby_Scripts"];
+		NSString *pluginDir = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent: @"Ruby_Scripts"];
 		NSString *cwd = [manager currentDirectoryPath];
         NSArray *scriptArray = [[manager contentsOfDirectoryAtPath:pluginDir error:NULL] sortedArrayUsingSelector: @selector(caseInsensitiveCompare:)];
 		[manager changeCurrentDirectoryPath: pluginDir];
@@ -260,7 +260,7 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 {
 	int kind;
 	int32_t validator = [[menuInfo valueForKey:@"validator"] intValue];
-	if (validator != (int32_t)RubyNil) {
+	if ((long)validator != (long)RubyNil) {
 		return Ruby_callValidatorForDocument(validator, document);
 	} else {
 		const char *cmd;

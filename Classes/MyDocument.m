@@ -3603,7 +3603,7 @@ isConductorEvent(const MDEvent *ep, int32_t position, void *inUserData)
 //	NSString *filename, *docname, *docdir;
 	NSString *dirname, *filename, *fullname;
 	NSString *errmsg = nil;
-	MDTickType startTick;
+/*	MDTickType startTick; */
 	BOOL isDir;
 	NSDictionary *info = [[self myMIDISequence] recordingInfo];
 	NSFileManager *manager = [NSFileManager defaultManager];
@@ -3650,7 +3650,7 @@ isConductorEvent(const MDEvent *ep, int32_t position, void *inUserData)
 			}
 		}
 	}
-	startTick = (int)[[info valueForKey: MyRecordingInfoStartTickKey] doubleValue];
+/*	startTick = (int)[[info valueForKey: MyRecordingInfoStartTickKey] doubleValue]; */
     if ([[self myMIDISequence] startAudioRecordingWithName: fullname] == kMDNoError)
         return YES;
     else errmsg = @"Failed to record audio";

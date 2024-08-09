@@ -611,7 +611,7 @@ CGFloat gDashWidth = 8.0f;
 - (void)doZoomByOptionDrag: (NSEvent *)theEvent
 {
     NSPoint pt1, pt2;
-    NSRect visibleRect, documentRect;
+    NSRect visibleRect;
     float pos, wid, r, oldppq;
     /*  Option + drag: zoom, Option + double click: unzoom  */
     switch ([theEvent clickCount]) {
@@ -619,7 +619,6 @@ CGFloat gDashWidth = 8.0f;
             pt1 = [[selectPoints objectAtIndex: 0] pointValue];
             pt2 = [[selectPoints objectAtIndex: 1] pointValue];
             visibleRect = [[self superview] bounds];
-            documentRect = [self frame];
             if (pt1.x > pt2.x) {
                 pos = pt2.x;
                 wid = pt1.x - pt2.x;

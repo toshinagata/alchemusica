@@ -204,7 +204,6 @@
 - (void)keyDown:(NSEvent *)theEvent
 {
 	int row;
-	BOOL insertFlag;
 	unichar charCode = [[theEvent charactersIgnoringModifiers] characterAtIndex: 0];
 	NSUInteger modifierFlags = [theEvent modifierFlags];
 	if ((modifierFlags & NSCommandKeyMask) != 0 && (charCode == NSCarriageReturnCharacter || charCode == NSEnterCharacter)) {
@@ -213,11 +212,8 @@
 			int32_t position;
 			row = (int)[self selectedRow];
 			if (charCode == NSCarriageReturnCharacter) {
-				insertFlag = YES;
 				if (row < [self numberOfRows] - 1)
 					row++;
-			} else {
-				insertFlag = NO;
 			}
 			position = [(ListWindowController *)[self dataSource] eventPositionForTableRow: row];
 			[(ListWindowController *)[self dataSource] startEditAtColumn: -1 creatingEventWithTick: kMDNegativeTick atPosition: position + 1];

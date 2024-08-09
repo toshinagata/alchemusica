@@ -664,19 +664,17 @@ MDSequenceDisposeMutex(MDSequence *inSequence)
 void
 MDSequenceLock(MDSequence *inSequence)
 {
-	int n;
 	if (inSequence == NULL || inSequence->mutex == NULL)
 		return;
-	n = pthread_mutex_lock(inSequence->mutex);
+	pthread_mutex_lock(inSequence->mutex);
 }
 
 void
 MDSequenceUnlock(MDSequence *inSequence)
 {
-	int n;
 	if (inSequence == NULL || inSequence->mutex == NULL)
 		return;
-	n = pthread_mutex_unlock(inSequence->mutex);
+	pthread_mutex_unlock(inSequence->mutex);
 }
 
 int

@@ -138,13 +138,14 @@ getYValue(const MDEvent *ep, int eventKind)
 
 - (void)drawVelocityInRect: (NSRect)aRect
 {
-	float ppt, height;
+	float ppt;
+	/* float height; */
 	MDTickType beginTick, endTick;
 	int32_t n;
 	float dx, dy;
 	NSBezierPath *draggingPath;
 	NSMutableArray *array;
-	height = [self bounds].size.height;
+	/* height = [self bounds].size.height; *//* unused? */
 	ppt = [dataSource pixelsPerTick];
 	beginTick = (MDTickType)floor(aRect.origin.x / ppt);
 	endTick = (MDTickType)ceil((aRect.origin.x + aRect.size.width) / ppt);
@@ -221,8 +222,9 @@ getYValue(const MDEvent *ep, int eventKind)
 {
 	float ppt;
 	int32_t n;
-	MDTickType beginTick, endTick;
-	float height;
+	MDTickType beginTick;
+	/* MDTickType endTick; */
+	/* float height; */
 	float dx, dy;
 	NSBezierPath *draggingPath;
 	NSMutableArray *array;
@@ -231,7 +233,7 @@ getYValue(const MDEvent *ep, int eventKind)
 		[self reallocateCalibrators];
 	}
 
-	height = [self bounds].size.height;
+	/* height = [self bounds].size.height; *//* unused? */
 	ppt = [dataSource pixelsPerTick];
 	draggingPath = nil;
 	array = nil;
@@ -245,7 +247,7 @@ getYValue(const MDEvent *ep, int eventKind)
 		}
 	}
 	beginTick = (MDTickType)floor(aRect.origin.x / ppt);
-	endTick = (MDTickType)ceil((aRect.origin.x + aRect.size.width) / ppt);
+	/* endTick = (MDTickType)ceil((aRect.origin.x + aRect.size.width) / ppt); *//* unused? */
 	MDCalibratorJumpToTick(calib, beginTick);
 	if (eventKind == kMDEventTempo)
 		n = 0;
@@ -620,7 +622,8 @@ getYValue(const MDEvent *ep, int eventKind)
 	int32_t poslast;
 	MDEvent *ep;
 	float ppt = [dataSource pixelsPerTick];
-	float x, y, xlast, ylast;
+	float x, y, ylast;
+/*	float xlast; */
 /*	float height = [self bounds].size.height; */
 	MyDocument *document = (MyDocument *)[dataSource document];
 	MDTickType theTick;
@@ -651,12 +654,13 @@ getYValue(const MDEvent *ep, int eventKind)
 			continue;
 		ep = MDPointerCurrent(pt);
 		if (ep == NULL) {
-			xlast = ylast = 0;
+			/* xlast = 0; *//* unused? */
+			ylast = 0;
 			poslast = -1;
 		} else {
 			//ylast = (float)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - sVerticalMargin * 2)) + sVerticalMargin;
 			ylast = [self convertFromYValue:getYValue(ep, eventKind)];
-			xlast = (float)floor(MDGetTick(ep) * ppt);
+			/* xlast = (float)floor(MDGetTick(ep) * ppt); *//* unused? */
 			poslast = MDPointerGetPosition(pt);
 		}
 		while (retval == 0) {
@@ -885,7 +889,8 @@ cubicReverseFunc(float x, const float *points, float tt)
 	MDTickType fromTick, toTick;
 	MDPointer *mdptr;
 	float fromValue, toValue;
-	float pixelsPerTick, height;
+	float pixelsPerTick;
+	/* float height; */
 	float valueResolution = resolution;
 	const float *p;
 	float v1, v2;
@@ -902,7 +907,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 		pt2 = pt1;
 	else pt2 = [[selectPoints objectAtIndex: 1] pointValue];
 	pixelsPerTick = [dataSource pixelsPerTick];
-	height = [self bounds].size.height;
+	/* height = [self bounds].size.height; *//* unused? */
 	t1 = (MDTickType)floor(pt1.x / pixelsPerTick + 0.5);
 	t2 = (MDTickType)floor(pt2.x / pixelsPerTick + 0.5);
 	//v1 = (int)floor((pt1.y - sVerticalMargin) * (maxValue - minValue) / (height - sVerticalMargin * 2) + 0.5 + minValue);
@@ -1273,8 +1278,8 @@ cubicReverseFunc(float x, const float *points, float tt)
 	int32_t pos;
 	MDEvent *ep;
 	int n;
-	NSPoint pt = [NSEvent mouseLocation]; /*  Use mouseLocation in case this is called from flagsChanged: handler (not implemented yet)  */
-	pt = [self convertPoint: [[self window] convertScreenToBase:pt] fromView: nil];
+	NSPoint pt = [[self window] mouseLocationOutsideOfEventStream]; /*  Use mouseLocationOutsideOfEventStream in case this is called from flagsChanged: handler (not implemented yet)  */
+	pt = [self convertPoint: pt fromView: nil];
 	localGraphicTool = [self modifyLocalGraphicTool:[[self dataSource] graphicTool]];
 	if (localGraphicTool == kGraphicPencilTool) {
 		[[NSCursor pencilCursor] set];
@@ -1460,7 +1465,6 @@ cubicReverseFunc(float x, const float *points, float tt)
 {
 	int i, trackNo;
 	float ppt;
-	float height;
 	MyDocument *document;
 	MDTickType minTick, maxTick;
 	NSRect bounds;
@@ -1497,7 +1501,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 
 	/*  Change selection  */
 	bounds = [[self selectionPath] bounds];
-	height = [self bounds].size.height;
+	// height = [self bounds].size.height;
 	ppt = [dataSource pixelsPerTick];
 	minTick = (MDTickType)(bounds.origin.x / ppt);
 	maxTick = (MDTickType)((bounds.origin.x + bounds.size.width) / ppt);

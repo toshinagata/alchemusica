@@ -618,7 +618,7 @@ MDTrackNewFromTrack(const MDTrack *inTrack)
 {
 	MDPointer *src, *dest;
 	MDEvent *eventSrc, *eventDest;
-	int32_t count, noteCount;
+	int32_t count;
 	MDTrack *newTrack;
     const char *key, *value;
 	int i;
@@ -643,7 +643,6 @@ MDTrackNewFromTrack(const MDTrack *inTrack)
 	}
 	
 	/*  Copy the events  */
-	noteCount = 0;
 	while ((eventDest = MDPointerForward(dest)) != NULL && (eventSrc = MDPointerForward(src)) != NULL) {
 		MDEventCopy(eventDest, eventSrc, 1);
 	}
@@ -814,7 +813,6 @@ MDTrackMerge(MDTrack *inTrack1, const MDTrack *inTrack2, IntGroup **ioSet)
 	MDPointer *src2;	/*  The source position in inTrack2  */
 	MDPointer *dest;	/*  The destination position  */
 	MDEvent *eventSrc1, *eventSrc2, *eventDest;
-	int32_t	noteCount;	/*  The number of note-on's that have partners  */
 	int32_t	destPosition;
 	int32_t	i;
 	MDTickType tick1, duration1, duration2;
@@ -863,7 +861,6 @@ MDTrackMerge(MDTrack *inTrack1, const MDTrack *inTrack2, IntGroup **ioSet)
 	
 	eventDest = MDPointerCurrent(dest);
 	eventSrc1 = MDPointerCurrent(src1);
-	noteCount = 0;
 	destPosition = MDPointerGetPosition(dest);
 
 	while (eventSrc2 != NULL) {
@@ -940,7 +937,6 @@ sMDTrackUnmergeSub(MDTrack *inTrack, MDTrack **outTrack, const IntGroup *inSet, 
 	MDPointer *dest;
 	MDEvent *eventSrc, *eventDest;
 	int32_t	ptCount;	/*  The number of points in inSet  */
-	int32_t	noteCount;	/*  The number of note-on's that have partners  */
 	int32_t	destPosition;
 	int32_t	index, start, length;
 	int i;
@@ -969,7 +965,6 @@ sMDTrackUnmergeSub(MDTrack *inTrack, MDTrack **outTrack, const IntGroup *inSet, 
 	destPosition = 0;
 	eventDest = MDPointerCurrent(dest);
 	duration = 0;
-	noteCount = 0;
 
 	/*  Copy the events  */
 	for (index = 0; index < IntGroupGetIntervalCount(inSet); index++) {

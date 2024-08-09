@@ -1248,9 +1248,7 @@ MDEventCalculateMetronomeBarAndBeat(const MDEvent *eptr, int32_t timebase, int32
 char *
 MDEventToString(const MDEvent *eptr, char *buf, int32_t bufsize)
 {
-	char *p;
 	int32_t n = 0;
-	p = buf;
 	n = snprintf(buf, bufsize, "%d", (int32_t)MDGetTick(eptr));
 	if (n > bufsize - 5)
 		return buf;

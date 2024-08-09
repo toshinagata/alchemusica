@@ -93,7 +93,13 @@ static NSMutableArray *sAUViewWindowControllers = nil;
 
 + (BOOL)error:(NSString *)errString status:(OSStatus)err
 {
-	NSString *errorString = [NSString stringWithFormat:@"%@ failed with error code %i: %s", errString, (int)err, GetMacOSStatusCommentString(err)];
+    NSString *desc;
+    NSError *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:nil];
+    if (error)
+        desc = [error localizedDescription];
+    else
+        desc = @"";
+	NSString *errorString = [NSString stringWithFormat:@"%@ failed with error code %i: %@", errString, (int)err, desc];
 	NSLog(@"%@", errorString);
 	return NO;
 }

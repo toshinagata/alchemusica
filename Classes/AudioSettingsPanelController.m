@@ -203,13 +203,10 @@ static void printCFdata(CFTypeRef ref, int nestLevel)
     data = [NSPropertyListSerialization dataWithPropertyList:plist format:NSPropertyListXMLFormat_v1_0 options:0 error: NULL];
     if (data) {
         NSSavePanel *panel = [NSSavePanel savePanel];
-        NSString *filename, *foldername;
         NSURL *url;
         [panel setNameFieldStringValue:@"audio_settings.xml"];
         if ([panel runModal] == NSFileHandlingPanelOKButton) {
-            foldername = [[[panel directoryURL] path] stringByAbbreviatingWithTildeInPath];
             url = [panel URL];
-            filename = [[url path] lastPathComponent];
             [data writeToURL:url atomically:YES];
         }
     }

@@ -131,8 +131,11 @@ static NSColor *sMiscColor = nil;
 		selector:@selector(showPlayPosition:)
 		name:MyDocumentPlayPositionNotification
 		object:[self document]];
-    
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8
+    [[NSBundle mainBundle] loadNibNamed:@"EventKindContextMenu" owner:kindDataCell topLevelObjects:NULL];
+#else
     [NSBundle loadNibNamed:@"EventKindContextMenu" owner:kindDataCell];
+#endif
     menu = [[[NSMenu alloc] init] autorelease];
     [dataDataCell setMenu:menu];
 }
@@ -719,8 +722,8 @@ row:(NSInteger)rowIndex
 
 		} else if ([@"ch" isEqualToString: identifier]) {
 
-			int ch;
-			ch = atoi(buf);
+			// int ch;
+			// ch = atoi(buf);
 			/*  set channel  */
 
 		} else {
@@ -1355,7 +1358,7 @@ static NSString *sTickIdentifiers[] = { @"bar", @"sec", @"msec", @"count", @"del
 {
 	BOOL startFlag;
 	int32_t bar, beat, subtick;
-	MDTickType tick, duration, endtick;
+	MDTickType tick, endtick;
 	const char *s;
 	if (sender == startEditingRangeText)
 		startFlag = YES;
@@ -1368,7 +1371,7 @@ static NSString *sTickIdentifiers[] = { @"bar", @"sec", @"msec", @"count", @"del
 		if (MDEventParseTickString(s, &bar, &beat, &subtick) < 3)
 			return;
 		tick = MDCalibratorMeasureToTick(myCalibrator, bar, beat, subtick);
-		duration = [[[self document] myMIDISequence] sequenceDuration];
+	//	duration = [[[self document] myMIDISequence] sequenceDuration];
 		if (tick < 0)
 			tick = 0;
 	//	if (tick > duration)

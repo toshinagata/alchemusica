@@ -23,7 +23,7 @@
 #include <ruby.h>
 #include "ruby/version.h"  /*  for RUBY_BIRTH_YEAR etc.  */
 #include "ruby/encoding.h" /*  for rb_str_encode() etc. */
-#include "ruby/node.h"     /*  for rb_add_event_hook()  */
+/*#include "ruby/node.h"    */ /*  for rb_add_event_hook()  */
 
 #ifndef RSTRING_PTR
 #define RSTRING_PTR(_s) (RSTRING(_s)->ptr)

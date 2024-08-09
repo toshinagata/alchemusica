@@ -310,7 +310,7 @@ static NSString *sAudioEffectPanelShouldUpdate = @"Audio effect panel should upd
 - (void)showCustomViewForEffectInChain:(int)chainIndex atIndex:(int)effectIndex
 {
     NSView *view;
-    MDAudioMusicDeviceInfo *mp;
+/*    MDAudioMusicDeviceInfo *mp; */
     MDAudioIOStreamInfo *ip = MDAudioGetIOStreamInfoAtIndex(busIndex);
     MDAudioEffect *ep;
     if (chainIndex < 0 || chainIndex >= ip->nchains)
@@ -318,7 +318,7 @@ static NSString *sAudioEffectPanelShouldUpdate = @"Audio effect panel should upd
     if (effectIndex < 0 || effectIndex > ip->chains[chainIndex].neffects)
         return;  //  This cannot happen
     ep = ip->chains[chainIndex].effects + effectIndex;
-    mp = MDAudioEffectDeviceInfoAtIndex(ep->effectDeviceIndex);
+/*    mp = MDAudioEffectDeviceInfoAtIndex(ep->effectDeviceIndex); */
     view = [AUViewWindowController getCocoaViewForAudioUnit:ep->unit defaultViewSize:NSMakeSize(100, 100)];
     if (view != nil) {
         NSRect b = [view bounds];

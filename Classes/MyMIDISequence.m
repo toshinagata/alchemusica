@@ -488,32 +488,15 @@ MyRecordingInfoFileExtensionForFormat(int format)
 
 - (MDTrackObject *)finishMIDIRecording
 {
-//    MDStatus result;
-	int32_t n;
 	MDTrackObject *trackObj;
     if (mySequence == NULL || myPlayer == NULL)
         return nil;
     MDPlayerStopRecording(myPlayer);
-//    if (recordTrack == NULL || recordNoteOffTrack == NULL)
 	if (recordTrack == NULL)
         return nil;
-    n = [self collectRecordedEvents];
-//    result = MDTrackMatchNoteOffInTrack(recordTrack, recordNoteOffTrack);
-
-//    if (n >= 0) {
-		trackObj = [[[MDTrackObject allocWithZone: [self zone]] initWithMDTrack: recordTrack] autorelease];
-    //    if (outTrack != NULL)
-    //        *outTrack = [[[MDTrackObject allocWithZone: [self zone]] initWithMDTrack: recordTrack] autorelease];
-    //    if (outIndex != NULL)
-    //        *outIndex = MDSequenceGetIndexOfRecordingTrack(mySequence);
-//    } else trackObj = nil;
-
+    trackObj = [[[MDTrackObject allocWithZone: [self zone]] initWithMDTrack: recordTrack] autorelease];
     MDTrackRelease(recordTrack);
 	recordTrack = NULL;
-
-//    MDTrackRelease(recordNoteOffTrack);
-//    recordTrack = recordNoteOffTrack = NULL;
-
     return trackObj;
 }
 

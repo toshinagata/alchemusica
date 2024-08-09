@@ -230,7 +230,7 @@ typedef struct TimeScalingRecord {
 	}
 	seq = [[[dataSource document] myMIDISequence] mySequence];
 	for (i = 0; i < timeScaling->ntracks; i++) {
-        int n;
+        /* int n; */
         MDPointer *pt;
         MDEvent *ep;
         int trackNum = timeScaling->trackNums[i];
@@ -240,7 +240,7 @@ typedef struct TimeScalingRecord {
             /*  Temporarily remove the meter events  */
             MDTrackUnmerge(track, &meterTrack, timeScaling->meterPos);
         }
-		n = MDTrackGetNumberOfEvents(track) - timeScaling->startPos[i];  /*  Number of events  */
+		/* n = MDTrackGetNumberOfEvents(track) - timeScaling->startPos[i];  *//*  Number of events (unused?) */
 		pt = MDPointerNew(track);
 		MDPointerSetPosition(pt, timeScaling->startPos[i]);
 		for (ep = MDPointerCurrent(pt), j = 0; ; ep = MDPointerForward(pt), j++) {
@@ -544,7 +544,7 @@ typedef struct TimeScalingRecord {
 	NSUInteger modifierFlags;
 	localGraphicTool = [self modifyLocalGraphicTool:[[self dataSource] graphicTool]];
 	if ([theEvent type] == NSFlagsChanged) {
-		pt = [self convertPoint:[[self window] convertScreenToBase:[NSEvent mouseLocation]] fromView:nil];
+		pt = [self convertPoint:[[self window] convertPointFromScreen:[NSEvent mouseLocation]] fromView:nil];
 	} else {		
 		pt = [self convertPoint:[theEvent locationInWindow] fromView:nil];
 	}
