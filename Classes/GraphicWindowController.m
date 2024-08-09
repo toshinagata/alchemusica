@@ -2,7 +2,7 @@
    GraphicWindowController.m
 */
 /*
-    Copyright (c) 2000-2023 Toshi Nagata. All rights reserved.
+    Copyright (c) 2000-2024 Toshi Nagata. All rights reserved.
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -707,7 +707,7 @@ sTableColumnIDToInt(id identifier)
 {
     float width = (float)(([self sequenceDurationInQuarter] + 4.0) * [self pixelsPerQuarter]);
     float scrollerWidth;
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7
+#if defined(MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7)
     scrollerWidth = [NSScroller scrollerWidthForControlSize:NSRegularControlSize scrollerStyle:NSScrollerStyleLegacy];
 #else
     scrollerWidth = [NSScroller scrollerWidth];
@@ -814,7 +814,7 @@ sTableColumnIDToInt(id identifier)
 		return;   //  Too many client views
 	
 	aRect = [myMainView bounds];
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7
+#if defined(MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7)
     scrollerWidth = [NSScroller scrollerWidthForControlSize:NSRegularControlSize scrollerStyle:NSScrollerStyleLegacy];
 #else
     scrollerWidth = [NSScroller scrollerWidth];

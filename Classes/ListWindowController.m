@@ -3,7 +3,7 @@
 //
 //  Created by Toshi Nagata.
 /*
-    Copyright (c) 2000-2022 Toshi Nagata. All rights reserved.
+    Copyright (c) 2000-2024 Toshi Nagata. All rights reserved.
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -131,7 +131,7 @@ static NSColor *sMiscColor = nil;
 		selector:@selector(showPlayPosition:)
 		name:MyDocumentPlayPositionNotification
 		object:[self document]];
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8
+#if defined(MAC_OS_X_VERSION_10_8) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8)
     [[NSBundle mainBundle] loadNibNamed:@"EventKindContextMenu" owner:kindDataCell topLevelObjects:NULL];
 #else
     [NSBundle loadNibNamed:@"EventKindContextMenu" owner:kindDataCell];

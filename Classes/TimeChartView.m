@@ -3,7 +3,7 @@
 //  Created by Toshi Nagata on Sat Jan 25 2003.
 //
 /*
-    Copyright (c) 2003-2022 Toshi Nagata. All rights reserved.
+    Copyright (c) 2003-2024 Toshi Nagata. All rights reserved.
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -544,7 +544,8 @@ typedef struct TimeScalingRecord {
 	NSUInteger modifierFlags;
 	localGraphicTool = [self modifyLocalGraphicTool:[[self dataSource] graphicTool]];
 	if ([theEvent type] == NSFlagsChanged) {
-		pt = [self convertPoint:[[self window] convertPointFromScreen:[NSEvent mouseLocation]] fromView:nil];
+        pt = [self convertPoint:[[self window] mouseLocationOutsideOfEventStream] fromView:nil];
+//		pt = [self convertPoint:[[self window] convertPointFromScreen:[NSEvent mouseLocation]] fromView:nil];
 	} else {		
 		pt = [self convertPoint:[theEvent locationInWindow] fromView:nil];
 	}
