@@ -79,7 +79,7 @@
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
             <ActionContent
                title = "Run Script"
-               scriptText = "# Type a script or drag a script file from your workspace to insert its path.&#10;rm -rf &quot;$PROJECT_DIR/latest_binaries/Alchemusica.app&quot; || exit 1&#10;(cd &quot;$TARGET_BUILD_DIR&quot; &amp;&amp; cp -a Alchemusica.app &quot;$PROJECT_DIR/latest_binaries&quot;) || exit 1&#10;(cd &quot;$PROJECT_DIR/latest_binaries&quot; &amp;&amp; zip -r Alchemusica.zip Alchemusica.app -x \*.DS_Store -x \*.svn*) || exit 1&#10;exit 0&#10;&#10;">
+               scriptText = "# Type a script or drag a script file from your workspace to insert its path.&#10;rm -rf &quot;$PROJECT_DIR/latest_binaries/Alchemusica.app&quot; || exit 1&#10;(cd &quot;$TARGET_BUILD_DIR&quot; &amp;&amp; zip -r Alchemusica.zip Alchemusica.app) || exit 1&#10;(mkdir -p &quot;$PROJECT_DIR/latest_binaries&quot; &amp;&amp; mv -f &quot;$TARGET_BUILD_DIR/Alchemusica.zip&quot; &quot;$PROJECT_DIR/latest_binaries/&quot;) || exit 1&#10;exit 0&#10;&#10;">
                <EnvironmentBuildable>
                   <BuildableReference
                      BuildableIdentifier = "primary"
