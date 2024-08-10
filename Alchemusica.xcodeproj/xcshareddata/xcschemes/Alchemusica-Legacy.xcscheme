@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
    LastUpgradeVersion = "1400"
-   version = "1.3">
+   version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES">
@@ -74,5 +74,23 @@
    <ArchiveAction
       buildConfiguration = "Deployment"
       revealArchiveInOrganizer = "NO">
+      <PostActions>
+         <ExecutionAction
+            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
+            <ActionContent
+               title = "Run Script"
+               scriptText = "# Type a script or drag a script file from your workspace to insert its path.&#10;rm -rf &quot;$PROJECT_DIR/latest_binaries/Alchemusica-Legacy.app&quot; || exit 1&#10;(cd &quot;$TARGET_BUILD_DIR&quot; &amp;&amp; cp -a Alchemusica-Legacy.app &quot;$PROJECT_DIR/latest_binaries&quot;) || exit 1&#10;(cd &quot;$PROJECT_DIR/latest_binaries&quot; &amp;&amp; zip -r Alchemusica-Legacy.zip Alchemusica-Legacy.app -x \*.DS_Store -x \*.svn*) || exit 1&#10;exit 0&#10;">
+               <EnvironmentBuildable>
+                  <BuildableReference
+                     BuildableIdentifier = "primary"
+                     BlueprintIdentifier = "E4BB67412C6625CB00EDCDA4"
+                     BuildableName = "Alchemusica-Legacy.app"
+                     BlueprintName = "Alchemusica-Legacy"
+                     ReferencedContainer = "container:Alchemusica.xcodeproj">
+                  </BuildableReference>
+               </EnvironmentBuildable>
+            </ActionContent>
+         </ExecutionAction>
+      </PostActions>
    </ArchiveAction>
 </Scheme>

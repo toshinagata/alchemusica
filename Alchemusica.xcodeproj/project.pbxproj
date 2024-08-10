@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -970,7 +970,6 @@
 				E400BBB911D627550032B969 /* Resources */,
 				E400BBBA11D627550032B969 /* Sources */,
 				E400BBBB11D627550032B969 /* Frameworks */,
-				E41081A51ADAB1CE004D6482 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -989,7 +988,6 @@
 				E4BB67432C6625CB00EDCDA4 /* Resources */,
 				E4BB67A02C6625CB00EDCDA4 /* Sources */,
 				E4BB67E32C6625CB00EDCDA4 /* Frameworks */,
-				E4BB67ED2C6625CB00EDCDA4 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -1231,21 +1229,9 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		E41081A51ADAB1CE004D6482 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# rm -rf \"$TARGET_BUILD_DIR/Molby.app/Contents/Resources/MolbyDoc\"\n# cp -a \"$PROJECT_DIR/../docs/MolbyDoc\" \"$TARGET_BUILD_DIR/Molby.app/Contents/Resources/\"\nif [ \"${BUILD_STYLE:=$CONFIGURATION}\" = \"Deployment\" ]; then\n  rm -rf \"$PROJECT_DIR/latest_binaries/Alchemusica.app\" || exit 1\n  (cd \"$TARGET_BUILD_DIR\"; cp -a Alchemusica.app \"$PROJECT_DIR/latest_binaries\") || exit 1\nfi\nexit 0\n\n\ncd $PROJECT_DIR\nruby add_revision_to_infoplist.rb\nif [ \"$BUILD_STYLE\" = \"Deployment\" ]; then\n  cd $PROJECT_DIR\n  sh make_release_package.sh\nfi\n";
-		};
 		E4BB67422C6625CB00EDCDA4 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -1258,21 +1244,9 @@
 			shellScript = "cd $PROJECT_DIR\nsh record_build_date.sh\nif [ \"${BUILD_STYLE:=$CONFIGURATION}\" = \"Deployment\" ]; then\n  ruby update_version.rb\nfi\n";
 			showEnvVarsInLog = 0;
 		};
-		E4BB67ED2C6625CB00EDCDA4 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ \"${BUILD_STYLE:=$CONFIGURATION}\" = \"Deployment\" ]; then\n  rm -rf \"$PROJECT_DIR/latest_binaries/Alchemusica-Legacy.app\" || exit 1\n  (cd \"$TARGET_BUILD_DIR\"; cp -a Alchemusica-Legacy.app \"$PROJECT_DIR/latest_binaries\") || exit 1\nfi\nexit 0\n\ncd $PROJECT_DIR\nruby add_revision_to_infoplist.rb\nif [ \"$BUILD_STYLE\" = \"Deployment\" ]; then\n  cd $PROJECT_DIR\n  sh make_release_package.sh\nfi\n";
-		};
 		E4C3848414111D93006F2661 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -1677,6 +1651,7 @@
 					"$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx/include/ruby-2.0.0/x86_64-darwin21.6.0",
 				);
 				INFOPLIST_FILE = "Alchemusica-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INSTALL_PATH = "";
 				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx/lib";
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
@@ -1691,6 +1666,8 @@
 					"-Wmost",
 					"-Wno-four-char-constants",
 					"-Wno-unknown-pragmas",
+					"-Wunguarded-availability",
+					"-Wno-shift-negative-value",
 				);
 			};
 			name = Development;
@@ -1713,6 +1690,7 @@
 					"$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx/include/ruby-2.0.0/x86_64-darwin21.6.0",
 				);
 				INFOPLIST_FILE = "Alchemusica-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INSTALL_PATH = "";
 				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx/lib";
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
@@ -1727,6 +1705,8 @@
 					"-Wmost",
 					"-Wno-four-char-constants",
 					"-Wno-unknown-pragmas",
+					"-Wunguarded-availability",
+					"-Wno-shift-negative-value",
 				);
 			};
 			name = Deployment;
@@ -1748,6 +1728,7 @@
 					"$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx/include/ruby-2.0.0/x86_64-darwin21.6.0",
 				);
 				INFOPLIST_FILE = "Alchemusica-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INSTALL_PATH = "";
 				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx/lib";
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
@@ -1762,6 +1743,8 @@
 					"-Wmost",
 					"-Wno-four-char-constants",
 					"-Wno-unknown-pragmas",
+					"-Wunguarded-availability",
+					"-Wno-shift-negative-value",
 				);
 			};
 			name = Default;
@@ -1792,6 +1775,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				WARNING_CFLAGS = "";
 			};
 			name = Development;
 		};
@@ -1819,6 +1803,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				WARNING_CFLAGS = "";
 			};
 			name = Deployment;
 		};
@@ -1845,6 +1830,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				SDKROOT = macosx;
+				WARNING_CFLAGS = "";
 			};
 			name = Default;
 		};
@@ -1869,6 +1855,7 @@
 					"$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx106/include/ruby-2.0.0/x86_64-darwin18.7.0",
 				);
 				INFOPLIST_FILE = "Alchemusica-Legacy-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INSTALL_PATH = "";
 				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx106/lib";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
@@ -1882,6 +1869,8 @@
 					"-Wmost",
 					"-Wno-four-char-constants",
 					"-Wno-unknown-pragmas",
+					"-Wunguarded-availability",
+					"-Wno-shift-negative-value",
 				);
 			};
 			name = Development;
@@ -1904,6 +1893,7 @@
 					"$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx106/include/ruby-2.0.0/x86_64-darwin18.7.0",
 				);
 				INFOPLIST_FILE = "Alchemusica-Legacy-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INSTALL_PATH = "";
 				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx106/lib";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
@@ -1917,6 +1907,8 @@
 					"-Wmost",
 					"-Wno-four-char-constants",
 					"-Wno-unknown-pragmas",
+					"-Wunguarded-availability",
+					"-Wno-shift-negative-value",
 				);
 			};
 			name = Deployment;
@@ -1938,6 +1930,7 @@
 					"$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx106/include/ruby-2.0.0/x86_64-darwin18.7.0",
 				);
 				INFOPLIST_FILE = "Alchemusica-Legacy-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INSTALL_PATH = "";
 				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../wxMyProjects/ruby-2.0.0-p353/build-osx106/lib";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
@@ -1951,6 +1944,8 @@
 					"-Wmost",
 					"-Wno-four-char-constants",
 					"-Wno-unknown-pragmas",
+					"-Wunguarded-availability",
+					"-Wno-shift-negative-value",
 				);
 			};
 			name = Default;
