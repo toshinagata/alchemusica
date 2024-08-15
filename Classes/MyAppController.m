@@ -31,6 +31,7 @@
 NSString *MyAppScriptMenuModifiedNotification = @"Script menu modified";
 NSString *MyAppControllerMIDISetupDidChangeNotification = @"MIDI setup changed";
 NSString *MyAppControllerModalPanelTimerNotification = @"Modal Panel timer fired";
+NSString *MyAppControllerWarningNotification = @"Warning reported";
 
 static int sScriptMenuCount = 0;
 static BOOL sStartupCompleted = NO;  //  If NO, then Ruby interrupt check is disabled
@@ -61,6 +62,12 @@ static BOOL sStartupCompleted = NO;  //  If NO, then Ruby interrupt check is dis
 		selector:@selector(updateScriptMenu:)
 		name:MyAppScriptMenuModifiedNotification
 		object:self];
+
+    [[NSNotificationCenter defaultCenter]
+        addObserver: self
+        selector: @selector(warningReported:)
+        name: MyAppControllerWarningNotification
+        object: self];
 
 	scriptMenuInfos = [[NSMutableArray array] retain];
 	sScriptMenuCount = (int)[scriptMenu numberOfItems];
@@ -362,6 +369,14 @@ appendScriptMenuItems(NSMenu *menu, NSArray *infos, SEL action, id target)
 	if (documents == nil || idx < 0 || idx >= [documents count])
 		return nil;
 	return [documents objectAtIndex: idx];
+}
+
+- (void)warningReported: (NSNotification *)notification {
+    id userInfo = [notification userInfo];
+    id message = (userInfo ? [userInfo objectForKey:@"message"] : @"There are non-fatal warnings.\nCheck the 'Ruby console' for details.");
+    NSAlert *alert = [NSAlert alertWithMessageText:@"Warning" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@"%@", message];
+    [alert runModal];
+    [self openRubyConsole:self];
 }
 
 #pragma mark ====== Ruby Progress Panel Support ======
@@ -714,6 +729,17 @@ MyAppCallback_startupMessage(const char *message, ...)
 	[AboutWindowController setMessage:(msg == NULL ? nil : [NSString stringWithUTF8String:msg])];
 	if (msg != NULL)
 		free(msg);
+}
+
+void
+MyAppCallback_enqueueWarningNotification(const char *message, ...)
+{
+    MyAppController *cont = (MyAppController *)[NSApp delegate];
+    va_list ap;
+    va_start(ap, message);
+    MyAppCallback_showScriptMessageWithColor(4, message, ap);
+    MyAppCallback_showScriptMessageWithColor(0, NULL, NULL);
+    [[NSNotificationQueue defaultQueue] enqueueNotification: [NSNotification notificationWithName: MyAppControllerWarningNotification object: cont] postingStyle: NSPostWhenIdle coalesceMask: NSNotificationCoalescingOnName | NSNotificationCoalescingOnSender forModes: nil];
 }
 
 #pragma mark ====== MIDI setup change notification ======

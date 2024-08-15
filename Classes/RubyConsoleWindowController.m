@@ -71,8 +71,11 @@ static RubyConsoleWindowController *shared;
 	range.length = 0;
 	[consoleView replaceCharactersInRange: range withString: string];
 	range.length = len = (int)[string length];
-	if (color == nil)
-		color = defaultColor;
+    if (color == nil) {
+        color = defaultColor;
+        if (color == nil)
+            color = [NSColor blackColor];
+    }
 	[consoleView setTextColor: color range: range];
 	range.location += range.length;
 	range.length = 0;
@@ -273,14 +276,14 @@ static RubyConsoleWindowController *shared;
 #pragma mark ====== Plain-C Interface ======
 
 int
-MyAppCallback_showScriptMessage(const char *fmt, ...)
+MyAppCallback_showScriptMessageWithColor(int col, const char *fmt, va_list ap)
 {
 	RubyConsoleWindowController *cont = [RubyConsoleWindowController sharedRubyConsoleWindowController];
+    if (col >= 0)
+        [cont setConsoleColor:col];
 	if (fmt != NULL) {
 		char *p;
-		va_list ap;
 		int retval;
-		va_start(ap, fmt);
 		if (strchr(fmt, '%') == NULL) {
 			/*  No format characters  */
 			return [cont appendMessage: [NSString stringWithUTF8String: fmt]];
@@ -306,6 +309,26 @@ MyAppCallback_setConsoleColor(int color)
 {
 	RubyConsoleWindowController *cont = [RubyConsoleWindowController sharedRubyConsoleWindowController];
 	[cont setConsoleColor: color];
+}
+
+int
+MyAppCallback_showErrorMessage(const char *fmt, ...)
+{
+    int retval;
+    va_list ap;
+    va_start(ap, fmt);
+    retval = MyAppCallback_showScriptMessageWithColor(4, fmt, ap);
+    MyAppCallback_setConsoleColor(0);
+    MyAppCallback_showScriptMessageWithColor(0, NULL, NULL);
+    return retval;
+}
+
+int
+MyAppCallback_showScriptMessage(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    return MyAppCallback_showScriptMessageWithColor(-1, fmt, ap);
 }
 
 void

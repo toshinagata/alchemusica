@@ -494,7 +494,7 @@ MDSequenceReadSMFTrack(MDSMFConvert *cref)
 		} else if (MDGetKind(&event) == kMDEventInternalNoteOff) {
 			result = MDTrackMatchNoteOff(cref->temptrk, &event, lastPendingNoteOn);
 			if (result != kMDNoError) {
-				fprintf(stderr, "Corrupsed file? orphaned note off at %d\n", (int32_t)MDGetTick(&event));
+                MDShowErrorMessage("Corrupsed file? orphaned note off at %d\n", (int32_t)MDGetTick(&event));
 				// break;
 			}
 			skipFlag = 1;

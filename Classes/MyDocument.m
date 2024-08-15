@@ -810,8 +810,9 @@ static NSString *sStackShouldBeCleared = @"stack_should_be_cleared";
 	if (gMyDocumentSanityCheck) {
 		int32_t trackNo = [[[notification userInfo] objectForKey: @"track"] intValue];
 		MDTrack *track = [[self myMIDISequence] getTrackAtIndex:trackNo];
-		if (track != NULL && MDTrackRecache(track, 1) > 0) {
-			MyAppCallback_messageBox("Track data has some inconsistency", "Internal Error", 0, 0);
+        int errcnt;
+		if (track != NULL && (errcnt = MDTrackRecache(track, 1)) > 0) {
+            MDShowErrorMessage("%d inconsisten%s found in track %d.\n", errcnt, (errcnt == 1 ? "cy was" : "cies were"), trackNo);
 		}
 	}
 }

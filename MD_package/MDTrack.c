@@ -1800,18 +1800,18 @@ MDTrackRecache(MDTrack *inTrack, int check)
 	while ((ev1 = MDPointerForward(pt1)) != NULL) {
 		pos = MDPointerGetPosition(pt1);
 		if (check && (MDGetKind(ev1) < 1 || MDGetKind(ev1) > kMDEventStop)) {
-			fprintf(stderr, "#%d: invalid event kind %d\n", (int)pos, (int)MDGetKind(ev1));
+			MDShowErrorMessage("#%d: invalid event kind %d\n", (int)pos, (int)MDGetKind(ev1));
 			errcnt++;
 		}
 		tick = MDGetTick(ev1);
 		if (check && tick < lastTick) {
-			fprintf(stderr, "#%d: tick disorder %d (last tick = %d)\n", (int)pos, (int)tick, (int)lastTick);
+            MDShowErrorMessage("#%d: tick disorder %d (last tick = %d)\n", (int)pos, (int)tick, (int)lastTick);
 			errcnt++;
 		}
 		lastTick = tick;
 		if (MDIsChannelEvent(ev1)) {
 			if (check && (unsigned)(MDGetChannel(ev1)) >= 16) {
-				fprintf(stderr, "#%d: channel number (%ud) >= 16\n", (int)pos, (unsigned int)MDGetChannel(ev1));
+                MDShowErrorMessage("#%d: channel number (%ud) >= 16\n", (int)pos, (unsigned int)MDGetChannel(ev1));
 				errcnt++;
 			} else
 				nch[MDGetChannel(ev1)]++;
@@ -1821,18 +1821,18 @@ MDTrackRecache(MDTrack *inTrack, int check)
 	}
 	++pos;
 	if (check && pos != inTrack->num) {
-		fprintf(stderr, "The track->num (%d) does not match the number of events (%d)\n", pos, inTrack->num);
+        MDShowErrorMessage("The track->num (%d) does not match the number of events (%d)\n", pos, inTrack->num);
 		errcnt++;
 	}
 	inTrack->num = pos;
 	if (check && lastTick >= inTrack->duration) {
-		fprintf(stderr, "The tick of the last event (%qd) exceeds the track duration (%qd)\n",
+        MDShowErrorMessage("The tick of the last event (%qd) exceeds the track duration (%qd)\n",
 			(int64_t)lastTick, (int64_t)inTrack->duration);
 		errcnt++;
 	}
 	for (i = 0; i < 18; i++) {
 		if (check && nch[i] != inTrack->nch[i]) {
-			fprintf(stderr, "The track->nch[%d] (%d) does not seem correct (%d)\n", (int)i, inTrack->nch[i], nch[i]);
+            MDShowErrorMessage("The track->nch[%d] (%d) does not seem correct (%d)\n", (int)i, inTrack->nch[i], nch[i]);
 			errcnt++;
 		}
 		inTrack->nch[i] = nch[i];
@@ -1851,16 +1851,16 @@ MDTrackRecache(MDTrack *inTrack, int check)
                 tick = tick2;
         }
         if (check && (block->largestTick >= 0 && tick != block->largestTick)) {
-            fprintf(stderr, "The largestTick(%d) does not match the largest tick(%d) in block %p\n", (int)block->largestTick, (int)tick, block);
+            MDShowErrorMessage("The largestTick(%d) does not match the largest tick(%d) in block %p\n", (int)block->largestTick, (int)tick, block);
 			errcnt++;
         }
 		block->largestTick = tick;
 		if (tick > lastTick)
 			lastTick = tick;
     }
-	if (lastTick >= inTrack->duration) {
+	if (lastTick > inTrack->duration) {
 		if (check) {
-            fprintf(stderr, "The track duration (%d) is not greater than the largest tick (%d)\n", (int)inTrack->duration, (int)lastTick);
+            MDShowErrorMessage("The track duration (%d) is less than the largest tick (%d)\n", (int)inTrack->duration, (int)lastTick);
 			errcnt++;
 		}
 		inTrack->duration = lastTick + 1;
@@ -2787,26 +2787,26 @@ MDPointerCheck(const MDPointer *inPointer)
 		return kMDNoError;
 	track = inPointer->parent;
 	if (track == NULL) {
-		fprintf(stderr, "MDPointerCheck: track is NULL\n");
+        MDShowErrorMessage("MDPointerCheck: track is NULL\n");
 		err++;
 	}
 	pos = inPointer->position;
 	if (pos == -1) {
 		if (inPointer->block != NULL) {
-			fprintf(stderr, "MDPointerCheck: position is -1 but block is not NULL\n");
+            MDShowErrorMessage("MDPointerCheck: position is -1 but block is not NULL\n");
 			err++;
 		}
 		if (inPointer->index != -1) {
-			fprintf(stderr, "MDPointerCheck: position is -1 but index is not -1\n");
+            MDShowErrorMessage("MDPointerCheck: position is -1 but index is not -1\n");
 			err++;
 		}
 	} else {
 		block = track->first;
 		if (block == NULL) {
-			fprintf(stderr, "MDPointerCheck: position (%d) >= 0 but track has no data\n", pos);
+            MDShowErrorMessage("MDPointerCheck: position (%d) >= 0 but track has no data\n", pos);
 			err++;
 		} else if (inPointer->block == NULL) {
-			fprintf(stderr, "MDPointerCheck: position (%d) >= 0 but block is NULL\n", pos);
+            MDShowErrorMessage("MDPointerCheck: position (%d) >= 0 but block is NULL\n", pos);
 			err++;
 		} else {
 			while (block != NULL && pos >= block->num) {
@@ -2816,10 +2816,10 @@ MDPointerCheck(const MDPointer *inPointer)
 				block = block->next;
 			}
 			if (block == NULL) {
-				fprintf(stderr, "MDPointerCheck: block exhausts before position (%d)\n", (int)inPointer->position);
+                MDShowErrorMessage("MDPointerCheck: block exhausts before position (%d)\n", (int)inPointer->position);
 				err++;
 			} else if (block != inPointer->block || pos != inPointer->index) {
-				fprintf(stderr, "MDPointerCheck: position (%d) is index %d in block %p but inPointer claims index %d in block %p\n", (int)inPointer->position, (int)(pos), block, (int)inPointer->index, inPointer->block);
+                MDShowErrorMessage("MDPointerCheck: position (%d) is index %d in block %p but inPointer claims index %d in block %p\n", (int)inPointer->position, (int)(pos), block, (int)inPointer->index, inPointer->block);
 				err++;
 			}
 		}

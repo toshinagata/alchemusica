@@ -463,6 +463,21 @@ _dprintf(const char *fname, int lineno, int level, const char *fmt, ...)
 }
 #endif
 
+int
+MDShowErrorMessage(const char *fmt, ...)
+{
+    extern void MyAppCallback_enqueueWarningNotification(const char *message, ...);
+
+    char *p;
+    int n;
+    va_list ap;
+    va_start(ap, fmt);
+    n = vasprintf(&p, fmt, ap);
+    MyAppCallback_enqueueWarningNotification("%s", p);
+    free(p);
+    return n;
+}
+
 #ifdef __MWERKS__
 #pragma mark ====== MDArray implementations ======
 #endif

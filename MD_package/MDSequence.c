@@ -22,6 +22,9 @@
 #include <limits.h>		/*  for LONG_MAX  */
 #include <pthread.h>    /*  for mutex  */
 
+/*  For output warning messages */
+extern int MyAppCallback_showErrorMessage(const char *fmt, ...);
+
 #ifdef __MWERKS__
 #pragma mark ====== Private definitions ======
 #endif
@@ -578,7 +581,7 @@ MDSequenceSingleChannelMode(MDSequence *inSequence, int separate)
             if (MDTrackGetNumberOfChannelEvents(track, i) > 0) {
                 MDTrackSetTrackChannel(track, i);
                 if (separate && nnch++ > 0)
-                    fprintf(stderr, "Warning: Internal inconsistency in function MDSequenceSingleChannelMode, file %s, line %d\n", __FILE__, __LINE__);
+                    MDShowErrorMessage("Warning: Internal inconsistency in function MDSequenceSingleChannelMode, file %s, line %d\n", __FILE__, __LINE__);
             }
         }
         MDTrackRemapChannel(track, newch);

@@ -18,6 +18,8 @@
 #ifndef __MDRubyExtern__
 #define __MDRubyExtern__
 
+#include <stdarg.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -56,7 +58,9 @@ void Ruby_getVersionStrings(const char **version, const char **copyright);
 STUB const char *MyAppCallback_getGlobalSettings(const char *key);
 STUB void MyAppCallback_setGlobalSettings(const char *key, const char *value);
 STUB void MyAppCallback_saveGlobalSettings(void);
+STUB int MyAppCallback_showScriptMessageWithColor(int col, const char *fmt, va_list ap);
 STUB int MyAppCallback_showScriptMessage(const char *fmt, ...);
+STUB int MyAppCallback_showErrorMessage(const char *fmt, ...);
 STUB void MyAppCallback_setConsoleColor(int color);
 STUB void MyAppCallback_showRubyPrompt(void);
 STUB int MyAppCallback_checkInterrupt(void);

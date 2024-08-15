@@ -79,6 +79,8 @@ extern int gMDVerbose;
 int		_dprintf(const char *fname, int lineno, int level, const char *fmt, ...);
 #endif
 
+int     MDShowErrorMessage(const char *fmt, ...);
+
 #if DEBUG
 /*  Usage: dprintf(int level, const char *fmt, ...)  */
 #define dprintf(level, fmt...) (gMDVerbose >= (level) ? _dprintf(__FILE__, __LINE__, (level), fmt) : 0)
