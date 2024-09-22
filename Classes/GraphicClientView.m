@@ -18,6 +18,7 @@
 #import "GraphicWindowController.h"	//  for trackDuration
 #import "MyDocument.h"
 #import "NSCursorAdditions.h"
+#import "PlayingViewController.h"   //  for getCurrentTick
 #import "MyAppController.h"  //  for getOSXVersion
 
 @implementation GraphicClientView
@@ -230,6 +231,11 @@ CGFloat gDashWidth = 8.0f;
     return floor(ox + [dataSource pixelsPerTick] * pos) + 0.5;
 }
 
+- (CGFloat)timeIndicatorWidth
+{
+    return 3.0;
+}
+
 - (void)drawTimeIndicatorInRect: (NSRect)aRect
 {
     float pos;
@@ -252,15 +258,21 @@ CGFloat gDashWidth = 8.0f;
 - (void)invalidateTimeIndicator
 {
     NSRect frame = [self frame];
-    NSRect rect = NSMakeRect(0.0, frame.origin.y, 3.0, frame.size.height);
+    CGFloat wid = [self timeIndicatorWidth];
+    NSRect rect = NSMakeRect(0.0, frame.origin.y, wid, frame.size.height);
     float pos;
     if (lastTimeIndicatorPos >= 0) {
-        rect.origin.x = [self timeIndicatorLocationFromPos:lastTimeIndicatorPos];
+        rect.origin.x = [self timeIndicatorLocationFromPos:lastTimeIndicatorPos] - wid * 0.5;
         [self setNeedsDisplayInRect:rect];
     }
     pos = [[self dataSource] timeIndicatorPos];
     if (pos >= 0) {
-        rect.origin.x = [self timeIndicatorLocationFromPos:pos];
+        rect.origin.x = [self timeIndicatorLocationFromPos:pos] - wid * 0.5;
+        [self setNeedsDisplayInRect:rect];
+    }
+    pos = [[[self dataSource] playingViewController] getCurrentTick];
+    if (pos >= 0) {
+        rect.origin.x = [self timeIndicatorLocationFromPos:pos] - wid * 0.5;
         [self setNeedsDisplayInRect:rect];
     }
 }

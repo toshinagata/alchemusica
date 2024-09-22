@@ -453,6 +453,16 @@
 	[self setCurrentTime: MDCalibratorTickToTime(calibrator, newTick)];
 }
 
+- (MDTickType)getCurrentTick
+{
+    return MDCalibratorTimeToTick(calibrator, currentTime);
+}
+
+- (MDTimeType)getCurrentTime
+{
+    return currentTime;
+}
+
 - (void)prerollWithFeedback
 {
 	MDPlayer *player;

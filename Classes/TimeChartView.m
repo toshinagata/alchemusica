@@ -72,7 +72,7 @@ typedef struct TimeScalingRecord {
 	float originx;
 	float limitx;
     float basey, maxLabelWidth;
-	NSPoint pt1, pt2;
+    NSPoint pt1, pt2, pt3;
     NSRect visibleRect = [self visibleRect];
     float editingRangeStartX, editingRangeEndX;
 
@@ -162,11 +162,11 @@ typedef struct TimeScalingRecord {
 		pt1.x = editingRangeStartX - 5.0f;
 		pt1.y = visibleRect.origin.y + 1.0f;
 		if (pt1.x >= aRect.origin.x && pt1.x < aRect.origin.x + aRect.size.width) {
-            [sStartEditingImage drawAtPoint: pt1 fromRect: NSZeroRect operation: NSCompositeSourceAtop fraction: 1.0f];
+            [sStartEditingImage drawAtPoint: pt1 fromRect: NSZeroRect operation: NSCompositeSourceOver fraction: 1.0f];
 		}
 		pt1.x = editingRangeEndX;
 		if (pt1.x >= aRect.origin.x && pt1.x < aRect.origin.x + aRect.size.width) {
-            [sEndEditingImage drawAtPoint: pt1 fromRect: NSZeroRect operation: NSCompositeSourceAtop fraction: 1.0f];
+            [sEndEditingImage drawAtPoint: pt1 fromRect: NSZeroRect operation: NSCompositeSourceOver fraction: 1.0f];
 		}
 	}
 	
@@ -184,9 +184,33 @@ typedef struct TimeScalingRecord {
 		[NSBezierPath setDefaultLineWidth: defaultLineWidth];
 	}
 	
-//    if ([self isDragging])
-		[self drawSelectRegion];
+    /*  Draw playing position symbol (even while not playing)  */
+    id playingViewController = [[self dataSource] playingViewController];
+    float playTick = (float)[playingViewController getCurrentTick];
+    pt1.x = [self timeIndicatorLocationFromPos:playTick];
+    if (pt1.x >= aRect.origin.x && pt1.x < aRect.origin.x + aRect.size.width) {
+        [[NSColor blackColor] set];
+        pt1.y = aRect.origin.y;
+        pt2.x = pt1.x;
+        pt2.y = pt1.y + 6.0;
+        [NSBezierPath strokeLineFromPoint:pt1 toPoint:pt2];
+        pt1 = pt2;
+        pt2.x -= 3.0;
+        pt2.y += 6.0;
+        pt3 = pt2;
+        pt3.x += 6.0;
+        [NSBezierPath strokeLineFromPoint:pt1 toPoint:pt2];
+        [NSBezierPath strokeLineFromPoint:pt2 toPoint:pt3];
+        [NSBezierPath strokeLineFromPoint:pt3 toPoint:pt1];
+    }
 
+    [self drawSelectRegion];
+
+}
+
+- (CGFloat)timeIndicatorWidth
+{
+    return 8.0;
 }
 
 //  Examine whether the mouse pointer is on one of the editing range marks

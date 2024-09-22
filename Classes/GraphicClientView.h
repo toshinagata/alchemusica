@@ -133,6 +133,9 @@ extern CGFloat gDashWidth;
 - (float)scrollVerticalPosition;
 - (void)scrollToVerticalPosition:(float)pos;
 
+- (CGFloat)timeIndicatorWidth;
+- (CGFloat)timeIndicatorLocationFromPos:(float)pos;
+- (void)drawTimeIndicatorInRect: (NSRect)aRect;
 - (void)invalidateTimeIndicator;
 
 @end

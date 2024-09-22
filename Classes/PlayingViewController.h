@@ -77,6 +77,8 @@
 
 - (void)setCurrentTime: (MDTimeType)newTime;
 - (void)setCurrentTick: (MDTickType)newTick;
+- (MDTimeType)getCurrentTime;
+- (MDTickType)getCurrentTick;
 
 //  Called from the parent windowController
 - (void)windowDidLoad;
