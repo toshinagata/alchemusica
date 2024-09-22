@@ -837,13 +837,11 @@ s_RubyDialog_Attr(VALUE self, VALUE tag, VALUE key)
 static VALUE
 s_RubyDialog_Run(VALUE self)
 {
-	int retval;
 	VALUE iflag;
 	RubyDialog *dref = s_RubyDialog_GetController(self);
 
 	iflag = Ruby_SetInterruptFlag(Qfalse);
-	retval = RubyDialogCallback_runModal(dref);
-  rb_iv_set(self, "_retval", INT2NUM(retval));
+	RubyDialogCallback_runModal(dref);
 	Ruby_SetInterruptFlag(iflag);
 	RubyDialogCallback_destroy(dref);
 	s_RubyDialog_Forget(self);
