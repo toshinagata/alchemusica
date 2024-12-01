@@ -1427,6 +1427,18 @@ MDAudioChangeEffect(int streamIndex, int chainIndex, int effectIndex, int effect
     CHECK_ERR(result, AUGraphAddNode(gAudio->graph, &desc, &ep->node));
     CHECK_ERR(result, AUGraphOpen(gAudio->graph));
     CHECK_ERR(result, AUGraphNodeInfo(gAudio->graph, ep->node, NULL, &ep->unit));
+    /*  If this is the first load of this effect device, then cache the internal information */
+    if (!mp->formatCached) {
+        UInt32 propSize;
+        /*  Get the audio output format  */
+        propSize = sizeof(MDAudioFormat);
+        CHECK_ERR(result, AudioUnitGetProperty(ep->unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &(mp->format), &propSize));
+        mp->acceptsCanonicalFormat = sMDAudioCompareFormat(&(mp->format), &gAudio->preferredFormat);
+        result = AudioUnitGetPropertyInfo(ep->unit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global, 0, &propSize, NULL);
+        if (result == 0 && propSize > 0)
+            mp->hasCustomView = kMDAudioHasCocoaView;
+        mp->formatCached = 1;
+    }
 
     if (effectIndex == 0) {
         lastNode = cp->converterNode;
