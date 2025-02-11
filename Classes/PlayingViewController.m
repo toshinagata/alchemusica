@@ -602,9 +602,11 @@
             barBeatFlag = [[info valueForKey: MyRecordingInfoBarBeatFlagKey] intValue];
             MDEventCalculateMetronomeBarAndBeat(ep, (int32_t)timebase, &bar, &beat);
             MDCalibratorTickToMeasure(calibrator, currentTick, &currentBar, &currentBeat, &currentTickInBeat);
-            barTime = (int)floor(bar * 60000000.0 / (tempo * timebase) + 0.5);
-            beatTime = (int)ceil(beat * 60000000.0 / (tempo * timebase));
-            tickInBeatTime = (int)floor(currentTickInBeat * 60000000.0 / (tempo * timebase) + 0.5);
+            //  floor(60000000.0/tempo): MIDI integer tempo
+            float MIDItempo = floor(60000000.0 / tempo);
+            barTime = (int)floor(bar * MIDItempo / timebase + 0.5);
+            beatTime = (int)ceil(beat * MIDItempo / timebase);
+            tickInBeatTime = (int)floor(currentTickInBeat * MIDItempo / timebase + 0.5);
             if (barBeatFlag) {
                 countOffDuration = barTime * countOffNumber;
                 /*  Add ticks between the beginning of the bar and currentTick  */
