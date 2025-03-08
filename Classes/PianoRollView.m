@@ -55,7 +55,7 @@
 
 	staves = [[NSBezierPath allocWithZone: [self zone]] init];
 	subStaves = [[NSBezierPath allocWithZone: [self zone]] init];
-	limitx = [dataSource sequenceDuration] * [dataSource pixelsPerTick];
+    limitx = [dataSource tickToPixel:[dataSource sequenceDuration]];
 	index = 0;
 	/*  Line start/end points are set to multiples of sDashWidth to avoid complication of calculating appropriate phase for setLineDash: */
 	startx = (float)(gDashWidth * floor(aRect.origin.x / gDashWidth));
@@ -101,8 +101,6 @@
 	int num, trackNum, i;
 	MDTrack *track;
 	IntGroup *pset;
-//	MDPointer *pt;
-//	MDEvent *ep;
 	[cacheArray release];
 	num = [self visibleTrackCount];
 	cacheArray = [[NSMutableArray allocWithZone: [self zone]] initWithCapacity: num + 1];
@@ -163,10 +161,9 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	int num, i;
 	NSBezierPath *normalPath, *selectedPath;
 	NSRect rect = [self visibleRect];
-	float ppt = [dataSource pixelsPerTick];
 	float ys = [self yScale];
 	MyDocument *document = (MyDocument *)[dataSource document];
-	MDTickType originTick = (MDTickType)(rect.origin.x / ppt);
+    MDTickType originTick = (MDTickType)[dataSource pixelToTick:rect.origin.x];
 	MDTickType startTick, endTick;
 	int startNote, endNote;
 	MDTickType duration;
@@ -183,9 +180,8 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	selectedPath = [[NSBezierPath allocWithZone: [self zone]] init];
 	if (isDraggingImage)
 		[selectedPath setLineDash:sDash count:2 phase:0.0f];
-	startTick = (MDTickType)(aRect.origin.x / ppt);
-	endTick = (MDTickType)((aRect.origin.x + aRect.size.width) / ppt);
-//	NSLog(@"drawNotesInRect: startTick %ld endTick %ld", (int32_t)startTick, (int32_t)endTick);
+    startTick = (MDTickType)[dataSource pixelToTick:aRect.origin.x];
+    endTick = (MDTickType)[dataSource pixelToTick:(aRect.origin.x + aRect.size.width)];
 	startNote = (int)floor(aRect.origin.y / ys);
 	endNote = (int)ceil((aRect.origin.y + aRect.size.height) / ys);
 	for (i = num; i >= 0; i--) {
@@ -253,10 +249,9 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 			}
 			if ((tick2 = MDGetTick(ep) + duration) < startTick || (note = MDGetCode(ep)) < startNote || note > endNote)
 				continue;	/*  Need not draw this one  */
-			x1 = (float)floor(MDGetTick(ep) * ppt);
-			x2 = (float)floor(tick2 * ppt);
+            x1 = floor([dataSource tickToPixel:MDGetTick(ep)]);
+            x2 = floor([dataSource tickToPixel:tick2]);
 			y = (float)floor(note * ys + 0.5);
-		//	if (isDragging && !pencilOn && !isLoupeDragging && draggingMode == 0 && isFocus) {
 			if (isFocus && !isLoupeDragging && selectionPath != nil) {
 				/*  Change selection by dragging  */
 				if ([self isPointInSelectRegion: NSMakePoint(x1, y + 0.5f * ys)]) {
@@ -289,17 +284,8 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 		}
 		if (pencilOn && isFocus) {
 			/*  Drawing note  */
-		/*	x1 = draggingStartPoint.x;
-			x2 = draggingPoint.x;
-			if (x2 < x1) {
-				x2 = x1;
-				x1 = draggingPoint.x;
-			} else if (x2 == x1) {
-				x2 = x1 + [dataSource pixelsPerQuarter];
-			}
-			y = floor(draggingStartPoint.y / ys) * ys; */
 			x1 = draggingPoint.x;
-			x2 = x1 + [dataSource pixelsPerQuarter];
+            x2 = [dataSource tickToPixel:([dataSource pixelToTick:x1] + [document timebase])];
 			y = (float)(floor(draggingPoint.y / ys) * ys);
 			appendNotePath(selectedPath, x1, x2, y, ys);
 		}
@@ -321,7 +307,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 {
 	MDTickType deltaDuration;
 	if (draggingMode == 3)
-		deltaDuration = (MDTickType)floor((MDTickType)((draggingPoint.x - draggingStartPoint.x) / [dataSource pixelsPerTick]) + 0.5);
+        deltaDuration = (MDTickType)floor([dataSource pixelToTick:draggingPoint.x] - [dataSource pixelToTick:draggingStartPoint.x] + 0.5);
 	else deltaDuration = 0;
 	NSEraseRect(aRect);
 	[self paintEditingRange: aRect startX: NULL endX: NULL];
@@ -349,7 +335,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	[self drawSelectRegion];
 	if (rubbingArray != nil) {
 		NSPoint pt;
-		pt.x = (CGFloat)(floor(rubbingTick * [dataSource pixelsPerTick]) + 0.5);
+        pt.x = (CGFloat)(floor([dataSource tickToPixel:rubbingTick] + 0.5));
 		pt.y = aRect.origin.y;
 		[[NSColor blueColor] set];
 		[NSBezierPath strokeLineFromPoint:pt toPoint:NSMakePoint(pt.x, pt.y + aRect.size.height)];
@@ -385,16 +371,15 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 {
 	int num, i;
 	NSRect rect = [self visibleRect];
-	float ppt = [dataSource pixelsPerTick];
 	float ys = [self yScale];
 	MyDocument *document = (MyDocument *)[dataSource document];
-	MDTickType originTick = (MDTickType)(rect.origin.x / ppt);
-	MDTickType limitTick = (MDTickType)((rect.origin.x + rect.size.width) / ppt);
+    MDTickType originTick = (MDTickType)[dataSource pixelToTick:rect.origin.x];
+    MDTickType limitTick = (MDTickType)[dataSource pixelToTick:(rect.origin.x + rect.size.width)];
 	MDTickType theTick;
 	int theNote;
 
 	num = [self visibleTrackCount];
-	theTick = (MDTickType)(aPoint.x / ppt);
+    theTick = (MDTickType)[dataSource pixelToTick:aPoint.x];
 	theNote = (int)floor(aPoint.y / ys);
 	for (i = 0; i < num; i++) {
 		int trackNum;
@@ -413,8 +398,6 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 		pt = MDPointerNew(track);
 		if (pt == NULL)
 			break;
-//		pset = [[cacheArray objectAtIndex: i] pointSet];
-//		MDPointerSetPositionWithPointSet(pt, pset, -1, &n);
 		pset = NULL;
 		MDPointerJumpToTick(pt, theTick);
 		while (1) {
@@ -468,14 +451,13 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	int i, n;
 	short note, minNote, maxNote;
 	MDTickType tick, minTick, maxTick;
-	float ys, ppt;
+	float ys;
 	MyDocument *document = [dataSource document];
 	minTick = kMDMaxTick;
 	maxTick = kMDNegativeTick;
 	minNote = 128;
 	maxNote = -1;
 	ys = [self yScale];
-	ppt = [dataSource pixelsPerTick];
 	for (i = 0; (n = [self sortedTrackNumberAtIndex: i]) >= 0; i++) {
 		int index;
 		MDPointer *pt;
@@ -506,7 +488,9 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	if (minTick > maxTick || minNote > maxNote) {
 		return NSMakeRect(0, 0, 0, 0);
 	} else {
-		return NSMakeRect(minTick * ppt, minNote * ys, (maxTick - minTick) * ppt, (maxNote - minNote + 1) * ys);
+        float maxX = [dataSource tickToPixel:maxTick];
+        float minX = [dataSource tickToPixel:minTick];
+		return NSMakeRect(minX, minNote * ys, maxX - minX, (maxNote - minNote + 1) * ys);
 	}
 }
 
@@ -695,7 +679,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 - (void)invalidateRubbingTickLine
 {
 	NSRect rect = [self bounds];
-	rect.origin.x = (CGFloat)(floor(rubbingTick * [dataSource pixelsPerTick]) - 1);
+    rect.origin.x = (CGFloat)(floor([dataSource tickToPixel:rubbingTick]) - 1);
 	rect.size.width = 3;
 	[self setNeedsDisplayInRect:rect];
 }
@@ -704,7 +688,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 {
 	int i, num, trackNum, n;
 	MDTrack *track;
-	MDTickType tick = (MDTickType)(floor(xpos / [dataSource pixelsPerTick] + 0.5));
+    MDTickType tick = (MDTickType)(floor([dataSource pixelToTick:xpos] + 0.5));
 	IntGroup *pset, *pset2, *pset3;
 	MDPointer *pt;
 	MDEvent *ep;
@@ -942,7 +926,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 		}
 		pt.x = pt.x - draggingStartPoint.x;
 		pt.y = pt.y - draggingStartPoint.y;
-		deltaDraggedTick = (MDTickType)(floor(pt.x / [dataSource pixelsPerTick] + 0.5));
+        deltaDraggedTick = (MDTickType)(floor([dataSource pixelToTick:pt.x] + 0.5));
 		deltaDraggedValue = (int)floor(pt.y / [self yScale] + 0.5);
 	} else if (pencilOn) {
 		[self invalidateDraggingRegion];
@@ -966,7 +950,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 - (void)doMouseUp: (NSEvent *)theEvent
 {
 	int i, trackNo;
-	float ppt, ys;
+	float ys;
 	MDTickType minTick, maxTick;
 	BOOL shiftDown, optionDown;
 	NSRect bounds;
@@ -1011,7 +995,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 		[self invalidateDraggingRegion];
 		pt.x = draggingPoint.x - draggingStartPoint.x;
 		pt.y = draggingPoint.y - draggingStartPoint.y;
-		deltaTick = (MDTickType)(floor(pt.x / [dataSource pixelsPerTick] + 0.5));
+        deltaTick = (MDTickType)(floor([dataSource pixelToTick:draggingPoint.x] - [dataSource pixelToTick:draggingStartPoint.x] + 0.5));
 		deltaNote = (int)floor(pt.y / [self yScale] + 0.5);
 		optionDown = (([theEvent modifierFlags] & NSAlternateKeyMask) != 0);
 		if (draggingMode == 1 || draggingMode == 2) {
@@ -1043,24 +1027,9 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 		float x1;
 		[self invalidateDraggingRegion];
 
-		ppt = [dataSource pixelsPerTick];
 		ys = [self yScale];
-	/*	x1 = draggingStartPoint.x;
-		x2 = draggingPoint.x;
-		if (x2 < x1) {
-			x2 = x1;
-			x1 = draggingPoint.x;
-		} else if (x2 == x1) {
-			x2 = x1 + [dataSource pixelsPerQuarter];
-		}
-		minTick = (MDTickType)(x1 / ppt);
-		maxTick = (MDTickType)(x2 / ppt);
-		//  This should be double checked, because it is possible that x2 > x1 but maxTick == minTick
-		if (minTick == maxTick)
-			maxTick = minTick + [document timebase];
-		keyCode = (int)(floor(draggingStartPoint.y / ys)); */
 		x1 = draggingPoint.x;
-		minTick = (MDTickType)(x1 / ppt);
+        minTick = (MDTickType)[dataSource pixelToTick:x1];
 		maxTick = minTick + [document timebase];
 		if (minTick == maxTick)
 			maxTick = minTick + 1;
@@ -1093,10 +1062,10 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 	if (isDragging && !isLoupeDragging) {
 		shiftDown = (([theEvent modifierFlags] & NSShiftKeyMask) != 0);
 		bounds = [[self selectionPath] bounds];
-		ppt = [dataSource pixelsPerTick];
+		//ppt = [dataSource pixelsPerTick];
 		ys = [self yScale];
-		minTick = (MDTickType)(bounds.origin.x / ppt);
-		maxTick = (MDTickType)((bounds.origin.x + bounds.size.width) / ppt);
+        minTick = (MDTickType)[dataSource pixelToTick:bounds.origin.x];
+        maxTick = (MDTickType)[dataSource pixelToTick:(bounds.origin.x + bounds.size.width)];
 		document = (MyDocument *)[dataSource document];
 		for (i = 0; (trackNo = [self sortedTrackNumberAtIndex: i]) >= 0; i++) {
 			MDTrack *track;
@@ -1121,7 +1090,7 @@ appendNotePath(NSBezierPath *path, float x1, float x2, float y, float ys)
 				NSPoint point;
 				if (MDGetKind(ep) != kMDEventNote)
 					continue;
-				point.x = (CGFloat)(floor(MDGetTick(ep) * ppt));
+                point.x = (CGFloat)(floor([dataSource tickToPixel:MDGetTick(ep)]));
 				point.y = (CGFloat)(floor(MDGetCode(ep) * ys + 0.5) + 0.5 * ys);
 				if ([self isPointInSelectRegion: point]) {
 					if (IntGroupAdd(pset, MDPointerGetPosition(pt), 1) != kMDNoError)

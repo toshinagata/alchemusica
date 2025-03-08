@@ -67,8 +67,7 @@ typedef struct TimeScalingRecord {
 
 - (void)drawContentsInRect: (NSRect)aRect
 {
-	float ppt;
-	MDTickType beginTick, endTick;
+    MDTickType beginTick, endTick;
 	float originx;
 	float limitx;
     float basey, maxLabelWidth;
@@ -77,8 +76,7 @@ typedef struct TimeScalingRecord {
     float editingRangeStartX, editingRangeEndX;
 
     basey = visibleRect.origin.y + 0.5f;
-	ppt = [dataSource pixelsPerTick];
-	limitx = [dataSource sequenceDurationInQuarter] * [dataSource pixelsPerQuarter];
+    limitx = [dataSource tickToPixel:[dataSource sequenceDuration]];
 
 	[self paintEditingRange: aRect startX: &editingRangeStartX endX: &editingRangeEndX];
 	
@@ -90,8 +88,8 @@ typedef struct TimeScalingRecord {
     originx = aRect.origin.x - maxLabelWidth;
     if (originx < 0.0f)
         originx = 0.0f;
-	beginTick = originx / ppt;
-	endTick = (aRect.origin.x + aRect.size.width) / ppt + 1;
+    beginTick = [dataSource pixelToTick:originx];
+    endTick = [dataSource pixelToTick:(aRect.origin.x + aRect.size.width)];
 	while (beginTick < endTick) {
 		int mediumCount, majorCount, i, numLines;
         int sigNumerator, sigDenominator;
@@ -99,22 +97,22 @@ typedef struct TimeScalingRecord {
 		MDTickType sigTick, nextSigTick;
 		float interval, startx;
         float widthPerBeat, widthPerMeasure;
-		[dataSource verticalLinesFromTick: beginTick timeSignature: &sig1 nextTimeSignature: &sig2 lineIntervalInPixels: &interval mediumCount: &mediumCount majorCount: &majorCount];
+		[dataSource verticalLinesFromTick: beginTick timeSignature: &sig1 nextTimeSignature: &sig2 lineInterval: &interval mediumCount: &mediumCount majorCount: &majorCount];
 		sigTick = (sig1 == NULL ? 0 : MDGetTick(sig1));
 		nextSigTick = (sig2 == NULL ? kMDMaxTick : MDGetTick(sig2));
 		if (nextSigTick > endTick)
 			nextSigTick = endTick;
-		startx = sigTick * ppt;
+        startx = [dataSource tickToPixel:sigTick];
         sigDenominator = (sig1 == NULL ? 4 : (1 << (int)(MDGetMetaDataPtr(sig1)[1])));
         sigNumerator = (sig1 == NULL ? 4 : MDGetMetaDataPtr(sig1)[0]);
         if (sigNumerator == 0)
             sigNumerator = 4;
         [[NSString stringWithFormat: @"%d/%d", sigNumerator, sigDenominator] drawAtPoint: NSMakePoint(startx, basey + 22.0f) withAttributes: nil clippingRect: aRect];
-        numLines = (int)floor((nextSigTick - sigTick) * ppt / interval) + 1;
-		i = (startx >= originx ? 0 : (int)floor((originx - startx) / interval));
+        numLines = (int)floor((nextSigTick - sigTick) / interval) + 1;
+		i = (startx >= originx ? 0 : (int)floor((beginTick - sigTick) / interval));
 		[[NSColor blackColor] set];
 		for ( ; i < numLines; i++) {
-            pt1 = NSMakePoint((CGFloat)(floor(startx + i * interval) + 0.5), basey);
+            pt1 = NSMakePoint((CGFloat)(floor([dataSource tickToPixel:(sigTick + i * interval)]) + 0.5), basey);
             pt2.x = pt1.x;
 			if (pt1.x > limitx)
 				[[NSColor grayColor] set];
@@ -122,8 +120,8 @@ typedef struct TimeScalingRecord {
                 /*  Draw label  */
                 NSString *label;
                 int32_t n1, n2, n3;
-                [dataSource convertTick: (MDTickType)floor((startx + i * interval) / ppt + 0.5) toMeasure: &n1 beat: &n2 andTick: &n3];
-                widthPerBeat = [(MyDocument *)[dataSource document] timebase] * ppt * 4 / sigDenominator;
+                [dataSource convertTick: (MDTickType)floor((sigTick + i * interval) + 0.5) toMeasure: &n1 beat: &n2 andTick: &n3];
+                widthPerBeat = [(MyDocument *)[dataSource document] timebase] * 4 / sigDenominator;
                 widthPerMeasure = widthPerBeat * sigNumerator;
                 if (interval * majorCount >= widthPerMeasure) {
                     label = [NSString stringWithFormat: @"%d", (int)n1];
@@ -222,11 +220,10 @@ typedef struct TimeScalingRecord {
 	if (pt.y >= visibleRect.origin.y && pt.y <= visibleRect.origin.y + 5) {
 		MDTickType startTick, endTick;
 		float startx, endx;
-		float ppt = [dataSource pixelsPerTick];
 		[(MyDocument *)[dataSource document] getEditingRangeStart: &startTick end: &endTick];
 		if (startTick >= 0 && startTick < kMDMaxTick && endTick >= startTick) {
-			startx = (float)floor(startTick * ppt);
-			endx = (float)floor(endTick * ppt);
+            startx = (CGFloat)[dataSource tickToPixel:startTick];
+            endx = (CGFloat)[dataSource tickToPixel:endTick];
 			if (startx - 5 <= pt.x && pt.x <= startx)
 				return -1;
 			if (endx <= pt.x && pt.x <= endx + 5)
@@ -247,8 +244,7 @@ typedef struct TimeScalingRecord {
 		timeScaling->newEndTick = timeScaling->endTick;  /*  Return to the original  */
 	else {
 		NSPoint mousePt = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-		float ppt = [dataSource pixelsPerTick];
-		timeScaling->newEndTick = mousePt.x / ppt;
+        timeScaling->newEndTick = [dataSource pixelToTick:mousePt.x];
 		if (timeScaling->newEndTick < timeScaling->startTick)
 			timeScaling->newEndTick = timeScaling->startTick;
 	}
@@ -308,12 +304,11 @@ typedef struct TimeScalingRecord {
 		/*  Mofity selectPoints so that the 'other' edit start/end position
 		    looks like the dragging start points  */
 		MDTickType startTick, endTick;
-		float ppt = [dataSource pixelsPerTick];
 		[(MyDocument *)[dataSource document] getEditingRangeStart: &startTick end: &endTick];
 		if (n < 0)
-			pt.x = endTick * ppt;
+            pt.x = [dataSource tickToPixel:endTick];
 		else
-			pt.x = startTick * ppt;
+            pt.x = [dataSource tickToPixel:startTick];
 		[selectPoints replaceObjectAtIndex: 0 withObject: [NSValue valueWithPoint:pt]];
 		if (n == 1 && ([theEvent modifierFlags] & (NSAlternateKeyMask | NSShiftKeyMask)) && startTick < endTick) {
 			/*  Scale selected time: initialize the internal information  */
@@ -414,7 +409,6 @@ typedef struct TimeScalingRecord {
 	GraphicClientView *view;
 	BOOL shiftDown = (([theEvent modifierFlags] & NSShiftKeyMask) != 0);
 	MyDocument *document = (MyDocument *)[dataSource document];
-    float ppt = [dataSource pixelsPerTick];
 
 	/*  Clear the selection paths for other clientViews  */
 	for (i = 1; (view = [dataSource clientViewAtIndex: i]) != nil; i++) {
@@ -467,7 +461,7 @@ typedef struct TimeScalingRecord {
         timeScaling->origMeterPos = NULL;
         
         /*  Scale time with undo registration  */
-        timeScaling->newEndTick = mousePt.x / ppt;
+        timeScaling->newEndTick = [dataSource pixelToTick:mousePt.x];
         if (timeScaling->newEndTick < timeScaling->startTick)
             return;
         [document scaleTimeFrom:timeScaling->startTick to:timeScaling->endTick newDuration:timeScaling->newEndTick - timeScaling->startTick insertTempo:insertTempo setSelection:NO];
@@ -494,8 +488,8 @@ typedef struct TimeScalingRecord {
 		if (isDragging) {
 			pt2 = [[selectPoints objectAtIndex: 1] pointValue];
 		} else pt2 = pt1;
-		tick1 = (MDTickType)floor(pt1.x / ppt);
-		tick2 = (MDTickType)floor(pt2.x / ppt);
+        tick1 = (MDTickType)[dataSource pixelToTick:pt1.x];
+        tick2 = (MDTickType)[dataSource pixelToTick:pt2.x];
 		if (tick1 < 0)
 			tick1 = 0;
 		if (tick2 < 0)

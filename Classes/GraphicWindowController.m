@@ -53,6 +53,7 @@ enum {
 	kEditingRangeStartTextTag = 3006,
 	kEditingRangeEndTextTag = 3007,
     kCursorInfoTextTag = 3008,
+    kTickTimePopUpTag = 3009,
 	kQuantizePopUpTag = 3020,
 	kLinearMenuTag = 3021,
 	kParabolaMenuTag = 3022,
@@ -64,6 +65,8 @@ enum {
 	kScaleMenuTag = 3052,
 	kLimitMaxMenuTag = 3053,
 	kLimitMinMenuTag = 3054,
+    kTickMenuTag = 3060,
+    kTimeMenuTag = 3061,
 	kQuantizeMenuTag = 3100
 };
 
@@ -129,6 +132,8 @@ sTableColumnIDToInt(id identifier)
         removeObserver:self];
     if (calib != NULL)
         MDCalibratorRelease(calib);
+    if (timeCalib != NULL)
+        MDCalibratorRelease(timeCalib);
 	for (i = 0; i < myClientViewsCount; i++) {
 		[records[i].client release];
 		[records[i].ruler release];
@@ -257,7 +262,17 @@ sTableColumnIDToInt(id identifier)
 	return visibleTrackCount;
 }
 
-#pragma mark ==== Pixel/tick conversion ====
+#pragma mark ==== Pixel/tick/time conversion ====
+
+- (BOOL)isRealTime
+{
+    return isRealTime;
+}
+
+- (void)updateDocumentTimebase
+{
+    timebase = [[self document] timebase];
+}
 
 - (float)pixelsPerQuarter
 {
@@ -282,6 +297,43 @@ sTableColumnIDToInt(id identifier)
     }
 }
 
+- (float)tickToPixel:(MDTickType)tick
+{
+    if (isRealTime) {
+        MDTimeType time = MDCalibratorTickToTime(timeCalib, tick);
+        return pixelsPerQuarter * time / 500000.0;
+    } else return tick * pixelsPerQuarter / timebase;
+}
+
+- (MDTickType)pixelToTick:(float)pixel
+{
+    if (isRealTime) {
+        MDTimeType time = pixel * 500000.0 / pixelsPerQuarter;
+        return MDCalibratorTimeToTick(timeCalib, time);
+    } else return (MDTickType)(pixel * timebase / pixelsPerQuarter);
+
+}
+
+- (float)timeToPixel:(MDTimeType)time
+{
+    if (isRealTime) {
+        return pixelsPerQuarter * time / 500000.0;
+    } else {
+        MDTickType tick = MDCalibratorTimeToTick(timeCalib, time);
+        return tick * pixelsPerQuarter / timebase;
+    }
+}
+
+- (MDTimeType)pixelToTime:(float)pixel
+{
+    if (isRealTime) {
+        return (MDTimeType)(pixel * 500000.0 / pixelsPerQuarter);
+    } else {
+        MDTickType tick = (MDTickType)(pixel * timebase / pixelsPerQuarter);
+        return MDCalibratorTickToTime(timeCalib, tick);
+    }
+}
+
 - (float)pixelsPerTick
 {
     return pixelsPerQuarter / [[self document] timebase];
@@ -289,10 +341,8 @@ sTableColumnIDToInt(id identifier)
 
 - (MDTickType)quantizedTickFromPixel: (float)pixel
 {
-	float ppt = [self pixelsPerTick];
-	float timebase = [[self document] timebase];
 	float tickQuantum = quantize * timebase;
-	MDTickType tick = pixel / ppt;
+    MDTickType tick = [self pixelToTick:pixel];
 	MDTickType basetick;  /*  The tick at the beginning of the bar  */
 	MDTickType qtick;
 	int32_t measure, beat, mtick;
@@ -308,7 +358,7 @@ sTableColumnIDToInt(id identifier)
 {
 	if (quantize == 0.0)
 		return pixel;
-	else return [self quantizedTickFromPixel: pixel] * [self pixelsPerTick];
+    else return [self tickToPixel:[self quantizedTickFromPixel: pixel]];
 }
 
 - (float)pixelQuantum
@@ -323,7 +373,7 @@ sTableColumnIDToInt(id identifier)
 - (void)showTimeIndicatorAtBeat: (float)beat
 {
     int n;
-    timeIndicatorPos = (beat >= 0.0 ? beat * [[self document] timebase] : -1.0);
+    timeIndicatorPos = (beat >= 0.0 ? beat * timebase : -1.0);
     endOfSequencePos = [[[self document] myMIDISequence] sequenceDuration];
     for (n = 0; n < myClientViewsCount; n++) {
         [records[n].client invalidateTimeIndicator];
@@ -349,7 +399,8 @@ sTableColumnIDToInt(id identifier)
 {
 	NSRect visibleRect, documentRect;
 	float beat = [[[notification userInfo] objectForKey: @"position"] floatValue];
-	float pos = beat * [self pixelsPerQuarter];
+    float tick = beat * timebase;
+    float pos = [self tickToPixel:tick];
 	float width;
 
     if ([myMainView isHiddenOrHasHiddenAncestor]) {
@@ -365,7 +416,7 @@ sTableColumnIDToInt(id identifier)
 			return;
 	}
 	
-	if (pos < 0) {
+	if (tick < 0) {
 		[self hideTimeIndicator];
 		return;
 	}
@@ -386,15 +437,16 @@ sTableColumnIDToInt(id identifier)
 #pragma mark ==== Time marks ====
 
 //  Calculate the intervals of vertical lines.
-//    lineIntervalInPixels: the interval in pixels with which the vertical lines are to be drawn
+//    lineInterval: the interval in ticks with which the vertical lines are to be drawn
 //    mediumCount: every mediumCount lines, a vertical line with "medium thickness" appears
 //    majorCount: every majorCount lines, a vertical line with "large thickness" appears
-- (void)verticalLinesFromTick: (MDTickType)fromTick timeSignature: (MDEvent **)timeSignature nextTimeSignature: (MDEvent **)nextTimeSignature lineIntervalInPixels: (float *)lineIntervalInPixels mediumCount: (int *)mediumCount majorCount: (int *)majorCount
+- (void)verticalLinesFromTick: (MDTickType)fromTick timeSignature: (MDEvent **)timeSignature nextTimeSignature: (MDEvent **)nextTimeSignature lineInterval: (float *)lineInterval mediumCount: (int *)mediumCount majorCount: (int *)majorCount
 {
-    float ppb;
+    float average_ppb;  //  Average pixels per beat between last and next time signatures
     float interval;
     int mdCount, mjCount;
     MDEvent *ep1, *ep2;
+    MDTickType etick1, etick2;
     int sig0, sig1;
     if (myClientViewsCount > 0 && calib != NULL) {
         /*  Get time signature at fromTick  */
@@ -406,27 +458,33 @@ sTableColumnIDToInt(id identifier)
     if (ep1 == NULL) {
         /*  Assume 4/4  */
         sig0 = sig1 = 4;
+        etick1 = 0;
     } else {
         const unsigned char *p = MDGetMetaDataPtr(ep1);
         sig0 = p[0];
         sig1 = (1 << p[1]);
         if (sig1 == 0)
             sig1 = 4;
+        etick1 = MDGetTick(ep1);
     }
     if (calib != NULL && (ep2 = MDCalibratorGetNextEvent(calib, NULL, kMDEventTimeSignature, -1)) != NULL) {
+        etick2 = MDGetTick(ep2);
     } else {
         ep2 = NULL;
+        etick2 = [self sequenceDuration];
     }
-    ppb = [self pixelsPerTick] * [[self document] timebase] * 4 / sig1;
-    if (ppb * 0.125 >= kMinimumTickIntervalsInPixels) {
-        interval = ppb * 0.125f;
+    if (etick2 <= etick1)
+        etick2 = etick1 + timebase * 4;
+    average_ppb = ([self tickToPixel:etick2] - [self tickToPixel:etick1]) / (etick2 - etick1) * timebase * 4 / sig1;
+    if (average_ppb * 0.125 >= kMinimumTickIntervalsInPixels) {
+        interval = average_ppb * 0.125f;
         mdCount = 4;
         mjCount = 8;
         while (interval >= kMinimumTickIntervalsInPixels * 2) {
             interval *= 0.5f;
         }
-    } else if (ppb * 0.5 >= kMinimumTickIntervalsInPixels) {
-        interval = ppb * 0.5f;
+    } else if (average_ppb * 0.5 >= kMinimumTickIntervalsInPixels) {
+        interval = average_ppb * 0.5f;
         mdCount = 2;
         mjCount = sig0 * mdCount;
         if (interval >= kMinimumTickIntervalsInPixels * 2) {
@@ -434,11 +492,11 @@ sTableColumnIDToInt(id identifier)
             mdCount *= 2;
             mjCount *= 2;
         }
-    } else if (ppb >= kMinimumTickIntervalsInPixels) {
-        interval = ppb;
+    } else if (average_ppb >= kMinimumTickIntervalsInPixels) {
+        interval = average_ppb;
         mdCount = mjCount = sig0;
     } else {
-        interval = ppb * sig0;
+        interval = average_ppb * sig0;
         mjCount = 5;
         while (interval < kMinimumTickIntervalsInPixels) {
             interval *= 10;
@@ -453,8 +511,8 @@ sTableColumnIDToInt(id identifier)
         *timeSignature = ep1;
     if (nextTimeSignature)
         *nextTimeSignature = ep2;
-    if (lineIntervalInPixels)
-        *lineIntervalInPixels = interval;
+    if (lineInterval)
+        *lineInterval = interval / (average_ppb * sig1 / 4 / timebase);
     if (mediumCount)
         *mediumCount = mdCount;
     if (majorCount)
@@ -614,7 +672,7 @@ sTableColumnIDToInt(id identifier)
 
 - (void)scrollClientViewsToTick: (MDTickType)tick
 {
-    [self scrollClientViewsToPosition: tick * [self pixelsPerTick]];
+    [self scrollClientViewsToPosition: [self tickToPixel:tick]];
 }
 
 - (IBAction)scrollerMoved: (id)sender
@@ -705,7 +763,7 @@ sTableColumnIDToInt(id identifier)
 
 - (float)clientViewWidth
 {
-    float width = (float)(([self sequenceDurationInQuarter] + 4.0) * [self pixelsPerQuarter]);
+    float width = [self tickToPixel:([self sequenceDuration] + 4 * timebase)];
     float scrollerWidth;
 #if defined(MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7)
     scrollerWidth = [NSScroller scrollerWidthForControlSize:NSRegularControlSize scrollerStyle:NSScrollerStyleLegacy];
@@ -1411,7 +1469,10 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 	waitingForFirstWindowResize = YES;
 	
     calib = MDCalibratorNew([[[self document] myMIDISequence] mySequence], NULL, kMDEventTimeSignature, -1);
+    timeCalib = MDCalibratorNew([[[self document] myMIDISequence] mySequence], NULL, kMDEventTempo, -1);
 
+    isRealTime = NO;
+    
 	/*  Set pixels per tick: about 1 cm per quarter note  */
 	[self setPixelsPerQuarter: 72 / 2.54f];
 	
@@ -1595,7 +1656,14 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 			}
 		}
 		
-		/*  Mode popup menu  */
+        /*  Tick/Time popup menu  */
+        myPopUpButton = [[[self window] contentView] viewWithTag: kTickTimePopUpTag];
+        frame = [myPopUpButton frame];
+        frame.size.height = 16;
+        [myPopUpButton setFrame: frame];
+        [myPopUpButton setBezelStyle: NSShadowlessSquareBezelStyle];
+
+        /*  Mode popup menu  */
 		myPopUpButton = [[[self window] contentView] viewWithTag: kModePopUpTag];
 		frame = [myPopUpButton frame];
 		frame.size.height = 16;
@@ -1628,9 +1696,9 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 				itag++;
 			}
 		}
-	}
+    }
 
-	/*  Initialize the playing view  */
+    /*  Initialize the playing view  */
 	[playingViewController windowDidLoad];
 	
 	[self reloadClientViews];
@@ -1662,7 +1730,7 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 
 - (float)sequenceDurationInQuarter
 {
-	return (float)[self sequenceDuration] / [[self document] timebase];
+	return (float)[self sequenceDuration] / timebase;
 }
 
 - (void)setInfoText: (NSString *)string
@@ -1893,6 +1961,28 @@ sUpdateDeviceMenu(MyComboBoxCell *cell)
 			graphicTool = kGraphicPencilTool;
 			break;
 	}
+}
+- (IBAction)tickTimeSelected: (id)sender
+{
+    float scrollTick;
+    scrollTick = [self pixelToTick:[self scrollPositionOfClientViews]];
+    switch ([sender tag]) {
+        case kTickMenuTag:
+            if (!isRealTime)
+                return;
+            isRealTime = NO;
+            break;
+        case kTimeMenuTag:
+            if (isRealTime)
+                return;
+            isRealTime = YES;
+            break;
+        default:
+            return;
+    }
+    [self scrollClientViewsToPosition:[self tickToPixel:scrollTick]];
+    [self setNeedsReloadClientViews];
+    [myMainView setNeedsDisplay: YES];
 }
 
 - (IBAction)shapeSelected: (id)sender

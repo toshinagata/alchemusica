@@ -100,7 +100,8 @@ enum {
 	int myClientViewsCount;
 	ClientRecord records[kGraphicWindowControllerMaxNumberOfClientViews];
 	
-    MDCalibrator *calib;	//  calibrator for tick conversion
+    MDCalibrator *calib;	//  calibrator for time signature
+    MDCalibrator *timeCalib;  //  calibrator for tick/time conversion
     
 	/*  The visible and editable track numbers are cached in this array  */
 	int *sortedTrackNumbers; // If NULL, then needs update
@@ -110,6 +111,9 @@ enum {
 	float pixelsPerQuarter;    //  Pixels per a quarter note
 	float quantize;         //  Mouse position quantize (unit = quarter note; 0: no quantize)
 
+    BOOL isRealTime;        //  If yes, then the horizontal axis is time instead of tick
+    float timebase;         //  timebase of the MIDI sequence is cached here (updated by updateDocumentTimebase method)
+    
 	//  Note on/off are cached here too
 	NSArray *noteCache;
 	float noteCacheBeginBeat, noteCacheEndBeat;
@@ -173,8 +177,15 @@ enum {
 - (int32_t)visibleTrackCount;
 - (int)sortedTrackNumberAtIndex: (int)index;  // For clientViews; focus track comes first
 
+- (BOOL)isRealTime;
+- (void)updateDocumentTimebase;  //  cache timebase in the instance variable
+
 - (float)pixelsPerQuarter;
 - (void)setPixelsPerQuarter: (float)newPixelsPerQuarter;
+- (float)tickToPixel:(MDTickType)tick;
+- (MDTickType)pixelToTick:(float)tick;
+- (float)timeToPixel:(MDTimeType)time;
+- (MDTimeType)pixelToTime:(float)tick;
 - (float)pixelsPerTick;
 - (MDTickType)quantizedTickFromPixel: (float)pixel;
 - (float)quantizedPixelFromPixel: (float)pixel;
@@ -189,7 +200,7 @@ enum {
 
 - (void)needsReloadClientViews: (NSNotification *)aNotification;
 
-- (void)verticalLinesFromTick: (MDTickType)fromTick timeSignature: (MDEvent **)timeSignature nextTimeSignature: (MDEvent **)nextTimeSignature lineIntervalInPixels: (float *)lineIntervalInPixels mediumCount: (int *)mediumCount majorCount: (int *)majorCount;
+- (void)verticalLinesFromTick: (MDTickType)fromTick timeSignature: (MDEvent **)timeSignature nextTimeSignature: (MDEvent **)nextTimeSignature lineInterval: (float *)lineInterval mediumCount: (int *)mediumCount majorCount: (int *)majorCount;
 
 - (MDTickType)sequenceDuration;
 - (float)sequenceDurationInQuarter;
@@ -211,6 +222,7 @@ enum {
 - (IBAction)shrinkHorizontally: (id)sender;
 
 - (IBAction)toolButton: (id)sender;
+- (IBAction)tickTimeSelected: (id)sender;
 - (IBAction)shapeSelected: (id)sender;
 - (IBAction)modeSelected: (id)sender;
 

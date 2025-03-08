@@ -348,7 +348,7 @@
                                                 </connections>
                                             </textField>
                                             <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" tag="3005" allowsCharacterPickerTouchBarItem="YES" id="163">
-                                                <rect key="frame" x="173" y="1" width="348" height="16"/>
+                                                <rect key="frame" x="173" y="1" width="298" height="16"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                 <textFieldCell key="cell" controlSize="mini" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="left" tag="3005" drawsBackground="YES" id="286">
                                                     <font key="font" metaFont="miniSystem"/>
@@ -356,6 +356,28 @@
                                                     <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                                 </textFieldCell>
                                             </textField>
+                                            <popUpButton verticalHuggingPriority="750" tag="3009" id="1wU-T9-FWO" userLabel="Tick/Time" customClass="MyPopUpButton">
+                                                <rect key="frame" x="471" y="2" width="55" height="15"/>
+                                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                                                <popUpButtonCell key="cell" type="push" title="Tick" bezelStyle="rounded" alignment="left" controlSize="mini" lineBreakMode="clipping" state="on" borderStyle="borderAndBezel" tag="3060" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="oFh-Ye-e2Z" id="PlF-Ys-g3w" userLabel="Tick/Time">
+                                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                                    <font key="font" metaFont="miniSystem"/>
+                                                    <menu key="menu" title="OtherViews" id="DCk-s8-qak">
+                                                        <items>
+                                                            <menuItem title="Tick" state="on" tag="3060" id="oFh-Ye-e2Z">
+                                                                <connections>
+                                                                    <action selector="tickTimeSelected:" target="-2" id="Rkk-Eu-q0w"/>
+                                                                </connections>
+                                                            </menuItem>
+                                                            <menuItem title="Time" tag="3061" id="RRv-XN-nXu">
+                                                                <connections>
+                                                                    <action selector="tickTimeSelected:" target="-2" id="tg2-CG-piW"/>
+                                                                </connections>
+                                                            </menuItem>
+                                                        </items>
+                                                    </menu>
+                                                </popUpButtonCell>
+                                            </popUpButton>
                                             <popUpButton verticalHuggingPriority="750" tag="3020" id="264" customClass="MyPopUpButton">
                                                 <rect key="frame" x="524" y="2" width="24" height="15"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
@@ -384,43 +406,28 @@
                                                     <action selector="toolButton:" target="-2" id="184"/>
                                                 </connections>
                                             </button>
-                                            <popUpButton verticalHuggingPriority="750" tag="3004" id="159" customClass="MyPopUpButton">
-                                                <rect key="frame" x="638" y="2" width="71" height="15"/>
+                                            <button tag="3001" id="129">
+                                                <rect key="frame" x="571" y="2" width="24" height="16"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                                <popUpButtonCell key="cell" type="push" title="Set Value" bezelStyle="rounded" alignment="left" controlSize="mini" lineBreakMode="clipping" state="on" borderStyle="borderAndBezel" tag="3050" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="156" id="285">
-                                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                                    <font key="font" metaFont="miniSystem"/>
-                                                    <menu key="menu" title="OtherViews" id="160">
-                                                        <items>
-                                                            <menuItem title="Set Value" state="on" tag="3050" id="156">
-                                                                <connections>
-                                                                    <action selector="modeSelected:" target="-2" id="169"/>
-                                                                </connections>
-                                                            </menuItem>
-                                                            <menuItem title="Add/Sub" tag="3051" id="158">
-                                                                <connections>
-                                                                    <action selector="modeSelected:" target="-2" id="170"/>
-                                                                </connections>
-                                                            </menuItem>
-                                                            <menuItem title="Scale" tag="3052" id="181">
-                                                                <connections>
-                                                                    <action selector="modeSelected:" target="-2" id="182"/>
-                                                                </connections>
-                                                            </menuItem>
-                                                            <menuItem title="Limit Max" tag="3053" id="157">
-                                                                <connections>
-                                                                    <action selector="modeSelected:" target="-2" id="171"/>
-                                                                </connections>
-                                                            </menuItem>
-                                                            <menuItem title="Limit Min" tag="3054" id="161">
-                                                                <connections>
-                                                                    <action selector="modeSelected:" target="-2" id="172"/>
-                                                                </connections>
-                                                            </menuItem>
-                                                        </items>
-                                                    </menu>
-                                                </popUpButtonCell>
-                                            </popUpButton>
+                                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="ibeam" imagePosition="only" alignment="center" borderStyle="border" tag="3001" inset="2" id="283">
+                                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
+                                                    <font key="font" metaFont="system" size="10"/>
+                                                </buttonCell>
+                                                <connections>
+                                                    <action selector="toolButton:" target="-2" id="152"/>
+                                                </connections>
+                                            </button>
+                                            <button tag="3002" id="128">
+                                                <rect key="frame" x="594" y="2" width="24" height="16"/>
+                                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="pencil" imagePosition="only" alignment="center" borderStyle="border" tag="3002" inset="2" id="282">
+                                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
+                                                    <font key="font" metaFont="system" size="10"/>
+                                                </buttonCell>
+                                                <connections>
+                                                    <action selector="toolButton:" target="-2" id="153"/>
+                                                </connections>
+                                            </button>
                                             <popUpButton verticalHuggingPriority="750" tag="3003" id="148" customClass="MyPopUpButton">
                                                 <rect key="frame" x="616" y="2" width="24" height="15"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
@@ -461,28 +468,43 @@
                                                     <action selector="shapeSelected:" target="-2" id="154"/>
                                                 </connections>
                                             </popUpButton>
-                                            <button tag="3001" id="129">
-                                                <rect key="frame" x="571" y="2" width="24" height="16"/>
+                                            <popUpButton verticalHuggingPriority="750" tag="3004" id="159" customClass="MyPopUpButton">
+                                                <rect key="frame" x="638" y="2" width="71" height="15"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="ibeam" imagePosition="only" alignment="center" borderStyle="border" tag="3001" inset="2" id="283">
-                                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
-                                                    <font key="font" metaFont="system" size="10"/>
-                                                </buttonCell>
-                                                <connections>
-                                                    <action selector="toolButton:" target="-2" id="152"/>
-                                                </connections>
-                                            </button>
-                                            <button tag="3002" id="128">
-                                                <rect key="frame" x="594" y="2" width="24" height="16"/>
-                                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                                <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="pencil" imagePosition="only" alignment="center" borderStyle="border" tag="3002" inset="2" id="282">
-                                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
-                                                    <font key="font" metaFont="system" size="10"/>
-                                                </buttonCell>
-                                                <connections>
-                                                    <action selector="toolButton:" target="-2" id="153"/>
-                                                </connections>
-                                            </button>
+                                                <popUpButtonCell key="cell" type="push" title="Set Value" bezelStyle="rounded" alignment="left" controlSize="mini" lineBreakMode="clipping" state="on" borderStyle="borderAndBezel" tag="3050" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="156" id="285">
+                                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                                    <font key="font" metaFont="miniSystem"/>
+                                                    <menu key="menu" title="OtherViews" id="160">
+                                                        <items>
+                                                            <menuItem title="Set Value" state="on" tag="3050" id="156">
+                                                                <connections>
+                                                                    <action selector="modeSelected:" target="-2" id="169"/>
+                                                                </connections>
+                                                            </menuItem>
+                                                            <menuItem title="Add/Sub" tag="3051" id="158">
+                                                                <connections>
+                                                                    <action selector="modeSelected:" target="-2" id="170"/>
+                                                                </connections>
+                                                            </menuItem>
+                                                            <menuItem title="Scale" tag="3052" id="181">
+                                                                <connections>
+                                                                    <action selector="modeSelected:" target="-2" id="182"/>
+                                                                </connections>
+                                                            </menuItem>
+                                                            <menuItem title="Limit Max" tag="3053" id="157">
+                                                                <connections>
+                                                                    <action selector="modeSelected:" target="-2" id="171"/>
+                                                                </connections>
+                                                            </menuItem>
+                                                            <menuItem title="Limit Min" tag="3054" id="161">
+                                                                <connections>
+                                                                    <action selector="modeSelected:" target="-2" id="172"/>
+                                                                </connections>
+                                                            </menuItem>
+                                                        </items>
+                                                    </menu>
+                                                </popUpButtonCell>
+                                            </popUpButton>
                                         </subviews>
                                     </customView>
                                     <customView id="39">

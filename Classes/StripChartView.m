@@ -138,7 +138,6 @@ getYValue(const MDEvent *ep, int eventKind)
 
 - (void)drawVelocityInRect: (NSRect)aRect
 {
-	float ppt;
 	/* float height; */
 	MDTickType beginTick, endTick;
 	int32_t n;
@@ -146,9 +145,8 @@ getYValue(const MDEvent *ep, int eventKind)
 	NSBezierPath *draggingPath;
 	NSMutableArray *array;
 	/* height = [self bounds].size.height; *//* unused? */
-	ppt = [dataSource pixelsPerTick];
-	beginTick = (MDTickType)floor(aRect.origin.x / ppt);
-	endTick = (MDTickType)ceil((aRect.origin.x + aRect.size.width) / ppt);
+    beginTick = (MDTickType)floor([dataSource pixelToTick:aRect.origin.x]);
+    endTick = (MDTickType)ceil([dataSource pixelToTick:(aRect.origin.x + aRect.size.width)]);
 	draggingPath = nil;
 	array = nil;
 	if (stripDraggingMode > 0) {
@@ -157,8 +155,8 @@ getYValue(const MDEvent *ep, int eventKind)
 		if (dx < -0.5 || dx > 0.5 || dy < -0.5 || dy > 0.5) {
 			array = [NSMutableArray array];
 		}
-		beginTick = (MDTickType)floor((aRect.origin.x - (dx > 0 ? dx : -dx)) / ppt);
-		endTick = (MDTickType)ceil((aRect.origin.x + aRect.size.width + (dx > 0 ? dx : -dx)) / ppt);
+        beginTick = (MDTickType)floor([dataSource pixelToTick:(aRect.origin.x - (dx > 0 ? dx : -dx))]);
+        endTick = (MDTickType)ceil([dataSource pixelToTick:(aRect.origin.x + aRect.size.width + (dx > 0 ? dx : -dx))]);
 	}
 	for (n = [self visibleTrackCount] - 1; n >= 0; n--) {
 		float x, y, ybase;
@@ -184,7 +182,7 @@ getYValue(const MDEvent *ep, int eventKind)
 				continue;
 			//y = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - sVerticalMargin * 2)) + 0.5) + sVerticalMargin;
 			y = [self convertFromYValue:getYValue(ep, eventKind)];
-			x = (float)(floor(MDGetTick(ep) * ppt) + 0.5);
+            x = (float)(floor([dataSource tickToPixel:MDGetTick(ep)] + 0.5));
 			if (y >= aRect.origin.y) {
 				if ([[dataSource document] isSelectedAtPosition: MDPointerGetPosition(pt) inTrack: trackNo]) {
 					NSFrameRect(NSMakeRect(x - 1, y - 1, 3, 3));
@@ -220,7 +218,6 @@ getYValue(const MDEvent *ep, int eventKind)
 
 - (void)drawBoxStripInRect: (NSRect)aRect
 {
-	float ppt;
 	int32_t n;
 	MDTickType beginTick;
 	/* MDTickType endTick; */
@@ -234,7 +231,6 @@ getYValue(const MDEvent *ep, int eventKind)
 	}
 
 	/* height = [self bounds].size.height; *//* unused? */
-	ppt = [dataSource pixelsPerTick];
 	draggingPath = nil;
 	array = nil;
 	if (stripDraggingMode > 0) {
@@ -246,7 +242,7 @@ getYValue(const MDEvent *ep, int eventKind)
 			aRect.size.width += (dx > 0 ? dx : -dx) * 2;
 		}
 	}
-	beginTick = (MDTickType)floor(aRect.origin.x / ppt);
+    beginTick = (MDTickType)floor([dataSource pixelToTick:aRect.origin.x]);
 	/* endTick = (MDTickType)ceil((aRect.origin.x + aRect.size.width) / ppt); *//* unused? */
 	MDCalibratorJumpToTick(calib, beginTick);
 	if (eventKind == kMDEventTempo)
@@ -280,7 +276,7 @@ getYValue(const MDEvent *ep, int eventKind)
 		} else {
 			//ylast = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - sVerticalMargin * 2))) + sVerticalMargin;
 			ylast = [self convertFromYValue:getYValue(ep, eventKind)];
-			xlast = (float)(floor(MDGetTick(ep) * ppt));
+            xlast = (CGFloat)(floor([dataSource tickToPixel:MDGetTick(ep)]));
 			poslast = MDPointerGetPosition(pt);
 		}
 		while (1) {
@@ -292,7 +288,7 @@ getYValue(const MDEvent *ep, int eventKind)
 					continue;
 				//y = (float)(ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - sVerticalMargin * 2))) + sVerticalMargin;
 				y = [self convertFromYValue:getYValue(ep, eventKind)];
-				x = (float)(floor(MDGetTick(ep) * ppt));
+                x = (float)(floor([dataSource tickToPixel:MDGetTick(ep)]));
 			} else {
 				x = [self bounds].size.width;
 			}
@@ -567,16 +563,12 @@ getYValue(const MDEvent *ep, int eventKind)
 {
 	int i, n;
 	MDTickType tick, minTick, maxTick;
-	float ppt;
-//	float minY;
 	float maxY;
 	float height = [self bounds].size.height;
 	MyDocument *document = [dataSource document];
 	minTick = kMDMaxTick;
 	maxTick = kMDNegativeTick;
-//	minY = 10000000.0;
 	maxY = -10000000.0f;
-	ppt = [dataSource pixelsPerTick];
 	for (i = 0; (n = [self sortedTrackNumberAtIndex: i]) >= 0; i++) {
 		int index;
 		MDPointer *pt;
@@ -595,8 +587,6 @@ getYValue(const MDEvent *ep, int eventKind)
 				continue;
 			tick = MDGetTick(ep);
 			y = getYValue(ep, eventKind);
-		//	if (y < minY)
-		//		minY = y;
 			if (y > maxY)
 				maxY = y;
 			if (tick < minTick)
@@ -608,9 +598,9 @@ getYValue(const MDEvent *ep, int eventKind)
 	if (minTick > maxTick || maxY < 0) {
 		return NSMakeRect(0, 0, 0, 0);
 	} else {
-	//	minY = (minY - minValue) / (maxValue - minValue) * height;
+        float minX = [dataSource tickToPixel:minTick];
 		maxY = (maxY - minValue) / (maxValue - minValue) * height;
-		return NSMakeRect(minTick * ppt - 1, 0, (maxTick - minTick) * ppt + 3, maxY + 1);
+        return NSMakeRect(minX - 1, 0, [dataSource tickToPixel:maxTick] - minX + 3, maxY + 1);
 	}
 }
 
@@ -621,15 +611,12 @@ getYValue(const MDEvent *ep, int eventKind)
 	int trackNum;
 	int32_t poslast;
 	MDEvent *ep;
-	float ppt = [dataSource pixelsPerTick];
 	float x, y, ylast;
-/*	float xlast; */
-/*	float height = [self bounds].size.height; */
 	MyDocument *document = (MyDocument *)[dataSource document];
 	MDTickType theTick;
 
 	num = [self visibleTrackCount];
-	theTick = (MDTickType)((aPoint.x - 1) / ppt);
+    theTick = (MDTickType)[dataSource pixelToTick:(aPoint.x - 1)];
 	if (calib == NULL)
 		[self reallocateCalibrators];
 	MDCalibratorJumpToTick(calib, theTick);
@@ -672,7 +659,7 @@ getYValue(const MDEvent *ep, int eventKind)
 					continue;
 				//y = (float)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - sVerticalMargin * 2)) + sVerticalMargin;
 				y = [self convertFromYValue:getYValue(ep, eventKind)];
-				x = (float)floor(MDGetTick(ep) * ppt);
+                x = (float)floor([dataSource tickToPixel:MDGetTick(ep)]);
 			} else {
 				x = [self bounds].size.width + 2;
 			}
@@ -889,7 +876,6 @@ cubicReverseFunc(float x, const float *points, float tt)
 	MDTickType fromTick, toTick;
 	MDPointer *mdptr;
 	float fromValue, toValue;
-	float pixelsPerTick;
 	/* float height; */
 	float valueResolution = resolution;
 	const float *p;
@@ -906,10 +892,9 @@ cubicReverseFunc(float x, const float *points, float tt)
 	if (n < 2)
 		pt2 = pt1;
 	else pt2 = [[selectPoints objectAtIndex: 1] pointValue];
-	pixelsPerTick = [dataSource pixelsPerTick];
 	/* height = [self bounds].size.height; *//* unused? */
-	t1 = (MDTickType)floor(pt1.x / pixelsPerTick + 0.5);
-	t2 = (MDTickType)floor(pt2.x / pixelsPerTick + 0.5);
+    t1 = (MDTickType)floor([dataSource pixelToTick:pt1.x] + 0.5);
+    t2 = (MDTickType)floor([dataSource pixelToTick:pt2.x] + 0.5);
 	//v1 = (int)floor((pt1.y - sVerticalMargin) * (maxValue - minValue) / (height - sVerticalMargin * 2) + 0.5 + minValue);
 	//v2 = (int)floor((pt2.y - sVerticalMargin) * (maxValue - minValue) / (height - sVerticalMargin * 2) + 0.5 + minValue);
 	v1 = [self convertToYValue:pt1.y];
@@ -959,6 +944,8 @@ cubicReverseFunc(float x, const float *points, float tt)
 	if (calib == NULL)
 		[self reallocateCalibrators];
 	
+    //  TODO: calculate values based on pixels, and convert to tick
+    //  (pixels and ticks are not proportional in real time mode)
 	editingMode = [[self dataSource] graphicEditingMode];
 	if (editingMode == kGraphicSetMode && eventKind != kMDEventNote && eventKind != kMDEventInternalNoteOff && !shiftFlag) {
 		//  Generate a series of events
@@ -1453,9 +1440,8 @@ cubicReverseFunc(float x, const float *points, float tt)
 		[self invalidateDraggingRegion];
 		draggingPoint = pt;
 		[self invalidateDraggingRegion];
-		pt.x = pt.x - draggingStartPoint.x;
+        deltaDraggedTick = (MDTickType)(floor([dataSource pixelToTick:pt.x] - [dataSource pixelToTick:draggingStartPoint.x] + 0.5));
 		pt.y = pt.y - draggingStartPoint.y;
-		deltaDraggedTick = (MDTickType)floor(pt.x / [dataSource pixelsPerTick] + 0.5);
 		deltaDraggedValue = floor((pt.y * (maxValue - minValue) / ([self bounds].size.height - sVerticalMargin * 2)) / valueResolution + 0.5) * valueResolution;
 		[self displayIfNeeded];
 	} else [super doMouseDragged: theEvent];
@@ -1464,7 +1450,6 @@ cubicReverseFunc(float x, const float *points, float tt)
 - (void)doMouseUp: (NSEvent *)theEvent
 {
 	int i, trackNo;
-	float ppt;
 	MyDocument *document;
 	MDTickType minTick, maxTick;
 	NSRect bounds;
@@ -1487,7 +1472,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 		[self invalidateDraggingRegion];
 		pt.x = draggingPoint.x - draggingStartPoint.x;
 		pt.y = draggingPoint.y - draggingStartPoint.y;
-		deltaTick = (MDTickType)floor(pt.x / [dataSource pixelsPerTick] + 0.5);
+        deltaTick = (MDTickType)floor([dataSource pixelToTick:draggingPoint.x] - [dataSource pixelToTick:draggingStartPoint.x] + 0.5);
 		deltaValue = floor((pt.y * (maxValue - minValue) / ([self bounds].size.height - sVerticalMargin * 2)) / valueResolution + 0.5) * valueResolution;
 		[dataSource dragEventsOfKind: eventKind andCode: eventCode byTick: deltaTick andValue: deltaValue sender: self optionFlag: optionDown];
 		stripDraggingMode = 0;
@@ -1502,9 +1487,8 @@ cubicReverseFunc(float x, const float *points, float tt)
 	/*  Change selection  */
 	bounds = [[self selectionPath] bounds];
 	// height = [self bounds].size.height;
-	ppt = [dataSource pixelsPerTick];
-	minTick = (MDTickType)(bounds.origin.x / ppt);
-	maxTick = (MDTickType)((bounds.origin.x + bounds.size.width) / ppt);
+    minTick = (MDTickType)[dataSource pixelToTick:bounds.origin.x];
+    maxTick = (MDTickType)[dataSource pixelToTick:(bounds.origin.x + bounds.size.width)];
 	document = (MyDocument *)[dataSource document];
 	for (i = 0; (trackNo = [self sortedTrackNumberAtIndex: i]) >= 0; i++) {
 		MDTrack *track;
@@ -1534,7 +1518,7 @@ cubicReverseFunc(float x, const float *points, float tt)
 			
 		//	point.y = (CGFloat)ceil((getYValue(ep, eventKind) - minValue) / (maxValue - minValue) * (height - 2)) + 1;
 			point.y = [self convertFromYValue:getYValue(ep, eventKind)];
-			point.x = (CGFloat)floor(MDGetTick(ep) * ppt);
+            point.x = (CGFloat)floor([dataSource tickToPixel:MDGetTick(ep)]);
 		//	point.x = floor(MDGetTick(ep) * ppt);
 		//	point.y = floor(MDGetCode(ep) * ys + 0.5) + 0.5 * ys;
 			if ([self isPointInSelectRegion: point]) {

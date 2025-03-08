@@ -294,6 +294,12 @@ callback(float progress, void *data)
         }
     }
 
+    //  Cache document timebase if possible
+    if (result == kMDNoError) {
+        if (mainWindowController != nil)
+            [mainWindowController updateDocumentTimebase];
+    }
+    
     return (result == kMDNoError);
 }
 
@@ -402,6 +408,7 @@ callback(float progress, void *data)
     [self addWindowController: mainWindowController];
     if (docCode == 1)
         [self decodeDocumentAttributesFromFile: [[self fileURL] path]];
+    [mainWindowController updateDocumentTimebase];
     [[mainWindowController window] makeKeyAndOrderFront: self];
     [[mainWindowController window] makeFirstResponder: [[mainWindowController window] initialFirstResponder]];
 }
@@ -506,6 +513,10 @@ callback(float progress, void *data)
 	[[[self undoManager] prepareWithInvocationTarget: self]
 	 setTimebase: (float)MDSequenceGetTimebase(sequence)];
 	MDSequenceSetTimebase(sequence, (int32_t)timebase);
+    
+    //  Update main window controller cache
+    if (mainWindowController != nil)
+        [mainWindowController updateDocumentTimebase];
 }
 
 - (void)lockMIDISequence
