@@ -81,14 +81,17 @@ def shift_selected_events
   end
 end
 
-def scale_selected_time_dialog
-  s_tick, e_tick = self.editing_range
+#  optional arguments: start_tick, end_tick, duration
+def scale_selected_time_dialog(*args)
+  s_tick = args[0] || self.editing_range[0]
+  e_tick = args[1] || self.editing_range[1]
   return [] if s_tick < 0
   duration = e_tick - s_tick
   s_str = tick_to_measure(s_tick).join(".")
   e_str = tick_to_measure(e_tick).join(".")
-  new_e_tick = e_tick
-  new_duration = duration
+  new_duration = args[2] || duration
+  new_e_tick = s_tick + new_duration
+  new_e_str = tick_to_measure(new_e_tick).join(".")
   seq = self
   hash = Dialog.run("Scale Selected Time") {
     @bind_global_settings = "scale_selected_time_dialog"
@@ -139,7 +142,7 @@ def scale_selected_time_dialog
 		),
 	  layout(2,
 	    item(:radio, :title=>"Specify end tick", :tag=>"new_end_radio", :value=>1),
-	    item(:textfield, :width=>100, :tag=>"new_end", :value=>e_str,
+	    item(:textfield, :width=>100, :tag=>"new_end", :value=>new_e_str,
 			:action=>proc { |it|
 				val_tick = str_to_tick.call(it[:value])
 				if val_tick != new_e_tick
@@ -151,7 +154,7 @@ def scale_selected_time_dialog
 				end
 			}),
         item(:radio, :title=>"Specify duration", :tag=>"new_duration_radio", :value=>0),
-	    item(:textfield, :width=>100, :tag=>"new_duration", :value=>duration.to_s,
+	    item(:textfield, :width=>100, :tag=>"new_duration", :value=>new_duration.to_s,
 			:action=>proc { |it|
 				d = Integer(it[:value])
 				if d != new_duration
@@ -163,12 +166,14 @@ def scale_selected_time_dialog
 					new_e_tick = s_tick + d
 				end
 			}),
+      item(:checkbox, :title=>"Modify all tracks (inclding non-editing ones)", :tag=>"modify_all_tracks"),
 	    item(:checkbox, :title=>"Insert TEMPO event to keep absolute timings", :tag=>"insert_tempo"),
+      item(:checkbox, :title=>"Show this dialog on shift-command-dragging time chart", :tag=>"show_dialog_on_dragging"),
 	    -1)
 	)
   }
   if hash[:status] == 0
-	return [s_tick, e_tick, new_duration, hash["insert_tempo"]]
+	return [s_tick, e_tick, new_duration, hash["insert_tempo"], hash["modify_all_tracks"]]
   else
 	return []
   end

@@ -27,16 +27,20 @@
 #import "NSCursorAdditions.h"
 #import "PlayingViewController.h"
 
+#include "MDRubyExtern.h"
+
 typedef struct TimeScalingRecord {
 	MDTickType startTick;  /*  Start tick of the time region to be scaled   */
 	MDTickType endTick;    /*  End tick of the time region to be scaled  */
 	MDTickType newEndTick; /*  End tick after scaling the time region  */
-	int ntracks;           /*  Number of editable tracks  */
-	int *trackNums;        /*  Track numbers  */
-	int32_t *startPos;        /*  Start positions for each track to modify ticks  */
-	MDTickType **originalTicks;  /*  Arrays of original ticks for each track  */
-    IntGroup *meterPos;    /*  The position of meter events  */
-    IntGroup *origMeterPos;  /*  The _original_ position of meter events  */
+    BOOL insertTempo;      /*  Do we insert tempo?  */
+    BOOL modifyAllTracks;  /*  Modify all tracks (including non-editing ones) */
+//	int ntracks;           /*  Number of editable tracks  */
+//	int *trackNums;        /*  Track numbers  */
+//	int32_t *startPos;        /*  Start positions for each track to modify ticks  */
+//	MDTickType **originalTicks;  /*  Arrays of original ticks for each track  */
+//    IntGroup *meterPos;    /*  The position of meter events  */
+//    IntGroup *origMeterPos;  /*  The _original_ position of meter events  */
 } TimeScalingRecord;
 
 @implementation TimeChartView
@@ -233,69 +237,6 @@ typedef struct TimeScalingRecord {
 	return 0;
 }
 
-/*  See also: -[MyDocument scaleSelectedTime:]  */
-- (void)scaleSelectedTimeWithEvent: (NSEvent *)theEvent
-{
-	MDSequence *seq;
-	int i, j;
-	if (timeScaling == NULL)
-		return;  /*  Do nothing  */
-	if (theEvent == NULL)
-		timeScaling->newEndTick = timeScaling->endTick;  /*  Return to the original  */
-	else {
-		NSPoint mousePt = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-        timeScaling->newEndTick = [dataSource pixelToTick:mousePt.x];
-		if (timeScaling->newEndTick < timeScaling->startTick)
-			timeScaling->newEndTick = timeScaling->startTick;
-	}
-	seq = [[[dataSource document] myMIDISequence] mySequence];
-	for (i = 0; i < timeScaling->ntracks; i++) {
-        /* int n; */
-        MDPointer *pt;
-        MDEvent *ep;
-        int trackNum = timeScaling->trackNums[i];
-		MDTrack *track = MDSequenceGetTrack(seq, trackNum);
-        MDTrack *meterTrack = NULL;
-        if (trackNum == 0 && IntGroupGetCount(timeScaling->meterPos) > 0) {
-            /*  Temporarily remove the meter events  */
-            MDTrackUnmerge(track, &meterTrack, timeScaling->meterPos);
-        }
-		/* n = MDTrackGetNumberOfEvents(track) - timeScaling->startPos[i];  *//*  Number of events (unused?) */
-		pt = MDPointerNew(track);
-		MDPointerSetPosition(pt, timeScaling->startPos[i]);
-		for (ep = MDPointerCurrent(pt), j = 0; ; ep = MDPointerForward(pt), j++) {
-			MDTickType tick = timeScaling->originalTicks[i][j];
-			if (timeScaling->newEndTick != timeScaling->endTick) {
-				if (tick < timeScaling->endTick)
-                    tick = timeScaling->startTick + (MDTickType)((double)(tick - timeScaling->startTick) * (timeScaling->newEndTick - timeScaling->startTick) / (timeScaling->endTick - timeScaling->startTick));
-				else
-					tick += (timeScaling->newEndTick - timeScaling->endTick);
-			}
-			if (ep == NULL) {
-                MDTrackSetDuration(track, tick);
-				break;
-			} else {
-                MDSetTick(ep, tick);
-			}
-        }
-        if (trackNum == 0 && IntGroupGetCount(timeScaling->meterPos) > 0) {
-            /*  Restore the meter events  */
-            if (theEvent == NULL) {
-                /*  Restore to the original positions  */
-                MDTrackMerge(track, meterTrack, &(timeScaling->origMeterPos));
-            } else {
-                /*  Restore to the appropriate positions  */
-                IntGroupRelease(timeScaling->meterPos);
-                timeScaling->meterPos = NULL;
-                MDTrackMerge(track, meterTrack, &(timeScaling->meterPos));
-            }
-            MDTrackRelease(meterTrack);
-            MDSequenceResetCalibrators(seq);
-        }
-	}
-	[dataSource reloadClientViews];
-}
-
 - (void)doMouseDown: (NSEvent *)theEvent
 {
 	NSPoint pt = [self convertPoint:[theEvent locationInWindow] fromView:nil];
@@ -312,55 +253,15 @@ typedef struct TimeScalingRecord {
 		[selectPoints replaceObjectAtIndex: 0 withObject: [NSValue valueWithPoint:pt]];
 		if (n == 1 && ([theEvent modifierFlags] & (NSAlternateKeyMask | NSShiftKeyMask)) && startTick < endTick) {
 			/*  Scale selected time: initialize the internal information  */
-			int i, j;
-			int32_t trackNo;
-			MDTrack *track;
-			MDSequence *seq = [[[dataSource document] myMIDISequence] mySequence];
-			timeScaling = (TimeScalingRecord *)calloc(sizeof(TimeScalingRecord), 1);
-			timeScaling->startTick = startTick;
-			timeScaling->endTick = endTick;
-			j = MDSequenceGetNumberOfTracks(seq);
-			timeScaling->trackNums = (int *)calloc(sizeof(int), j);
-			for (i = 0; (trackNo = [self sortedTrackNumberAtIndex: i]) >= 0; i++) {
-				if (![self isFocusTrack:trackNo])
-					continue;
-				timeScaling->trackNums[timeScaling->ntracks] = trackNo;
-				timeScaling->ntracks++;
-			}
-			timeScaling->trackNums = (int *)realloc(timeScaling->trackNums, sizeof(int) * timeScaling->ntracks);
-			timeScaling->startPos = (int32_t *)calloc(sizeof(int32_t), timeScaling->ntracks);
-			timeScaling->originalTicks = (MDTickType **)calloc(sizeof(MDTickType *), timeScaling->ntracks);
-			for (i = 0; i < timeScaling->ntracks; i++) {
-				MDPointer *pt;
-				MDEvent *ep;
-                int trackNum = timeScaling->trackNums[i];
-				track = MDSequenceGetTrack(seq, trackNum);
-				pt = MDPointerNew(track);
-                if (trackNum == 0) {
-                    /*  Conductor track: the meter events should be fixed  */
-                    timeScaling->meterPos = IntGroupNew();
-                }
-				if (MDPointerJumpToTick(pt, startTick)) {
-					timeScaling->startPos[i] = MDPointerGetPosition(pt);
-				} else {
-					timeScaling->startPos[i] = MDTrackGetNumberOfEvents(track);
-				}
-				timeScaling->originalTicks[i] = (MDTickType *)calloc(sizeof(MDTickType), MDTrackGetNumberOfEvents(track) - timeScaling->startPos[i] + 1);  /*  +1 for end-of-track  */
-				for (ep = MDPointerCurrent(pt), j = 0; ep != NULL; ep = MDPointerForward(pt)) {
-                    if (trackNum == 0 && MDGetKind(ep) == kMDEventTimeSignature) {
-                        /*  Record the position of the meter events  */
-                        IntGroupAdd(timeScaling->meterPos, MDPointerGetPosition(pt), 1);
-                    } else {
-                        timeScaling->originalTicks[i][j++] = MDGetTick(ep);
-                    }
-				}
-				MDPointerRelease(pt);
-				timeScaling->originalTicks[i][j] = MDTrackGetDuration(track);
-                if (trackNum == 0) {
-                    timeScaling->origMeterPos = IntGroupNew();
-                    IntGroupCopy(timeScaling->origMeterPos, timeScaling->meterPos);
-                }
-			}
+            /*  2025.3.9. See whether invoking MyDocument method every time on mouse dragging works */
+            timeScaling = calloc(sizeof(TimeScalingRecord), 1);
+            timeScaling->startTick = startTick;
+            timeScaling->endTick = endTick;
+            timeScaling->newEndTick = endTick;
+            NSString *str = MyAppCallback_getObjectGlobalSettings(@"scale_selected_time_dialog.insert_tempo");
+            timeScaling->insertTempo = (str != nil && strtol([str UTF8String], NULL, 0) != 0);
+            str = MyAppCallback_getObjectGlobalSettings(@"scale_selected_time_dialog.modify_all_tracks");
+            timeScaling->modifyAllTracks = (str != nil && strtol([str UTF8String], NULL, 0) != 0);
 		}
 	} else {
 		[super doMouseDown: theEvent];
@@ -377,8 +278,16 @@ typedef struct TimeScalingRecord {
 - (void)doMouseDragged: (NSEvent *)theEvent
 {
 	if (timeScaling != NULL) {
-		[self scaleSelectedTimeWithEvent:theEvent];
-        [(MyDocument *)[dataSource document] setEditingRangeStart:timeScaling->startTick end:timeScaling->newEndTick];
+        MyDocument *doc = (MyDocument *)[dataSource document];
+        NSPoint mousePt = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+        if (timeScaling->endTick != timeScaling->newEndTick)
+            //  Restore the original state
+            [[doc undoManager] undo];
+        timeScaling->newEndTick = [dataSource pixelToTick:mousePt.x];
+        if (timeScaling->newEndTick < timeScaling->startTick)
+            timeScaling->newEndTick = timeScaling->startTick;
+        if (timeScaling->endTick != timeScaling->newEndTick)
+            [doc scaleTicksFrom:timeScaling->startTick to:timeScaling->endTick newDuration:(timeScaling->newEndTick - timeScaling->startTick) insertTempo:timeScaling->insertTempo modifyAllTracks:timeScaling->modifyAllTracks setSelection:NO];
 		return;
 	}
 	
@@ -416,66 +325,40 @@ typedef struct TimeScalingRecord {
 	}
 	
 	if (timeScaling != NULL) {
+        
 		/*  Time scaling  */
-        /*  If this is the first call since start, ask the user whether
-            she wants to insert tempo.  */
-        static BOOL sFirstInvocation = YES;
-        int insertTempo = 0;
-        NSString *str = MyAppCallback_getObjectGlobalSettings(@"scale_selected_time_dialog.insert_tempo");
-        NSPoint mousePt = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-        if (str == nil) {
-            insertTempo = 0;
-        } else if (strtol([str UTF8String], NULL, 0) == 0) {
-            insertTempo = 0;
-        } else insertTempo = 1;
-        if (sFirstInvocation) {
-            NSAlert *alert = [[NSAlert alloc] init];
-            int response;
-            [alert setMessageText:[NSString stringWithFormat:@"Tempo events %s inserted to keep timings. OK?", (insertTempo ? "ARE" : "are NOT")]];
-            [alert setInformativeText:@"This setting can be changed anytime by 'Scale Selected Time' dialog."];
-            [alert addButtonWithTitle:[NSString stringWithFormat:@"OK, %s insert", (insertTempo ? "do" : "don't")]];
-            [alert addButtonWithTitle:@"Cancel"];
-            [alert addButtonWithTitle:[NSString stringWithFormat:@"NO, %s insert", (insertTempo ? "don't" : "do")]];
-            [alert setAlertStyle:NSWarningAlertStyle];
-            response = (int)[alert runModal];
-            [alert autorelease];
-            if (response == NSAlertThirdButtonReturn) {
-                insertTempo = !insertTempo;
-                MyAppCallback_setObjectGlobalSettings(@"scale_selected_time_dialog.insert_tempo", [NSString stringWithFormat:@"%d", insertTempo]);
-
-            } else if (response == NSAlertSecondButtonReturn) {
+        /*  Show tick scaling dialog (unless the user doesn't want it)  */
+        NSString *str = MyAppCallback_getObjectGlobalSettings(@"scale_selected_time_dialog.show_dialog_on_dragging");
+        BOOL showDialog = (str != nil && strtol([str UTF8String], NULL, 0) != 0);
+        BOOL undoNeeded = (timeScaling->endTick != timeScaling->newEndTick);
+        if (showDialog) {
+            double *dp;
+            int n, status;
+            status = Ruby_callMethodOfDocument("scale_selected_time_dialog", document, 0, "qqq;D", (int64_t)timeScaling->startTick, (int64_t)timeScaling->endTick, (int64_t)(timeScaling->newEndTick - timeScaling->startTick), &n, &dp);
+            if (status != 0) {
+                Ruby_showError(status);
                 return;
             }
-            sFirstInvocation = NO;
+            if (n == 0) {
+                //  Dialog is canceled; we undo the last operation
+                timeScaling->endTick = timeScaling->newEndTick;  //  Disable operation
+            } else {
+                //  timeScaling fields are updated according to the dialog results and call scaleTicksFrom: again
+                timeScaling->startTick = (MDTickType)dp[0];
+                timeScaling->endTick = (MDTickType)dp[1];
+                timeScaling->newEndTick = (MDTickType)(dp[0] + dp[2]);
+                timeScaling->insertTempo = (BOOL)dp[3];
+                timeScaling->modifyAllTracks = (BOOL)dp[4];
+            }
         }
-		/*  Register undo for selections and editing range  */
-	/*	[document getEditingRangeStart: &tick1 end: &tick2]; */
-		[[[self undoManager] prepareWithInvocationTarget:document]
-         setEditingRangeStart:timeScaling->startTick end:timeScaling->endTick];
-
-        /*  Revert temporary scaling  */
-        [self scaleSelectedTimeWithEvent:nil];
-        IntGroupRelease(timeScaling->meterPos);
-        IntGroupRelease(timeScaling->origMeterPos);
-        timeScaling->meterPos = NULL;
-        timeScaling->origMeterPos = NULL;
-        
-        /*  Scale time with undo registration  */
-        timeScaling->newEndTick = [dataSource pixelToTick:mousePt.x];
-        if (timeScaling->newEndTick < timeScaling->startTick)
-            return;
-        [document scaleTimeFrom:timeScaling->startTick to:timeScaling->endTick newDuration:timeScaling->newEndTick - timeScaling->startTick insertTempo:insertTempo setSelection:NO];
-		tick1 = timeScaling->startTick;
-		tick2 = timeScaling->newEndTick;
-		for (i = 0; i < timeScaling->ntracks; i++)
-			free(timeScaling->originalTicks[i]);
-		free(timeScaling->originalTicks);
-		free(timeScaling->startPos);
-		free(timeScaling->trackNums);
-		free(timeScaling);
-		timeScaling = NULL;
+        if (undoNeeded)
+            [[document undoManager] undo];
+        if (timeScaling->endTick != timeScaling->newEndTick)
+            [document scaleTicksFrom:timeScaling->startTick to:timeScaling->endTick newDuration:(timeScaling->newEndTick - timeScaling->startTick) insertTempo:timeScaling->insertTempo modifyAllTracks:timeScaling->modifyAllTracks setSelection:YES];
+        free(timeScaling);
+        timeScaling = NULL;
         return;
-		
+
 	} else {
 		
 		if (isLoupeDragging) {

@@ -2909,7 +2909,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	[self setEditingRangeStart:startTick end:startTick];
 }
 
-- (BOOL)scaleTimeFrom:(MDTickType)startTick to:(MDTickType)endTick newDuration:(MDTickType)newDuration insertTempo:(BOOL)insertTempo setSelection:(BOOL)setSelection
+- (BOOL)scaleTicksFrom:(MDTickType)startTick to:(MDTickType)endTick newDuration:(MDTickType)newDuration insertTempo:(BOOL)insertTempo modifyAllTracks:(BOOL)modifyAllTracks setSelection:(BOOL)setSelection
 {
 	int32_t trackNo;
 	MDTickType deltaTick;
@@ -2922,6 +2922,8 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	if (startTick < 0 || startTick >= endTick)
 		return NO;  /*  Do nothing  */
 	
+    [[self undoManager] beginUndoGrouping];
+    
 	/* Register undo for editing range */
 	[[[self undoManager] prepareWithInvocationTarget:self]
 	 setEditingRangeStart:startEditingRange end:endEditingRange]; 
@@ -2980,7 +2982,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
         int32_t n1, n2, n3;
         MDTickType oldDuration, tick1, tick2;
 
-		if (![cont isFocusTrack:trackNo] && (!insertTempo || trackNo != 0))
+		if (!modifyAllTracks && ![cont isFocusTrack:trackNo] && (!insertTempo || trackNo != 0))
 			continue;
 		track = [[self myMIDISequence] getTrackAtIndex:trackNo];
 		oldDuration = MDTrackGetDuration(track);
@@ -3084,11 +3086,13 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 	/*  Set editing range to the scaled time region  */
 	[self setEditingRangeStart:startTick end:startTick + newDuration];
     
+    [[self undoManager] endUndoGrouping];
+
     return YES;
 }
 
 /* See also: -[TimeChartView scaleSelectedTimeWithEvent:]  */
-- (IBAction)scaleSelectedTime:(id)sender
+- (IBAction)scaleTicks:(id)sender
 {
 	double *dp;
 	int n, status;
@@ -3098,7 +3102,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 		return;
 	}
 	if (n > 0) {
-        [self scaleTimeFrom:(float)dp[0] to:(float)dp[1] newDuration:(float)dp[2] insertTempo:(float)dp[3] setSelection:YES];
+        [self scaleTicksFrom:(float)dp[0] to:(float)dp[1] newDuration:(float)dp[2] insertTempo:(BOOL)dp[3] modifyAllTracks:(BOOL)dp[4] setSelection:YES];
 		free(dp);
 	}
 }
@@ -3204,7 +3208,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
         return [seq isPlaying];
 	} else if (sel == @selector(performStopPlay:)) {
         return [seq isPlaying] || [seq isSuspended];
-	} else if (sel == @selector(insertBlankTime:) || sel == @selector(deleteSelectedTime:) || sel == @selector(scaleSelectedTime:)) {
+	} else if (sel == @selector(insertBlankTime:) || sel == @selector(deleteSelectedTime:) || sel == @selector(scaleTicks:)) {
 		MDTickType startTick, endTick;
 		[self getEditingRangeStart:&startTick end:&endTick];
 		return (startTick < endTick);

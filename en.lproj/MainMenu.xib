@@ -274,10 +274,10 @@ DQ
                                     <action selector="deleteSelectedTime:" target="-1" id="337"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Scale Selected Time..." keyEquivalent="s" id="334">
+                            <menuItem title="Scale Ticks..." keyEquivalent="s" id="334">
                                 <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>
-                                    <action selector="scaleSelectedTime:" target="-1" id="338"/>
+                                    <action selector="scaleTicks:" target="-1" id="x2i-vb-rYm"/>
                                 </connections>
                             </menuItem>
                         </items>

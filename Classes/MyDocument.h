@@ -140,7 +140,7 @@ typedef enum MyDocumentModifyMode {
 - (BOOL)changeValue: (MDEventFieldDataWhole)wholeValue ofType: (int)code atPosition: (int32_t)position inTrack: (int32_t)trackNo;
 - (BOOL)changeMessage: (NSData *)data atPosition: (int32_t)position inTrack: (int32_t)trackNo;
 
-- (BOOL)scaleTimeFrom:(MDTickType)startTick to:(MDTickType)endTick newDuration:(MDTickType)newDuration insertTempo:(BOOL)insertTempo setSelection:(BOOL)setSelection;
+- (BOOL)scaleTicksFrom:(MDTickType)startTick to:(MDTickType)endTick newDuration:(MDTickType)newDuration insertTempo:(BOOL)insertTempo modifyAllTracks:(BOOL)modifyAllTracks setSelection:(BOOL)setSelection;
 
 - (BOOL)changeDevice: (NSString *)deviceName forTrack: (int32_t)trackNo;
 //- (BOOL)changeDeviceNumber: (int32_t)deviceNumber forTrack: (int32_t)trackNo;
@@ -208,7 +208,7 @@ typedef enum MyDocumentModifyMode {
 //  General editing
 - (IBAction)insertBlankTime:(id)sender;
 - (IBAction)deleteSelectedTime:(id)sender;
-- (IBAction)scaleSelectedTime:(id)sender;
+- (IBAction)scaleTicks:(id)sender;
 - (IBAction)quantizeSelectedEvents:(id)sender;
 - (IBAction)getEditingRangeFromPasteboard:(id)sender;
 
