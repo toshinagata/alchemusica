@@ -82,6 +82,9 @@ def shift_selected_events
 end
 
 #  optional arguments: start_tick, end_tick, duration
+#  2025/3/16 Note: the command is now called "Scale Ticks", but the name
+#  of this function is kept as before, for consistency with the preference
+#  settings called "scale_selected_time_dialog".
 def scale_selected_time_dialog(*args)
   s_tick = args[0] || self.editing_range[0]
   e_tick = args[1] || self.editing_range[1]
@@ -167,7 +170,9 @@ def scale_selected_time_dialog(*args)
 				end
 			}),
       item(:checkbox, :title=>"Modify all tracks (inclding non-editing ones)", :tag=>"modify_all_tracks"),
+      -1,
 	    item(:checkbox, :title=>"Insert TEMPO event to keep absolute timings", :tag=>"insert_tempo"),
+      -1,
       item(:checkbox, :title=>"Show this dialog on shift-command-dragging time chart", :tag=>"show_dialog_on_dragging"),
 	    -1)
 	)
@@ -176,6 +181,79 @@ def scale_selected_time_dialog(*args)
 	return [s_tick, e_tick, new_duration, hash["insert_tempo"], hash["modify_all_tracks"]]
   else
 	return []
+  end
+end
+
+def scale_tempo_dialog(*args)
+  s_tick = args[0] || self.editing_range[0]
+  e_tick = args[1] || self.editing_range[1]
+  s_time = self.tick_to_time(s_tick)
+  e_time = self.tick_to_time(e_tick)
+  return [] if s_tick < 0 || e_tick <= 0
+  interval = e_time - s_time
+  s_str = tick_to_measure(s_tick).join(".")
+  e_str = tick_to_measure(e_tick).join(".")
+  multiple = args[2] || 1.0
+  seq = self
+  tempo_change_styles = ["uniform", "accel/rit"]
+  hash = Dialog.run("Scale Tempo") {
+    @bind_global_settings = "scale_tempo_dialog"
+    str_to_tick = proc { |str|
+      a = str.scan(/\d+/)
+      while a.length < 3; a.unshift("1"); end
+      seq.measure_to_tick(a[0].to_i, a[1].to_i, a[2].to_i)
+    }
+    layout(1,
+      layout(2,
+        item(:text, :title=>"Start:"),
+        item(:textfield, :width=>100, :tag=>"start", :value=>s_str,
+             :action=>proc { |it|
+               s_tick = str_to_tick.call(it[:value])
+               if s_tick >= e_tick
+                 s_tick = e_tick - 1
+                 set_value("start", seq.tick_to_measure(s_tick).join("."))
+               end
+             }),
+        item(:text, :title=>"End:"),
+        item(:textfield, :width=>100, :tag=>"end", :value=>e_str,
+             :action=>proc { |it|
+               e_tick = str_to_tick.call(it[:value])
+               if s_tick >= e_tick
+                 e_tick = s_tick + 1
+                 set_value("end", seq.tick_to_measure(e_tick).join("."))
+               end
+             }),
+        item(:text, :title=>"Multiple:"),
+        item(:textfield, :width=>100, :tag=>"multiple", :value=>sprintf("%f", multiple),
+             :action=>proc { |it|
+               new_multiple = it[:value].to_f
+               if new_multiple <= 0.0
+                 set_value("multiple", sprintf("%f", multiple))
+               else
+                 multiple = new_multiple
+               end
+             })
+      ),
+      layout(2,
+        item(:text, :title=>"Tempo change style"),
+        item(:popup, :subitems=>tempo_change_styles, :tag=>"tempo_change_style",
+             :action=>proc { |it|
+               set_attr("tempo_event_interval", :enabled, it[:value] != 0)
+             }),
+        item(:text, :title=>"Tempo event interval"),
+        item(:textfield, :width=>100, :tag=>"tempo_event_interval"),
+        item(:checkbox, :title=>"Show this dialog on shift-command-dragging time chart", :tag=>"show_dialog_on_dragging"),
+        -1)
+    )
+    set_attr("tempo_event_interval", :enabled, value("tempo_change_style") != 0)
+    if value("tempo_event_interval").to_i == 0
+      set_value("tempo_event_interval", sprintf("%d", seq.timebase))
+    end
+  }
+  if hash[:status] == 0
+    return [s_tick, e_tick, multiple, hash["tempo_change_style"], hash["tempo_event_interval"]]
+  else
+    return []
   end
 end
 

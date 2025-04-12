@@ -280,6 +280,12 @@ DQ
                                     <action selector="scaleTicks:" target="-1" id="x2i-vb-rYm"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Scale Tempo..." keyEquivalent="s" id="RoV-Zf-iqz" userLabel="Scale Tempo...">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                <connections>
+                                    <action selector="scaleTempo:" target="-1" id="bLA-Hi-wb6"/>
+                                </connections>
+                            </menuItem>
                         </items>
                     </menu>
                 </menuItem>

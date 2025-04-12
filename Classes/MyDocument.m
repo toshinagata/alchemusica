@@ -2709,10 +2709,13 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
 					if (MDGetData1(ep) >= fromData && MDGetData1(ep) <= toData)
 						ok = YES;
 				}
-			} else if (eventKind == kMDEventNote) {
-				//  The data range is key code
-				if (MDGetCode(ep) >= fromData && MDGetCode(ep) <= toData)
-					ok = YES;
+            } else if (eventKind == kMDEventNote) {
+                //  The data range is key code
+                if (MDGetCode(ep) >= fromData && MDGetCode(ep) <= toData)
+                    ok = YES;
+            } else if (eventKind == kMDEventTempo) {
+                if (MDGetTempo(ep) >= fromData && MDGetTempo(ep) <= toData)
+                    ok = YES;
 			} else {
 				if (MDGetData1(ep) >= fromData && MDGetData1(ep) <= toData)
 					ok = YES;
@@ -3091,6 +3094,169 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
     return YES;
 }
 
+- (BOOL)scaleTempoFrom:(MDTickType)startTick to:(MDTickType)endTick by:(float)multiple scalingMode:(int)scalingMode tempoEventInterval:(MDTickType)tempoEventInterval
+{
+    MDTrack *conductorTrack = [[self myMIDISequence] getTrackAtIndex:0];
+    MDCalibrator *calib = [[self myMIDISequence] sharedCalibrator];
+    MDPointer *mdptr;
+    MDEvent *ep;
+    int i, n;
+
+    if (startTick < 0 || startTick >= endTick)
+        return NO;  /*  Do nothing  */
+    
+    [[self undoManager] beginUndoGrouping];
+
+    //  Register undo for editing range
+    [[[self undoManager] prepareWithInvocationTarget:self]
+     setEditingRangeStart:startEditingRange end:endEditingRange];
+
+    //  The number of newly inserted tempos (not including endTick)
+    if (scalingMode == 0 || tempoEventInterval < 10) {
+        n = 1;
+    } else {
+        n = ceil((endTick - startTick) / tempoEventInterval);
+    }
+    
+    //  Insert new tempo (with skipping the existing tempos that are at the same tick)
+    {
+        MDTrackObject *trackObj = [[MDTrackObject allocWithZone: [self zone]] init];
+        mdptr = MDPointerNew([trackObj track]);
+        MDEvent event;
+        MDEventInit(&event);
+        MDSetKind(&event, kMDEventTempo);
+        for (i = n; i >= 0; i--) {
+            MDTickType newTick = startTick + (endTick - startTick) * i / n;
+            MDCalibratorJumpToTick(calib, newTick);
+            ep = MDCalibratorGetEvent(calib, conductorTrack, kMDEventTempo, -1);
+            if (ep == NULL || MDGetTick(ep) != newTick) {
+                //  No tempo event at this tick: insert one
+                MDSetTick(&event, newTick);
+                MDSetTempo(&event, MDCalibratorGetTempo(calib));
+                MDPointerInsertAnEvent(mdptr, &event);
+            }
+        }
+        [self insertMultipleEvents: trackObj at: nil toTrack: 0 selectInsertedEvents: NO insertedPositions: NULL];
+        MDPointerRelease(mdptr);
+        [trackObj release];
+    }
+    
+    //  Modify tempos from startTick to (not including) endTick
+    {
+        MDSelectionObject *psetObj;
+        IntGroup *pset;
+        int32_t count;
+        NSMutableData *theData;
+        float *fp;
+        MDTickType *tp;
+        psetObj = [self eventSetInTrack:0 eventKind:kMDEventTempo eventCode:-1 fromTick:startTick toTick:endTick-1 fromData:kMDMinTempo toData:kMDMaxTempo inPointSet:nil];
+        //  psetObj cannot be nil, because we already inserted at least one tempo event at startTick
+        pset = [psetObj pointSet];
+        count = IntGroupGetCount(pset);
+        //  count cannot be zero, because psetObj cannot be nil nor empty
+        theData = [NSMutableData dataWithLength: count * sizeof(float)];
+        fp = (float *)[theData mutableBytes];
+        tp = (MDTickType *)calloc(sizeof(MDTickType), count + 1);  //  Don't forget to free()!
+        mdptr = MDPointerNew(conductorTrack);
+        //  Cache the tempo and tick values
+        for (i = 0; i < count; i++) {
+            MDPointerSetPosition(mdptr, IntGroupGetNthPoint(pset, i));
+            ep = MDPointerCurrent(mdptr);
+            fp[i] = MDGetTempo(ep);
+            tp[i] = MDGetTick(ep);
+        }
+        MDPointerRelease(mdptr);
+        tp[count] = endTick;
+        if (n == 1) {
+            //  Uniform scaling
+            for (i = 0; i < count; i++) {
+                fp[i] = fp[i] * multiple;
+            }
+        } else {
+            //  accelerando/ritardando
+            //  trial tempo gradient (min/max of binary search)
+            float trial1, trial2;
+            //  calculated time interval between tick1 and tick2
+            //  time interval is sum of delta-tick / tempo
+            float interval0, interval1, interval2;
+            float ex;
+            int trial_count = 0;
+            interval0 = 0.0;
+            for (i = 0; i < count; i++)
+                interval0 += (tp[i + 1] - tp[i]) / fp[i];
+            //  New tempo is calculated as:
+            //  newTempo[i] = tempo[i]*(1+(trial-1)*(tp[i]-startTick)/(endTick-startTick))
+            //  Look for the starting point of binary search. That is,
+            //  find trial1 and trial2 where interval1 > interval0 > interval2 (or the opposite)
+            trial1 = 1.0;
+            interval1 = interval0;
+            interval0 /= multiple;  //  Target value of time interval
+            trial2 = multiple;
+            while (trial_count < 100) {
+                interval2 = 0.0;
+                for (i = 0; i < count; i++) {
+                    ex = ((float)(tp[i] - startTick)) / (endTick - startTick);
+                    interval2 += (tp[i + 1] - tp[i]) / (fp[i] * (1.0 + (trial2 - 1.0) * ex));
+                }
+                if ((interval1 < interval0 && interval0 <= interval2) || (interval1 > interval0 && interval0 >= interval2)) {
+                    break;
+                }
+                trial1 = trial2;
+                interval1 = interval2;
+                trial2 *= multiple;
+                trial_count += 1;
+            }
+            if (trial_count < 100) {
+                //  Do binary search
+                float trial3, interval3;
+                trial_count = 0;
+                while (trial_count < 100) {
+                    interval3 = 0.0;
+                    trial3 = sqrt(trial1 * trial2);
+                    for (i = 0; i < count; i++) {
+                        ex = ((float)(tp[i] - startTick)) / (endTick - startTick);
+                        interval3 += (tp[i + 1] - tp[i]) / (fp[i] * (1.0 + (trial3 - 1.0) * ex));
+                    }
+                    //  Is interval0 between interval1 and interval3?
+                    if ((interval1 < interval0 && interval0 <= interval3) || (interval1 > interval0 && interval0 >= interval3)) {
+                        //  If yes, then replace trial2 with trial3
+                        trial2 = trial3;
+                        interval2 = interval3;
+                    } else {
+                        trial1 = trial3;
+                        interval1 = interval3;
+                    }
+                    if (trial2 / trial1 < 1.0001)
+                        break;
+                    trial_count++;
+                }
+            }
+            if (trial_count >= 100) {
+                //  We give up, and do uniform scaling
+                for (i = 0; i < count; i++) {
+                    fp[i] = fp[i] * multiple;
+                }
+            } else {
+                //  scale with trial1
+                for (i = 0; i < count; i++) {
+                    ex = ((float)(tp[i] - startTick)) / (endTick - startTick);
+                    fp[i] = fp[i] * (1.0 + (trial1 - 1.0) * ex);
+                }
+            }
+        }
+        //  Modify tempo
+        [self modifyData:theData forEventKind:kMDEventTempo ofMultipleEventsAt: psetObj inTrack:0 mode:MyDocumentModifySet];
+        free(tp);
+    }
+    
+    /*  Set the editing range to the scaled region  */
+    [self setEditingRangeStart:startTick end:endTick];
+
+    [[self undoManager] endUndoGrouping];
+
+    return YES;
+}
+
 /* See also: -[TimeChartView scaleSelectedTimeWithEvent:]  */
 - (IBAction)scaleTicks:(id)sender
 {
@@ -3105,6 +3271,21 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
         [self scaleTicksFrom:(float)dp[0] to:(float)dp[1] newDuration:(float)dp[2] insertTempo:(BOOL)dp[3] modifyAllTracks:(BOOL)dp[4] setSelection:YES];
 		free(dp);
 	}
+}
+
+- (IBAction)scaleTempo:(id)sender
+{
+    double *dp;
+    int n, status;
+    status = Ruby_callMethodOfDocument("scale_tempo_dialog", self, 0, ";D", &n, &dp);
+    if (status != 0) {
+        Ruby_showError(status);
+        return;
+    }
+    if (n > 0) {
+        [self scaleTempoFrom:(float)dp[0] to:(float)dp[1] by:(float)dp[2] scalingMode:(int)dp[3] tempoEventInterval:(MDTickType)dp[4]];
+        free(dp);
+    }
 }
 
 - (IBAction)quantizeSelectedEvents:(id)sender
@@ -3208,7 +3389,7 @@ sInternalComparatorByPosition(void *t, const void *a, const void *b)
         return [seq isPlaying];
 	} else if (sel == @selector(performStopPlay:)) {
         return [seq isPlaying] || [seq isSuspended];
-	} else if (sel == @selector(insertBlankTime:) || sel == @selector(deleteSelectedTime:) || sel == @selector(scaleTicks:)) {
+    } else if (sel == @selector(insertBlankTime:) || sel == @selector(deleteSelectedTime:) || sel == @selector(scaleTicks:) || sel == @selector(scaleTempo:)) {
 		MDTickType startTick, endTick;
 		[self getEditingRangeStart:&startTick end:&endTick];
 		return (startTick < endTick);

@@ -32,15 +32,16 @@
 typedef struct TimeScalingRecord {
 	MDTickType startTick;  /*  Start tick of the time region to be scaled   */
 	MDTickType endTick;    /*  End tick of the time region to be scaled  */
+    /*  The following fields are valid only in non-realtime mode  */
 	MDTickType newEndTick; /*  End tick after scaling the time region  */
     BOOL insertTempo;      /*  Do we insert tempo?  */
     BOOL modifyAllTracks;  /*  Modify all tracks (including non-editing ones) */
-//	int ntracks;           /*  Number of editable tracks  */
-//	int *trackNums;        /*  Track numbers  */
-//	int32_t *startPos;        /*  Start positions for each track to modify ticks  */
-//	MDTickType **originalTicks;  /*  Arrays of original ticks for each track  */
-//    IntGroup *meterPos;    /*  The position of meter events  */
-//    IntGroup *origMeterPos;  /*  The _original_ position of meter events  */
+    /*  The following fields are valid only in realtime mode  */
+    MDTimeType startTime;  /*  Time for startTick  */
+    MDTimeType endTime;    /*  Time for endTick  */
+    MDTimeType newEndTime; /*  End time after scaling tempo  */
+    int mode;              /*  0: uniform scaling, 1: linear cresc/decresc. (not implemented yet)  */
+    MDTickType tempoEventInterval;  /*  Intervals of newly inserted Tempo events */
 } TimeScalingRecord;
 
 @implementation TimeChartView
@@ -252,16 +253,26 @@ typedef struct TimeScalingRecord {
             pt.x = [dataSource tickToPixel:startTick];
 		[selectPoints replaceObjectAtIndex: 0 withObject: [NSValue valueWithPoint:pt]];
 		if (n == 1 && ([theEvent modifierFlags] & (NSAlternateKeyMask | NSShiftKeyMask)) && startTick < endTick) {
+            NSString *str;
 			/*  Scale selected time: initialize the internal information  */
-            /*  2025.3.9. See whether invoking MyDocument method every time on mouse dragging works */
             timeScaling = calloc(sizeof(TimeScalingRecord), 1);
             timeScaling->startTick = startTick;
             timeScaling->endTick = endTick;
             timeScaling->newEndTick = endTick;
-            NSString *str = MyAppCallback_getObjectGlobalSettings(@"scale_selected_time_dialog.insert_tempo");
-            timeScaling->insertTempo = (str != nil && strtol([str UTF8String], NULL, 0) != 0);
-            str = MyAppCallback_getObjectGlobalSettings(@"scale_selected_time_dialog.modify_all_tracks");
-            timeScaling->modifyAllTracks = (str != nil && strtol([str UTF8String], NULL, 0) != 0);
+            if ([dataSource isRealTime]) {
+                timeScaling->startTime = [dataSource tickToTime:startTick];
+                timeScaling->endTime = [dataSource tickToTime:endTick];
+                timeScaling->newEndTime = timeScaling->endTime;
+                str = MyAppCallback_getObjectGlobalSettings(@"scale_tempo_dialog.tempo_change_style");
+                timeScaling->mode = (int)(str == nil ? 0 : strtol([str UTF8String], NULL, 0));
+                str = MyAppCallback_getObjectGlobalSettings(@"scale_tempo_dialog.tempo_event_interval");
+                timeScaling->tempoEventInterval = (MDTickType)(str == nil ? 0 : strtol([str UTF8String], NULL, 0));
+            } else {
+                str = MyAppCallback_getObjectGlobalSettings(@"scale_selected_time_dialog.insert_tempo");
+                timeScaling->insertTempo = (str != nil && strtol([str UTF8String], NULL, 0) != 0);
+                str = MyAppCallback_getObjectGlobalSettings(@"scale_selected_time_dialog.modify_all_tracks");
+                timeScaling->modifyAllTracks = (str != nil && strtol([str UTF8String], NULL, 0) != 0);
+            }
 		}
 	} else {
 		[super doMouseDown: theEvent];
@@ -280,14 +291,33 @@ typedef struct TimeScalingRecord {
 	if (timeScaling != NULL) {
         MyDocument *doc = (MyDocument *)[dataSource document];
         NSPoint mousePt = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-        if (timeScaling->endTick != timeScaling->newEndTick)
-            //  Restore the original state
-            [[doc undoManager] undo];
-        timeScaling->newEndTick = [dataSource pixelToTick:mousePt.x];
-        if (timeScaling->newEndTick < timeScaling->startTick)
-            timeScaling->newEndTick = timeScaling->startTick;
-        if (timeScaling->endTick != timeScaling->newEndTick)
-            [doc scaleTicksFrom:timeScaling->startTick to:timeScaling->endTick newDuration:(timeScaling->newEndTick - timeScaling->startTick) insertTempo:timeScaling->insertTempo modifyAllTracks:timeScaling->modifyAllTracks setSelection:NO];
+        BOOL isRealTime = [dataSource isRealTime];
+        if (isRealTime) {
+            double dt1, dt2;
+            if (timeScaling->endTime != timeScaling->newEndTime)
+                //  Restore the original state
+                [[doc undoManager] undo];
+            timeScaling->newEndTime = [dataSource pixelToTime:mousePt.x];
+            if (timeScaling->newEndTime < timeScaling->startTime)
+                timeScaling->newEndTime = timeScaling->startTime;
+            dt1 = timeScaling->endTime - timeScaling->startTime;
+            dt2 = timeScaling->newEndTime - timeScaling->startTime;
+            if (dt2 < dt1 * 0.01)
+                timeScaling->newEndTime = timeScaling->startTime + ceil(dt1 * 0.01);
+            if (timeScaling->endTime != timeScaling->newEndTime) {
+                [doc scaleTempoFrom:timeScaling->startTick to:timeScaling->endTick by: dt1/dt2 scalingMode:timeScaling->mode tempoEventInterval:timeScaling->tempoEventInterval];
+            }
+        } else {
+            if (timeScaling->endTick != timeScaling->newEndTick)
+                //  Restore the original state
+                [[doc undoManager] undo];
+            timeScaling->newEndTick = [dataSource pixelToTick:mousePt.x];
+            if (timeScaling->newEndTick < timeScaling->startTick)
+                timeScaling->newEndTick = timeScaling->startTick;
+            if (timeScaling->endTick != timeScaling->newEndTick) {
+                [doc scaleTicksFrom:timeScaling->startTick to:timeScaling->endTick newDuration:(timeScaling->newEndTick - timeScaling->startTick) insertTempo:timeScaling->insertTempo modifyAllTracks:timeScaling->modifyAllTracks setSelection:NO];
+            }
+        }
 		return;
 	}
 	
@@ -325,36 +355,71 @@ typedef struct TimeScalingRecord {
 	}
 	
 	if (timeScaling != NULL) {
-        
-		/*  Time scaling  */
-        /*  Show tick scaling dialog (unless the user doesn't want it)  */
-        NSString *str = MyAppCallback_getObjectGlobalSettings(@"scale_selected_time_dialog.show_dialog_on_dragging");
-        BOOL showDialog = (str != nil && strtol([str UTF8String], NULL, 0) != 0);
-        BOOL undoNeeded = (timeScaling->endTick != timeScaling->newEndTick);
-        if (showDialog) {
-            double *dp;
-            int n, status;
-            status = Ruby_callMethodOfDocument("scale_selected_time_dialog", document, 0, "qqq;D", (int64_t)timeScaling->startTick, (int64_t)timeScaling->endTick, (int64_t)(timeScaling->newEndTick - timeScaling->startTick), &n, &dp);
-            if (status != 0) {
-                Ruby_showError(status);
-                return;
+
+        /*  Time scaling  */
+        NSString *str;
+        BOOL showDialog, undoNeeded;
+        BOOL isRealTime = [dataSource isRealTime];
+        if (isRealTime) {
+            double multiple = (double)(timeScaling->endTime - timeScaling->startTime) / (timeScaling->newEndTime - timeScaling->startTime);
+            /*  Show tempo scaling dialog (unless the user doesn't want it)  */
+            str = MyAppCallback_getObjectGlobalSettings(@"scale_tempo_dialog.show_dialog_on_dragging");
+            showDialog = (str != nil && strtol([str UTF8String], NULL, 0) != 0);
+            undoNeeded = (timeScaling->endTime != timeScaling->newEndTime);
+            if (showDialog) {
+                double *dp;
+                int n, status;
+                status = Ruby_callMethodOfDocument("scale_tempo_dialog", document, 0, "qqd;D", (int64_t)timeScaling->startTick, (int64_t)timeScaling->endTick, multiple, &n, &dp);
+                if (status != 0) {
+                    Ruby_showError(status);
+                    return;
+                }
+                if (n == 0) {
+                    //  Dialog is canceled; we undo the last operation
+                    multiple = 1.0;  //  Disable operation
+                } else {
+                    //  timeScaling fields are updated according to the dialog results and call scaleTempoFrom: again
+                    timeScaling->startTick = (MDTickType)dp[0];
+                    timeScaling->endTick = (MDTickType)dp[1];
+                    multiple = (double)dp[2];
+                    timeScaling->mode = (int)dp[3];
+                    timeScaling->tempoEventInterval = (MDTickType)dp[4];
+                }
             }
-            if (n == 0) {
-                //  Dialog is canceled; we undo the last operation
-                timeScaling->endTick = timeScaling->newEndTick;  //  Disable operation
-            } else {
-                //  timeScaling fields are updated according to the dialog results and call scaleTicksFrom: again
-                timeScaling->startTick = (MDTickType)dp[0];
-                timeScaling->endTick = (MDTickType)dp[1];
-                timeScaling->newEndTick = (MDTickType)(dp[0] + dp[2]);
-                timeScaling->insertTempo = (BOOL)dp[3];
-                timeScaling->modifyAllTracks = (BOOL)dp[4];
+            if (undoNeeded)
+                [[document undoManager] undo];
+            if (multiple != 1.0)
+                [document scaleTempoFrom:timeScaling->startTick to:timeScaling->endTick by:multiple scalingMode:timeScaling->mode tempoEventInterval:timeScaling->tempoEventInterval];
+        } else {
+            /*  Show tick scaling dialog (unless the user doesn't want it)  */
+            str = MyAppCallback_getObjectGlobalSettings(@"scale_selected_time_dialog.show_dialog_on_dragging");
+            showDialog = (str != nil && strtol([str UTF8String], NULL, 0) != 0);
+            undoNeeded = (timeScaling->endTick != timeScaling->newEndTick);
+            if (showDialog) {
+                double *dp;
+                int n, status;
+                status = Ruby_callMethodOfDocument("scale_selected_time_dialog", document, 0, "qqq;D", (int64_t)timeScaling->startTick, (int64_t)timeScaling->endTick, (int64_t)(timeScaling->newEndTick - timeScaling->startTick), &n, &dp);
+                if (status != 0) {
+                    Ruby_showError(status);
+                    return;
+                }
+                if (n == 0) {
+                    //  Dialog is canceled; we undo the last operation
+                    timeScaling->endTick = timeScaling->newEndTick;  //  Disable operation
+                } else {
+                    //  timeScaling fields are updated according to the dialog results and call scaleTicksFrom: again
+                    timeScaling->startTick = (MDTickType)dp[0];
+                    timeScaling->endTick = (MDTickType)dp[1];
+                    timeScaling->newEndTick = (MDTickType)(dp[0] + dp[2]);
+                    timeScaling->insertTempo = (BOOL)dp[3];
+                    timeScaling->modifyAllTracks = (BOOL)dp[4];
+                }
             }
+            if (undoNeeded)
+                [[document undoManager] undo];
+            if (timeScaling->endTick != timeScaling->newEndTick)
+                [document scaleTicksFrom:timeScaling->startTick to:timeScaling->endTick newDuration:(timeScaling->newEndTick - timeScaling->startTick) insertTempo:timeScaling->insertTempo modifyAllTracks:timeScaling->modifyAllTracks setSelection:YES];
         }
-        if (undoNeeded)
-            [[document undoManager] undo];
-        if (timeScaling->endTick != timeScaling->newEndTick)
-            [document scaleTicksFrom:timeScaling->startTick to:timeScaling->endTick newDuration:(timeScaling->newEndTick - timeScaling->startTick) insertTempo:timeScaling->insertTempo modifyAllTracks:timeScaling->modifyAllTracks setSelection:YES];
         free(timeScaling);
         timeScaling = NULL;
         return;

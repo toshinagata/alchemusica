@@ -339,6 +339,16 @@ sTableColumnIDToInt(id identifier)
     return pixelsPerQuarter / [[self document] timebase];
 }
 
+- (MDTimeType)tickToTime:(MDTickType)tick
+{
+    return MDCalibratorTickToTime(timeCalib, tick);
+}
+
+- (MDTickType)timeToTick:(MDTimeType)time
+{
+    return MDCalibratorTimeToTick(timeCalib, time);
+}
+
 - (MDTickType)quantizedTickFromPixel: (float)pixel
 {
 	float tickQuantum = quantize * timebase;

@@ -186,6 +186,8 @@ enum {
 - (MDTickType)pixelToTick:(float)tick;
 - (float)timeToPixel:(MDTimeType)time;
 - (MDTimeType)pixelToTime:(float)tick;
+- (MDTimeType)tickToTime:(MDTickType)tick;
+- (MDTickType)timeToTick:(MDTimeType)time;
 - (float)pixelsPerTick;
 - (MDTickType)quantizedTickFromPixel: (float)pixel;
 - (float)quantizedPixelFromPixel: (float)pixel;
