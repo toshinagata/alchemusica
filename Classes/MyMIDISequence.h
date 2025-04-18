@@ -3,7 +3,7 @@
 //
 //  Created by Toshi Nagata on Sun Jun 03 2001.
 /*
-    Copyright (c) 2000-2024 Toshi Nagata. All rights reserved.
+    Copyright (c) 2000-2025 Toshi Nagata. All rights reserved.
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -45,6 +45,7 @@ extern NSString
 	*MyRecordingInfoFileNameKey,        // NSString; destination file name (for audio only)
 	*MyRecordingInfoOverwriteExistingFileFlagKey, // bool; silently overwrite existing files (for audio only)
 	*MyRecordingInfoMultiFileNamesKey,  // NSMutableArray of NSString; destination file names (for multiple audio recording only)
+    *MyRecordingInfoAudioSourcesKey,    // NSMutableArray of { bus:(int), record:(BOOL), thru:(BOOL) }
 	*MyRecordingInfoTrackSelectionsKey, // NSMutableArray of IntGroupObjects; representing track selections (for multiple audio recording only)
 	*MyRecordingInfoIsAudioKey,         // bool; is audio recording?
 	*MyRecordingInfoAudioPlayThroughKey, // bool; audio play through?
@@ -61,6 +62,13 @@ extern NSString
 	*MyRecordingInfoAudioRecordingFormatKey, // int; kAudioRecording{AIFF,WAV}Format
 	*MyRecordingInfoAudioBitRateKey,    // float; audio bit rate
     *MyRecordingInfoAudioChannelFormatKey; // int; kAudioRecording{Mono,Stereo}Format
+
+//  Key for audio recording info: defined in RecordPanelController.m
+extern NSString
+    *AudioRecordingSourceKey,
+    *AudioRecordingSourceBusKey,
+    *AudioRecordingSourceRecordKey,
+    *AudioRecordingSourceThruKey;
 
 extern NSString *MyRecordingInfoFileExtensionForFormat(int format);
 

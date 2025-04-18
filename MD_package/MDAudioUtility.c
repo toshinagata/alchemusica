@@ -3,7 +3,7 @@
  *  Alchemusica
  *
  *  Created by Toshi Nagata on 09/11/05.
- *  Copyright 2009-2023 Toshi Nagata. All rights reserved.
+ *  Copyright 2009-2025 Toshi Nagata. All rights reserved.
  *
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ MDRingBufferNew(void)
 }
 
 int
-MDRingBufferAllocate(MDRingBuffer *ring, int nChannels, UInt32 bytesPerFrame, UInt32 capacityFrames)
+MDRingBufferAllocate(MDRingBuffer *ring, int numberBuffers, UInt32 bytesPerFrame, UInt32 capacityFrames)
 {
 	UInt32 allocSize;
 	Byte *p;
@@ -49,8 +49,7 @@ MDRingBufferAllocate(MDRingBuffer *ring, int nChannels, UInt32 bytesPerFrame, UI
 	MDRingBufferDeallocate(ring);
 	capacityFrames = sNextPowerOfTwo(capacityFrames);
 	
-	ring->numberChannels = 1;  /*  Assumes non-interleaved stream  */
-	ring->numberBuffers = nChannels;
+	ring->numberBuffers = numberBuffers;
 	ring->bytesPerFrame = bytesPerFrame;
 	ring->capacityFrames = capacityFrames;
 	ring->capacityFramesMask = capacityFrames - 1;
@@ -86,7 +85,6 @@ MDRingBufferDeallocate(MDRingBuffer *ring)
 		free(ring->buffers);
 		ring->buffers = NULL;
 	}
-	ring->numberChannels = 0;
 	ring->numberBuffers = 0;
 	ring->capacityBytes = 0;
 	ring->capacityFrames = 0;
@@ -100,9 +98,9 @@ MDRingBufferRelease(MDRingBuffer *ring)
 }
 
 static inline void
-sZeroRange(Byte **buffers, int nchannels, int offset, int nbytes)
+sZeroRange(Byte **buffers, int nbuffers, int offset, int nbytes)
 {
-	while (--nchannels >= 0) {
+	while (--nbuffers >= 0) {
 		memset(*buffers + offset, 0, nbytes);
 		++buffers;
 	}
@@ -111,10 +109,10 @@ sZeroRange(Byte **buffers, int nchannels, int offset, int nbytes)
 static inline void
 sStoreABL(Byte **buffers, int destOffset, const AudioBufferList *abl, int srcOffset, int nbytes)
 {
-	int nchannels = abl->mNumberBuffers;
+	int nbuffers = abl->mNumberBuffers;
 	const AudioBuffer *src = abl->mBuffers;
 //    printf("Store %d bytes at [%d] from [%d]\n", nbytes, destOffset, srcOffset);
-	while (--nchannels >= 0) {
+	while (--nbuffers >= 0) {
 		memcpy(*buffers + destOffset, (Byte *)src->mData + srcOffset, nbytes);
 		++buffers;
 		++src;
@@ -124,10 +122,10 @@ sStoreABL(Byte **buffers, int destOffset, const AudioBufferList *abl, int srcOff
 static inline void
 sFetchABL(AudioBufferList *abl, int destOffset, Byte **buffers, int srcOffset, int nbytes)
 {
-	int nchannels = abl->mNumberBuffers;
+	int nbuffers = abl->mNumberBuffers;
 	AudioBuffer *dest = abl->mBuffers;
 //    printf("Fetch %d bytes from [%d] to [%d]\n", nbytes, srcOffset, destOffset);
-	while (--nchannels >= 0) {
+	while (--nbuffers >= 0) {
 		memcpy((Byte *)dest->mData + destOffset, *buffers + srcOffset, nbytes);
 		++buffers;
 		++dest;
@@ -163,7 +161,7 @@ MDRingBufferStore(MDRingBuffer *ring, const AudioBufferList *abl, UInt32 framesT
 	
 	// write the new frames
 	Byte **buffers = ring->buffers;
-	int nchannels = ring->numberChannels;
+	int nbuffers = ring->numberBuffers;
 	int offset0, offset1, nbytes;
 	MDSampleTime curEnd = MDRingBufferEndTime(ring);
 	
@@ -172,10 +170,10 @@ MDRingBufferStore(MDRingBuffer *ring, const AudioBufferList *abl, UInt32 framesT
 		offset0 = MDRingBufferFrameOffset(ring, curEnd);
 		offset1 = MDRingBufferFrameOffset(ring, startWrite);
 		if (offset0 < offset1)
-			sZeroRange(buffers, nchannels, offset0, offset1 - offset0);
+			sZeroRange(buffers, nbuffers, offset0, offset1 - offset0);
 		else {
-			sZeroRange(buffers, nchannels, offset0, ring->capacityBytes - offset0);
-			sZeroRange(buffers, nchannels, 0, offset1);
+			sZeroRange(buffers, nbuffers, offset0, ring->capacityBytes - offset0);
+			sZeroRange(buffers, nbuffers, 0, offset1);
 		}
 		offset0 = offset1;
 	} else {

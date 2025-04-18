@@ -3,7 +3,7 @@
  *  Alchemusica
  *
  *  Created by Toshi Nagata on 09/11/05.
- *  Copyright 2009-2023 Toshi Nagata. All rights reserved.
+ *  Copyright 2009-2025 Toshi Nagata. All rights reserved.
  *
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -49,7 +49,6 @@ typedef struct MDTimeBounds {
 
 struct MDRingBuffer {
     Byte **    buffers;
-    int     numberChannels;
     int     numberBuffers;
     UInt32  bytesPerFrame;
     UInt32  capacityFrames;
@@ -63,7 +62,7 @@ struct MDRingBuffer {
 typedef struct MDRingBuffer MDRingBuffer;
 
 MDRingBuffer *MDRingBufferNew(void);
-int MDRingBufferAllocate(MDRingBuffer *ring, int nChannels, UInt32 bytesPerFrame, UInt32 capacityFrames);
+int MDRingBufferAllocate(MDRingBuffer *ring, int numberBuffers, UInt32 bytesPerFrame, UInt32 capacityFrames);
 void MDRingBufferDeallocate(MDRingBuffer *ring);
 void MDRingBufferRelease(MDRingBuffer *ring);
 

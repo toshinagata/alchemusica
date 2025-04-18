@@ -3,7 +3,7 @@
 //
 //  Created by Toshi Nagata on Sun Jun 03 2001.
 /*
-    Copyright (c) 2000-2024 Toshi Nagata. All rights reserved.
+    Copyright (c) 2000-2025 Toshi Nagata. All rights reserved.
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ NSString
 	*MyRecordingInfoFileNameKey = @"fileName",
 	*MyRecordingInfoOverwriteExistingFileFlagKey = @"overwriteExistingFile",
 	*MyRecordingInfoMultiFileNamesKey = @"multiFileNames",
+    *MyRecordingInfoAudioSourcesKey = @"audioSources",
 	*MyRecordingInfoTrackSelectionsKey = @"trackSelections",
 	*MyRecordingInfoIsAudioKey = @"isAudio",
 	*MyRecordingInfoAudioPlayThroughKey = @"audioPlayThru",
@@ -109,6 +110,7 @@ NSString
 				[NSNumber numberWithInt: kAudioRecordingAIFFFormat], MyRecordingInfoAudioRecordingFormatKey,
 				[NSNumber numberWithFloat: 44100.0f], MyRecordingInfoAudioBitRateKey,
 				[NSNumber numberWithInt: kAudioRecordingStereoFormat], MyRecordingInfoAudioChannelFormatKey,
+                [NSArray array], MyRecordingInfoAudioSourcesKey,
 				nil];
 			[recordingInfo retain];
 		}
@@ -507,23 +509,19 @@ MyRecordingInfoFileExtensionForFormat(int format)
 
 - (MDStatus)startAudioRecordingWithName: (NSString *)filename
 {
-//	NSString *sourceAudioDevice;
-//	MDAudioDeviceID deviceID;
-//	MDAudioDeviceInfo *infop;
     MDTickType tick, stopTick;
     UInt64 duration;
 	MDStatus result;
-//	MDAudio *myAudio;
 	MDAudioFormat audioFormat;
 	int fileFormat, channelFormat, mdAudioFileFormat;
+    int i;
+    NSArray *ary;
+    NSString *ext, *base;
 
     if (mySequence == NULL || myPlayer == NULL)
         return kMDErrorInternalError;
-//	sourceAudioDevice = [recordingInfo valueForKey: MyRecordingInfoSourceAudioDeviceKey];
-//	if (sourceAudioDevice == nil || (infop = MDAudioDeviceInfoWithName([sourceAudioDevice UTF8String], 1, NULL)) == NULL || (deviceID = infop->deviceID) == kMDAudioDeviceUnknown)
-//		return kMDErrorCannotSetupAudio;
-//	myAudio = MDPlayerGetAudioPlayer(myPlayer);
-	tick = (MDTickType)[[recordingInfo valueForKey: MyRecordingInfoStartTickKey] doubleValue];
+
+    tick = (MDTickType)[[recordingInfo valueForKey: MyRecordingInfoStartTickKey] doubleValue];
 	if (tick >= 0 && tick < kMDMaxTick)
 		MDPlayerJumpToTick(myPlayer, tick);
 	tick = MDPlayerGetTick(myPlayer);
@@ -552,9 +550,6 @@ MyRecordingInfoFileExtensionForFormat(int format)
 	audioFormat.mFramesPerPacket = 1;
 	audioFormat.mBytesPerPacket = audioFormat.mBytesPerFrame * audioFormat.mFramesPerPacket;
 	audioFormat.mReserved = 0;
-//	MDAudioFormatSetCanonical(&audioFormat, 44100, 2, YES);
-	
-/*	#error "Maybe need to set up audio thru device here" */
 
     duration = 0;
 	if ([[recordingInfo valueForKey: MyRecordingInfoStopFlagKey] boolValue]) {
@@ -566,10 +561,24 @@ MyRecordingInfoFileExtensionForFormat(int format)
             duration = ConvertMDTimeTypeToHostTime(durationTime);
 	}
 	
-    result = MDAudioPrepareRecording([filename fileSystemRepresentation], &audioFormat, mdAudioFileFormat, duration);
-    if (result != kMDNoError)
-        return result;
-
+    //  Set up audio file for each recording bus
+    base = [filename stringByDeletingPathExtension];
+    ext = [filename pathExtension];
+    ary = [recordingInfo objectForKey:MyRecordingInfoAudioSourcesKey];
+    for (i = 0; i < [ary count]; i++) {
+        id obj = [ary objectAtIndex:i];
+        int bus = [[obj objectForKey:AudioRecordingSourceBusKey] intValue];
+        BOOL thru = [[obj objectForKey:AudioRecordingSourceThruKey] boolValue];
+        NSString *fname;
+        if ([[obj objectForKey:AudioRecordingSourceRecordKey] boolValue] == NO)
+            continue;
+        if (bus >= 0 && bus < kMDAudioNumberOfInputStreams) {
+            fname = [NSString stringWithFormat:@"%@-Bus%d.%@", base, bus + 1, ext];
+        } else fname = filename;
+        result = MDAudioPrepareRecording(bus, [fname fileSystemRepresentation], &audioFormat, mdAudioFileFormat, duration, thru);
+        if (result != kMDNoError)
+            return result;
+    }
     MDPlayerStart(myPlayer);
 	MDAudioStartRecording();
 

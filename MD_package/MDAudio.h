@@ -3,7 +3,7 @@
  *  Alchemusica
  *
  *  Created by Toshi Nagata on 08/01/06.
- *  Copyright (c) 2008-2024 Toshi Nagata. All rights reserved.
+ *  Copyright (c) 2008-2025 Toshi Nagata. All rights reserved.
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -129,6 +129,12 @@ typedef struct MDAudioIOStreamInfo {
 	MDSampleTime inToOutSampleOffset;  /*  Time stamp offset  */
 	SInt32 bufferSizeFrames;      /*  buffer size  */
 
+    /*  Recording to file  */
+    ExtAudioFileRef audioFile;
+    SInt16 thruEnabled;
+    UInt64 recordingStartTime;
+    UInt64 recordingDuration;
+
 	/*  for MusicDevice only  */
 	char *midiControllerName;  /*  malloc'ed  */
     unsigned char *midiBuffer; /*  Ring buffer for MIDI scheduling  */
@@ -179,7 +185,7 @@ MDStatus	MDAudioStopInput(void); */
 /*MDStatus	MDAudioEnablePlayThru(int flag);
 int			MDAudioIsPlayThruEnabled(void); */
 
-MDStatus	MDAudioPrepareRecording(const char *filename, const MDAudioFormat *format, int audioFileType, UInt64 recordingDuration);
+MDStatus	MDAudioPrepareRecording(int bus, const char *filename, const MDAudioFormat *format, int audioFileType, UInt64 recordingDuration, int thruEnabled);
 MDStatus	MDAudioStartRecording(void);
 MDStatus	MDAudioStopRecording(void);
 int         MDAudioIsRecording(void);

@@ -1,5 +1,5 @@
 /*
- Copyright 2010-2024 Toshi Nagata.  All rights reserved.
+ Copyright 2010-2025 Toshi Nagata.  All rights reserved.
  
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -17,6 +17,16 @@
 #import "MyMIDISequence.h"
 #import "MyAppController.h"
 
+NSString
+*AudioRecordingSourceKey = @"audiorecording.source",
+*AudioRecordingSourceBusKey = @"bus",
+*AudioRecordingSourceRecordKey = @"record",
+*AudioRecordingSourceThruKey = @"thru";
+
+#if !defined(MAC_OS_X_VERSION_10_14) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_14)
+#define NSButtonTypeSwitch NSSwitchButton
+#endif
+
 @implementation RecordPanelController
 
 - (id)initWithDocument: (MyDocument *)document audio: (BOOL)audioFlag
@@ -24,6 +34,24 @@
     self = [super initWithWindowNibName: (audioFlag ? @"AudioRecordPanel" : @"RecordPanel")];
 	myDocument = [document retain];
 	isAudio = audioFlag;
+    if (isAudio) {
+        int i, n;
+        id obj = MyAppCallback_getObjectGlobalSettings(AudioRecordingSourceKey);
+        audioSources = [[NSMutableArray array] retain];
+        if (obj != nil) {
+            for (i = 0; i < [obj count]; i++) {
+                id dict = [obj objectAtIndex:i];
+                n = [[dict objectForKey:AudioRecordingSourceBusKey] intValue];
+                if ([[dict objectForKey:AudioRecordingSourceRecordKey] intValue])
+                    n |= 0x10000;
+                if ([[dict objectForKey:AudioRecordingSourceThruKey] intValue])
+                    n |= 0x20000;
+                [audioSources addObject:[NSNumber numberWithInt:n]];
+            }
+        } else {
+            [audioSources addObject:[NSNumber numberWithInt:0x3ffff]];  //  Standard audio output, and record/thru enabled
+        }
+    }
     return self;
 }
 
@@ -34,7 +62,33 @@
     [myDocument release];
 	[info release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    if (audioSources != nil)
+        [audioSources release];
 	[super dealloc];
+}
+
+-(void)updateGlobalSettings
+{
+    if (isAudio) {
+        NSMutableArray *ary;
+        int i, n;
+        ary = [NSMutableArray array];
+        for (i = 0; i < [audioSources count]; i++) {
+            NSDictionary *dict;
+            n = [[audioSources objectAtIndex:i] intValue];
+            dict = [NSDictionary dictionaryWithObjectsAndKeys:
+                    [NSNumber numberWithInt:(n & 0xffff)],
+                    AudioRecordingSourceBusKey,
+                    [NSNumber numberWithBool:((n & 0x10000) != 0)],
+                    AudioRecordingSourceRecordKey,
+                    [NSNumber numberWithBool:((n & 0x20000) != 0)],
+                    AudioRecordingSourceThruKey,
+                    nil];
+            [ary addObject:dict];
+        }
+        MyAppCallback_setObjectGlobalSettings(AudioRecordingSourceKey, ary);
+        [info setObject:ary forKey:MyRecordingInfoAudioSourcesKey];
+    }
 }
 
 static id
@@ -126,6 +180,21 @@ sAllowedExtensionsForTag(int tag)
 	
 	if (isAudio) {
 		NSString *locationText, *nameText;
+        int i, n, countRecordingSources;
+        countRecordingSources = 0;
+        for (i = 0; i < [audioSources count]; i++) {
+            id cont;
+            n = [[audioSources objectAtIndex:i] intValue];
+            cont = [audioSourcesView viewWithTag:12000 + i];
+            if ((n & 0x10000) != 0) {
+                countRecordingSources++;
+                [cont setState:NSOnState];
+            } else [cont setState:NSOffState];
+            cont = [audioSourcesView viewWithTag:13000 + i];
+            if ((n & 0x20000) != 0) {
+                [cont setState:NSOnState];
+            } else [cont setState:NSOffState];
+        }
 		[audioSampleRatePopUp selectItemWithTitle: [NSString stringWithFormat: @"%.0f", [[info valueForKey: MyRecordingInfoAudioBitRateKey] floatValue]]];
 		ival = [[info valueForKey: MyRecordingInfoAudioChannelFormatKey] intValue];		
 		[audioChannelsPopUp selectItemAtIndex: ival];
@@ -142,7 +211,7 @@ sAllowedExtensionsForTag(int tag)
 			nameText = @"";
 		[audioFileLocationText setStringValue: locationText];
 		[audioFileNameText setStringValue: nameText];
-		if ([locationText length] > 0 && [nameText length] > 0)
+		if ([locationText length] > 0 && [nameText length] > 0 && countRecordingSources > 0)
 			[startRecordingButton setEnabled: YES];
 		else
 			[startRecordingButton setEnabled: NO];
@@ -247,7 +316,24 @@ sAllowedExtensionsForTag(int tag)
 	
 	if (!isAudio) {
 		[self reloadMIDIDeviceInfo];
-	}
+    } else {
+        NSArray *ary = [info objectForKey:MyRecordingInfoAudioSourcesKey];
+        if (ary != nil) {
+            int i, j, k, m;
+            for (i = 0; i < [ary count]; i++) {
+                obj = [ary objectAtIndex:i];
+                k = [[obj objectForKey:AudioRecordingSourceBusKey] intValue];
+                for (j = 0; j < [audioSources count]; j++) {
+                    if (([[audioSources objectAtIndex:j] intValue] & 0xffff) == k) {
+                        k |=
+                        ([[obj objectForKey:AudioRecordingSourceRecordKey] boolValue] ? 0x10000 : 0) |
+                        ([[obj objectForKey:AudioRecordingSourceThruKey] boolValue] ? 0x20000 : 0);
+                        [audioSources replaceObjectAtIndex:j withObject:[NSNumber numberWithInt:k]];
+                    }
+                }
+            }
+        }
+    }
 
 	//  Initialize the calibrator
 	{
@@ -298,6 +384,99 @@ sAllowedExtensionsForTag(int tag)
 
 - (void)windowDidLoad
 {
+    //  Update audio sources settings
+    int i, j, k, m;
+    MDAudioDeviceInfo *dp;
+    MDStatus status;
+    NSMutableArray *newArray = [[NSMutableArray array] retain];
+    [newArray addObject:[NSNumber numberWithInt:0x3ffff]];  //  Standard audio output, and record/thru enabled
+    for (i = 0; i < kMDAudioNumberOfInputStreams; i++) {
+        status = MDAudioGetIOStreamDevice(i, &j);
+        if (status != kMDNoError)
+            break;
+        dp = MDAudioDeviceInfoAtIndex(j, 1);
+        if (dp != NULL && dp->name != NULL && dp->name[0] != 0) {
+            m = i;  //  record/thru disabled
+            for (k = (int)[audioSources count] - 1; k >= 0; k--) {
+                int n = [[audioSources objectAtIndex:k] intValue];
+                if ((n & 0xffff) == i) {
+                    m = n;
+                    break;
+                }
+            }
+            [newArray addObject:[NSNumber numberWithInt:m]];
+        }
+    }
+    {
+        //  Update audio sources panel
+        id cont;
+        NSRect rect = [audioSourcesView frame];
+        NSRect superrect = [[audioSourcesView superview] bounds];
+        int lineHeight = 18;
+        for (i = (int)[audioSources count] - 1; i >= 1; i--) {
+            for (j = 10000; j <= 13000; j += 1000) {
+                cont = [audioSourcesView viewWithTag:i + j];
+                if (cont != nil)
+                    [cont removeFromSuperview];
+            }
+        }
+        rect.size.height = lineHeight * [newArray count];
+        if (rect.size.height < superrect.size.height) {
+            rect.size.height = superrect.size.height;
+        }
+        [audioSourcesView setFrame:rect];
+        for (i = (int)[newArray count] - 1; i >= 0; i--) {
+            NSRect frame;
+            k = [[newArray objectAtIndex:i] intValue];
+            for (j = 0; j < 2; j++) {
+                frame = NSMakeRect(10, rect.size.height - lineHeight * i - 15, 34, 14);
+                if (j == 1) {
+                    frame.origin.x = 44;
+                    frame.size.width = 184;
+                }
+                if (i != 0) {
+                    cont = [[[NSTextField alloc] initWithFrame:frame] autorelease];
+                    [audioSourcesView addSubview:cont];
+                    [cont setTag:10000 + j * 1000 + i];
+                    [cont setFont:[NSFont systemFontOfSize:[NSFont smallSystemFontSize]]];
+                    [cont setBordered:NO];
+                    [cont setDrawsBackground:NO];
+                    if (j == 1) {
+                        status = MDAudioGetIOStreamDevice((k & 0xffff), &m);
+                        dp = MDAudioDeviceInfoAtIndex(m, 1);
+                        [cont setStringValue:[NSString stringWithUTF8String:dp->name]];
+                    } else {
+                        [cont setStringValue:[NSString stringWithFormat:@"%d", (k & 0xffff) + 1]];
+                    }
+                } else {
+                    cont = [audioSourcesView viewWithTag:10000 + j * 1000];
+                    [cont setFrame:frame];
+                }
+            }
+            for (j = 0; j < 2; j++) {
+                frame = NSMakeRect(238 + 45 * j, rect.size.height - lineHeight * (i + 1), 27, lineHeight);
+                if (i != 0) {
+                    cont = [[[NSButton alloc] initWithFrame:frame] autorelease];
+                    [cont setButtonType:NSButtonTypeSwitch];
+                    [cont setTitle:@""];
+                    [audioSourcesView addSubview:cont];
+                    [cont setTag:12000 + j * 1000 + i];
+                    [cont setTarget:self];
+                    [cont setAction:@selector(audioSourceCheckboxClicked:)];
+                } else {
+                    cont = [audioSourcesView viewWithTag:12000 + j * 1000];
+                    [cont setFrame:frame];
+                }
+                if (((k >> (16 + j)) & 1) != 0)
+                    [cont setState:NSOnState];
+                else
+                    [cont setState:NSOffState];
+            }
+        }
+    }
+    [audioSources release];
+    audioSources = newArray;
+
 	[[NSNotificationCenter defaultCenter]
 	 addObserver:self
 	 selector:@selector(midiSetupDidChange:)
@@ -321,6 +500,7 @@ sAllowedExtensionsForTag(int tag)
 - (IBAction)cancelButtonPressed: (id)sender
 {
     editingText = nil;
+    [self updateGlobalSettings];
 	[[NSApplication sharedApplication] endSheet: [self window] returnCode: 0];
 }
 
@@ -410,6 +590,7 @@ sAllowedExtensionsForTag(int tag)
 {
     if (editingText != nil)
         [editingText sendAction:[editingText action] to:[editingText target]];
+    [self updateGlobalSettings];
 	[[NSApplication sharedApplication] endSheet: [self window] returnCode: 1];
 }
 
@@ -432,6 +613,24 @@ sAllowedExtensionsForTag(int tag)
 	int val = ([sender state] != NSOffState);
 	[info setValue: [NSNumber numberWithBool: val] forKey: MyRecordingInfoStopFlagKey];
 	[self updateDisplay];
+}
+
+- (IBAction)audioSourceCheckboxClicked:(id)sender
+{
+    int tag = (int)[sender tag];
+    int i = tag % 1000;
+    int j = (tag / 1000) - 12;
+    if (i >= 0 && i < [audioSources count]) {
+        int n = [[audioSources objectAtIndex:i] intValue];
+        BOOL state = ([sender state] == NSOnState);
+        if (j == 0) {
+            n = (n & 0x2ffff) | (state ? 0x10000 : 0);
+        } else {
+            n = (n & 0x1ffff) | (state ? 0x20000 : 0);
+        }
+        [audioSources replaceObjectAtIndex:i withObject:[NSNumber numberWithInt:n]];
+    }
+    [self updateDisplay];
 }
 
 /*

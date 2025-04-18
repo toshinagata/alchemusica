@@ -3,7 +3,7 @@
 //
 //  Created by Toshi Nagata.
 /*
-    Copyright (c) 2000-2024 Toshi Nagata. All rights reserved.
+    Copyright (c) 2000-2025 Toshi Nagata. All rights reserved.
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -3798,10 +3798,12 @@ isConductorEvent(const MDEvent *ep, int32_t position, void *inUserData)
 - (BOOL)startAudioRecording
 {
 //	NSString *filename, *docname, *docdir;
-	NSString *dirname, *filename, *fullname;
+    NSString *dirname, *filename, *fullname, *base, *ext;
 	NSString *errmsg = nil;
 /*	MDTickType startTick; */
-	BOOL isDir;
+    BOOL isDir, overwrite;
+    int i, n;
+    NSArray *ary; // audioSources
 	NSDictionary *info = [[self myMIDISequence] recordingInfo];
 	NSFileManager *manager = [NSFileManager defaultManager];
 	dirname = [info valueForKey: MyRecordingInfoFolderNameKey];
@@ -3817,38 +3819,50 @@ isConductorEvent(const MDEvent *ep, int32_t position, void *inUserData)
 	}
 	if (filename == nil)
 		filename = [NSString stringWithFormat: @"audio.%@", MyRecordingInfoFileExtensionForFormat([[info valueForKey: MyRecordingInfoAudioRecordingFormatKey] intValue])];
-	fullname = [dirname stringByAppendingPathComponent: filename];
-	if ([manager fileExistsAtPath: fullname]) {
-		if ([[info valueForKey: MyRecordingInfoOverwriteExistingFileFlagKey] boolValue]) {
-            [manager removeItemAtURL:[NSURL fileURLWithPath:fullname] error:NULL];
-		} else {
-			//  Ask whether to overwrite the existing file
-			int retval = (int)NSRunCriticalAlertPanel(@"", [NSString stringWithFormat: @"The file %@ already exists. Do you want to overwrite it?", filename], @"Cancel", @"Overwrite", @"Save with modified name", nil);
-			switch (retval) {
-				case NSAlertDefaultReturn: return NO;
-				case NSAlertAlternateReturn: {
-                    [manager removeItemAtURL:[NSURL fileURLWithPath:fullname] error:NULL];
-					break;
-				}
-				case NSAlertOtherReturn: {
-					//  Try to rename the file
-					int i = 1;
-					while (1) {
-						NSString *newname = [[NSString stringWithFormat: @"%@_%d", [fullname stringByDeletingPathExtension], i] stringByAppendingPathExtension: [fullname pathExtension]];
-						if (![manager fileExistsAtPath: newname]) {
-							fullname = newname;
-							filename = [fullname lastPathComponent];
-							break;
-						}
-						i++;
-					}
-					break;
-				}
-			}
-		}
-	}
-/*	startTick = (int)[[info valueForKey: MyRecordingInfoStartTickKey] doubleValue]; */
-    if ([[self myMIDISequence] startAudioRecordingWithName: fullname] == kMDNoError)
+    
+    //  filename is used for exporting standard audio output
+    //  Other audio output (Bus N) is saved as filename.busN.{aiff,wav}
+    //  When the file is already present, we do _not_ ask the user to
+    //  provide a new name, but just overwrite or change file name.
+    ary = [info objectForKey:MyRecordingInfoAudioSourcesKey];
+    fullname = [dirname stringByAppendingPathComponent: filename];
+    base = [fullname stringByDeletingPathExtension];
+    ext = [fullname pathExtension];
+    overwrite = [[info valueForKey: MyRecordingInfoOverwriteExistingFileFlagKey] boolValue];
+    for (n = 0; ; n++) {  // Loop for trying non-conflicting filenames
+        NSString *fname, *suffix;
+        BOOL ok = YES;
+        for (i = 0; i < [ary count]; i++) {
+            int bus;
+            id dic = [ary objectAtIndex:i];
+            if ([[dic objectForKey:AudioRecordingSourceRecordKey] boolValue] == NO)
+                continue;
+            bus = [[dic objectForKey:AudioRecordingSourceBusKey] intValue];
+            if (n > 0)
+                suffix = [NSString stringWithFormat:@"(%d)", n];
+            else
+                suffix = @"";
+            if (bus >= 0 && bus < kMDAudioNumberOfInputStreams) {
+                fname = [NSString stringWithFormat:@"%@%@-Bus%d.%@", base, suffix, bus + 1, ext];
+            } else {
+                fname = [NSString stringWithFormat:@"%@%@.%@", base, suffix, ext];
+
+            }
+            if ([manager fileExistsAtPath:fname]) {
+                if (overwrite)
+                    [manager removeItemAtURL:[NSURL fileURLWithPath:fname] error:NULL];
+                else {
+                    ok = NO;
+                    break;
+                }
+            }
+        }
+        if (ok) {
+            fullname = [NSString stringWithFormat:@"%@%@.%@", base, suffix, ext];
+            break;
+        }
+    }
+    if ([[self myMIDISequence] startAudioRecordingWithName:fullname] == kMDNoError)
         return YES;
     else errmsg = @"Failed to record audio";
     error: {

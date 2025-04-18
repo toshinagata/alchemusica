@@ -519,12 +519,7 @@ static void printCFdata(CFTypeRef ref, int nestLevel)
 	if (![[self window] isVisible])
 		return;
 	for (idx = 0; idx < kMDAudioNumberOfStreams; idx++) {
-		if (idx < kMDAudioNumberOfInputStreams) {
-			/*  Skip if the device is disabled  */
-			int n;
-			if (MDAudioGetIOStreamDevice(idx, &n) != kMDNoError || n < 0)
-				continue;
-		}
+        /*  Always update for all input/output channels  */
 		if (MDAudioGetMixerBusAttributes(idx, &pan, &volume, &ampLeft, &ampRight, &peakLeft, &peakRight) == kMDNoError) {
 			int tagOffset = (idx % kMDAudioFirstIndexForOutputStream) + (idx >= kMDAudioFirstIndexForOutputStream ? kOutputTagOffset : 0);
 			ampLeft = (ampLeft * 1.6667f) + 100.0f;

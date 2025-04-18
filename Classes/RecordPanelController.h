@@ -1,7 +1,7 @@
 /* RecordPanelController */
 
 /*
- Copyright 2010-2024 Toshi Nagata.  All rights reserved.
+ Copyright 2010-2025 Toshi Nagata.  All rights reserved.
  
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -45,6 +45,7 @@
 	IBOutlet NSLevelIndicator *audioRightLevel;
     IBOutlet NSPopUpButton *transposeOctavePopUp;
     IBOutlet NSPopUpButton *transposeNotePopUp;
+    IBOutlet NSView *audioSourcesView;
     
 	BOOL stopModalFlag;
 	BOOL isAudio;
@@ -52,6 +53,8 @@
 	MDCalibrator *calib;
 	NSMutableDictionary *info;
     
+    NSMutableArray *audioSources; /* Array of deviceIndex + (record << 16) + (thru << 17) */
+
     NSTextField *editingText;   /*  The editing text control  */
 
 	NSTimer *timer;				/*  Refresh the display periodically during playing  */
@@ -66,6 +69,7 @@
 - (IBAction)overdubRadioChecked:(id)sender;
 - (IBAction)startButtonPressed:(id)sender;
 - (IBAction)stopCheckboxClicked:(id)sender;
+- (IBAction)audioSourceCheckboxClicked:(id)sender;
 //- (IBAction)playThruCheckboxClicked:(id)sender;
 - (IBAction)tickTextChanged:(id)sender;
 - (IBAction)chooseDestinationFile:(id)sender;
