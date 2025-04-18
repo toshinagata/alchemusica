@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="21225" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
-        <deployment identifier="macosx"/>
+        <deployment version="1070" identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="21225"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -24,7 +24,7 @@
                 <rect key="frame" x="0.0" y="0.0" width="540" height="376"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="28">
+                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="28">
                         <rect key="frame" x="70" y="357" width="120" height="17"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Device/Virtual Synth" id="29">
@@ -33,7 +33,7 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="65">
+                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="65">
                         <rect key="frame" x="216" y="357" width="32" height="17"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Pan" id="66">
@@ -42,7 +42,7 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="67">
+                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="67">
                         <rect key="frame" x="271" y="357" width="60" height="17"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Volume" id="68">
@@ -51,7 +51,7 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="69">
+                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="69">
                         <rect key="frame" x="385" y="357" width="44" height="17"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Level" id="70">
@@ -60,7 +60,7 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <slider verticalHuggingPriority="750" fixedFrame="YES" tag="350" id="209">
+                    <slider verticalHuggingPriority="750" tag="350" id="209">
                         <rect key="frame" x="249" y="11" width="103" height="20"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <sliderCell key="cell" controlSize="small" continuous="YES" state="on" alignment="left" maxValue="100" doubleValue="50" tickMarkPosition="below" numberOfTickMarks="11" sliderType="linear" id="226">
@@ -70,21 +70,21 @@
                             <action selector="volumeSliderMoved:" target="-2" id="244"/>
                         </connections>
                     </slider>
-                    <levelIndicator verticalHuggingPriority="750" fixedFrame="YES" tag="550" id="210">
+                    <levelIndicator verticalHuggingPriority="750" tag="550" id="210">
                         <rect key="frame" x="358" y="9" width="97" height="13"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <levelIndicatorCell key="cell" controlSize="small" alignment="left" maxValue="100" warningValue="80" criticalValue="90" levelIndicatorStyle="continuousCapacity" id="225">
                             <font key="font" metaFont="smallSystem"/>
                         </levelIndicatorCell>
                     </levelIndicator>
-                    <levelIndicator verticalHuggingPriority="750" fixedFrame="YES" tag="450" id="211">
+                    <levelIndicator verticalHuggingPriority="750" tag="450" id="211">
                         <rect key="frame" x="358" y="24" width="97" height="13"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <levelIndicatorCell key="cell" controlSize="small" alignment="left" maxValue="100" warningValue="80" criticalValue="90" levelIndicatorStyle="continuousCapacity" id="224">
                             <font key="font" metaFont="smallSystem"/>
                         </levelIndicatorCell>
                     </levelIndicator>
-                    <slider horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" tag="250" id="212">
+                    <slider horizontalHuggingPriority="750" verticalHuggingPriority="750" tag="250" id="212">
                         <rect key="frame" x="212" y="8" width="28" height="30"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <sliderCell key="cell" continuous="YES" enabled="NO" alignment="left" maxValue="100" allowsTickMarkValuesOnly="YES" sliderType="circular" id="223">
@@ -94,7 +94,7 @@
                             <action selector="panKnobMoved:" target="-2" id="235"/>
                         </connections>
                     </slider>
-                    <popUpButton verticalHuggingPriority="750" fixedFrame="YES" tag="150" id="213">
+                    <popUpButton verticalHuggingPriority="750" tag="150" id="213">
                         <rect key="frame" x="52" y="11" width="155" height="22"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <popUpButtonCell key="cell" type="push" title="Item1" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="222" id="218">
@@ -112,7 +112,7 @@
                             <action selector="myPopUpAction:" target="-2" id="261"/>
                         </connections>
                     </popUpButton>
-                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="214">
+                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="214">
                         <rect key="frame" x="7" y="13" width="95" height="17"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Output" id="217">
@@ -121,7 +121,7 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <scrollView fixedFrame="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" id="271">
+                    <scrollView horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" id="271">
                         <rect key="frame" x="-1" y="41" width="542" height="317"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <clipView key="contentView" id="61K-j4-mIF">

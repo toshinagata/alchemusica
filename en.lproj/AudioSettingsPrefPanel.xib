@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="21225" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
-        <deployment identifier="macosx"/>
+        <deployment version="1070" identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="21225"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -28,7 +28,7 @@
                 <rect key="frame" x="0.0" y="0.0" width="359" height="208"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" id="48">
+                    <button verticalHuggingPriority="750" id="48">
                         <rect key="frame" x="223" y="14" width="121" height="28"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                         <buttonCell key="cell" type="push" title="Save Preferences" bezelStyle="rounded" alignment="center" controlSize="small" borderStyle="border" inset="2" id="156">
@@ -42,7 +42,7 @@ DQ
                             <action selector="saveClicked:" target="-2" id="LSm-B5-mGS"/>
                         </connections>
                     </button>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" id="49">
+                    <button verticalHuggingPriority="750" id="49">
                         <rect key="frame" x="14" y="14" width="80" height="28"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <buttonCell key="cell" type="push" title="Cancel" bezelStyle="rounded" alignment="center" controlSize="small" borderStyle="border" inset="2" id="157">
@@ -56,7 +56,7 @@ Gw
                             <action selector="cancelClicked:" target="-2" id="Hir-SZ-AkH"/>
                         </connections>
                     </button>
-                    <popUpButton verticalHuggingPriority="750" fixedFrame="YES" id="CX3-3o-pP5">
+                    <popUpButton verticalHuggingPriority="750" id="CX3-3o-pP5">
                         <rect key="frame" x="68" y="179" width="274" height="22"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <popUpButtonCell key="cell" type="push" title="Item 1" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="jes-sp-a46" id="X0h-wy-nfC">
@@ -74,7 +74,7 @@ Gw
                             <action selector="devicePopUpSelected:" target="-2" id="3b4-Hy-iEC"/>
                         </connections>
                     </popUpButton>
-                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="dta-bH-KQJ">
+                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="dta-bH-KQJ">
                         <rect key="frame" x="18" y="184" width="95" height="14"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Device" id="u6a-GO-IOc">
@@ -83,14 +83,14 @@ Gw
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <box fixedFrame="YES" id="73">
+                    <box id="73">
                         <rect key="frame" x="17" y="47" width="326" height="141"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                         <view key="contentView" id="zos-cu-qZO">
                             <rect key="frame" x="3" y="3" width="320" height="123"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
-                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="10">
+                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="10">
                                     <rect key="frame" x="30" y="59" width="95" height="14"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                     <textFieldCell key="cell" enabled="NO" sendsActionOnEndEditing="YES" title="Application path:" id="158">
@@ -99,7 +99,7 @@ Gw
                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                     </textFieldCell>
                                 </textField>
-                                <button fixedFrame="YES" id="9IW-GS-hTh">
+                                <button id="9IW-GS-hTh">
                                     <rect key="frame" x="10" y="98" width="266" height="20"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                     <buttonCell key="cell" type="check" title="Import/export internal state (may cause crash)" bezelStyle="regularSquare" imagePosition="left" controlSize="small" inset="2" id="2fJ-ns-nwA">
@@ -110,7 +110,7 @@ Gw
                                         <action selector="checkBoxClicked:" target="-2" id="2Bc-kf-52l"/>
                                     </connections>
                                 </button>
-                                <button fixedFrame="YES" id="Fs5-EX-ysq">
+                                <button id="Fs5-EX-ysq">
                                     <rect key="frame" x="10" y="78" width="285" height="20"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                     <buttonCell key="cell" type="check" title="Invoke support application instead of custom view" bezelStyle="regularSquare" imagePosition="left" controlSize="small" inset="2" id="gwj-ZY-biU">
@@ -121,7 +121,7 @@ Gw
                                         <action selector="checkBoxClicked:" target="-2" id="sFS-WL-OkX"/>
                                     </connections>
                                 </button>
-                                <textField verticalHuggingPriority="750" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="jod-SZ-swS">
+                                <textField verticalHuggingPriority="750" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="jod-SZ-swS">
                                     <rect key="frame" x="32" y="11" width="274" height="40"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                     <textFieldCell key="cell" selectable="YES" enabled="NO" allowsUndo="NO" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="qOA-UH-V8e">
@@ -130,7 +130,7 @@ Gw
                                         <color key="backgroundColor" name="windowBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     </textFieldCell>
                                 </textField>
-                                <button verticalHuggingPriority="750" fixedFrame="YES" id="Wnf-Yh-ANl">
+                                <button verticalHuggingPriority="750" id="Wnf-Yh-ANl">
                                     <rect key="frame" x="122" y="51" width="79" height="28"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                     <buttonCell key="cell" type="push" title="Select..." bezelStyle="rounded" alignment="center" controlSize="small" enabled="NO" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="xK7-b1-8vb">

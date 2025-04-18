@@ -1,9 +1,8 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="11762" systemVersion="15G1010" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="21225" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
-        <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11762"/>
-        <capability name="box content view" minToolsVersion="7.0"/>
+        <deployment version="1070" identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="21225"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -23,39 +22,39 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="291" y="475" width="580" height="460"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1280" height="778"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="875"/>
             <value key="minSize" type="size" width="320" height="200"/>
             <view key="contentView" id="8">
                 <rect key="frame" x="0.0" y="0.0" width="580" height="460"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <splitView misplaced="YES" dividerStyle="paneSplitter" id="dhP-QZ-4YH">
+                    <splitView fixedFrame="YES" dividerStyle="paneSplitter" translatesAutoresizingMaskIntoConstraints="NO" id="dhP-QZ-4YH">
                         <rect key="frame" x="-1" y="0.0" width="580" height="460"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <customView id="wMQ-4P-0dE">
+                            <customView fixedFrame="YES" id="wMQ-4P-0dE">
                                 <rect key="frame" x="0.0" y="0.0" width="580" height="73"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <subviews>
-                                    <scrollView wantsLayer="YES" misplaced="YES" borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="Y1r-hN-Xr8">
+                                    <scrollView wantsLayer="YES" fixedFrame="YES" borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Y1r-hN-Xr8">
                                         <rect key="frame" x="0.0" y="0.0" width="580" height="73"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         <clipView key="contentView" id="VTx-P3-p9y" customClass="MyClipView">
                                             <rect key="frame" x="0.0" y="0.0" width="569" height="62"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
-                                                <view autoresizesSubviews="NO" misplaced="YES" id="kbx-xr-KMR" customClass="AudioEffectLayoutView">
-                                                    <rect key="frame" x="0.0" y="0.0" width="569" height="60"/>
+                                                <view autoresizesSubviews="NO" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="kbx-xr-KMR" customClass="AudioEffectLayoutView">
+                                                    <rect key="frame" x="0.0" y="2" width="569" height="60"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                                     <subviews>
-                                                        <box misplaced="YES" boxType="custom" borderType="bezel" titlePosition="noTitle" id="QBw-O4-Dcp">
+                                                        <box fixedFrame="YES" boxType="custom" borderType="bezel" titlePosition="noTitle" translatesAutoresizingMaskIntoConstraints="NO" id="QBw-O4-Dcp">
                                                             <rect key="frame" x="12" y="31" width="66" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <view key="contentView" id="YlH-7Z-pGK">
                                                                 <rect key="frame" x="1" y="1" width="64" height="15"/>
                                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 <subviews>
-                                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" misplaced="YES" id="pc0-qI-YD3">
+                                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pc0-qI-YD3">
                                                                         <rect key="frame" x="5" y="1" width="59" height="14"/>
                                                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                                                         <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Stereo In" id="SaT-ns-zwp">
@@ -68,7 +67,7 @@
                                                             </view>
                                                             <color key="fillColor" red="0.89412430873108872" green="0.99919462203979492" blue="0.98956127409000305" alpha="1" colorSpace="calibratedRGB"/>
                                                         </box>
-                                                        <button toolTip="Insert a new effect unit" verticalHuggingPriority="750" misplaced="YES" tag="10" id="YBd-Ph-hOF">
+                                                        <button toolTip="Insert a new effect unit" verticalHuggingPriority="750" fixedFrame="YES" tag="10" translatesAutoresizingMaskIntoConstraints="NO" id="YBd-Ph-hOF">
                                                             <rect key="frame" x="120" y="32" width="16" height="16"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="plus" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Amz-v7-9Zq">
@@ -79,7 +78,7 @@
                                                                 <action selector="addEffect:" target="-2" id="0zN-ZV-YcE"/>
                                                             </connections>
                                                         </button>
-                                                        <button toolTip="Add stereo signal chain" verticalHuggingPriority="750" misplaced="YES" tag="2" id="TFW-kv-inq">
+                                                        <button toolTip="Add stereo signal chain" verticalHuggingPriority="750" fixedFrame="YES" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="TFW-kv-inq">
                                                             <rect key="frame" x="61" y="17" width="16" height="16"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="plus" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="lvh-yV-gK9">
@@ -90,7 +89,7 @@
                                                                 <action selector="addEffectChain:" target="-2" id="wbA-Nq-Cyd"/>
                                                             </connections>
                                                         </button>
-                                                        <button toolTip="Remove stereo signal chain" verticalHuggingPriority="750" misplaced="YES" tag="1" id="Zfy-fA-YTf">
+                                                        <button toolTip="Remove stereo signal chain" verticalHuggingPriority="750" fixedFrame="YES" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="Zfy-fA-YTf">
                                                             <rect key="frame" x="46" y="17" width="16" height="16"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="minus" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="HNM-4c-IHE">
@@ -101,14 +100,14 @@
                                                                 <action selector="removeEffectChain:" target="-2" id="QfX-7p-gAg"/>
                                                             </connections>
                                                         </button>
-                                                        <box misplaced="YES" boxType="custom" borderType="bezel" titlePosition="noTitle" id="HVz-BK-7vn">
+                                                        <box fixedFrame="YES" boxType="custom" borderType="bezel" titlePosition="noTitle" translatesAutoresizingMaskIntoConstraints="NO" id="HVz-BK-7vn">
                                                             <rect key="frame" x="162" y="31" width="78" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <view key="contentView" id="6ie-rn-Jyc">
                                                                 <rect key="frame" x="1" y="1" width="76" height="15"/>
                                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 <subviews>
-                                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" misplaced="YES" tag="4" id="M5m-fu-cSd">
+                                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" tag="4" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="M5m-fu-cSd">
                                                                         <rect key="frame" x="6" y="1" width="70" height="14"/>
                                                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                                                         <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Stereo Out" id="Dff-9D-waa">
@@ -121,14 +120,14 @@
                                                             </view>
                                                             <color key="fillColor" red="0.99919462203979492" green="0.9272800024363741" blue="0.90841535667631346" alpha="1" colorSpace="calibratedRGB"/>
                                                         </box>
-                                                        <box misplaced="YES" boxType="custom" borderType="bezel" titlePosition="noTitle" id="flR-k1-OoR">
+                                                        <box fixedFrame="YES" boxType="custom" borderType="bezel" titlePosition="noTitle" translatesAutoresizingMaskIntoConstraints="NO" id="flR-k1-OoR">
                                                             <rect key="frame" x="76" y="31" width="45" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <view key="contentView" id="nAH-XO-zCA">
                                                                 <rect key="frame" x="1" y="1" width="43" height="15"/>
                                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                 <subviews>
-                                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" misplaced="YES" tag="3" id="21V-up-qbD">
+                                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" tag="3" allowsCharacterPickerTouchBarItem="YES" translatesAutoresizingMaskIntoConstraints="NO" id="21V-up-qbD">
                                                                         <rect key="frame" x="0.0" y="1" width="46" height="14"/>
                                                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                                                         <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="0-1" id="8ZH-kv-nmD">
@@ -156,19 +155,19 @@
                                     </scrollView>
                                 </subviews>
                             </customView>
-                            <customView id="NF9-rl-9nm">
+                            <customView fixedFrame="YES" id="NF9-rl-9nm">
                                 <rect key="frame" x="0.0" y="83" width="580" height="377"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <subviews>
-                                    <scrollView wantsLayer="YES" misplaced="YES" borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="oDY-U5-xri">
+                                    <scrollView wantsLayer="YES" fixedFrame="YES" borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oDY-U5-xri">
                                         <rect key="frame" x="0.0" y="0.0" width="580" height="377"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         <clipView key="contentView" id="URJ-QQ-6LP" customClass="MyClipView">
                                             <rect key="frame" x="0.0" y="0.0" width="569" height="366"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
-                                                <view id="flI-Js-u4p">
-                                                    <rect key="frame" x="0.0" y="4" width="570" height="367"/>
+                                                <view fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="flI-Js-u4p">
+                                                    <rect key="frame" x="0.0" y="8" width="570" height="367"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 </view>
                                             </subviews>
