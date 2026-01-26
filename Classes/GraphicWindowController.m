@@ -3117,6 +3117,8 @@ exit:
 
 - (void)keyDown:(NSEvent *)theEvent
 {
+    if ([playingViewController handleKeyDown:theEvent])
+        return;
 	unichar charCode = [[theEvent charactersIgnoringModifiers] characterAtIndex: 0];
 	if (charCode == NSBackspaceCharacter || charCode == NSDeleteCharacter) {
 		[self delete:self];

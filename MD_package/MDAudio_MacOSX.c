@@ -193,7 +193,7 @@ sMDAudioInputProc(void* inRefCon, AudioUnitRenderActionFlags* ioActionFlags, con
 	}
 	
     /*  Write to file (if recording enabled)  */
-    if (gAudio->isRecording && info->audioFile != NULL) {
+    if (gAudio->isRecording && gWaitingForTrigger == kMDPlayerTriggerNone && info->audioFile != NULL) {
         if (info->recordingStartTime == 0)
             info->recordingStartTime = inTimeStamp->mHostTime;
         if (info->recordingDuration == 0 || inTimeStamp->mHostTime < info->recordingStartTime + info->recordingDuration) {
@@ -320,7 +320,7 @@ sMDAudioRecordProc(void* inRefCon, AudioUnitRenderActionFlags* ioActionFlags, co
     }
 
 	/*  Write to file  */
-	if (gAudio->isRecording && gAudio->audioFile != NULL) {
+	if (gAudio->isRecording && gWaitingForTrigger == kMDPlayerTriggerNone && gAudio->audioFile != NULL) {
         if (gAudio->recordingStartTime == 0)
             gAudio->recordingStartTime = inTimeStamp->mHostTime;
         if (gAudio->recordingDuration == 0 || inTimeStamp->mHostTime < gAudio->recordingStartTime + gAudio->recordingDuration) {

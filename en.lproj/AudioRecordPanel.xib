@@ -33,7 +33,7 @@
                 <rect key="frame" x="0.0" y="0.0" width="353" height="345"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" id="9">
+                    <button verticalHuggingPriority="750" id="9">
                         <rect key="frame" x="229" y="13" width="121" height="28"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <buttonCell key="cell" type="push" title="Start Recording" bezelStyle="rounded" alignment="center" controlSize="small" borderStyle="border" inset="2" id="202">
@@ -47,7 +47,7 @@ DQ
                             <action selector="startButtonPressed:" target="-2" id="86"/>
                         </connections>
                     </button>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" id="10">
+                    <button verticalHuggingPriority="750" id="10">
                         <rect key="frame" x="6" y="13" width="80" height="28"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <buttonCell key="cell" type="push" title="Cancel" bezelStyle="rounded" alignment="center" controlSize="small" borderStyle="border" inset="2" id="203">
@@ -61,14 +61,14 @@ Gw
                             <action selector="cancelButtonPressed:" target="-2" id="87"/>
                         </connections>
                     </button>
-                    <box fixedFrame="YES" title="Record settings" id="104">
+                    <box title="Record settings" id="104">
                         <rect key="frame" x="9" y="280" width="339" height="65"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <view key="contentView" id="NkO-em-Ekk">
                             <rect key="frame" x="3" y="3" width="333" height="47"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
-                                <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" id="77">
+                                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" id="77">
                                     <rect key="frame" x="45" y="13" width="90" height="19"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="center" placeholderString="----:--:----" drawsBackground="YES" id="207">
@@ -81,7 +81,7 @@ Gw
                                         <outlet property="delegate" destination="-2" id="Q0L-cs-CTg"/>
                                     </connections>
                                 </textField>
-                                <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" id="66">
+                                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" id="66">
                                     <rect key="frame" x="215" y="13" width="90" height="19"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="center" placeholderString="----:--:----" drawsBackground="YES" id="205">
@@ -94,7 +94,7 @@ Gw
                                         <outlet property="delegate" destination="-2" id="NY8-Vw-yaF"/>
                                     </connections>
                                 </textField>
-                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" preferredMaxLayoutWidth="39" id="59">
+                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="YES" preferredMaxLayoutWidth="39" id="59">
                                     <rect key="frame" x="11" y="15" width="43" height="14"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Start" id="204">
@@ -103,7 +103,7 @@ Gw
                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                     </textFieldCell>
                                 </textField>
-                                <button fixedFrame="YES" id="76">
+                                <button id="76">
                                     <rect key="frame" x="149" y="13" width="60" height="18"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <buttonCell key="cell" type="check" title="Stop at" bezelStyle="regularSquare" imagePosition="left" alignment="left" controlSize="small" inset="2" id="206">
@@ -117,14 +117,14 @@ Gw
                             </subviews>
                         </view>
                     </box>
-                    <box fixedFrame="YES" title="Destination file" id="122">
+                    <box title="Destination file" id="122">
                         <rect key="frame" x="9" y="44" width="338" height="143"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <view key="contentView" id="hfM-62-OuJ">
                             <rect key="frame" x="3" y="3" width="332" height="125"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
-                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" preferredMaxLayoutWidth="72" id="97">
+                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="YES" preferredMaxLayoutWidth="72" id="97">
                                     <rect key="frame" x="11" y="69" width="76" height="14"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="File name:" id="208">
@@ -133,7 +133,7 @@ Gw
                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                     </textFieldCell>
                                 </textField>
-                                <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" id="98">
+                                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" id="98">
                                     <rect key="frame" x="72" y="66" width="151" height="19"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="209">
@@ -145,7 +145,7 @@ Gw
                                         <action selector="destinationTextChanged:" target="-2" id="133"/>
                                     </connections>
                                 </textField>
-                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" preferredMaxLayoutWidth="72" id="99">
+                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="YES" preferredMaxLayoutWidth="72" id="99">
                                     <rect key="frame" x="14" y="96" width="76" height="14"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Location:" id="210">
@@ -154,7 +154,7 @@ Gw
                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                     </textFieldCell>
                                 </textField>
-                                <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" id="100">
+                                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" id="100">
                                     <rect key="frame" x="72" y="93" width="251" height="19"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="211">
@@ -166,7 +166,7 @@ Gw
                                         <action selector="destinationTextChanged:" target="-2" id="134"/>
                                     </connections>
                                 </textField>
-                                <button verticalHuggingPriority="750" fixedFrame="YES" id="101">
+                                <button verticalHuggingPriority="750" id="101">
                                     <rect key="frame" x="233" y="61" width="94" height="28"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <buttonCell key="cell" type="push" title="Choose..." bezelStyle="rounded" alignment="center" controlSize="small" borderStyle="border" inset="2" id="212">
@@ -177,7 +177,7 @@ Gw
                                         <action selector="chooseDestinationFile:" target="-2" id="129"/>
                                     </connections>
                                 </button>
-                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" preferredMaxLayoutWidth="55" id="106">
+                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="YES" preferredMaxLayoutWidth="55" id="106">
                                     <rect key="frame" x="11" y="41" width="59" height="14"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Format:" id="213">
@@ -186,7 +186,7 @@ Gw
                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                     </textFieldCell>
                                 </textField>
-                                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" id="107">
+                                <popUpButton verticalHuggingPriority="750" id="107">
                                     <rect key="frame" x="69" y="35" width="74" height="22"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <popUpButtonCell key="cell" type="push" title="AIFF" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="110" id="214">
@@ -203,7 +203,7 @@ Gw
                                         <action selector="myPopUpAction:" target="-2" id="130"/>
                                     </connections>
                                 </popUpButton>
-                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" preferredMaxLayoutWidth="76" id="112">
+                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="YES" preferredMaxLayoutWidth="76" id="112">
                                     <rect key="frame" x="154" y="40" width="80" height="14"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Sample rate:" id="215">
@@ -212,7 +212,7 @@ Gw
                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                     </textFieldCell>
                                 </textField>
-                                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" id="113">
+                                <popUpButton verticalHuggingPriority="750" id="113">
                                     <rect key="frame" x="226" y="35" width="99" height="22"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <popUpButtonCell key="cell" type="push" title="44100" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="116" id="216">
@@ -229,7 +229,7 @@ Gw
                                         <action selector="myPopUpAction:" target="-2" id="131"/>
                                     </connections>
                                 </popUpButton>
-                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" allowsCharacterPickerTouchBarItem="YES" preferredMaxLayoutWidth="55" id="117">
+                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="YES" preferredMaxLayoutWidth="55" id="117">
                                     <rect key="frame" x="11" y="16" width="59" height="14"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Channels:" id="217">
@@ -238,7 +238,7 @@ Gw
                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                     </textFieldCell>
                                 </textField>
-                                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" id="118">
+                                <popUpButton verticalHuggingPriority="750" id="118">
                                     <rect key="frame" x="69" y="10" width="74" height="22"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <popUpButtonCell key="cell" type="push" title="2" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" tag="1" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="120" id="218">
@@ -258,14 +258,14 @@ Gw
                             </subviews>
                         </view>
                     </box>
-                    <box fixedFrame="YES" title="Record source" id="JoV-wa-2Vo">
+                    <box title="Record source" id="JoV-wa-2Vo">
                         <rect key="frame" x="9" y="191" width="339" height="85"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <view key="contentView" id="HCZ-uX-vOq">
                             <rect key="frame" x="3" y="3" width="333" height="67"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
-                                <scrollView fixedFrame="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" findBarPosition="belowContent" id="eRw-cb-uV2">
+                                <scrollView horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" findBarPosition="belowContent" id="eRw-cb-uV2">
                                     <rect key="frame" x="0.0" y="0.0" width="333" height="53"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                     <clipView key="contentView" id="QUk-ij-FaY">
@@ -307,7 +307,7 @@ Gw
                                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                         </textFieldCell>
                                                     </textField>
-                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" tag="11000" preferredMaxLayoutWidth="180" id="U4Z-qY-Vyl">
+                                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="11000" preferredMaxLayoutWidth="180" id="U4Z-qY-Vyl">
                                                         <rect key="frame" x="44" y="35" width="184" height="14"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <textFieldCell key="cell" lineBreakMode="clipping" title="Standard audio output" id="PbT-8z-LWq">
@@ -331,7 +331,7 @@ Gw
                                         <autoresizingMask key="autoresizingMask"/>
                                     </scroller>
                                 </scrollView>
-                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" id="buG-h3-7CO">
+                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="buG-h3-7CO">
                                     <rect key="frame" x="12" y="53" width="24" height="14"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                     <textFieldCell key="cell" lineBreakMode="clipping" title="Bus" id="Lql-e8-gcz">
@@ -340,7 +340,7 @@ Gw
                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     </textFieldCell>
                                 </textField>
-                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" id="ZwW-Aq-Wrs">
+                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="ZwW-Aq-Wrs">
                                     <rect key="frame" x="227" y="53" width="42" height="14"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                     <textFieldCell key="cell" lineBreakMode="clipping" title="Record" id="6FZ-qh-DWZ">
@@ -349,7 +349,7 @@ Gw
                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     </textFieldCell>
                                 </textField>
-                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" id="d0Y-c2-1mJ">
+                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="d0Y-c2-1mJ">
                                     <rect key="frame" x="280" y="53" width="29" height="14"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                     <textFieldCell key="cell" lineBreakMode="clipping" title="Thru" id="Eeb-fn-rAp">
@@ -358,7 +358,7 @@ Gw
                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     </textFieldCell>
                                 </textField>
-                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" id="fZH-Fc-Fmj">
+                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="fZH-Fc-Fmj">
                                     <rect key="frame" x="44" y="53" width="41" height="14"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                     <textFieldCell key="cell" lineBreakMode="clipping" title="Source" id="ZVN-Nh-2Fd">

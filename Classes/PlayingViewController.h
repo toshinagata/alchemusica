@@ -82,5 +82,6 @@
 
 //  Called from the parent windowController
 - (void)windowDidLoad;
+- (BOOL)handleKeyDown:(NSEvent *)theEvent;
 
 @end

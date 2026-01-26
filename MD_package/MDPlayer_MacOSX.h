@@ -34,6 +34,13 @@ typedef struct MetronomeInfoRecord {
 } MetronomeInfoRecord;
 
 extern MetronomeInfoRecord gMetronomeInfo;
+extern volatile int gWaitingForTrigger;
+
+enum {
+    kMDPlayerTriggerNone = 0,
+    kMDPlayerTriggerCountOff,
+    kMDPlayerTriggerKey
+};
 
 typedef struct MDPlayer		MDPlayer;
 
@@ -83,6 +90,9 @@ MDTickType	MDPlayerGetTick(MDPlayer *inPlayer);
 void		MDPlayerSetMIDIThruDeviceAndChannel(int32_t dev, int ch);
 void        MDPlayerSetMIDIThruTranspose(int transpose);
 void        MDPlayerSetCountOffSettings(MDPlayer *inPlayer, MDTimeType duration, MDTimeType bar, MDTimeType beat);
+int         MDPlayerGetCountOffStatus(MDPlayer *inPlayer, int *outBar, int *outBeat);
+int         MDPlayerStartWaitingForKey(MDPlayer *inPlayer);
+int         MDPlayerFinishWaitingForKey(MDPlayer *inPlayer, MDTimeType triggerTime);
 MDStatus	MDPlayerBacktrackEvents(MDPlayer *inPlayer, MDTickType inTick, const int32_t *inEventType, const int32_t *inEventTypeLastOnly);
 int			MDPlayerSendRawMIDI(MDPlayer *player, const unsigned char *p, int size, int destDevice, MDTimeType scheduledTime);
 void		MDPlayerRingMetronomeClick(MDPlayer *inPlayer, MDTimeType atTime, int isPrincipal);

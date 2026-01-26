@@ -179,6 +179,20 @@
 					marker = 0;
 			} else marker = -1;
 		}
+        if (isRecording) {
+            switch (gWaitingForTrigger) {
+                case kMDPlayerTriggerKey:
+                    countString = @"(Waiting)";
+                    break;
+                case kMDPlayerTriggerCountOff: {
+                    int cbar, cbeat;
+                    if (MDPlayerGetCountOffStatus(player, &cbar, &cbeat)) {
+                        countString = [NSString stringWithFormat: @"%4d:%2d:%4d", cbar, cbeat, 0];
+                    }
+                    break;
+                }
+            }
+        }
 		ntime = (int32_t)(time / 1000000);
 		hour = ntime / 3600;
 		min = (ntime / 60) % 60;
@@ -188,6 +202,11 @@
 	}
 	[timeField setStringValue: timeString];
 	[countField setStringValue: countString];
+    if (isRecording && gWaitingForTrigger != kMDPlayerTriggerNone) {
+        [countField setBackgroundColor:[NSColor redColor]];
+    } else {
+        [countField setBackgroundColor:[NSColor whiteColor]];
+    }
 	[positionSlider setDoubleValue: slider];
 	if (marker >= 0)
 		[markerPopup selectItemAtIndex: marker];
@@ -588,10 +607,11 @@
 	}
     if (isRecordButton) {
 		BOOL flag;
-        int countOffNumber;
+        int countOffNumber, recordingMode;
         NSDictionary *info = [[myDocument myMIDISequence] recordingInfo];
         countOffNumber = [[info valueForKey: MyRecordingInfoCountOffNumberKey] intValue];
-        if (countOffNumber > 0) {
+        recordingMode = [[info valueForKey: MyRecordingInfoRecordingModeKey] intValue];
+        if (recordingMode == 0 && countOffNumber > 0) {
             /*  Handle metronome count-off */
             int bar, beat, barBeatFlag, barTime, beatTime, tickInBeatTime;
             int32_t currentBar, currentBeat, currentTickInBeat;
@@ -618,7 +638,12 @@
                 countOffDuration += tickInBeatTime;
                 MDPlayerSetCountOffSettings(player, countOffDuration, 0, beatTime);
             }
-        } else MDPlayerSetCountOffSettings(player, 0, 0, 0);
+        } else {
+            //  Disable count-off
+            MDPlayerSetCountOffSettings(player, 0, 0, 0);
+            if (recordingMode == 1)
+                MDPlayerStartWaitingForKey(player);
+        }
 		if (isAudioRecording)
 			flag = [myDocument startAudioRecording];
 		else
@@ -798,6 +823,23 @@
 	[self selectTuneAtIndex: [tunePopup indexOfSelectedItem]];
 }
 */
+
+- (BOOL)handleKeyDown:(NSEvent *)theEvent
+{
+    MDPlayer *player = [[myDocument myMIDISequence] myPlayer];
+    if (player != NULL && MDPlayerIsRecording(player) && gWaitingForTrigger == kMDPlayerTriggerKey) {
+        unichar charCode = [[theEvent charactersIgnoringModifiers] characterAtIndex: 0];
+        if (charCode == NSUpArrowFunctionKey ||
+            charCode == NSDownArrowFunctionKey ||
+            charCode == NSRightArrowFunctionKey ||
+            charCode == NSDownArrowFunctionKey ||
+            charCode == NSEnterCharacter) {
+            MDPlayerFinishWaitingForKey(player, 0);
+            return YES;
+        }
+    }
+    return NO;
+}
 
 #pragma mark ====== Notification Handler ======
 

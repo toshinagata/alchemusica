@@ -214,6 +214,8 @@ static int sMIDIThruTranspose = 0;
 
 MetronomeInfoRecord gMetronomeInfo;
 
+volatile int gWaitingForTrigger = kMDPlayerTriggerNone;
+
 #pragma mark ====== Utility function  ======
 
 int
@@ -223,6 +225,28 @@ my_usleep(uint32_t useconds)
 	req_time.tv_sec = useconds / 1000000;
 	req_time.tv_nsec = (useconds % 1000000) * 1000;
 	return nanosleep(&req_time, &rem_time);
+}
+
+void
+MDPlayerLock(MDPlayer *inPlayer)
+{
+    if (inPlayer != NULL)
+        MDSequenceLock(inPlayer->sequence);
+}
+
+void
+MDPlayerUnlock(MDPlayer *inPlayer)
+{
+    if (inPlayer != NULL)
+        MDSequenceUnlock(inPlayer->sequence);
+}
+
+int
+MDPlayerTryLock(MDPlayer *inPlayer)
+{
+    if (inPlayer != NULL)
+        return MDSequenceTryLock(inPlayer->sequence);
+    else return 0;
 }
 
 #pragma mark ====== Device Management ======
@@ -1039,10 +1063,11 @@ MyMIDIReadProc(const MIDIPacketList *pktlist, void *refCon, void *connRefCon)
 {
     MDTimeType now, myTimeStamp;
     MIDIPacket *packet;
-    unsigned char recordingFlag;
+    unsigned char recordingFlag, lockFlag;
     int i, j, n;
 
 //    dprintf(0, "MyMIDIReadProc invoked\n");
+    lockFlag = 0;
     if (sRecordingPlayer == NULL || sRecordingPlayer->isRecording == 0)
         recordingFlag = 0;
     else {
@@ -1062,11 +1087,33 @@ MyMIDIReadProc(const MIDIPacketList *pktlist, void *refCon, void *connRefCon)
             }
         }
         if (recordingFlag) {
-            if (packet->timeStamp != 0) {
-                myTimeStamp = ConvertHostTimeToMDTimeType(packet->timeStamp) - sRecordingPlayer->startTime;
-            } else myTimeStamp = now;
-            n = MDPlayerPutRecordingData(sRecordingPlayer, myTimeStamp, (int32_t)(packet->length), (unsigned char *)(packet->data));
+            if (gWaitingForTrigger == kMDPlayerTriggerKey) {
+                for (j = 0; j < packet->length; j++) {
+                    unsigned char b = packet->data[j];
+                    if ((b >= 0x80 && b < 0xf0) || b == 0xfa) {
+                        // FA is 'start' realtime message
+                        MDPlayerFinishWaitingForKey(sRecordingPlayer, ConvertHostTimeToMDTimeType(packet->timeStamp));
+                        break;
+                    }
+                }
+            }
+            if (gWaitingForTrigger == kMDPlayerTriggerNone) {
+                if (!lockFlag) {
+                    MDPlayerLock(sRecordingPlayer);
+                    lockFlag = 1;
+                }
+                if (packet->timeStamp != 0) {
+                    myTimeStamp = ConvertHostTimeToMDTimeType(packet->timeStamp) - sRecordingPlayer->startTime;
+                } else myTimeStamp = now;
+                n = MDPlayerPutRecordingData(sRecordingPlayer, myTimeStamp, (int32_t)(packet->length), (unsigned char *)(packet->data));
+            }
         }
+        
+        if (lockFlag) {
+            MDPlayerUnlock(sRecordingPlayer);
+            lockFlag = 0;
+        }
+        
         /*  Echo back  */
         if (sMIDIThruDevice >= 0) {
             if (sMIDIThruChannel >= 0 && sMIDIThruChannel < 16) {
@@ -1317,53 +1364,54 @@ MyTimerFunc(MDPlayer *player)
 	MDTimeType now_time;
     MDTimeType time_to_wait;
 	MDTickType now_tick, prefetch_tick, tick;
-	MDSequence *sequence;
 	
 	if (player == NULL)
 		return -1;
 
-	sequence = player->sequence;
-	
 	now_time = GetHostTimeInMDTimeType() - player->startTime;
-    if (now_time < player->countOffEndTime) {
-        /*  During count-off  */
-        MDTimeType time1, time2;
-        if (player->countOffNextRing < player->countOffEndTime && player->countOffNextRing <  now_time + kMDPlayerPrefetchInterval) {
-            /*  Ring the metronome  */
-            int isBell = 0;
-            if (player->countOffBar > 0 && (player->countOffNextRing - player->countOffFirstRing) % player->countOffBar == 0)
-                isBell = 1;
-            MDPlayerRingMetronomeClick(player, player->countOffNextRing, isBell);
-            /*  Next metronome  */
-            time1 = player->countOffNextRing + player->countOffBeat;
-            if (player->countOffBar > 0) {
-                time2 = ((player->countOffNextRing - player->countOffFirstRing) / player->countOffBar + 1) * player->countOffBar + player->countOffFirstRing;
-                if (time2 < time1)
-                    time1 = time2;
+
+    if (gWaitingForTrigger == kMDPlayerTriggerCountOff) {
+        time_to_wait = kMDPlayerMinimumInterval;
+        if (MDPlayerTryLock(player) == 0) {
+            if (now_time < player->countOffEndTime) {
+                /*  During count-off  */
+                MDTimeType time1, time2;
+                if (player->countOffNextRing < player->countOffEndTime && player->countOffNextRing <  now_time + kMDPlayerPrefetchInterval) {
+                    /*  Ring the metronome  */
+                    int isBell = 0;
+                    if (player->countOffBar > 0 && (player->countOffNextRing - player->countOffFirstRing) % player->countOffBar == 0)
+                        isBell = 1;
+                    MDPlayerRingMetronomeClick(player, player->countOffNextRing, isBell);
+                    /*  Next metronome  */
+                    time1 = player->countOffNextRing + player->countOffBeat;
+                    if (player->countOffBar > 0) {
+                        time2 = ((player->countOffNextRing - player->countOffFirstRing) / player->countOffBar + 1) * player->countOffBar + player->countOffFirstRing;
+                        if (time2 < time1)
+                            time1 = time2;
+                    }
+                    player->countOffNextRing = time1;
+                }
+                time1 = player->countOffNextRing - now_time;
+                time2 = player->countOffEndTime - now_time;
+                time_to_wait = (time1 < time2 ? time1 : time2);
+                if (time_to_wait < kMDPlayerMinimumInterval)
+                    time_to_wait = kMDPlayerMinimumInterval;
+            } else {
+                //  Count-off period is over
+                gWaitingForTrigger = kMDPlayerTriggerNone;
             }
-            player->countOffNextRing = time1;
         }
-        time1 = player->countOffNextRing - now_time;
-        time2 = player->countOffEndTime - now_time;
-        time_to_wait = (time1 < time2 ? time1 : time2);
-        if (time_to_wait < kMDPlayerMinimumInterval)
-            time_to_wait = kMDPlayerMinimumInterval;
         return (int32_t)time_to_wait;
+    } else if (gWaitingForTrigger == kMDPlayerTriggerKey) {
+        //  Do nothing until trigger is detected
+        return (int32_t)kMDPlayerMinimumInterval;
     }
-    player->time = now_time;
-	now_tick = MDCalibratorTimeToTick(player->calib, now_time);
-	prefetch_tick = MDCalibratorTimeToTick(player->calib, now_time + kMDPlayerPrefetchInterval);
-	
-    if (MDSequenceTryLock(sequence) == 0) {
-    /*    if (now_tick >= player->recordingStopTick) {
-            if (player->isRecording)
-                MDPlayerStopRecording(player);
-            if (MDAudioIsRecording())
-                MDAudioStopRecording();
-            player->recordingStopTick = kMDMaxTick;
-        } */
+    
+    if (MDPlayerTryLock(player) == 0) {
+        player->time = now_time;
+        now_tick = MDCalibratorTimeToTick(player->calib, now_time);
+        prefetch_tick = MDCalibratorTimeToTick(player->calib, now_time + kMDPlayerPrefetchInterval);
         SendMIDIEventsBeforeTick(player, now_tick, prefetch_tick, &tick);
-    //    printf("now_tick = %ld tick = %ld\n", now_tick, tick);
         if (tick >= kMDMaxTick) {
             player->status = kMDPlayer_exhausted;
             time_to_wait = -1;
@@ -1374,40 +1422,11 @@ MyTimerFunc(MDPlayer *player)
             else if (time_to_wait < kMDPlayerMinimumInterval)
                 time_to_wait = kMDPlayerMinimumInterval;
         }
-		MDSequenceUnlock(sequence);
+		MDPlayerUnlock(player);
     } else {
         time_to_wait = kMDPlayerPrefetchInterval;
     }
     return (int32_t)time_to_wait;
-    
-#if 0
-	player->time = now_time;
-	if (tick >= kMDMaxTick && !player->isRecording && !MDAudioIsRecording()) {
-		player->status = kMDPlayer_exhausted;
-		//	player->time = MDCalibratorTickToTime(player->calib, MDSequenceGetDuration(MDMergerGetSequence(player->merger)));
-		if (tick >= kMDMaxTick)
-			tick = MDSequenceGetDuration(sequence);
-		player->time = MDCalibratorTickToTime(player->calib, tick);
-		return -1;
-	} else {
-        if (now_tick >= player->recordingStopTick) {
-            if (player->isRecording)
-                MDPlayerStopRecording(player);
-            if (MDAudioIsRecording())
-                MDAudioStopRecording();
-            player->recordingStopTick = kMDMaxTick;
-        }
-		if (tick >= kMDMaxTick && player->nextMetronomeBeat < tick)
-			tick = player->nextMetronomeBeat;
-		next_time = MDCalibratorTickToTime(player->calib, tick + 1);
-		next_time -= (now_time + kMDPlayerPrefetchInterval);
-		if (next_time < kMDPlayerMinimumInterval)
-			next_time = kMDPlayerMinimumInterval;
-		if (next_time < last_time - now_time)
-			next_time = last_time - now_time;
-		return (int32_t)next_time;
-	}
-#endif
 }
 
 #if !USE_TIME_MANAGER
@@ -1714,7 +1733,7 @@ MDPlayerRefreshTrackDestinations(MDPlayer *inPlayer)
 //        temp[i] = inPlayer->destInfo[i]->dev;
 //    origDestNum = inPlayer->destNum;
 
-	MDSequenceLock(sequence);
+	MDPlayerLock(inPlayer);
     
     /*  Dispose previous destInfo[]  */
     if (inPlayer->destInfo != NULL) {
@@ -1725,8 +1744,10 @@ MDPlayerRefreshTrackDestinations(MDPlayer *inPlayer)
     
     /*  Allocate destInfo  */
     inPlayer->destInfo = (MDDestinationInfo **)malloc((num + 1) * sizeof(MDDestinationInfo *));
-    if (inPlayer->destInfo == NULL)
+    if (inPlayer->destInfo == NULL) {
+        MDPlayerUnlock(inPlayer);
         return kMDErrorOutOfMemory;
+    }
     memset(inPlayer->destInfo, 0, num * sizeof(MDDestinationInfo *));
     inPlayer->destNum = 0;
 
@@ -1771,7 +1792,7 @@ MDPlayerRefreshTrackDestinations(MDPlayer *inPlayer)
     }
     MDPlayerJumpToTick(inPlayer, 0);
 
-    MDSequenceUnlock(sequence);
+    MDPlayerUnlock(inPlayer);
     
     return kMDNoError;
 
@@ -1904,10 +1925,11 @@ MDPlayerStart(MDPlayer *inPlayer)
 	
 	inPlayer->startTime = GetHostTimeInMDTimeType() - inPlayer->time;
     inPlayer->countOffEndTime = inPlayer->time;
-    if (inPlayer->isRecording && inPlayer->countOffDuration > 0) {
+    if (inPlayer->isRecording && gWaitingForTrigger == kMDPlayerTriggerNone && inPlayer->countOffDuration > 0) {
         inPlayer->countOffFirstRing = inPlayer->time - inPlayer->countOffDuration;
         inPlayer->countOffNextRing = inPlayer->countOffFirstRing;
         inPlayer->startTime += inPlayer->countOffDuration;
+        gWaitingForTrigger = kMDPlayerTriggerCountOff;
     }
 	inPlayer->status = kMDPlayer_playing;
 	inPlayer->shouldTerminate = 0;
@@ -1942,6 +1964,8 @@ MDPlayerStop(MDPlayer *inPlayer)
     if (inPlayer == NULL || inPlayer->sequence == NULL)
         return kMDNoError;
     
+    gWaitingForTrigger = kMDPlayerTriggerNone;
+
     if (inPlayer->status == kMDPlayer_suspended) {
         inPlayer->recordingStopTick = kMDMaxTick;
         inPlayer->status = kMDPlayer_ready;
@@ -2106,7 +2130,10 @@ MDPlayerGetTime(MDPlayer *inPlayer)
 {
 	if (inPlayer != NULL) {
 		if (inPlayer->status == kMDPlayer_playing || inPlayer->status == kMDPlayer_exhausted) {
-            MDTimeType now_time = GetHostTimeInMDTimeType() - inPlayer->startTime;
+            MDTimeType now_time;
+            if (gWaitingForTrigger == kMDPlayerTriggerKey)
+                return inPlayer->time;
+            now_time = GetHostTimeInMDTimeType() - inPlayer->startTime;
             if (now_time < inPlayer->countOffEndTime)
                 return inPlayer->countOffEndTime;
             else return now_time;
@@ -2124,7 +2151,7 @@ MDTickType
 MDPlayerGetTick(MDPlayer *inPlayer)
 {
 	if (inPlayer != NULL) {
-		if (inPlayer->status == kMDPlayer_playing || inPlayer->isRecording) {
+		if ((inPlayer->status == kMDPlayer_playing || inPlayer->isRecording) && gWaitingForTrigger == kMDPlayerTriggerNone) {
 			return MDCalibratorTimeToTick(inPlayer->calib, GetHostTimeInMDTimeType() - inPlayer->startTime);
 		} else {
 			return MDCalibratorTimeToTick(inPlayer->calib, inPlayer->time);
@@ -2163,6 +2190,72 @@ MDPlayerSetCountOffSettings(MDPlayer *inPlayer, MDTimeType duration, MDTimeType 
         inPlayer->countOffBar = bar;
         inPlayer->countOffBeat = beat;
     }
+}
+
+/* --------------------------------------
+    ･ MDPlayerGetCountOffStatus
+ -------------------------------------- */
+int
+MDPlayerGetCountOffStatus(MDPlayer *inPlayer, int *outBar, int *outBeat)
+{
+    if (inPlayer != NULL) {
+        MDTimeType now_time = GetHostTimeInMDTimeType() - inPlayer->startTime;
+        if (now_time < inPlayer->countOffEndTime) {
+            int bar, beat, n;
+            now_time -= inPlayer->countOffFirstRing;
+            if (inPlayer->countOffBar == 0) {
+                bar = 0;
+                n = (int)(inPlayer->countOffDuration / inPlayer->countOffBeat);
+                beat = (int)(now_time / inPlayer->countOffBeat) - n;
+            } else {
+                n = (int)(inPlayer->countOffDuration / inPlayer->countOffBar);
+                bar = (int)(now_time / inPlayer->countOffBar) - n;
+                beat = (int)((now_time % inPlayer->countOffBar) / inPlayer->countOffBeat) + 1;
+            }
+            if (outBar != NULL)
+                *outBar = bar;
+            if (outBeat != NULL)
+                *outBeat = beat;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+/* --------------------------------------
+    ･ MDPlayerStartWaitingForKey
+ -------------------------------------- */
+int
+MDPlayerStartWaitingForKey(MDPlayer *inPlayer)
+{
+    int retval;
+    MDPlayerLock(inPlayer);
+    if (gWaitingForTrigger == kMDPlayerTriggerNone) {
+        gWaitingForTrigger = kMDPlayerTriggerKey;
+        retval = 0;
+    } else retval = 1;
+    MDPlayerUnlock(inPlayer);
+    return retval;
+}
+
+/* --------------------------------------
+    ･ MDPlayerFinishWaitingForKey
+ -------------------------------------- */
+int
+MDPlayerFinishWaitingForKey(MDPlayer *inPlayer, MDTimeType triggerTime)
+{
+    int retval;
+    MDPlayerLock(inPlayer);
+    if (gWaitingForTrigger == kMDPlayerTriggerKey && inPlayer->status == kMDPlayer_playing) {
+        if (triggerTime == 0) {
+            triggerTime = GetHostTimeInMDTimeType();
+        }
+        inPlayer->startTime = triggerTime - inPlayer->time;
+        gWaitingForTrigger = kMDPlayerTriggerNone;
+        retval = 0;
+    } else retval = 1;
+    MDPlayerUnlock(inPlayer);
+    return retval;
 }
 
 /* --------------------------------------
