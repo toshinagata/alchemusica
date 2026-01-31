@@ -25,7 +25,9 @@ d = sprintf("%04d%02d%02d", year, month, day)
 build = "build " + d
 verstr = "v#{ver} #{build}"
 yrange = "2000-#{year}"
-
+print "version=#{version}\n"
+print "yrange=#{yrange}\n"
+print "svn_revision=#{svn_revision}\n"
 def modify_file(name, enc = nil, &block)
   return if name =~ /~$/
   enc ||= 'utf-8'
@@ -49,19 +51,22 @@ def modify_file(name, enc = nil, &block)
       s = ary.join("\n") + "\n"
       fp.write(s.encode(enc))
       fp.close
+      print("#{name} is modified\n")
     end
+  else
+    # print("#{name} is not modified\n")
   end
 end
 
 #  Modify Info.plist
 ["Alchemusica-Info.plist", "Alchemusica-Legacy-info.plist"].each { |nm|
-  version = false
+  version_flag = false
   modify_file(nm) { |s|
-    if version
-      version = false
-      "\t<string>#{ver}</string>\n"
+    if version_flag
+      version_flag = false
+      "\t<string>#{ver}</string>"
     else
-      version = (s =~ /\bCFBundleVersion\b/)
+      version_flag = (s =~ /\bCFBundleVersion\b/) || (s =~ /\bCFBundleShortVersionString\b/)
       nil
     end
   }
@@ -70,11 +75,12 @@ end
 #  Modify InfoPlist.strings
 Dir["*.lproj/InfoPlist.strings"].each { |nm|
   modify_file(nm, 'utf-16') { |s|
-    olds = s.dup
-    s.sub!(/Copyright [-0-9]+/, "Copyright #{yrange}")
-    s.sub!(/Version [.0-9a-z]+( +\(rev [0-9]+\))?/, "Version #{ver} (rev #{svn_revision})")
-    if olds != s
-      s
+    news = s.dup
+    news.sub!(/Copyright [-0-9]+/, "Copyright #{yrange}")
+    news.sub!(/Version [.0-9a-z]+/, "Version #{ver}")
+    news.sub!(/\(rev [0-9]+\)/, "(rev #{svn_revision})")
+    if news != s
+      news
     else
       nil
     end
