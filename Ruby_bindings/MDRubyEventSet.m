@@ -519,8 +519,8 @@ static ID s_ID_track, s_ID_eot_selected;
 
 /*
  *  call-seq:
- *     MREventSet.new([track,] arg1, arg2, ...)
- *     MREventSet.new([track,] arg1, arg2, ...) { |n| ... }
+ *     EventSet.new([track,] arg1, arg2, ...)
+ *     EventSet.new([track,] arg1, arg2, ...) { |n| ... }
  *
  *  Create a new eventset. Arg1, arg2,... and block are handled as in MRPointSet.
  *  If track is given, then the created eventset is associated with the track.
@@ -559,7 +559,7 @@ MREventSetValueFromIntGroupAndTrackInfo(IntGroup *pset, MDTrack *track, void *my
 
 /*
  *  call-seq:
- *     MREventSet.track
+ *     eventset.track
  *
  *  Accessor (getter) function for @track.
  */
@@ -571,7 +571,7 @@ MREventSet_Track(VALUE self)
 
 /*
  *  call-seq:
- *     MREventSet.eot_selected
+ *     eventset.eot_selected
  *
  *  Accessor (getter) function for @eot_selected.
  */
@@ -583,7 +583,7 @@ MREventSet_EOTSelected(VALUE self)
 
 /*
  *  call-seq:
- *     MREventSet.track=
+ *     eventset.track=
  *
  *  Accessor (setter) function for @track.
  */
@@ -598,7 +598,7 @@ MREventSet_SetTrack(VALUE self, VALUE val)
 
 /*
  *  call-seq:
- *     MREventSet.eot_selected=
+ *     eventset.eot_selected=
  *
  *  Accessor (setter) function for @eot_selected.
  */
@@ -623,7 +623,7 @@ s_MREventSet_Pointer(VALUE self)
 
 /*
  *  call-seq:
- *     MREventSet.each { |pt| ... }
+ *     eventset.each { |pt| ... }
  *
  *  Iterate the block for each event. Pt is a Pointer value, and the same object
  *  is given for all block call.
@@ -646,7 +646,7 @@ s_MREventSet_Each(VALUE self)
 
 /*
  *  call-seq:
- *     MREventSet.reverse_each { |pt| ... }
+ *     eventset.reverse_each { |pt| ... }
  *
  *  Iterate the block backward for each event. Pt is a Pointer value, and the same object
  *  is given for all block call.
@@ -670,7 +670,7 @@ s_MREventSet_ReverseEach(VALUE self)
 
 /*
  *  call-seq:
- *     MREventSet.each_with_index { |pt,i| ... }
+ *     eventset.each_with_index { |pt,i| ... }
  *
  *  Iterate the block for each event. Pt is a Pointer value, and i is the index
  *  of the event within the event set.
@@ -696,7 +696,7 @@ s_MREventSet_EachWithIndex(VALUE self)
 
 /*
  *  call-seq:
- *     MREventSet.reverse_each_with_index { |pt,i| ... }
+ *     eventset.reverse_each_with_index { |pt,i| ... }
  *
  *  Iterate the block backward for each event. Pt is a Pointer value, and i is the index
  *  of the event within the event set (going downward from self.length-1 to 0)
@@ -756,7 +756,7 @@ s_MREventSet_Select_sub(VALUE self, int reject)
 
 /*
  *  call-seq:
- *     MREventSet.select { |pt| ... }
+ *     eventset.select { |pt| ... }
  *
  *  Create a new event set from those for which the block returns true.
  */
@@ -768,7 +768,7 @@ s_MREventSet_Select(VALUE self)
 
 /*
  *  call-seq:
- *     MREventSet.reject! { |pt| ... }
+ *     eventset.reject! { |pt| ... }
  *
  *  Remove those events for which the block returns true. Returns nil if
  *  no events were removed, otherwise returns self.
@@ -781,10 +781,10 @@ s_MREventSet_Reject(VALUE self)
 
 /*
  *  call-seq:
- *     MREventSet.modify_tick(op, num)  #  op is either "=", "+", or "*"
- *     MREventSet.modify_tick(num)      #  same as ("+", num)
- *     MREventSet.modify_tick(array)
- *     MREventSet.modify_tick { |pt| }
+ *     eventset.modify_tick(op, num)  #  op is either "=", "+", or "*"
+ *     eventset.modify_tick(num)      #  same as ("+", num)
+ *     eventset.modify_tick(array)
+ *     eventset.modify_tick { |pt| }
  *
  *  Modify the tick of the specified events.
  *  In the first form, the ticks are set, shift, or multiplied by the argument.
@@ -877,10 +877,10 @@ s_MREventSet_ModifyTick(int argc, VALUE *argv, VALUE self)
 
 /*
  *  call-seq:
- *     MREventSet.modify_code(op, num)  #  op is either "=", "+", or "*"
- *     MREventSet.modify_code(num)      #  same as ("+", num)
- *     MREventSet.modify_code(array)
- *     MREventSet.modify_code { |pt| }
+ *     eventset.modify_code(op, num)  #  op is either "=", "+", or "*"
+ *     eventset.modify_code(num)      #  same as ("+", num)
+ *     eventset.modify_code(array)
+ *     eventset.modify_code { |pt| }
  *
  *  Modify the code of the specified events.
  *  In the first form, the codes are set, shift, or multiplied by the argument.
@@ -1110,10 +1110,10 @@ s_MREventSet_ModifyDataSub(int argc, VALUE *argv, VALUE self, int kind)
 
 /*
  *  call-seq:
- *     MREventSet.modify_data(op, num)  #  op is either "=", "+", or "*"
- *     MREventSet.modify_data(num)      #  same as ("+", num)
- *     MREventSet.modify_data(array)
- *     MREventSet.modify_data { |pt| }
+ *     eventset.modify_data(op, num)  #  op is either "=", "+", or "*"
+ *     eventset.modify_data(num)      #  same as ("+", num)
+ *     eventset.modify_data(array)
+ *     eventset.modify_data { |pt| }
  *
  *  Modify the code of the specified events.
  *  In the first form, the data are set, shift, or multiplied by the argument.
@@ -1154,10 +1154,10 @@ s_MREventSet_ModifyVelocity(int argc, VALUE *argv, VALUE self)
 
 /*
  *  call-seq:
- *     MREventSet.modify_release_velocity(op, num)  #  op is either "=", "+", or "*"
- *     MREventSet.modify_release_velocity(num)      #  same as ("+", num)
- *     MREventSet.modify_release_velocity(array)
- *     MREventSet.modify_release_velocity { |pt| }
+ *     eventset.modify_release_velocity(op, num)  #  op is either "=", "+", or "*"
+ *     eventset.modify_release_velocity(num)      #  same as ("+", num)
+ *     eventset.modify_release_velocity(array)
+ *     eventset.modify_release_velocity { |pt| }
  *
  *  Modify the release velocities of the specified events. All specified events must be note events.
  *  In the first form, the release velocities are set, shift, or multiplied by the argument.
@@ -1176,10 +1176,10 @@ s_MREventSet_ModifyReleaseVelocity(int argc, VALUE *argv, VALUE self)
 
 /*
  *  call-seq:
- *     MREventSet.modify_duration(op, num)  #  op is either "=", "+", or "*"
- *     MREventSet.modify_duration(num)      #  same as ("+", num)
- *     MREventSet.modify_duration(array)
- *     MREventSet.modify_duration { |pt| }
+ *     eventset.modify_duration(op, num)  #  op is either "=", "+", or "*"
+ *     eventset.modify_duration(num)      #  same as ("+", num)
+ *     eventset.modify_duration(array)
+ *     eventset.modify_duration { |pt| }
  *
  *  Modify the duration of the specified events.
  *  In the first form, the durations are set, shift, or multiplied by the argument.

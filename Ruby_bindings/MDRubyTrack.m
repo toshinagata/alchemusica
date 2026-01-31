@@ -136,7 +136,7 @@ s_MRTrack_Index(VALUE self)
 	MyDocumentTrackInfo *ip = TrackInfoFromMRTrackValue(self);
 	if (ip->doc == nil)
 		return Qnil;
-	else return FIX2INT(ip->num);
+	else return INT2FIX(ip->num);
 }
 
 /*

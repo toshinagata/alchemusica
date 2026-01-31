@@ -3,7 +3,7 @@
 //  Alchemusica
 //
 //  Created by Toshi Nagata on 08/03/30.
-//  Copyright 2008-2024 Toshi Nagata. All rights reserved.
+//  Copyright 2008-2026 Toshi Nagata. All rights reserved.
 //
 /*
  This program is free software; you can redistribute it and/or modify
@@ -450,6 +450,30 @@ MRPointer_Last(VALUE self)
 
 /*
  *  call-seq:
+ *     pointer.state
+ *
+ *  Returns -1 if the pointer is "before beginning", 1 if the poiner is
+ *  at the end of track, 0 otherwise.
+ */
+VALUE
+MRPointer_State(VALUE self)
+{
+    MDPointer *pt = MDPointerFromMRPointerValue(self);
+    int32_t pos = MDPointerGetPosition(pt);
+    if (pos < 0)
+        return INT2FIX(-1);
+    else {
+        MDTrack *track = MDPointerGetTrack(pt);
+        if (track == NULL)
+            return INT2FIX(-1);
+        else if (pos >= MDTrackGetNumberOfEvents(track))
+            return INT2FIX(1);
+        else return INT2FIX(0);
+    }
+}
+
+/*
+ *  call-seq:
  *     pointer.next_in_selection
  *
  *  Move forward within the selection. If no more event is present within selection, the pointer
@@ -500,6 +524,56 @@ s_MRPointer_JumpToTick(VALUE self, VALUE val)
 	if (MDPointerJumpToTick(pt, tick))
 		return Qtrue;
 	else return Qfalse;
+}
+
+/*
+ *  call-seq:
+ *     pointer.time_signature_at_tick(tick)
+ *
+ *  Move to the time signature event having the tick not larger than the given value.
+ *  If no time signature is given before tick, then the pointer moves to the top.
+ *  If the pointer does not belong to the conductor track, an exception is raised.
+ */
+static VALUE
+s_MRPointer_TimeSignatureAtTick(VALUE self, VALUE val)
+{
+    MRPointerInfo *info = s_MRPointerInfoFromValue(self);
+    if (info != NULL && info->trackInfo.doc != NULL && info->trackInfo.num == 0) {
+        MDPointer *pt = info->pointer;
+        MDCalibrator *calib = [[info->trackInfo.doc myMIDISequence] sharedCalibrator];
+        MDTickType tick = (MDTickType)floor(NUM2DBL(val) + 0.5);
+        MDCalibratorJumpToTick(calib, tick);
+        int32_t pos = MDCalibratorGetEventPosition(calib, NULL, kMDEventTimeSignature, -1);
+        return (MDPointerSetPosition(pt, pos) ? Qtrue : Qfalse);
+    } else {
+        rb_raise(rb_eStandardError, "the pointer does not belong to the conductor track");
+        return Qfalse; /* no reach */
+    }
+}
+
+/*
+ *  call-seq:
+ *     pointer.tempo_at_tick(tick)
+ *
+ *  Move to the tempo event having the tick not larger than the given value.
+ *  If no tempo event is given before tick, then the pointer moves to the top.
+ *  If the pointer does not belong to the conductor track, an exception is raised.
+ */
+static VALUE
+s_MRPointer_TempoAtTick(VALUE self, VALUE val)
+{
+    MRPointerInfo *info = s_MRPointerInfoFromValue(self);
+    if (info != NULL && info->trackInfo.doc != NULL && info->trackInfo.num == 0) {
+        MDPointer *pt = info->pointer;
+        MDCalibrator *calib = [[info->trackInfo.doc myMIDISequence] sharedCalibrator];
+        MDTickType tick = (MDTickType)floor(NUM2DBL(val) + 0.5);
+        MDCalibratorJumpToTick(calib, tick);
+        int32_t pos = MDCalibratorGetEventPosition(calib, NULL, kMDEventTempo, -1);
+        return (MDPointerSetPosition(pt, pos) ? Qtrue : Qfalse);
+    } else {
+        rb_raise(rb_eStandardError, "the pointer does not belong to the conductor track");
+        return Qfalse; /* no reach */
+    }
 }
 
 static void
@@ -750,8 +824,8 @@ MRPointer_GetDataSub(const MDEvent *ep)
 			const unsigned char *cup = MDGetMetaDataPtr(ep);
 			vals[0] = INT2NUM(cup[0]);
 			vals[1] = INT2NUM(1 << cup[1]);
-			vals[2] = INT2NUM(cup[1]);
-			vals[3] = INT2NUM(cup[2]);
+			vals[2] = INT2NUM(cup[2]);
+			vals[3] = INT2NUM(cup[3]);
 			return rb_ary_new4(4, vals);
 		}
 		case kMDEventKey: {
@@ -858,7 +932,11 @@ MRPointer_SetDataSub(VALUE val, MDEvent *ep, MyDocument *doc, int trackNo, int32
 				ed.ucValue[1]++;
 			if ((valn = Ruby_ObjectAtIndex(val, 2)) != Qnil)
 				ed.ucValue[2] = NUM2INT(valn);
-			else ed.ucValue[2] = 24;
+            else {
+                ed.ucValue[2] = 96 / (1 << ed.ucValue[1]);
+                if (ed.ucValue[2] == 0)
+                    ed.ucValue[2] = 1;
+            }
 			if ((valn = Ruby_ObjectAtIndex(val, 3)) != Qnil)
 				ed.ucValue[3] = NUM2INT(valn);
 			else ed.ucValue[3] = 8;
@@ -1190,9 +1268,12 @@ MRPointerInitClass(void)
 	rb_define_method(rb_cMRPointer, "bottom", MRPointer_Bottom, 0);
 	rb_define_method(rb_cMRPointer, "next", MRPointer_Next, 0);
 	rb_define_method(rb_cMRPointer, "last", MRPointer_Last, 0);
+    rb_define_method(rb_cMRPointer, "state", MRPointer_State, 0);
 	rb_define_method(rb_cMRPointer, "next_in_selection", MRPointer_NextInSelection, 0);
 	rb_define_method(rb_cMRPointer, "last_in_selection", MRPointer_LastInSelection, 0);
 	rb_define_method(rb_cMRPointer, "jump_to_tick", s_MRPointer_JumpToTick, 1);
+    rb_define_method(rb_cMRPointer, "time_signature_at_tick", s_MRPointer_TimeSignatureAtTick, 1);
+    rb_define_method(rb_cMRPointer, "tempo_at_tick", s_MRPointer_TempoAtTick, 1);
 	rb_define_method(rb_cMRPointer, "kind", s_MRPointer_Kind, 0);
 	rb_define_method(rb_cMRPointer, "kind=", s_MRPointer_SetKind, 1);
 	rb_define_method(rb_cMRPointer, "code", s_MRPointer_Code, 0);

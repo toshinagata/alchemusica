@@ -371,6 +371,164 @@ def modify_durations
     end
 end
 
+def doReclock(guidetrack)
+  tr = track(guidetrack)
+  a = []
+  tr.each { |pt| if pt.kind == :note; a.push([pt.tick, nil, tick_to_time(pt.tick)]); end }
+  if a.length < 2
+    message_box("At least 2 note events must be present in the guide track.", "Error", :ok)
+    return
+  end
+  #  Pointer for time signature
+  pt = track(0).pointer(-1)
+  pos = -1
+  tinfo = [0, timebase, timebase * 4]   #  tick, beat_ticks, bar_ticks
+  #  Destination tick for each guide event
+  tick = a[0][0]
+  a.length.times { |i|
+    pt.time_signature_at_tick(tick)
+    if pt.position > pos
+      d = pt.data
+      ticks_per_beat = (d[2] > 0 ? timebase * d[2] / 24 : timebase * 4 / d[1])
+      tinfo = [pt.tick, ticks_per_beat, timebase * 4 * d[0] / d[1]]
+    end
+    bar_top = tick - (tick - tinfo[0]) % tinfo[2]
+    beat_top = tick - (tick - bar_top) % tinfo[1]
+    next_beat_top = [beat_top + tinfo[1], bar_top + tinfo[2]].min
+    if i == 0
+      #  Replace tick with the nearest beat position
+      if next_beat_top - tick < tick - beat_top
+        tick = next_beat_top
+      else
+        tick = beat_top
+      end
+    else
+      #  Proceed to the next beat position
+      tick = next_beat_top
+    end
+    a[i][1] = tick
+  }
+  print "#{a.length} guide events were found\n"
+  #  The original tempo value at the last guide event
+  if pt.tempo_at_tick(a[-1][0])
+    last_tempo = pt.data
+  else
+    last_tempo = 120.0
+  end
+  #  proc for calculating new tick
+  newtick = lambda { |tick|
+    if tick < a[0][0]
+      return tick
+    end
+    tm = tick_to_time(tick)
+    a0 = nil
+    a.each { |a1|
+      if tm < a1[2]  #  Never true for a[0]
+        return ((tm - a0[2]) * (a1[1] - a0[1]) / (a1[2] - a0[2]) + a0[1]).to_i
+      end
+      a0 = a1
+    }
+    return tick - a0[0] + a0[1]  #  a0 is not nil, because a always has >=2 elements
+  }
+  #  Reclock each track, including the conductor track
+  each_track { |tr|
+    tick_set = EventSet.new(tr)
+    tick_values = []
+    duration_set = EventSet.new(tr)
+    duration_values = []
+    track_duration = tr.duration
+    tr.each { |pt|
+      tick = pt.tick
+      ntick = newtick.call(tick)
+      if tick != ntick
+        tick_set.add(pt.position)
+        tick_values.push(ntick)
+      end
+      if pt.kind == :note
+        duration = pt.duration
+        nduration = newtick.call(tick + duration) - ntick
+        if nduration <= 0
+          nduration = 1
+        end
+        if duration != nduration
+          duration_set.add(pt.position)
+          duration_values.push(nduration)
+        end
+      end
+    }
+    if tick_values.length > 0
+      tick_set.modify_tick(tick_values)
+    end
+    if duration_values.length > 0
+      duration_set.modify_duration(duration_values)
+    end
+    new_track_duration = newtick.call(track_duration)
+    if tr.duration != new_track_duration
+      tr.duration = new_track_duration
+    end
+    print "track #{tr.index}: #{tick_values.length} ticks #{duration_values.length} durations modified, track duration #{track_duration} to #{tr.duration}\n"
+  }
+  #  Remove the tempo event between a[0][1] and a[-1][1]
+  tempo_set = EventSet.new(track(0))
+  pt.position = -1
+  while pt.next
+    if pt.kind == :tempo && pt.tick >= a[0][1] && pt.tick <= a[-1][1]
+      tempo_set.add(pt.position)
+    end
+  end
+  if tempo_set.length > 0
+    track(0).cut(tempo_set)
+  end
+  #  Insert new tempo events
+  tr = Track.new
+  a.length.times { |i|
+    a0 = a[i]
+    if i == a.length - 1
+      new_tempo = last_tempo
+    else
+      a1 = a[i + 1]
+      new_tempo = (a1[1] - a0[1]) * 60.0 / timebase / (a1[2] - a0[2])
+    end
+    ntick = a0[1]
+    tr.add(ntick, :tempo, new_tempo)
+  }
+  track(0).merge(tr)
+  print "tempo: #{tempo_set.length} events were removed and #{a.length} events were created\n"
+end
+
+def reclock
+  names = []
+  each_with_index { |tr, i|
+    next if i == 0
+    names.push("#{i}:#{tr.name}")
+  }
+  seq = self
+  hash = Dialog.run("Reclock") {
+    layout(1,
+      layout(2,
+        item(:text, :title=>"Guide Track"),
+        item(:popup, :subitems=>names, :tag=>"guidetrack",
+          :action=> proc { |it|
+            a = []
+            seq.track(it[:value] + 1).each { |pt| if pt.kind == :note; a.push(pt.tick); end }
+            if a.length == 0
+              s = "No note events"
+            elsif a.length == 1
+              s = "1 note event"
+            else
+              s = "#{a.length} note events\n" + seq.tick_to_measure(a[0]).join(":") + " - " + seq.tick_to_measure(a[-1]).join(":")
+            end
+            set_attr("note", :value, s)
+          })),
+      item(:textview, :width=>200, :tag=>"note", :value=>"\n", :editable=>false, :height=>36))
+    g = item_with_tag("guidetrack")
+    g[:action].call(g)
+  }
+  if hash[:status] == 0
+    doReclock(hash["guidetrack"] + 1)
+  end
+end
+
 end
 
 register_menu("Change Timebase...", :change_timebase)
@@ -379,3 +537,4 @@ register_menu("Thin Selected Events...", :thin_events, 1)
 register_menu("Create tremolo...", :create_tremolo, 1)
 register_menu("Move selected events to track...", :move_selected_events_to_track, 1)
 register_menu("Modify durations...", :modify_durations, 1)
+register_menu("Reclock...", :reclock)
