@@ -1241,7 +1241,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd $PROJECT_DIR\nsh record_build_date.sh\nif [ \"${BUILD_STYLE:=$CONFIGURATION}\" = \"Deployment\" ]; then\n  ruby update_version.rb\nfi\n";
+			shellScript = "cd $PROJECT_DIR\nsh record_build_date.sh\n#if [ \"${BUILD_STYLE:=$CONFIGURATION}\" = \"Deployment\" ]; #then\n  ruby update_version.rb\n#fi\n";
 			showEnvVarsInLog = 0;
 		};
 		E4C3848414111D93006F2661 /* ShellScript */ = {
@@ -1256,7 +1256,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd $PROJECT_DIR\nsh record_build_date.sh\nif [ \"${BUILD_STYLE:=$CONFIGURATION}\" = \"Deployment\" ]; then\n  ruby update_version.rb\nfi\n";
+			shellScript = "cd $PROJECT_DIR\nsh record_build_date.sh\n#if [ \"${BUILD_STYLE:=$CONFIGURATION}\" = \"Deployment\" ]; #then\n  ruby update_version.rb\n#fi\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */

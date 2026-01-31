@@ -37,8 +37,8 @@ def modify_file(name, enc = nil, &block)
     ary.each_with_index { |s, i|
       s = block.call(s)
       if s
+        modified = true if ary[i] != s
         ary[i] = s
-        modified = true
       end
     }
     fp.close
