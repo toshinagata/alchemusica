@@ -3,7 +3,7 @@
 //  Alchemusica
 //
 //  Created by Toshi Nagata on 06/05/08.
-//  Copyright 2006-2024 Toshi Nagata. All rights reserved.
+//  Copyright 2006-2026 Toshi Nagata. All rights reserved.
 /*
 
  This program is free software; you can redistribute it and/or modify
@@ -66,7 +66,7 @@
     r.origin.y = theRect.origin.y + theRect.size.height - 7;
     r.size.width = 5;
     r.size.height = 5;
-    [[MyPopUpButton triangleImage] drawInRect:r fromRect:NSZeroRect operation:NSCompositeSourceAtop fraction:fraction respectFlipped:YES hints:nil];
+    [[MyPopUpButton triangleImage] drawInRect:r fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:fraction respectFlipped:YES hints:nil];
 }
 
 @end
