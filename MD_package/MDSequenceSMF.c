@@ -2,7 +2,7 @@
    MDSequenceSMF.c
    Created by Toshi Nagata, 2000.11.24.
 
-   Copyright (c) 2000-2024 Toshi Nagata. All rights reserved.
+   Copyright (c) 2000-2026 Toshi Nagata. All rights reserved.
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -76,7 +76,7 @@ MDSequenceTempoToSMFTempo(float tempo)
     else return (int32_t)(60000000.0 / tempo);
 }
 
-static int32_t
+static float
 MDSequenceSMFTempoToTempo(int32_t smfTempo)
 {
     if (smfTempo <= (int32_t)(60000000.0 / kMDMaxTempo))
