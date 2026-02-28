@@ -1401,6 +1401,7 @@ MyTimerFunc(MDPlayer *player)
                 gWaitingForTrigger = kMDPlayerTriggerNone;
             }
         }
+        MDPlayerUnlock(player);
         return (int32_t)time_to_wait;
     } else if (gWaitingForTrigger == kMDPlayerTriggerKey) {
         //  Do nothing until trigger is detected
