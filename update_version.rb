@@ -78,7 +78,7 @@ Dir["*.lproj/InfoPlist.strings"].each { |nm|
     news = s.dup
     news.sub!(/Copyright [-0-9]+/, "Copyright #{yrange}")
     news.sub!(/Version [.0-9a-z]+/, "Version #{ver}")
-    news.sub!(/\(rev [0-9]+\)/, "(rev #{svn_revision})")
+    # news.sub!(/\(rev [0-9]+\)/, "(rev #{svn_revision})")
     if news != s
       news
     else
