@@ -1,5 +1,5 @@
 /*
- Copyright 2010-2025 Toshi Nagata.  All rights reserved.
+ Copyright 2010-2026 Toshi Nagata.  All rights reserved.
  
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@
 #import "MDHeaders.h"
 #import "MyMIDISequence.h"
 #import "MyAppController.h"
+#import "GraphicWindowController.h"
+#import "PlayingViewController.h"
 
 NSString
 *AudioRecordingSourceKey = @"audiorecording.source",
@@ -651,6 +653,8 @@ sAllowedExtensionsForTag(int tag)
 	s = [[sender stringValue] UTF8String];
 	if (MDEventParseTickString(s, &bar, &beat, &tick) == 3) {
 		mdTick = MDCalibratorMeasureToTick(calib, bar, beat, tick);
+        if (sender == startTickText && mdTick < 0)
+            mdTick = 0;
 		[info setValue: [NSNumber numberWithDouble: mdTick] forKey: (sender == startTickText ? MyRecordingInfoStartTickKey : MyRecordingInfoStopTickKey)];
 	}
 	[self updateDisplay];
@@ -699,6 +703,14 @@ sAllowedExtensionsForTag(int tag)
 		[info setValue: name forKey: MyRecordingInfoFileNameKey];
 	}
 	[self updateDisplay];
+}
+
+- (IBAction)setCurrentPos:(id)sender
+{
+    PlayingViewController *playing = [(GraphicWindowController *)[myDocument mainWindowController] playingViewController];
+    MDTickType playingTick = [playing getCurrentTick];
+    [info setValue: [NSNumber numberWithDouble: (double)playingTick] forKey: MyRecordingInfoStartTickKey];
+    [self updateDisplay];
 }
 
 - (BOOL)control:(NSControl *)control textShouldBeginEditing:(NSText *)fieldEditor

@@ -1,7 +1,7 @@
 /* RecordPanelController */
 
 /*
- Copyright 2010-2025 Toshi Nagata.  All rights reserved.
+ Copyright 2010-2026 Toshi Nagata.  All rights reserved.
  
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -76,5 +76,6 @@
 - (IBAction)tickTextChanged:(id)sender;
 - (IBAction)chooseDestinationFile:(id)sender;
 - (IBAction)destinationTextChanged:(id)sender;
+- (IBAction)setCurrentPos:(id)sender;
 //- (IBAction)volumeSliderMoved:(id)sender;
 @end

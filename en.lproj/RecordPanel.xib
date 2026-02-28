@@ -15,8 +15,6 @@
                 <outlet property="midiChannelPopUp" destination="29" id="53"/>
                 <outlet property="modePopUp" destination="105" id="140"/>
                 <outlet property="overdubRadioMatrix" destination="129" id="142"/>
-                <outlet property="setStartPopUp" destination="ZIj-6P-Lfr" id="N0x-HD-sfc"/>
-                <outlet property="setStopPopUp" destination="wPq-tE-yD1" id="oeQ-5c-Y7y"/>
                 <outlet property="sourceDevicePopUp" destination="11" id="50"/>
                 <outlet property="startTickText" destination="99" id="143"/>
                 <outlet property="stopTickCheckbox" destination="104" id="146"/>
@@ -395,40 +393,6 @@ Gw
                                         <outlet property="delegate" destination="-2" id="Df5-OU-hLK"/>
                                     </connections>
                                 </textField>
-                                <popUpButton verticalHuggingPriority="750" id="ZIj-6P-Lfr">
-                                    <rect key="frame" x="43" y="40" width="98" height="22"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <popUpButtonCell key="cell" type="push" title="Set..." bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="YOG-d6-IiH" id="Jcb-pJ-Rmx">
-                                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                        <font key="font" metaFont="smallSystem"/>
-                                        <menu key="menu" title="OtherViews" id="zkm-xx-Ipe">
-                                            <items>
-                                                <menuItem title="Set..." state="on" id="YOG-d6-IiH"/>
-                                                <menuItem title="the playing position ()" tag="1" id="yQ6-xu-17X"/>
-                                            </items>
-                                        </menu>
-                                    </popUpButtonCell>
-                                    <connections>
-                                        <action selector="myPopUpAction:" target="-2" id="D9A-V4-bk5"/>
-                                    </connections>
-                                </popUpButton>
-                                <popUpButton verticalHuggingPriority="750" id="wPq-tE-yD1">
-                                    <rect key="frame" x="213" y="40" width="98" height="22"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <popUpButtonCell key="cell" type="push" title="Set..." bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="H7I-mB-yRo" id="GTx-7E-825">
-                                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                        <font key="font" metaFont="smallSystem"/>
-                                        <menu key="menu" title="OtherViews" id="4o2-Ei-pca">
-                                            <items>
-                                                <menuItem title="Set..." state="on" id="H7I-mB-yRo"/>
-                                                <menuItem title="the end of selection ()" tag="1" id="Nn6-fZ-VgP"/>
-                                            </items>
-                                        </menu>
-                                    </popUpButtonCell>
-                                    <connections>
-                                        <action selector="myPopUpAction:" target="-2" id="OEd-I2-uxe"/>
-                                    </connections>
-                                </popUpButton>
                                 <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="111">
                                     <rect key="frame" x="11" y="14" width="43" height="14"/>
                                     <autoresizingMask key="autoresizingMask"/>
@@ -485,6 +449,20 @@ Gw
                                         <action selector="myPopUpAction:" target="-2" id="152"/>
                                     </connections>
                                 </popUpButton>
+                                <button verticalHuggingPriority="750" id="KpR-R5-gJa">
+                                    <rect key="frame" x="35" y="34" width="111" height="28"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <buttonCell key="cell" type="push" title="Set Current Pos" bezelStyle="rounded" alignment="center" controlSize="small" borderStyle="border" inset="2" id="HRd-bq-NsT">
+                                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                        <font key="font" metaFont="smallSystem"/>
+                                        <string key="keyEquivalent" base64-UTF8="YES">
+Gw
+</string>
+                                    </buttonCell>
+                                    <connections>
+                                        <action selector="setCurrentPos:" target="-2" id="mEz-4A-TLZ"/>
+                                    </connections>
+                                </button>
                             </subviews>
                         </view>
                     </box>
@@ -492,22 +470,5 @@ Gw
             </view>
             <point key="canvasLocation" x="133" y="134"/>
         </window>
-        <view id="76">
-            <rect key="frame" x="0.0" y="0.0" width="1" height="111"/>
-            <autoresizingMask key="autoresizingMask"/>
-            <point key="canvasLocation" x="-122" y="51"/>
-        </view>
-        <view id="82">
-            <rect key="frame" x="0.0" y="0.0" width="125" height="1"/>
-            <autoresizingMask key="autoresizingMask"/>
-        </view>
-        <view id="84">
-            <rect key="frame" x="0.0" y="0.0" width="1" height="111"/>
-            <autoresizingMask key="autoresizingMask"/>
-        </view>
-        <view id="86">
-            <rect key="frame" x="0.0" y="0.0" width="125" height="1"/>
-            <autoresizingMask key="autoresizingMask"/>
-        </view>
     </objects>
 </document>
