@@ -46,6 +46,8 @@
     IBOutlet NSPopUpButton *transposeOctavePopUp;
     IBOutlet NSPopUpButton *transposeNotePopUp;
     IBOutlet NSView *audioSourcesView;
+    IBOutlet NSPopUpButton *setStartPopUp;
+    IBOutlet NSPopUpButton *setStopPopUp;
     
 	BOOL stopModalFlag;
 	BOOL isAudio;

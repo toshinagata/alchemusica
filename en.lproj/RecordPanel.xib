@@ -15,6 +15,8 @@
                 <outlet property="midiChannelPopUp" destination="29" id="53"/>
                 <outlet property="modePopUp" destination="105" id="140"/>
                 <outlet property="overdubRadioMatrix" destination="129" id="142"/>
+                <outlet property="setStartPopUp" destination="ZIj-6P-Lfr" id="N0x-HD-sfc"/>
+                <outlet property="setStopPopUp" destination="wPq-tE-yD1" id="oeQ-5c-Y7y"/>
                 <outlet property="sourceDevicePopUp" destination="11" id="50"/>
                 <outlet property="startTickText" destination="99" id="143"/>
                 <outlet property="stopTickCheckbox" destination="104" id="146"/>
@@ -29,11 +31,11 @@
         <window title="Panel" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="7" userLabel="Panel" customClass="NSPanel">
             <windowStyleMask key="styleMask" titled="YES" closable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="74" y="227" width="359" height="333"/>
+            <rect key="contentRect" x="74" y="227" width="360" height="358"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1440" height="875"/>
             <value key="minSize" type="size" width="213" height="107"/>
             <view key="contentView" id="8">
-                <rect key="frame" x="0.0" y="0.0" width="359" height="333"/>
+                <rect key="frame" x="0.0" y="0.0" width="360" height="358"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <button verticalHuggingPriority="750" id="48">
@@ -64,175 +66,8 @@ Gw
                             <action selector="cancelButtonPressed:" target="-2" id="58"/>
                         </connections>
                     </button>
-                    <box title="Sequence Settings" id="87">
-                        <rect key="frame" x="17" y="46" width="325" height="139"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                        <view key="contentView" id="aXC-eT-Nsh">
-                            <rect key="frame" x="3" y="3" width="319" height="121"/>
-                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                            <subviews>
-                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="16">
-                                    <rect key="frame" x="11" y="92" width="89" height="14"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Target track" id="164">
-                                        <font key="font" metaFont="smallSystem"/>
-                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                    </textFieldCell>
-                                </textField>
-                                <popUpButton verticalHuggingPriority="750" id="17">
-                                    <rect key="frame" x="102" y="87" width="206" height="22"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <popUpButtonCell key="cell" type="push" title="Item1" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="21" id="165">
-                                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                        <font key="font" metaFont="smallSystem"/>
-                                        <menu key="menu" title="OtherViews" id="18">
-                                            <items>
-                                                <menuItem title="Item1" state="on" id="21"/>
-                                                <menuItem title="Item2" id="20"/>
-                                                <menuItem title="Item3" id="19"/>
-                                            </items>
-                                        </menu>
-                                    </popUpButtonCell>
-                                    <connections>
-                                        <action selector="myPopUpAction:" target="-2" id="56"/>
-                                    </connections>
-                                </popUpButton>
-                                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" id="99">
-                                    <rect key="frame" x="45" y="38" width="90" height="19"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="center" placeholderString="----:--:----" drawsBackground="YES" id="166">
-                                        <font key="font" metaFont="smallSystem"/>
-                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                    </textFieldCell>
-                                    <connections>
-                                        <action selector="tickTextChanged:" target="-2" id="149"/>
-                                        <outlet property="delegate" destination="-2" id="kOt-KW-1cQ"/>
-                                    </connections>
-                                </textField>
-                                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" id="101">
-                                    <rect key="frame" x="215" y="38" width="90" height="19"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="center" placeholderString="----:--:----" drawsBackground="YES" id="167">
-                                        <font key="font" metaFont="smallSystem"/>
-                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                    </textFieldCell>
-                                    <connections>
-                                        <action selector="tickTextChanged:" target="-2" id="150"/>
-                                        <outlet property="delegate" destination="-2" id="Df5-OU-hLK"/>
-                                    </connections>
-                                </textField>
-                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="102">
-                                    <rect key="frame" x="11" y="40" width="43" height="14"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Start" id="168">
-                                        <font key="font" metaFont="smallSystem"/>
-                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                    </textFieldCell>
-                                </textField>
-                                <button id="104">
-                                    <rect key="frame" x="149" y="38" width="60" height="18"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <buttonCell key="cell" type="check" title="Stop at" bezelStyle="regularSquare" imagePosition="left" alignment="left" controlSize="small" inset="2" id="169">
-                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                        <font key="font" metaFont="smallSystem"/>
-                                    </buttonCell>
-                                    <connections>
-                                        <action selector="stopCheckboxClicked:" target="-2" id="153"/>
-                                    </connections>
-                                </button>
-                                <popUpButton verticalHuggingPriority="750" id="105">
-                                    <rect key="frame" x="48" y="9" width="122" height="22"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <popUpButtonCell key="cell" type="push" title="Count off" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="108" id="170">
-                                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                        <font key="font" metaFont="smallSystem"/>
-                                        <menu key="menu" title="OtherViews" id="106">
-                                            <items>
-                                                <menuItem title="Count off" state="on" id="108"/>
-                                                <menuItem title="Wait for note" tag="1" id="107"/>
-                                            </items>
-                                        </menu>
-                                    </popUpButtonCell>
-                                    <connections>
-                                        <action selector="myPopUpAction:" target="-2" id="148"/>
-                                    </connections>
-                                </popUpButton>
-                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="111">
-                                    <rect key="frame" x="11" y="14" width="43" height="14"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Mode" id="171">
-                                        <font key="font" metaFont="smallSystem"/>
-                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                    </textFieldCell>
-                                </textField>
-                                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" id="112">
-                                    <rect key="frame" x="180" y="12" width="33" height="19"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="center" drawsBackground="YES" id="172">
-                                        <font key="font" metaFont="smallSystem"/>
-                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                    </textFieldCell>
-                                    <connections>
-                                        <action selector="barBeatTextChanged:" target="-2" id="151"/>
-                                        <outlet property="delegate" destination="-2" id="qYK-GL-wfk"/>
-                                    </connections>
-                                </textField>
-                                <popUpButton verticalHuggingPriority="750" id="124">
-                                    <rect key="frame" x="218" y="9" width="90" height="22"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <popUpButtonCell key="cell" type="push" title="bars" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" enabled="NO" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="126" id="173">
-                                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                        <font key="font" metaFont="smallSystem"/>
-                                        <menu key="menu" title="OtherViews" id="125">
-                                            <items>
-                                                <menuItem title="bars" state="on" id="126"/>
-                                                <menuItem title="beats" tag="1" id="127"/>
-                                            </items>
-                                        </menu>
-                                    </popUpButtonCell>
-                                    <connections>
-                                        <action selector="myPopUpAction:" target="-2" id="152"/>
-                                    </connections>
-                                </popUpButton>
-                                <matrix verticalHuggingPriority="750" allowsEmptySelection="NO" autosizesCells="NO" id="129">
-                                    <rect key="frame" x="9" y="63" width="140" height="21"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                    <size key="cellSize" width="68" height="21"/>
-                                    <size key="intercellSpacing" width="4" height="2"/>
-                                    <buttonCell key="prototype" type="radio" title="Radio" imagePosition="left" alignment="left" controlSize="small" inset="2" id="174">
-                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                        <font key="font" metaFont="smallSystem"/>
-                                    </buttonCell>
-                                    <cells>
-                                        <column>
-                                            <buttonCell type="radio" title="Overdub" bezelStyle="regularSquare" imagePosition="left" alignment="left" controlSize="small" state="on" inset="2" id="138">
-                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                <font key="font" metaFont="smallSystem"/>
-                                            </buttonCell>
-                                        </column>
-                                        <column>
-                                            <buttonCell type="radio" title="Replace" bezelStyle="regularSquare" imagePosition="left" alignment="left" controlSize="small" tag="1" inset="2" id="139">
-                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                <font key="font" metaFont="smallSystem"/>
-                                            </buttonCell>
-                                        </column>
-                                    </cells>
-                                    <connections>
-                                        <action selector="overdubRadioChecked:" target="-2" id="147"/>
-                                    </connections>
-                                </matrix>
-                            </subviews>
-                        </view>
-                    </box>
                     <box title="Device Settings" id="73">
-                        <rect key="frame" x="17" y="189" width="326" height="133"/>
+                        <rect key="frame" x="17" y="215" width="326" height="133"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <view key="contentView" id="zos-cu-qZO">
                             <rect key="frame" x="3" y="3" width="320" height="115"/>
@@ -452,13 +287,215 @@ Gw
                             </subviews>
                         </view>
                     </box>
+                    <box title="Sequence Settings" id="87">
+                        <rect key="frame" x="18" y="48" width="325" height="163"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <view key="contentView" id="aXC-eT-Nsh">
+                            <rect key="frame" x="3" y="3" width="319" height="145"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            <subviews>
+                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="16">
+                                    <rect key="frame" x="13" y="120" width="89" height="14"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Target track" id="164">
+                                        <font key="font" metaFont="smallSystem"/>
+                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                </textField>
+                                <popUpButton verticalHuggingPriority="750" id="17">
+                                    <rect key="frame" x="104" y="115" width="206" height="22"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <popUpButtonCell key="cell" type="push" title="Item1" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="21" id="165">
+                                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                        <font key="font" metaFont="smallSystem"/>
+                                        <menu key="menu" title="OtherViews" id="18">
+                                            <items>
+                                                <menuItem title="Item1" state="on" id="21"/>
+                                                <menuItem title="Item2" id="20"/>
+                                                <menuItem title="Item3" id="19"/>
+                                            </items>
+                                        </menu>
+                                    </popUpButtonCell>
+                                    <connections>
+                                        <action selector="myPopUpAction:" target="-2" id="56"/>
+                                    </connections>
+                                </popUpButton>
+                                <matrix verticalHuggingPriority="750" allowsEmptySelection="NO" autosizesCells="NO" id="129">
+                                    <rect key="frame" x="11" y="91" width="140" height="21"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                    <size key="cellSize" width="68" height="21"/>
+                                    <size key="intercellSpacing" width="4" height="2"/>
+                                    <buttonCell key="prototype" type="radio" title="Radio" imagePosition="left" alignment="left" controlSize="small" inset="2" id="174">
+                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                        <font key="font" metaFont="smallSystem"/>
+                                    </buttonCell>
+                                    <cells>
+                                        <column>
+                                            <buttonCell type="radio" title="Overdub" bezelStyle="regularSquare" imagePosition="left" alignment="left" controlSize="small" state="on" inset="2" id="138">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="smallSystem"/>
+                                            </buttonCell>
+                                        </column>
+                                        <column>
+                                            <buttonCell type="radio" title="Replace" bezelStyle="regularSquare" imagePosition="left" alignment="left" controlSize="small" tag="1" inset="2" id="139">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="smallSystem"/>
+                                            </buttonCell>
+                                        </column>
+                                    </cells>
+                                    <connections>
+                                        <action selector="overdubRadioChecked:" target="-2" id="147"/>
+                                    </connections>
+                                </matrix>
+                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="102">
+                                    <rect key="frame" x="13" y="68" width="43" height="14"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Start" id="168">
+                                        <font key="font" metaFont="smallSystem"/>
+                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                </textField>
+                                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" id="99">
+                                    <rect key="frame" x="47" y="66" width="90" height="19"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="center" placeholderString="----:--:----" drawsBackground="YES" id="166">
+                                        <font key="font" metaFont="smallSystem"/>
+                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                    <connections>
+                                        <action selector="tickTextChanged:" target="-2" id="149"/>
+                                        <outlet property="delegate" destination="-2" id="kOt-KW-1cQ"/>
+                                    </connections>
+                                </textField>
+                                <button id="104">
+                                    <rect key="frame" x="151" y="66" width="60" height="18"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <buttonCell key="cell" type="check" title="Stop at" bezelStyle="regularSquare" imagePosition="left" alignment="left" controlSize="small" inset="2" id="169">
+                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                        <font key="font" metaFont="smallSystem"/>
+                                    </buttonCell>
+                                    <connections>
+                                        <action selector="stopCheckboxClicked:" target="-2" id="153"/>
+                                    </connections>
+                                </button>
+                                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" id="101">
+                                    <rect key="frame" x="217" y="66" width="90" height="19"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="center" placeholderString="----:--:----" drawsBackground="YES" id="167">
+                                        <font key="font" metaFont="smallSystem"/>
+                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                    <connections>
+                                        <action selector="tickTextChanged:" target="-2" id="150"/>
+                                        <outlet property="delegate" destination="-2" id="Df5-OU-hLK"/>
+                                    </connections>
+                                </textField>
+                                <popUpButton verticalHuggingPriority="750" id="ZIj-6P-Lfr">
+                                    <rect key="frame" x="43" y="40" width="98" height="22"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <popUpButtonCell key="cell" type="push" title="Set..." bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="YOG-d6-IiH" id="Jcb-pJ-Rmx">
+                                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                        <font key="font" metaFont="smallSystem"/>
+                                        <menu key="menu" title="OtherViews" id="zkm-xx-Ipe">
+                                            <items>
+                                                <menuItem title="Set..." state="on" id="YOG-d6-IiH"/>
+                                                <menuItem title="the playing position ()" tag="1" id="yQ6-xu-17X"/>
+                                            </items>
+                                        </menu>
+                                    </popUpButtonCell>
+                                    <connections>
+                                        <action selector="myPopUpAction:" target="-2" id="D9A-V4-bk5"/>
+                                    </connections>
+                                </popUpButton>
+                                <popUpButton verticalHuggingPriority="750" id="wPq-tE-yD1">
+                                    <rect key="frame" x="213" y="40" width="98" height="22"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <popUpButtonCell key="cell" type="push" title="Set..." bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="H7I-mB-yRo" id="GTx-7E-825">
+                                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                        <font key="font" metaFont="smallSystem"/>
+                                        <menu key="menu" title="OtherViews" id="4o2-Ei-pca">
+                                            <items>
+                                                <menuItem title="Set..." state="on" id="H7I-mB-yRo"/>
+                                                <menuItem title="the end of selection ()" tag="1" id="Nn6-fZ-VgP"/>
+                                            </items>
+                                        </menu>
+                                    </popUpButtonCell>
+                                    <connections>
+                                        <action selector="myPopUpAction:" target="-2" id="OEd-I2-uxe"/>
+                                    </connections>
+                                </popUpButton>
+                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" allowsCharacterPickerTouchBarItem="YES" id="111">
+                                    <rect key="frame" x="11" y="14" width="43" height="14"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Mode" id="171">
+                                        <font key="font" metaFont="smallSystem"/>
+                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                </textField>
+                                <popUpButton verticalHuggingPriority="750" id="105">
+                                    <rect key="frame" x="48" y="9" width="122" height="22"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <popUpButtonCell key="cell" type="push" title="Count off" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="108" id="170">
+                                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                        <font key="font" metaFont="smallSystem"/>
+                                        <menu key="menu" title="OtherViews" id="106">
+                                            <items>
+                                                <menuItem title="Count off" state="on" id="108"/>
+                                                <menuItem title="Wait for note" tag="1" id="107"/>
+                                            </items>
+                                        </menu>
+                                    </popUpButtonCell>
+                                    <connections>
+                                        <action selector="myPopUpAction:" target="-2" id="148"/>
+                                    </connections>
+                                </popUpButton>
+                                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" id="112">
+                                    <rect key="frame" x="180" y="12" width="33" height="19"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="center" drawsBackground="YES" id="172">
+                                        <font key="font" metaFont="smallSystem"/>
+                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                    <connections>
+                                        <action selector="barBeatTextChanged:" target="-2" id="151"/>
+                                        <outlet property="delegate" destination="-2" id="qYK-GL-wfk"/>
+                                    </connections>
+                                </textField>
+                                <popUpButton verticalHuggingPriority="750" id="124">
+                                    <rect key="frame" x="218" y="9" width="90" height="22"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <popUpButtonCell key="cell" type="push" title="bars" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" enabled="NO" state="on" borderStyle="borderAndBezel" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="126" id="173">
+                                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                        <font key="font" metaFont="smallSystem"/>
+                                        <menu key="menu" title="OtherViews" id="125">
+                                            <items>
+                                                <menuItem title="bars" state="on" id="126"/>
+                                                <menuItem title="beats" tag="1" id="127"/>
+                                            </items>
+                                        </menu>
+                                    </popUpButtonCell>
+                                    <connections>
+                                        <action selector="myPopUpAction:" target="-2" id="152"/>
+                                    </connections>
+                                </popUpButton>
+                            </subviews>
+                        </view>
+                    </box>
                 </subviews>
             </view>
-            <point key="canvasLocation" x="132.5" y="158.5"/>
+            <point key="canvasLocation" x="133" y="134"/>
         </window>
         <view id="76">
             <rect key="frame" x="0.0" y="0.0" width="1" height="111"/>
             <autoresizingMask key="autoresizingMask"/>
+            <point key="canvasLocation" x="-122" y="51"/>
         </view>
         <view id="82">
             <rect key="frame" x="0.0" y="0.0" width="125" height="1"/>
