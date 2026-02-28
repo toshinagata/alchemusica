@@ -3,7 +3,7 @@
 //
 //  Created by Toshi Nagata.
 /*
-    Copyright (c) 2000-2025 Toshi Nagata. All rights reserved.
+    Copyright (c) 2000-2026 Toshi Nagata. All rights reserved.
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -3743,6 +3743,8 @@ isConductorEvent(const MDEvent *ep, int32_t position, void *inUserData)
 	MDTrackSetDuration([newTrack track], endTick);
 	if (newTrack != nil) {
 		int destChannel;
+        NSString *destDevice;
+        destDevice = [info valueForKey: MyRecordingInfoDestinationDeviceKey];
 		recIndex = [[info valueForKey: MyRecordingInfoTargetTrackKey] intValue];
 		startTick = (int)[[info valueForKey: MyRecordingInfoStartTickKey] doubleValue];
 		if (recIndex < 0 || recIndex >= [seq trackCount]) {
@@ -3767,6 +3769,8 @@ isConductorEvent(const MDEvent *ep, int32_t position, void *inUserData)
 					if (![self insertTrack: splitNewTrack atIndex: recIndex])
 						return NO;
 					[self changeTrackChannel: n forTrack: recIndex];
+                    if (destDevice != nil)
+                        [self changeDevice: destDevice forTrack: recIndex];
 					recIndex++;
 				}
 			} else {
@@ -3775,6 +3779,8 @@ isConductorEvent(const MDEvent *ep, int32_t position, void *inUserData)
 				if (![self insertTrack: newTrack atIndex: recIndex])
 					return NO;
 				[self changeTrackChannel: destChannel forTrack: recIndex];
+                if (destDevice != nil)
+                    [self changeDevice: destDevice forTrack: recIndex];
 			}
 			return YES;
 		} else {
